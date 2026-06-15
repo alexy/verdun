@@ -49,17 +49,21 @@ Manual social imports live at:
 
 Use those files for exported, saved, or explicitly reviewed posts rather than unauthenticated scraping. Future authenticated adapters can reuse the same normalized post shape.
 
-## Drafting and Ghost
+## Drafting for Ulysses
 
-Build a local Markdown draft from the current public snapshot:
+Build a local Markdown draft from the current public snapshot for editing and publishing with Ulysses:
 
 ```sh
 npm run draft
 ```
 
-The generated article includes this-week and ongoing editorial focus notes when they are present in the snapshot; in static local mode it uses the same fallback focus as the app preview.
+The generated article is written to `crawler/data/newsletter-draft.md` by default and includes this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview.
 
-Publish the same generated article to Ghost as a draft post:
+```sh
+NEWSLETTER_DRAFT_OUT=/path/to/ulysses-import/verdun-weekly.md npm run ulysses:draft
+```
+
+An optional Ghost helper remains available for direct API drafts from the same local snapshot, but the editorial publishing sequence is local Markdown into Ulysses:
 
 ```sh
 GHOST_ADMIN_API_URL=https://collected.ga \
@@ -67,4 +71,4 @@ GHOST_ADMIN_API_KEY='admin-key-id:admin-key-secret' \
 npm run ghost:draft
 ```
 
-`ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. It does not publish a public post unless the status argument is changed.
+`ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. It does not publish a public post unless `GHOST_POST_STATUS` or the status argument is changed.

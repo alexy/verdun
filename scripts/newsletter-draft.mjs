@@ -11,9 +11,9 @@ const fallbackFocuses = [
 ]
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  const input = process.argv[2] ?? 'public/data/newsletter-snapshot.json'
-  const out = process.argv[3]
-  const snapshot = normalizeSnapshot(JSON.parse(await readFile(input, 'utf8')))
+  const input = process.argv[2] ?? process.env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
+  const out = process.argv[3] ?? process.env.NEWSLETTER_DRAFT_OUT ?? 'crawler/data/newsletter-draft.md'
+  const snapshot = await loadSnapshotFile(input)
   const draft = buildNewsletterDraft(snapshot)
 
   if (out) {
@@ -22,6 +22,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   } else {
     process.stdout.write(draft.markdown)
   }
+}
+
+export async function loadSnapshotFile(input) {
+  return normalizeSnapshot(JSON.parse(await readFile(input, 'utf8')))
 }
 
 export function normalizeSnapshot(raw) {

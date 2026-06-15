@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a newsletter generator for strongly typed and functional AI/data news. The deployed Vercel app should show candidate news items, allow upvote/downvote editorial triage, accept text requests for what to collect more of, and later publish polished weekly updates through the Ghost API to `collected.ga`.
+Build a newsletter generator for strongly typed and functional AI/data news. The deployed Vercel app should show candidate news items, allow upvote/downvote editorial triage, and accept text requests for what to collect more of. The publishing sequence is a local Markdown draft for editing/publishing with Ulysses.
 
 ## Current Slice
 
@@ -17,13 +17,13 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - External DB loader SQL now upserts both newsletter items and `newsletter_source_runs`.
 - Source-health metadata shown in the app sidebar.
 - Live public-source ingestion for Hacker News, Lobste.rs, dev.to, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, LakeSail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, and TypeSec.
-- Deterministic editorial draft generation in the app and from `npm run draft`, including saved this-week and ongoing focus notes as an editorial brief.
-- Ghost Admin API draft publishing scaffold in `npm run ghost:draft`.
+- Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
+- Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
 
 ## Next Work
 
 - Replace manual LinkedIn/X imports with authenticated or policy-aware adapters when credentials and platform policy are settled.
-- Add production database export or admin workflow that feeds current votes/focuses directly into Ghost draft publishing.
+- Add a local export/import convention for moving the generated Markdown into the user's Ulysses library.
 - Extract shared UI/API/crawler modules back into Greathouse after the Verdun shape stabilizes.
 
 ## Verification

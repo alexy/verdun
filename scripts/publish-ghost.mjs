@@ -1,9 +1,13 @@
 import { createHmac } from 'node:crypto'
-import { buildNewsletterDraft, normalizeSnapshot } from './newsletter-draft.mjs'
-import { readFile } from 'node:fs/promises'
+import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
 
-const input = process.argv[2] ?? 'public/data/newsletter-snapshot.json'
-const status = process.argv[3] ?? 'draft'
+const ghostStatuses = new Set(['draft', 'published', 'scheduled', 'sent'])
+const firstArg = process.argv[2]
+const secondArg = process.argv[3]
+const input = firstArg && !ghostStatuses.has(firstArg)
+  ? firstArg
+  : process.env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
+const status = secondArg ?? (firstArg && ghostStatuses.has(firstArg) ? firstArg : process.env.GHOST_POST_STATUS ?? 'draft')
 const apiUrl = process.env.GHOST_ADMIN_API_URL
 const apiKey = process.env.GHOST_ADMIN_API_KEY
 
@@ -12,7 +16,7 @@ if (!apiUrl || !apiKey) {
   process.exit(2)
 }
 
-const snapshot = normalizeSnapshot(JSON.parse(await readFile(input, 'utf8')))
+const snapshot = await loadSnapshotFile(input)
 const draft = buildNewsletterDraft(snapshot)
 const endpoint = `${apiUrl.replace(/\/$/, '')}/ghost/api/admin/posts/?source=html`
 const response = await fetch(endpoint, {
