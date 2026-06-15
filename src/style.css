@@ -253,6 +253,7 @@ textarea {
 .focus-list,
 .source-health,
 .ontology,
+.readiness,
 .draft {
   padding-top: 12px;
   border-top: 1px solid var(--line);
@@ -327,6 +328,62 @@ textarea {
 
 .source-dot.skipped {
   background: #9ca3af;
+}
+
+.readiness {
+  display: grid;
+  gap: 10px;
+}
+
+.readiness__summary {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.4;
+}
+
+.readiness--ready .readiness__summary {
+  color: var(--accent-dark);
+}
+
+.readiness ul {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.readiness li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.readiness li > span {
+  width: 12px;
+  height: 12px;
+  margin-top: 3px;
+  border: 2px solid var(--warn);
+  border-radius: 999px;
+}
+
+.readiness li.passed > span {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.readiness strong {
+  display: block;
+  font-size: 13px;
+}
+
+.readiness li p {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .ontology {

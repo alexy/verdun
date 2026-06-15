@@ -51,6 +51,23 @@ export type NewsletterDraft = {
   itemIds: string[]
 }
 
+export type NewsletterReadinessCheck = {
+  id: string
+  label: string
+  passed: boolean
+  detail: string
+}
+
+export type NewsletterReadiness = {
+  status: 'ready' | 'needs_review'
+  summary: string
+  selectedCount: number
+  upvotedCount: number
+  liveSourceCount: number
+  focusCount: number
+  checks: NewsletterReadinessCheck[]
+}
+
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
   theme: 'Strongly typed and functional AI/data systems',
@@ -235,6 +252,69 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     markdown,
     html: markdownToHtml(markdown),
     itemIds: items.map((item) => item.id),
+  }
+}
+
+export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): NewsletterReadiness {
+  const selectedItems = draftSelection(snapshot.items)
+  const upvotedCount = snapshot.items.filter((item) => item.vote > 0).length
+  const liveSourceCount = snapshot.sourceRuns.filter((run) => run.status === 'ok' && run.itemCount > 0).length
+  const focusCount = snapshot.focuses.filter((focus) => focus.text.trim()).length
+  const selectedProjectCount = unique(selectedItems.map((item) => item.project)).length
+  const sourceErrorCount = snapshot.sourceRuns.filter((run) => run.status === 'error').length
+
+  const checks: NewsletterReadinessCheck[] = [
+    {
+      id: 'upvotes',
+      label: 'Editorial picks',
+      passed: upvotedCount > 0,
+      detail: upvotedCount > 0
+        ? `${upvotedCount} upvoted item${upvotedCount === 1 ? '' : 's'} will lead the draft.`
+        : 'Upvote at least one item before exporting a publishable draft.',
+    },
+    {
+      id: 'source-coverage',
+      label: 'Live source coverage',
+      passed: liveSourceCount >= 3,
+      detail: `${liveSourceCount} source${liveSourceCount === 1 ? '' : 's'} returned live items this run.`,
+    },
+    {
+      id: 'project-spread',
+      label: 'Project spread',
+      passed: selectedProjectCount >= 2 || selectedItems.length <= 1,
+      detail: selectedItems.length
+        ? `${selectedProjectCount} project${selectedProjectCount === 1 ? '' : 's'} represented in the selected spine.`
+        : 'No items are selected yet.',
+    },
+    {
+      id: 'editorial-intent',
+      label: 'Editorial intent',
+      passed: focusCount > 0,
+      detail: focusCount > 0
+        ? `${focusCount} saved focus signal${focusCount === 1 ? '' : 's'} will shape the brief.`
+        : 'Add this-week or ongoing focus before drafting.',
+    },
+    {
+      id: 'source-health',
+      label: 'Source health',
+      passed: sourceErrorCount === 0,
+      detail: sourceErrorCount === 0
+        ? 'No watched source is currently reporting an error.'
+        : `${sourceErrorCount} watched source${sourceErrorCount === 1 ? '' : 's'} need attention.`,
+    },
+  ]
+  const passedCount = checks.filter((check) => check.passed).length
+  const status = checks.every((check) => check.passed) ? 'ready' : 'needs_review'
+  return {
+    status,
+    summary: status === 'ready'
+      ? 'Ready for Ulysses export.'
+      : `${passedCount}/${checks.length} readiness checks pass.`,
+    selectedCount: selectedItems.length,
+    upvotedCount,
+    liveSourceCount,
+    focusCount,
+    checks,
   }
 }
 

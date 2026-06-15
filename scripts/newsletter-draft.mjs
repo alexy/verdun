@@ -40,6 +40,14 @@ export async function buildNewsletterDraft(snapshot) {
   return module.buildNewsletterDraft(snapshot)
 }
 
+export async function evaluateNewsletterReadiness(snapshot) {
+  const { module } = await runnerImport('./src/lib/newsletter.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
+  return module.evaluateNewsletterReadiness(snapshot)
+}
+
 export async function loadSnapshotFile(input) {
   return applyLocalEditorialState(normalizeSnapshot(await readSnapshotInput(input)))
 }

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
+import { ArrowDown, ArrowUp, BookOpenText, ClipboardCheck, Database, ExternalLink, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
 import AppHeader from './components/AppHeader.vue'
 import SourceHealthPanel from './components/SourceHealthPanel.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
-import { buildNewsletterDraft, seedSnapshot, sortedNewsItems } from './lib/newsletter'
+import { buildNewsletterDraft, evaluateNewsletterReadiness, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 import { credoBlurb, ontologyForItem, ontologyNodes } from './lib/ontology'
 
 const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
@@ -49,6 +49,7 @@ const filteredItems = computed(() => {
 const liveSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'ok' && run.itemCount > 0).length)
 const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
 const draft = computed(() => buildNewsletterDraft(snapshot.value))
+const readiness = computed(() => evaluateNewsletterReadiness(snapshot.value))
 
 onMounted(() => {
   void loadSnapshot()
@@ -214,6 +215,23 @@ function sourceDomain(value: string): string {
         </div>
 
         <SourceHealthPanel :pending-source-count="pendingSourceCount" :source-runs="snapshot.sourceRuns" />
+
+        <div class="readiness" :class="`readiness--${readiness.status}`">
+          <div class="panel-heading">
+            <ClipboardCheck :size="18" aria-hidden="true" />
+            <h2>Publishing readiness</h2>
+          </div>
+          <p class="readiness__summary">{{ readiness.summary }}</p>
+          <ul>
+            <li v-for="check in readiness.checks" :key="check.id" :class="{ passed: check.passed }">
+              <span aria-hidden="true"></span>
+              <div>
+                <strong>{{ check.label }}</strong>
+                <p>{{ check.detail }}</p>
+              </div>
+            </li>
+          </ul>
+        </div>
 
         <div class="ontology">
           <div class="panel-heading">
