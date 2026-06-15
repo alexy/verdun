@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Activity, ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, FileText, RefreshCw, Search, Send, Sparkles, X } from '@lucide/vue'
+import { ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
+import AppHeader from './components/AppHeader.vue'
+import SourceHealthPanel from './components/SourceHealthPanel.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 import { credoBlurb, ontologyForItem, ontologyNodes } from './lib/ontology'
@@ -143,15 +145,7 @@ function sourceDomain(value: string): string {
 
 <template>
   <main class="shell">
-    <header class="topbar">
-      <div class="brand">
-        <Sparkles :size="22" aria-hidden="true" />
-        <span>Verdun</span>
-      </div>
-      <button class="icon-button" type="button" :disabled="loading" title="Refresh items" @click="loadSnapshot">
-        <RefreshCw :size="18" aria-hidden="true" />
-      </button>
-    </header>
+    <AppHeader :loading="loading" @refresh="loadSnapshot" />
 
     <section class="hero">
       <div class="hero__copy">
@@ -219,20 +213,7 @@ function sourceDomain(value: string): string {
           </p>
         </div>
 
-        <div class="source-health">
-          <div class="panel-heading">
-            <Activity :size="18" aria-hidden="true" />
-            <h2>Source health</h2>
-          </div>
-          <div class="source-row" v-for="run in snapshot.sourceRuns" :key="run.source">
-            <span class="source-dot" :class="run.status" aria-hidden="true"></span>
-            <div>
-              <strong>{{ run.source }}</strong>
-              <p>{{ run.itemCount }} items · {{ run.message }}</p>
-            </div>
-          </div>
-          <p v-if="pendingSourceCount" class="empty">{{ pendingSourceCount }} credentialed or feed adapters still pending.</p>
-        </div>
+        <SourceHealthPanel :pending-source-count="pendingSourceCount" :source-runs="snapshot.sourceRuns" />
 
         <div class="ontology">
           <div class="panel-heading">
