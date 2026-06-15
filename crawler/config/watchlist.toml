@@ -73,11 +73,22 @@ url = "https://dev.to"
 name = "Medium"
 kind = "publication"
 url = "https://medium.com"
+feed_urls = [
+  "https://medium.com/feed/tag/pydantic",
+  "https://medium.com/feed/tag/surrealdb",
+  "https://medium.com/feed/tag/lancedb",
+  "https://medium.com/feed/tag/data-engineering",
+  "https://medium.com/feed/tag/rust",
+]
 
 [[sources]]
 name = "Substack"
 kind = "publication"
 url = "https://substack.com"
+feed_urls = [
+  "https://thesequence.substack.com/feed",
+  "https://www.latent.space/feed",
+]
 
 [[sources]]
 name = "LinkedIn"

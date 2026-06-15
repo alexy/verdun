@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
 use clap::{Parser, Subcommand};
+use regex::Regex;
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -63,6 +64,7 @@ struct Source {
     name: String,
     kind: String,
     url: String,
+    feed_urls: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -382,6 +384,40 @@ fn live_items(
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
+    if let Some(source) = watchlist
+        .sources
+        .iter()
+        .find(|source| source.name == "Medium")
+    {
+        match fetch_feed_source(&client, watchlist, source, max_per_project) {
+            Ok(mut source_items) => {
+                source_runs.push(ok_source_run(
+                    source,
+                    source_items.len(),
+                    "configured RSS/Atom feeds",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
+    if let Some(source) = watchlist
+        .sources
+        .iter()
+        .find(|source| source.name == "Substack")
+    {
+        match fetch_feed_source(&client, watchlist, source, max_per_project) {
+            Ok(mut source_items) => {
+                source_runs.push(ok_source_run(
+                    source,
+                    source_items.len(),
+                    "configured RSS/Atom feeds",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
     Ok((items, source_runs))
 }
 
@@ -481,6 +517,43 @@ fn fetch_dev_to(
     Ok(items)
 }
 
+fn fetch_feed_source(
+    client: &Client,
+    watchlist: &Watchlist,
+    source: &Source,
+    max_per_project: usize,
+) -> Result<Vec<NewsItem>> {
+    let feed_urls = source
+        .feed_urls
+        .as_ref()
+        .filter(|feeds| !feeds.is_empty())
+        .with_context(|| format!("{} has no feed_urls configured", source.name))?;
+    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut items = Vec::new();
+    for feed_url in feed_urls {
+        let text = client
+            .get(feed_url)
+            .send()
+            .with_context(|| format!("fetching feed {feed_url}"))?
+            .error_for_status()
+            .with_context(|| format!("feed returned error for {feed_url}"))?
+            .text()
+            .with_context(|| format!("reading feed body for {feed_url}"))?;
+        let entries = parse_feed_entries(&text, feed_url);
+        for entry in entries {
+            for project in &watchlist.projects {
+                let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+                if count >= max_per_project || !feed_entry_matches_project(&entry, project) {
+                    continue;
+                }
+                items.push(feed_item(project, source, &entry));
+                counts.insert(project.name.as_str(), count + 1);
+            }
+        }
+    }
+    Ok(items)
+}
+
 fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
     watchlist
         .sources
@@ -493,10 +566,19 @@ fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
             };
             let message = match source.name.as_str() {
                 "Hacker News" | "Lobste.rs" | "dev.to" if live => return None,
+                "Medium" | "Substack"
+                    if live
+                        && source
+                            .feed_urls
+                            .as_ref()
+                            .is_some_and(|feeds| !feeds.is_empty()) =>
+                {
+                    return None;
+                }
                 "Hacker News" | "Lobste.rs" | "dev.to" => {
                     "run with --live to collect this public source"
                 }
-                "Medium" | "Substack" => "feed adapter pending",
+                "Medium" | "Substack" => "configure feed_urls and run with --live",
                 "LinkedIn" | "X/Twitter" => "credentialed social adapter pending",
                 _ => "adapter pending",
             };
@@ -652,6 +734,15 @@ struct DevToUser {
     username: String,
 }
 
+#[derive(Debug, Clone)]
+struct FeedEntry {
+    title: String,
+    link: String,
+    published_at: DateTime<Utc>,
+    summary: String,
+    feed_url: String,
+}
+
 fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
     let title = hit
         .title
@@ -805,6 +896,49 @@ fn dev_to_item(project: &Project, source: &Source, article: &DevToArticle) -> Ne
     }
 }
 
+fn feed_item(project: &Project, source: &Source, entry: &FeedEntry) -> NewsItem {
+    NewsItem {
+        id: stable_id(
+            &slug(&source.name),
+            &format!("{}:{}", project.name, entry.link),
+        ),
+        title: entry.title.clone(),
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: entry.link.clone(),
+        published_at: entry.published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: if entry.summary.is_empty() {
+            format!(
+                "{} surfaced this feed item while tracking {} signals: {}.",
+                source.name,
+                project.name,
+                project.keywords.join(", ")
+            )
+        } else {
+            truncate_text(&entry.summary, 260)
+        },
+        why_it_matters: format!(
+            "Long-form publication coverage can show whether {} is being adopted, compared, or explained beyond release traffic.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(3)
+            .cloned()
+            .chain([slug(&source.name)])
+            .collect(),
+        score: feed_score(project, entry),
+        raw_json: serde_json::json!({
+            "collection_stage": "live",
+            "source": slug(&source.name),
+            "feed_url": entry.feed_url
+        }),
+    }
+}
+
 fn project_query(project: &Project) -> String {
     let mut parts = vec![project.name.clone()];
     parts.extend(project_live_terms(project).into_iter().take(2));
@@ -837,6 +971,162 @@ fn dev_to_article_matches_project(article: &DevToArticle, project: &Project) -> 
         article.tag_list.join(" ")
     );
     text_matches_project(&text, project)
+}
+
+fn feed_entry_matches_project(entry: &FeedEntry, project: &Project) -> bool {
+    let link_without_query = entry.link.split('?').next().unwrap_or(&entry.link);
+    let text = format!("{} {} {}", entry.title, link_without_query, entry.summary);
+    text_matches_project(&text, project)
+}
+
+fn feed_score(project: &Project, entry: &FeedEntry) -> i32 {
+    let text = format!("{} {}", entry.title, entry.link).to_lowercase();
+    let project_name = project.name.to_lowercase();
+    let explicit_project = text.contains(&project_name)
+        || (project.name == "LanceDB"
+            && (text.contains("lancedb") || text.contains("lance-format")));
+    if explicit_project { 88 } else { 68 }
+}
+
+fn parse_feed_entries(text: &str, feed_url: &str) -> Vec<FeedEntry> {
+    let blocks = xml_blocks(text, "item");
+    let blocks = if blocks.is_empty() {
+        xml_blocks(text, "entry")
+    } else {
+        blocks
+    };
+    blocks
+        .into_iter()
+        .filter_map(|block| feed_entry_from_block(&block, feed_url))
+        .collect()
+}
+
+fn feed_entry_from_block(block: &str, feed_url: &str) -> Option<FeedEntry> {
+    let title = clean_feed_text(&xml_text(block, "title")?);
+    let link = clean_feed_url(&feed_link(block)?);
+    let summary = xml_text(block, "description")
+        .or_else(|| xml_text(block, "summary"))
+        .or_else(|| xml_text(block, "content"))
+        .map(|value| clean_feed_text(&value))
+        .unwrap_or_default();
+    let published_at = xml_text(block, "pubDate")
+        .or_else(|| xml_text(block, "published"))
+        .or_else(|| xml_text(block, "updated"))
+        .and_then(|value| parse_feed_date(&value))
+        .unwrap_or_else(Utc::now);
+    Some(FeedEntry {
+        title,
+        link,
+        published_at,
+        summary,
+        feed_url: feed_url.to_string(),
+    })
+}
+
+fn xml_blocks(text: &str, tag: &str) -> Vec<String> {
+    let pattern = format!(r"(?is)<{tag}\b[^>]*>(.*?)</{tag}>");
+    Regex::new(&pattern)
+        .expect("valid xml block regex")
+        .captures_iter(text)
+        .filter_map(|capture| capture.get(1).map(|match_| match_.as_str().to_string()))
+        .collect()
+}
+
+fn xml_text(text: &str, tag: &str) -> Option<String> {
+    let pattern = format!(r"(?is)<(?:\w+:)?{tag}\b[^>]*>(.*?)</(?:\w+:)?{tag}>");
+    Regex::new(&pattern)
+        .ok()?
+        .captures(text)
+        .and_then(|capture| capture.get(1).map(|match_| match_.as_str().to_string()))
+}
+
+fn feed_link(block: &str) -> Option<String> {
+    if let Some(link) = xml_text(block, "link").map(|value| clean_feed_text(&value)) {
+        if link.starts_with("http") {
+            return Some(link);
+        }
+    }
+    Regex::new(r#"(?is)<link\b[^>]*href=["']([^"']+)["'][^>]*/?>"#)
+        .ok()?
+        .captures(block)
+        .and_then(|capture| {
+            capture
+                .get(1)
+                .map(|match_| decode_xml_entities(match_.as_str()))
+        })
+}
+
+fn clean_feed_url(value: &str) -> String {
+    if value.contains("medium.com") {
+        return value.split('?').next().unwrap_or(value).to_string();
+    }
+    value.to_string()
+}
+
+fn parse_feed_date(value: &str) -> Option<DateTime<Utc>> {
+    DateTime::parse_from_rfc2822(value)
+        .map(|date| date.with_timezone(&Utc))
+        .ok()
+        .or_else(|| {
+            DateTime::parse_from_rfc3339(value)
+                .map(|date| date.with_timezone(&Utc))
+                .ok()
+        })
+}
+
+fn clean_feed_text(value: &str) -> String {
+    let without_cdata = value.replace("<![CDATA[", "").replace("]]>", "");
+    let without_tags = Regex::new(r"(?is)<[^>]+>")
+        .expect("valid html tag regex")
+        .replace_all(&without_cdata, " ");
+    let text = normalize_whitespace(&decode_xml_entities(&without_tags));
+    let text = Regex::new(r"(?i)\bContinue reading on [^»]+»?")
+        .expect("valid continue-reading regex")
+        .replace_all(&text, "");
+    text.trim().to_string()
+}
+
+fn decode_xml_entities(value: &str) -> String {
+    let text = Regex::new(r"&#x([0-9a-fA-F]+);")
+        .expect("valid hex entity regex")
+        .replace_all(value, |captures: &regex::Captures<'_>| {
+            u32::from_str_radix(&captures[1], 16)
+                .ok()
+                .and_then(char::from_u32)
+                .unwrap_or(' ')
+                .to_string()
+        })
+        .to_string();
+    let text = Regex::new(r"&#([0-9]+);")
+        .expect("valid decimal entity regex")
+        .replace_all(&text, |captures: &regex::Captures<'_>| {
+            captures[1]
+                .parse::<u32>()
+                .ok()
+                .and_then(char::from_u32)
+                .unwrap_or(' ')
+                .to_string()
+        })
+        .to_string();
+    text.replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&apos;", "'")
+        .replace("&#39;", "'")
+}
+
+fn normalize_whitespace(value: &str) -> String {
+    value.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn truncate_text(value: &str, max_chars: usize) -> String {
+    if value.chars().count() <= max_chars {
+        return value.to_string();
+    }
+    let mut text = value.chars().take(max_chars).collect::<String>();
+    text.push('…');
+    text
 }
 
 fn text_matches_project(text: &str, project: &Project) -> bool {

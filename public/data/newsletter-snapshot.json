@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T22:09:15.986236Z",
+  "generated_at": "2026-06-15T22:14:40.608699Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
@@ -212,33 +212,6 @@
       }
     },
     {
-      "id": "hn-ea531198b925",
-      "title": "Show HN: A lightweight desktop explorer for HelixDB",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/nodfans/helixdb-explorer",
-      "published_at": "2026-02-25T14:09:15Z",
-      "project": "HelixDB",
-      "topic": "graph database",
-      "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
-      "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "helixdb",
-        "graph database",
-        "rust graph",
-        "hacker-news"
-      ],
-      "score": 62,
-      "raw_json": {
-        "author": "jomamax",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "47151691",
-        "points": 2,
-        "source": "hacker-news"
-      }
-    },
-    {
       "id": "lakesail-e5ce5d36852a",
       "title": "LakeSail belongs in this week's typed AI/data systems watch",
       "source": "Hacker News",
@@ -284,6 +257,150 @@
         "collection_stage": "watchlist-seed",
         "homepage": "https://lancedb.com",
         "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "medium-20bac10180c4",
+      "title": "Deploying a Vector Database with LanceDB and S3, connected to EKS",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@mendel.litkeor/deploying-a-vector-database-with-lance-s3-and-eks-e1d12f1b7980",
+      "published_at": "2025-09-30T03:53:45Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "In this blog post, we’ll dive into how to build a scalable vector database using LanceDB and Amazon S3, connected to EKS.",
+      "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "lancedb",
+        "lance",
+        "vectors",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/lancedb",
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-7ff0e55a83b1",
+      "title": "The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db",
+      "published_at": "2026-06-14T09:46:47Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability.",
+      "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/pydantic",
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-9a2a1c866f35",
+      "title": "Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b",
+      "published_at": "2026-05-28T16:27:14Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "Overview",
+      "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "lancedb",
+        "lance",
+        "vectors",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/lancedb",
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-b4b689fe8baf",
+      "title": "Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb",
+      "published_at": "2026-06-14T14:48:39Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Medium surfaced this feed item while tracking Pydantic signals: pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/pydantic",
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-cc435e297f3c",
+      "title": "SurrealDB 3.x by the numbers",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb80078638a0",
+      "published_at": "2026-05-29T19:46:26Z",
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "summary": "Author: Tobie Morgan Hitchcock",
+      "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "surrealdb",
+        "multimodel",
+        "graph",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/surrealdb",
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-fcd377fd2671",
+      "title": "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4",
+      "published_at": "2026-06-14T15:10:18Z",
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "summary": "Stop Hand-Writing SurrealQL Strings in Rust",
+      "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "surrealdb",
+        "multimodel",
+        "graph",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/surrealdb",
+        "source": "medium"
       }
     },
     {
@@ -409,20 +526,6 @@
   ],
   "source_runs": [
     {
-      "source": "Medium",
-      "kind": "publication",
-      "status": "pending",
-      "item_count": 0,
-      "message": "feed adapter pending"
-    },
-    {
-      "source": "Substack",
-      "kind": "publication",
-      "status": "pending",
-      "item_count": 0,
-      "message": "feed adapter pending"
-    },
-    {
       "source": "LinkedIn",
       "kind": "social",
       "status": "pending",
@@ -440,7 +543,7 @@
       "source": "Hacker News",
       "kind": "community",
       "status": "ok",
-      "item_count": 7,
+      "item_count": 6,
       "message": "HN Algolia search_by_date"
     },
     {
@@ -456,6 +559,20 @@
       "status": "ok",
       "item_count": 0,
       "message": "dev.to articles API"
+    },
+    {
+      "source": "Medium",
+      "kind": "publication",
+      "status": "ok",
+      "item_count": 6,
+      "message": "configured RSS/Atom feeds"
+    },
+    {
+      "source": "Substack",
+      "kind": "publication",
+      "status": "ok",
+      "item_count": 0,
+      "message": "configured RSS/Atom feeds"
     }
   ]
 }

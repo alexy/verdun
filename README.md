@@ -40,7 +40,7 @@ cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-pr
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --out /tmp/verdun-newsletter-load.sql
 ```
 
-Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, and dev.to through the public articles API, with conservative project-name/distinctive-keyword matching. The next adapters are Medium, Substack, LinkedIn, and X/Twitter with source-specific policy checks and API credentials where required.
+Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through the public articles API, and configured Medium/Substack RSS or Atom feeds, with conservative project-name/distinctive-keyword matching. The next adapters are LinkedIn and X/Twitter with source-specific policy checks and API credentials where required.
 
 ## Drafting and Ghost
 

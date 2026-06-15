@@ -1,8 +1,8 @@
 # Strongly Typed AI/Data Notes: June 15, 2026
 
-This week follows HelixDB, SurrealDB, Pydantic, LakeSail and the systems around them.
+This week follows HelixDB, SurrealDB, Pydantic and the systems around them.
 
-The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. HelixDB, SurrealDB, Pydantic, LakeSail, and Turso give the issue concrete shape.
+The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. HelixDB, SurrealDB, and Pydantic give the issue concrete shape.
 
 ## 1. HelixDB: Show HN: HelixDB – A graph database built on object storage
 
@@ -22,40 +22,40 @@ Pydantic is being tracked for typed AI signals around pydantic, typed agents, st
 
 Source: [Hacker News](https://github.com/pydantic/pydantic-ai) · typed AI · pydantic, typed agents, structured outputs, validation
 
-## 4. LakeSail: LakeSail belongs in this week's typed AI/data systems watch
+## 4. SurrealDB: Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel
 
-LakeSail is being tracked for typed dataframes signals around sail, spark connect, datafusion, arrow, rust. LakeSail helps explain where typed contracts, local execution, and practical AI/data systems are converging.
+Stop Hand-Writing SurrealQL Strings in Rust Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
 
-Source: [Hacker News](https://github.com/lakehq/sail) · typed dataframes · sail, spark connect, datafusion, arrow
+Source: [Medium](https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4) · multimodel data · surrealdb, multimodel, graph, medium
 
-## 5. Turso: Turso belongs in this week's typed AI/data systems watch
+## 5. Pydantic: Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It
 
-Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge. Turso helps explain where typed contracts, local execution, and practical AI/data systems are converging.
+Medium surfaced this feed item while tracking Pydantic signals: pydantic, typed agents, structured outputs, validation. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
 
-Source: [Hacker News](https://turso.tech) · edge data · turso, libsql, sqlite, replication
+Source: [Medium](https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb) · typed AI · pydantic, typed agents, structured outputs, medium
 
-## 6. LanceDB: LanceDB belongs in this week's typed AI/data systems watch
+## 6. Pydantic: The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts
 
-LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar. LanceDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.
+Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
 
-Source: [Hacker News](https://lancedb.com) · vector data · lancedb, lance, vectors, multimodal
+Source: [Medium](https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db) · typed AI · pydantic, typed agents, structured outputs, medium
 
-## 7. HelixDB: HelixDB belongs in this week's typed AI/data systems watch
+## 7. SurrealDB: SurrealDB 3.x by the numbers
 
-HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph. HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.
+Author: Tobie Morgan Hitchcock Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
 
-Source: [Hacker News](https://github.com/HelixDB/helix-db) · graph database · helixdb, graph database, rust graph
+Source: [Medium](https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb80078638a0) · multimodel data · surrealdb, multimodel, graph, medium
 
 ## Editorial thread
 
-The connective tissue is graph database, multimodel data, typed AI, typed dataframes, edge data, and vector data. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products.
+The connective tissue is graph database, multimodel data, and typed AI. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products.
 
 ## Sources watched
 
-- Medium: pending, 0 items. feed adapter pending
-- Substack: pending, 0 items. feed adapter pending
 - LinkedIn: pending, 0 items. credentialed social adapter pending
 - X/Twitter: pending, 0 items. credentialed social adapter pending
-- Hacker News: ok, 7 items. HN Algolia search_by_date
+- Hacker News: ok, 6 items. HN Algolia search_by_date
 - Lobste.rs: ok, 0 items. Lobste.rs newest.json
 - dev.to: ok, 0 items. dev.to articles API
+- Medium: ok, 6 items. configured RSS/Atom feeds
+- Substack: ok, 0 items. configured RSS/Atom feeds

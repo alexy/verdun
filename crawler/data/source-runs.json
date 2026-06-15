@@ -1,19 +1,5 @@
 [
   {
-    "source": "Medium",
-    "kind": "publication",
-    "status": "pending",
-    "item_count": 0,
-    "message": "feed adapter pending"
-  },
-  {
-    "source": "Substack",
-    "kind": "publication",
-    "status": "pending",
-    "item_count": 0,
-    "message": "feed adapter pending"
-  },
-  {
     "source": "LinkedIn",
     "kind": "social",
     "status": "pending",
@@ -31,7 +17,7 @@
     "source": "Hacker News",
     "kind": "community",
     "status": "ok",
-    "item_count": 7,
+    "item_count": 6,
     "message": "HN Algolia search_by_date"
   },
   {
@@ -47,5 +33,19 @@
     "status": "ok",
     "item_count": 0,
     "message": "dev.to articles API"
+  },
+  {
+    "source": "Medium",
+    "kind": "publication",
+    "status": "ok",
+    "item_count": 6,
+    "message": "configured RSS/Atom feeds"
+  },
+  {
+    "source": "Substack",
+    "kind": "publication",
+    "status": "ok",
+    "item_count": 0,
+    "message": "configured RSS/Atom feeds"
   }
 ]
