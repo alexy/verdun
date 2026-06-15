@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-prod/
+.vercel/
+.DS_Store
+target/
+crawler/target/
+crawler/data/raw/
+crawler/data/out/
+*.log
+.env
+.env.local

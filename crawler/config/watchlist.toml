@@ -1,0 +1,90 @@
+theme = "Strongly typed and functional AI/data systems"
+
+[[projects]]
+name = "Pydantic"
+topic = "typed AI"
+homepage = "https://github.com/pydantic/pydantic-ai"
+keywords = ["pydantic", "typed agents", "structured outputs", "validation"]
+
+[[projects]]
+name = "LakeSail"
+topic = "typed dataframes"
+homepage = "https://github.com/lakehq/sail"
+keywords = ["sail", "spark connect", "datafusion", "arrow", "rust"]
+
+[[projects]]
+name = "Turso"
+topic = "edge data"
+homepage = "https://turso.tech"
+keywords = ["turso", "libsql", "sqlite", "replication", "edge"]
+
+[[projects]]
+name = "LanceDB"
+topic = "vector data"
+homepage = "https://lancedb.com"
+keywords = ["lancedb", "lance", "vectors", "multimodal", "columnar"]
+
+[[projects]]
+name = "HelixDB"
+topic = "graph database"
+homepage = "https://github.com/HelixDB/helix-db"
+keywords = ["helixdb", "graph database", "rust graph"]
+
+[[projects]]
+name = "SurrealDB"
+topic = "multimodel data"
+homepage = "https://surrealdb.com"
+keywords = ["surrealdb", "multimodel", "graph", "realtime"]
+
+[[projects]]
+name = "pgGraph"
+topic = "postgres graph"
+homepage = "https://github.com/apache/age"
+keywords = ["postgres graph", "apache age", "cypher", "pggraph"]
+
+[[projects]]
+name = "Grust"
+topic = "typed graph"
+homepage = "https://github.com/ChiefScientist-io/grust"
+keywords = ["grust", "typed graph", "rust", "cypher"]
+
+[[projects]]
+name = "TypeSec"
+topic = "typed security"
+homepage = "https://github.com/ChiefScientist-io/typesec"
+keywords = ["typesec", "capability", "typed policy", "security"]
+
+[[sources]]
+name = "Hacker News"
+kind = "community"
+url = "https://news.ycombinator.com"
+
+[[sources]]
+name = "Lobste.rs"
+kind = "community"
+url = "https://lobste.rs"
+
+[[sources]]
+name = "dev.to"
+kind = "community"
+url = "https://dev.to"
+
+[[sources]]
+name = "Medium"
+kind = "publication"
+url = "https://medium.com"
+
+[[sources]]
+name = "Substack"
+kind = "publication"
+url = "https://substack.com"
+
+[[sources]]
+name = "LinkedIn"
+kind = "social"
+url = "https://www.linkedin.com"
+
+[[sources]]
+name = "X/Twitter"
+kind = "social"
+url = "https://x.com"

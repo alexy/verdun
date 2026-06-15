@@ -1,0 +1,217 @@
+[
+  {
+    "id": "pydantic-19e4620a7634",
+    "title": "Pydantic belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/pydantic/pydantic-ai",
+    "published_at": "2026-06-15T21:55:56.859941Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "Pydantic is being tracked for typed AI signals around pydantic, typed agents, structured outputs, validation.",
+    "why_it_matters": "Pydantic helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "validation"
+    ],
+    "score": 90,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/pydantic/pydantic-ai",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "lakesail-e5ce5d36852a",
+    "title": "LakeSail belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/lakehq/sail",
+    "published_at": "2026-06-14T21:55:56.860075Z",
+    "project": "LakeSail",
+    "topic": "typed dataframes",
+    "summary": "LakeSail is being tracked for typed dataframes signals around sail, spark connect, datafusion, arrow, rust.",
+    "why_it_matters": "LakeSail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "sail",
+      "spark connect",
+      "datafusion",
+      "arrow"
+    ],
+    "score": 87,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/lakehq/sail",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "turso-33e02aa599d3",
+    "title": "Turso belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://turso.tech",
+    "published_at": "2026-06-13T21:55:56.860087Z",
+    "project": "Turso",
+    "topic": "edge data",
+    "summary": "Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge.",
+    "why_it_matters": "Turso helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "turso",
+      "libsql",
+      "sqlite",
+      "replication"
+    ],
+    "score": 84,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://turso.tech",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "lancedb-76fb73c47cb",
+    "title": "LanceDB belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://lancedb.com",
+    "published_at": "2026-06-12T21:55:56.860102Z",
+    "project": "LanceDB",
+    "topic": "vector data",
+    "summary": "LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar.",
+    "why_it_matters": "LanceDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "lancedb",
+      "lance",
+      "vectors",
+      "multimodal"
+    ],
+    "score": 81,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://lancedb.com",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "helixdb-8b14f2b883d",
+    "title": "HelixDB belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/HelixDB/helix-db",
+    "published_at": "2026-06-11T21:55:56.860113Z",
+    "project": "HelixDB",
+    "topic": "graph database",
+    "summary": "HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph.",
+    "why_it_matters": "HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "helixdb",
+      "graph database",
+      "rust graph"
+    ],
+    "score": 78,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/HelixDB/helix-db",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "surrealdb-fbad9a0fbf33",
+    "title": "SurrealDB belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://surrealdb.com",
+    "published_at": "2026-06-10T21:55:56.860123Z",
+    "project": "SurrealDB",
+    "topic": "multimodel data",
+    "summary": "SurrealDB is being tracked for multimodel data signals around surrealdb, multimodel, graph, realtime.",
+    "why_it_matters": "SurrealDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "surrealdb",
+      "multimodel",
+      "graph",
+      "realtime"
+    ],
+    "score": 75,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://surrealdb.com",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "pggraph-f1ef2151ecc4",
+    "title": "pgGraph belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/apache/age",
+    "published_at": "2026-06-09T21:55:56.860133Z",
+    "project": "pgGraph",
+    "topic": "postgres graph",
+    "summary": "pgGraph is being tracked for postgres graph signals around postgres graph, apache age, cypher, pggraph.",
+    "why_it_matters": "pgGraph helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "postgres graph",
+      "apache age",
+      "cypher",
+      "pggraph"
+    ],
+    "score": 72,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/apache/age",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "grust-210a95e033dd",
+    "title": "Grust belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/ChiefScientist-io/grust",
+    "published_at": "2026-06-08T21:55:56.860143Z",
+    "project": "Grust",
+    "topic": "typed graph",
+    "summary": "Grust is being tracked for typed graph signals around grust, typed graph, rust, cypher.",
+    "why_it_matters": "Grust helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "grust",
+      "typed graph",
+      "rust",
+      "cypher"
+    ],
+    "score": 69,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/ChiefScientist-io/grust",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "typesec-26fcee3223ad",
+    "title": "TypeSec belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/ChiefScientist-io/typesec",
+    "published_at": "2026-06-07T21:55:56.860153Z",
+    "project": "TypeSec",
+    "topic": "typed security",
+    "summary": "TypeSec is being tracked for typed security signals around typesec, capability, typed policy, security.",
+    "why_it_matters": "TypeSec helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "typesec",
+      "capability",
+      "typed policy",
+      "security"
+    ],
+    "score": 66,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/ChiefScientist-io/typesec",
+      "source_url": "https://news.ycombinator.com"
+    }
+  }
+]
