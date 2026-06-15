@@ -13,6 +13,8 @@ try {
   await page.getByText('Strongly typed AI and data news').first().waitFor()
   await page.locator('.ontology').getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
   await page.locator('.source-health').getByText(/projects covered by live\/manual source matches/).waitFor()
+  await page.getByText('CocoIndex belongs in this week').first().waitFor()
+  if (await page.getByText(/Local fallback:/).count()) throw new Error('app fell back to the embedded seed instead of the static snapshot')
   await page.locator('.readiness').getByRole('heading', { name: 'Publishing readiness' }).waitFor()
   const markdownLink = page.locator('.draft-actions').getByRole('link', { name: /Markdown/ })
   await markdownLink.waitFor()

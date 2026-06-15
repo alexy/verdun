@@ -6,6 +6,7 @@ import SourceHealthPanel from './components/SourceHealthPanel.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, evaluateNewsletterReadiness, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 import { credoBlurb, ontologyForItem, ontologyNodes } from './lib/ontology'
+import { normalizeSnapshot } from './lib/snapshot'
 
 const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
 const loading = ref(false)
@@ -17,6 +18,7 @@ const voteFilter = ref<'all' | 'unreviewed' | 'upvoted' | 'downvoted'>('all')
 const projectFilter = ref('all')
 const sourceFilter = ref('all')
 const copyStatus = ref<'idle' | 'copied' | 'failed'>('idle')
+const apiAvailable = ref(false)
 
 const includedItems = computed(() => sortedNewsItems(snapshot.value.items).filter((item) => item.vote > 0))
 const rejectedItems = computed(() => snapshot.value.items.filter((item) => item.vote < 0).length)
@@ -62,14 +64,33 @@ async function loadSnapshot(): Promise<void> {
   loading.value = true
   error.value = ''
   try {
-    const response = await fetch('/api/newsletter/items')
-    if (!response.ok) throw new Error(`items API returned ${response.status}`)
-    snapshot.value = await response.json() as NewsletterSnapshot
-  } catch (apiError) {
-    error.value = apiError instanceof Error ? apiError.message : String(apiError)
+    const result = await fetchSnapshot()
+    snapshot.value = result.snapshot
+    apiAvailable.value = result.apiAvailable
+  } catch (snapshotError) {
+    error.value = snapshotError instanceof Error ? snapshotError.message : String(snapshotError)
     snapshot.value = seedSnapshot
+    apiAvailable.value = false
   } finally {
     loading.value = false
+  }
+}
+
+async function fetchSnapshot(): Promise<{ snapshot: NewsletterSnapshot, apiAvailable: boolean }> {
+  const apiResult = await tryFetchSnapshot('/api/newsletter/items')
+  if (apiResult) return { snapshot: apiResult, apiAvailable: true }
+  const staticResult = await tryFetchSnapshot(`${import.meta.env.BASE_URL}data/newsletter-snapshot.json`)
+  if (staticResult) return { snapshot: staticResult, apiAvailable: false }
+  throw new Error('items API and static snapshot are unavailable')
+}
+
+async function tryFetchSnapshot(url: string): Promise<NewsletterSnapshot | null> {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return null
+    return normalizeSnapshot(await response.json())
+  } catch {
+    return null
   }
 }
 
@@ -79,6 +100,7 @@ async function setVote(itemId: string, vote: VoteValue): Promise<void> {
     ...snapshot.value,
     items: snapshot.value.items.map((item) => item.id === itemId ? { ...item, vote } : item),
   }
+  if (!apiAvailable.value) return
   try {
     const response = await fetch('/api/newsletter/vote', {
       method: 'POST',
@@ -106,6 +128,7 @@ async function saveFocus(): Promise<void> {
     ...snapshot.value,
     focuses: [focus, ...snapshot.value.focuses],
   }
+  if (!apiAvailable.value) return
   try {
     const response = await fetch('/api/newsletter/focus', {
       method: 'POST',
