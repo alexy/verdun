@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Search, X } from '@lucide/vue'
 import AppHeader from './components/AppHeader.vue'
 import EditorialSidebar from './components/EditorialSidebar.vue'
+import InboxControls from './components/InboxControls.vue'
 import NewsItemCard from './components/NewsItemCard.vue'
 import NewsletterDraftPreview from './components/NewsletterDraftPreview.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
@@ -138,17 +138,6 @@ async function saveFocus(text: string, scope: 'this_week' | 'ongoing'): Promise<
   }
 }
 
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(value))
-}
-
-function clearFilters(): void {
-  searchText.value = ''
-  voteFilter.value = 'all'
-  projectFilter.value = 'all'
-  sourceFilter.value = 'all'
-}
-
 function uniqueSorted(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right))
 }
@@ -209,39 +198,22 @@ function isoDate(value: string): string {
       />
 
       <section class="news-list" aria-label="News items">
-        <div class="list-header">
-          <div>
-            <p class="eyebrow">Inbox</p>
-            <h2>{{ snapshot.theme }}</h2>
-          </div>
-          <p v-if="error" class="status">Local fallback: {{ error }}</p>
-          <p v-else class="status">Generated {{ formatDate(snapshot.generatedAt) }}</p>
-        </div>
-
-        <div class="inbox-controls" aria-label="Inbox filters">
-          <label class="search-field">
-            <Search :size="17" aria-hidden="true" />
-            <input v-model="searchText" type="search" placeholder="Search titles, projects, tags..." />
-          </label>
-          <select v-model="voteFilter" aria-label="Vote status">
-            <option value="all">All votes</option>
-            <option value="unreviewed">Unreviewed ({{ unreviewedItems }})</option>
-            <option value="upvoted">Upvoted ({{ includedItems.length }})</option>
-            <option value="downvoted">Downvoted ({{ rejectedItems }})</option>
-          </select>
-          <select v-model="projectFilter" aria-label="Project">
-            <option value="all">All projects</option>
-            <option v-for="project in projectOptions" :key="project" :value="project">{{ project }}</option>
-          </select>
-          <select v-model="sourceFilter" aria-label="Source">
-            <option value="all">All sources</option>
-            <option v-for="source in sourceOptions" :key="source" :value="source">{{ source }}</option>
-          </select>
-          <button class="clear-filters" type="button" title="Clear filters" @click="clearFilters">
-            <X :size="16" aria-hidden="true" />
-          </button>
-          <p>{{ filteredItems.length }} of {{ snapshot.items.length }}</p>
-        </div>
+        <InboxControls
+          v-model:project-filter="projectFilter"
+          v-model:search-text="searchText"
+          v-model:source-filter="sourceFilter"
+          v-model:vote-filter="voteFilter"
+          :downvoted-count="rejectedItems"
+          :error="error"
+          :filtered-count="filteredItems.length"
+          :generated-at="snapshot.generatedAt"
+          :project-options="projectOptions"
+          :source-options="sourceOptions"
+          :theme="snapshot.theme"
+          :total-count="snapshot.items.length"
+          :unreviewed-count="unreviewedItems"
+          :upvoted-count="includedItems.length"
+        />
 
         <NewsletterDraftPreview :draft="draft" :filename="draftFilename" />
 
