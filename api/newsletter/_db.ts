@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless'
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type VoteValue } from '../../src/lib/newsletter'
+import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type SourceRunStatus, type VoteValue } from '../../src/lib/newsletter'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -42,6 +42,14 @@ type FocusRow = {
   text: string
   scope: 'this_week' | 'ongoing'
   created_at: string
+}
+
+type SourceRunRow = {
+  source: string
+  kind: string
+  status: SourceRunStatus
+  item_count: number
+  message: string
 }
 
 type StaticNewsRow = {
@@ -116,13 +124,20 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     order by created_at desc
     limit 25
   `) as FocusRow[]
+  const sourceRunRows = await sql.query(`
+    select source, kind, status, item_count, message
+    from newsletter_source_runs
+    order by
+      case status when 'ok' then 0 when 'error' then 1 when 'pending' then 2 else 3 end,
+      source
+  `) as SourceRunRow[]
 
   return {
     generatedAt: new Date().toISOString(),
     theme: 'Strongly typed and functional AI/data systems',
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
-    sourceRuns: [],
+    sourceRuns: sourceRunRows.map(toSourceRun),
   }
 }
 
@@ -240,5 +255,15 @@ function toFocus(row: FocusRow): NewsletterFocus {
     text: row.text,
     scope: row.scope,
     createdAt: row.created_at,
+  }
+}
+
+function toSourceRun(row: SourceRunRow) {
+  return {
+    source: row.source,
+    kind: row.kind,
+    status: row.status,
+    itemCount: row.item_count,
+    message: row.message,
   }
 }

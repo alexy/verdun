@@ -29,6 +29,16 @@ create table if not exists newsletter_focuses (
   created_at timestamptz not null default now()
 );
 
+create table if not exists newsletter_source_runs (
+  source text primary key,
+  kind text not null,
+  status text not null check (status in ('ok', 'error', 'pending', 'skipped')),
+  item_count integer not null default 0,
+  message text not null default '',
+  collected_at timestamptz not null default now()
+);
+
 create index if not exists newsletter_items_rank_idx on newsletter_items (published_at desc, score desc);
 create index if not exists newsletter_items_project_idx on newsletter_items (project);
 create index if not exists newsletter_items_topic_idx on newsletter_items (topic);
+create index if not exists newsletter_source_runs_status_idx on newsletter_source_runs (status, collected_at desc);

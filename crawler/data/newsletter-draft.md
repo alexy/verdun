@@ -34,17 +34,17 @@ Turso is being tracked for edge data signals around turso, libsql, sqlite, repli
 
 Source: [Hacker News](https://turso.tech) · edge data · turso, libsql, sqlite, replication
 
-## 6. LanceDB: GPU-Accelerated Indexing in LanceDB
-
-Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar. Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.
-
-Source: [Hacker News](https://blog.lancedb.com/gpu-accelerated-indexing-in-lancedb-27558fa7eee5) · vector data · lancedb, lance, vectors, hacker-news
-
-## 7. LanceDB: LanceDB belongs in this week's typed AI/data systems watch
+## 6. LanceDB: LanceDB belongs in this week's typed AI/data systems watch
 
 LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar. LanceDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.
 
 Source: [Hacker News](https://lancedb.com) · vector data · lancedb, lance, vectors, multimodal
+
+## 7. HelixDB: HelixDB belongs in this week's typed AI/data systems watch
+
+HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph. HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.
+
+Source: [Hacker News](https://github.com/HelixDB/helix-db) · graph database · helixdb, graph database, rust graph
 
 ## Editorial thread
 

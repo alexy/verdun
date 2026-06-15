@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T22:02:56.493006Z",
+  "generated_at": "2026-06-15T22:09:15.986236Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
@@ -47,33 +47,6 @@
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/HelixDB/helix-db",
         "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "hn-1d28a3ef4ded",
-      "title": "GPU-Accelerated Indexing in LanceDB",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://blog.lancedb.com/gpu-accelerated-indexing-in-lancedb-27558fa7eee5",
-      "published_at": "2023-11-02T17:31:41Z",
-      "project": "LanceDB",
-      "topic": "vector data",
-      "summary": "Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar.",
-      "why_it_matters": "Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "lancedb",
-        "lance",
-        "vectors",
-        "hacker-news"
-      ],
-      "score": 83,
-      "raw_json": {
-        "author": "yurisagalov",
-        "collection_stage": "live",
-        "comments": 4,
-        "object_id": "38117101",
-        "points": 19,
-        "source": "hacker-news"
       }
     },
     {
@@ -127,33 +100,6 @@
         "comments": 42,
         "object_id": "48478148",
         "points": 157,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-4ef9ce6fe4cc",
-      "title": "LanceDB Raises $30M Series A to Build the Multimodal Lakehouse",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://lancedb.com/blog/lancedb-raises-30m-series-a-to-build-the-multimodal-lakehouse/",
-      "published_at": "2025-06-24T11:30:47Z",
-      "project": "LanceDB",
-      "topic": "vector data",
-      "summary": "Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar.",
-      "why_it_matters": "Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "lancedb",
-        "lance",
-        "vectors",
-        "hacker-news"
-      ],
-      "score": 61,
-      "raw_json": {
-        "author": "Fendy",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "44365003",
-        "points": 1,
         "source": "hacker-news"
       }
     },
@@ -234,6 +180,60 @@
         "collection_stage": "live",
         "comments": 0,
         "object_id": "41703059",
+        "points": 2,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-cf8ebfce1399",
+      "title": "Building AI Agents in Python with Pydantic AI",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
+      "published_at": "2026-04-29T12:18:36Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "hacker-news"
+      ],
+      "score": 61,
+      "raw_json": {
+        "author": "eigenBasis",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "47947311",
+        "points": 1,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-ea531198b925",
+      "title": "Show HN: A lightweight desktop explorer for HelixDB",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/nodfans/helixdb-explorer",
+      "published_at": "2026-02-25T14:09:15Z",
+      "project": "HelixDB",
+      "topic": "graph database",
+      "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
+      "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "helixdb",
+        "graph database",
+        "rust graph",
+        "hacker-news"
+      ],
+      "score": 62,
+      "raw_json": {
+        "author": "jomamax",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "47151691",
         "points": 2,
         "source": "hacker-news"
       }

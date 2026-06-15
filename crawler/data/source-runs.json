@@ -1,0 +1,51 @@
+[
+  {
+    "source": "Medium",
+    "kind": "publication",
+    "status": "pending",
+    "item_count": 0,
+    "message": "feed adapter pending"
+  },
+  {
+    "source": "Substack",
+    "kind": "publication",
+    "status": "pending",
+    "item_count": 0,
+    "message": "feed adapter pending"
+  },
+  {
+    "source": "LinkedIn",
+    "kind": "social",
+    "status": "pending",
+    "item_count": 0,
+    "message": "credentialed social adapter pending"
+  },
+  {
+    "source": "X/Twitter",
+    "kind": "social",
+    "status": "pending",
+    "item_count": 0,
+    "message": "credentialed social adapter pending"
+  },
+  {
+    "source": "Hacker News",
+    "kind": "community",
+    "status": "ok",
+    "item_count": 7,
+    "message": "HN Algolia search_by_date"
+  },
+  {
+    "source": "Lobste.rs",
+    "kind": "community",
+    "status": "ok",
+    "item_count": 0,
+    "message": "Lobste.rs newest.json"
+  },
+  {
+    "source": "dev.to",
+    "kind": "community",
+    "status": "ok",
+    "item_count": 0,
+    "message": "dev.to articles API"
+  }
+]
