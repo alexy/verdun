@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Check, Copy, Download, FileText, Search, X } from '@lucide/vue'
+import { Search, X } from '@lucide/vue'
 import AppHeader from './components/AppHeader.vue'
 import EditorialSidebar from './components/EditorialSidebar.vue'
 import NewsItemCard from './components/NewsItemCard.vue'
+import NewsletterDraftPreview from './components/NewsletterDraftPreview.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, evaluateNewsletterReadiness, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 import { ontologyNodes } from './lib/ontology'
@@ -16,7 +17,6 @@ const searchText = ref('')
 const voteFilter = ref<'all' | 'unreviewed' | 'upvoted' | 'downvoted'>('all')
 const projectFilter = ref('all')
 const sourceFilter = ref('all')
-const copyStatus = ref<'idle' | 'copied' | 'failed'>('idle')
 const apiAvailable = ref(false)
 
 const includedItems = computed(() => sortedNewsItems(snapshot.value.items).filter((item) => item.vote > 0))
@@ -52,7 +52,6 @@ const liveSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) =>
 const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
 const draft = computed(() => buildNewsletterDraft(snapshot.value))
 const readiness = computed(() => evaluateNewsletterReadiness(snapshot.value))
-const draftDownloadHref = computed(() => `data:text/markdown;charset=utf-8,${encodeURIComponent(draft.value.markdown)}`)
 const draftFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-strongly-typed-ai-data-notes.md`)
 
 onMounted(() => {
@@ -154,16 +153,6 @@ function uniqueSorted(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right))
 }
 
-async function copyDraftMarkdown(): Promise<void> {
-  copyStatus.value = 'idle'
-  try {
-    await navigator.clipboard.writeText(draft.value.markdown)
-    copyStatus.value = 'copied'
-  } catch {
-    copyStatus.value = 'failed'
-  }
-}
-
 function isoDate(value: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return new Date().toISOString().slice(0, 10)
@@ -254,29 +243,7 @@ function isoDate(value: string): string {
           <p>{{ filteredItems.length }} of {{ snapshot.items.length }}</p>
         </div>
 
-        <article class="draft-preview">
-          <div class="draft-preview__header">
-            <div class="panel-heading">
-              <FileText :size="18" aria-hidden="true" />
-              <h2>Draft preview</h2>
-            </div>
-            <div class="draft-actions">
-              <a :href="draftDownloadHref" :download="draftFilename">
-                <Download :size="16" aria-hidden="true" />
-                Markdown
-              </a>
-              <button type="button" @click="copyDraftMarkdown">
-                <Check v-if="copyStatus === 'copied'" :size="16" aria-hidden="true" />
-                <Copy v-else :size="16" aria-hidden="true" />
-                {{ copyStatus === 'copied' ? 'Copied' : 'Copy' }}
-              </button>
-            </div>
-          </div>
-          <h3>{{ draft.title }}</h3>
-          <p>{{ draft.subtitle }}</p>
-          <p v-if="copyStatus === 'failed'" class="draft-copy-error">Clipboard access is unavailable in this browser session.</p>
-          <div class="draft-preview__body" v-html="draft.html"></div>
-        </article>
+        <NewsletterDraftPreview :draft="draft" :filename="draftFilename" />
 
         <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
 
