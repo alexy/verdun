@@ -34,6 +34,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Local draft generation overlays ignored `crawler/data/editorial-state.json` so no-database app upvotes/focus notes drive the Ulysses and Ghost draft paths; `NEWSLETTER_APPLY_LOCAL_STATE=false` renders the raw snapshot.
 - Draft and Ghost scripts can read a snapshot from a local JSON file or an `http(s)` URL, including the deployed `/api/newsletter/items` endpoint.
 - Draft and Ghost scripts support `--require-upvotes` / `NEWSLETTER_REQUIRE_UPVOTES=true` to block publishing from a fallback-ranked draft when no item has been explicitly upvoted.
+- Draft and Ghost scripts support `--require-ready` / `NEWSLETTER_REQUIRE_READY=true` to apply the same publishing readiness checks used by the app before writing or posting a draft.
 - The app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/lib/newsletter.ts`.
 - The app draft preview offers direct Markdown download/copy controls for the exact draft shown on screen.
 - `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.

@@ -16,11 +16,12 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const args = process.argv.slice(2)
   const ulyssesMode = args.includes('--ulysses')
   const requireUpvotes = args.includes('--require-upvotes') || process.env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
-  const positional = args.filter((arg) => arg !== '--ulysses' && arg !== '--require-upvotes')
+  const requireReady = args.includes('--require-ready') || process.env.NEWSLETTER_REQUIRE_READY === 'true'
+  const positional = args.filter((arg) => arg !== '--ulysses' && arg !== '--require-upvotes' && arg !== '--require-ready')
   const input = positional[0] ?? process.env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
   const snapshot = await loadSnapshotFile(input)
   const draft = await buildNewsletterDraft(snapshot)
-  assertDraftReady(snapshot, draft, { requireUpvotes })
+  await assertDraftReady(snapshot, draft, { requireUpvotes, requireReady })
   const out = positional[1] ?? process.env.NEWSLETTER_DRAFT_OUT ?? defaultDraftPath(draft, snapshot, ulyssesMode)
 
   if (out) {
@@ -61,12 +62,24 @@ export async function readSnapshotInput(input) {
   return JSON.parse(await readFile(input, 'utf8'))
 }
 
-export function assertDraftReady(snapshot, draft, options = {}) {
-  if (!options.requireUpvotes) return
-  const selectedVotes = new Map(snapshot.items.map((item) => [item.id, item.vote]))
-  const selectedUpvotes = draft.itemIds.filter((itemId) => selectedVotes.get(itemId) > 0)
-  if (!selectedUpvotes.length) {
-    throw new Error('Draft requires at least one upvoted item. Upvote items in the app or unset NEWSLETTER_REQUIRE_UPVOTES.')
+export async function assertDraftReady(snapshot, draft, options = {}) {
+  if (options.requireUpvotes) {
+    const selectedVotes = new Map(snapshot.items.map((item) => [item.id, item.vote]))
+    const selectedUpvotes = draft.itemIds.filter((itemId) => selectedVotes.get(itemId) > 0)
+    if (!selectedUpvotes.length) {
+      throw new Error('Draft requires at least one upvoted item. Upvote items in the app or unset NEWSLETTER_REQUIRE_UPVOTES.')
+    }
+  }
+
+  if (options.requireReady) {
+    const readiness = await evaluateNewsletterReadiness(snapshot)
+    if (readiness.status !== 'ready') {
+      const failedChecks = readiness.checks
+        .filter((check) => !check.passed)
+        .map((check) => `${check.label}: ${check.detail}`)
+      const details = failedChecks.length ? failedChecks.join(' ') : readiness.summary
+      throw new Error(`Draft is not publishing-ready. ${details}`)
+    }
   }
 }
 

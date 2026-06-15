@@ -1,12 +1,13 @@
 import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
 import { ghostEndpoint, ghostJwt, ghostPostPayload, parseGhostArgs } from './publish-ghost.mjs'
 
-const options = parseGhostArgs(['--dry-run', '--require-upvotes', 'draft'], {
+const options = parseGhostArgs(['--dry-run', '--require-upvotes', '--require-ready', 'draft'], {
   GHOST_ADMIN_API_URL: 'https://collected.ga',
   GHOST_ADMIN_API_KEY: 'a'.repeat(24) + ':' + 'b'.repeat(64),
 })
 if (!options.dryRun) throw new Error('dry-run option was not parsed')
 if (!options.requireUpvotes) throw new Error('require-upvotes option was not parsed')
+if (!options.requireReady) throw new Error('require-ready option was not parsed')
 if (options.status !== 'draft') throw new Error('draft status was not parsed')
 if (ghostEndpoint(options.apiUrl) !== 'https://collected.ga/ghost/api/admin/posts/?source=html') {
   throw new Error('Ghost endpoint is not stable')

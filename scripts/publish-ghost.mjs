@@ -8,7 +8,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const options = parseGhostArgs(process.argv.slice(2), process.env)
   const snapshot = await loadSnapshotFile(options.input)
   const draft = await buildNewsletterDraft(snapshot)
-  assertDraftReady(snapshot, draft, options)
+  await assertDraftReady(snapshot, draft, options)
   const payload = ghostPostPayload(draft, options.status)
 
   if (options.dryRun) {
@@ -22,7 +22,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
 export function parseGhostArgs(args, env = process.env) {
   const dryRun = args.includes('--dry-run')
   const requireUpvotes = args.includes('--require-upvotes') || env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
-  const positional = args.filter((arg) => arg !== '--dry-run' && arg !== '--require-upvotes')
+  const requireReady = args.includes('--require-ready') || env.NEWSLETTER_REQUIRE_READY === 'true'
+  const positional = args.filter((arg) => arg !== '--dry-run' && arg !== '--require-upvotes' && arg !== '--require-ready')
   const firstArg = positional[0]
   const secondArg = positional[1]
   const input = firstArg && !ghostStatuses.has(firstArg)
@@ -35,6 +36,7 @@ export function parseGhostArgs(args, env = process.env) {
   return {
     dryRun,
     requireUpvotes,
+    requireReady,
     input,
     status,
     apiUrl: env.GHOST_ADMIN_API_URL,

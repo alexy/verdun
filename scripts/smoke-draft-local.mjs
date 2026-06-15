@@ -13,7 +13,7 @@ try {
   const rawDraft = await buildNewsletterDraft(rawSnapshot)
   let rejectedRawDraft = false
   try {
-    assertDraftReady(rawSnapshot, rawDraft, { requireUpvotes: true })
+    await assertDraftReady(rawSnapshot, rawDraft, { requireUpvotes: true })
   } catch {
     rejectedRawDraft = true
   }
@@ -42,7 +42,7 @@ try {
   }
 
   const draft = await buildNewsletterDraft(snapshot)
-  assertDraftReady(snapshot, draft, { requireUpvotes: true })
+  await assertDraftReady(snapshot, draft, { requireUpvotes: true, requireReady: true })
   if (!draft.itemIds.includes('grust-sail-3683deba292c')) {
     throw new Error('local upvote did not promote Grust Sail into the draft')
   }

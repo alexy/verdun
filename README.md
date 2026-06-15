@@ -78,16 +78,18 @@ The draft renderer also rewrites thin feed snippets such as generic overviews, a
 ```sh
 NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/newsletter/items npm run draft
 NEWSLETTER_REQUIRE_UPVOTES=true npm run ulysses:draft
+NEWSLETTER_REQUIRE_READY=true npm run ulysses:draft
 NEWSLETTER_DRAFT_OUT=/path/to/ulysses-import/verdun-weekly.md npm run ulysses:draft
 ```
 
-The snapshot input can be a local JSON file or an `http(s)` URL such as the deployed Vercel items API. Set `NEWSLETTER_REQUIRE_UPVOTES=true` or pass `--require-upvotes` to fail instead of publishing a fallback-ranked draft when no item has been explicitly upvoted. Without `NEWSLETTER_DRAFT_OUT`, `npm run ulysses:draft` writes a dated file under `crawler/data/ulysses/`, such as `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.md`. That directory is ignored by git and is meant as the local Ulysses handoff area. Set `ULYSSES_DRAFT_DIR` to choose another export directory.
+The snapshot input can be a local JSON file or an `http(s)` URL such as the deployed Vercel items API. Set `NEWSLETTER_REQUIRE_UPVOTES=true` or pass `--require-upvotes` to fail instead of publishing a fallback-ranked draft when no item has been explicitly upvoted. Set `NEWSLETTER_REQUIRE_READY=true` or pass `--require-ready` to apply the same publishing readiness checks shown in the app before writing the Ulysses Markdown draft. Without `NEWSLETTER_DRAFT_OUT`, `npm run ulysses:draft` writes a dated file under `crawler/data/ulysses/`, such as `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.md`. That directory is ignored by git and is meant as the local Ulysses handoff area. Set `ULYSSES_DRAFT_DIR` to choose another export directory.
 
 An optional Ghost helper remains available for direct API drafts from the same local snapshot, but the editorial publishing sequence is local Markdown into Ulysses:
 
 ```sh
 npm run ghost:draft -- --dry-run
 npm run ghost:draft -- --dry-run --require-upvotes
+npm run ghost:draft -- --dry-run --require-ready
 
 GHOST_ADMIN_API_URL=https://collected.ga \
 GHOST_ADMIN_API_KEY='admin-key-id:admin-key-secret' \
