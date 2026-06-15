@@ -65,10 +65,11 @@ npm run draft
 The generated article is written to `crawler/data/newsletter-draft.md` by default and includes this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The CLI uses the same `src/lib/newsletter.ts` draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
 
 ```sh
+NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/newsletter/items npm run draft
 NEWSLETTER_DRAFT_OUT=/path/to/ulysses-import/verdun-weekly.md npm run ulysses:draft
 ```
 
-Without `NEWSLETTER_DRAFT_OUT`, `npm run ulysses:draft` writes a dated file under `crawler/data/ulysses/`, such as `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.md`. That directory is ignored by git and is meant as the local Ulysses handoff area. Set `ULYSSES_DRAFT_DIR` to choose another export directory.
+The snapshot input can be a local JSON file or an `http(s)` URL such as the deployed Vercel items API. Without `NEWSLETTER_DRAFT_OUT`, `npm run ulysses:draft` writes a dated file under `crawler/data/ulysses/`, such as `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.md`. That directory is ignored by git and is meant as the local Ulysses handoff area. Set `ULYSSES_DRAFT_DIR` to choose another export directory.
 
 An optional Ghost helper remains available for direct API drafts from the same local snapshot, but the editorial publishing sequence is local Markdown into Ulysses:
 

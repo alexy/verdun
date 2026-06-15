@@ -26,6 +26,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - `verdun-crawler verify` guards the required project list, public-source adapters, Medium/Substack feed configuration, and LinkedIn/X manual import files.
 - Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
 - Local draft generation overlays ignored `crawler/data/editorial-state.json` so no-database app upvotes/focus notes drive the Ulysses and Ghost draft paths; `NEWSLETTER_APPLY_LOCAL_STATE=false` renders the raw snapshot.
+- Draft and Ghost scripts can read a snapshot from a local JSON file or an `http(s)` URL, including the deployed `/api/newsletter/items` endpoint.
 - The app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/lib/newsletter.ts`.
 - `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
@@ -50,5 +51,6 @@ Current local checks:
 - `npm run draft`
 - `npm run smoke:api`
 - `npm run smoke:draft`
+- `npm run smoke:draft-url`
 - `npm run smoke:ghost`
 - `npm run smoke:app -- http://127.0.0.1:5174`

@@ -39,7 +39,16 @@ export async function buildNewsletterDraft(snapshot) {
 }
 
 export async function loadSnapshotFile(input) {
-  return applyLocalEditorialState(normalizeSnapshot(JSON.parse(await readFile(input, 'utf8'))))
+  return applyLocalEditorialState(normalizeSnapshot(await readSnapshotInput(input)))
+}
+
+export async function readSnapshotInput(input) {
+  if (isHttpUrl(input)) {
+    const response = await fetch(input)
+    if (!response.ok) throw new Error(`snapshot URL returned ${response.status}`)
+    return await response.json()
+  }
+  return JSON.parse(await readFile(input, 'utf8'))
 }
 
 export function defaultDraftPath(draft, snapshot, ulyssesMode = false) {
@@ -141,6 +150,10 @@ function normalizeFocus(focus) {
         ? focus.createdAt
         : new Date().toISOString(),
   }
+}
+
+function isHttpUrl(value) {
+  return value.startsWith('http://') || value.startsWith('https://')
 }
 
 function isoDate(value) {

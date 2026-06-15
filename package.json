@@ -13,6 +13,7 @@
     "smoke:app": "node scripts/smoke-app.mjs",
     "smoke:api": "node scripts/smoke-api-local.mjs",
     "smoke:draft": "node scripts/smoke-draft-local.mjs",
+    "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",
     "draft": "node scripts/newsletter-draft.mjs",
     "ulysses:draft": "node scripts/newsletter-draft.mjs --ulysses",
