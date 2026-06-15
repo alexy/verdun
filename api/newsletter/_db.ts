@@ -1,7 +1,8 @@
 import { neon } from '@neondatabase/serverless'
 import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type SourceRunStatus, type VoteValue } from '../../src/lib/newsletter'
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { randomUUID } from 'node:crypto'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 
 declare const process: {
   env: Record<string, string | undefined>
@@ -82,6 +83,11 @@ type StaticSnapshot = {
   source_runs: StaticSourceRun[]
 }
 
+type LocalEditorialState = {
+  votes: Record<string, VoteValue>
+  focuses: FocusRow[]
+}
+
 export function allowMethods(req: ApiRequest, res: ApiResponse, methods: string[]): boolean {
   if (!req.method || methods.includes(req.method)) return true
   res.setHeader('allow', methods.join(', '))
@@ -96,7 +102,7 @@ export function sendJson(res: ApiResponse, body: unknown): void {
 
 export async function readSnapshot(): Promise<NewsletterSnapshot> {
   const databaseUrl = newsletterDatabaseUrl()
-  if (!databaseUrl) return readStaticSnapshot() ?? seedSnapshot
+  if (!databaseUrl) return withLocalEditorialState(readStaticSnapshot() ?? seedSnapshot)
   const sql = neon(databaseUrl)
   const rows = await sql.query(`
     select
@@ -174,7 +180,16 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
 
 export async function writeVote(itemId: string, vote: VoteValue): Promise<void> {
   const databaseUrl = newsletterDatabaseUrl()
-  if (!databaseUrl) return
+  if (!databaseUrl) {
+    const state = readLocalEditorialState()
+    if (vote === 0) {
+      delete state.votes[itemId]
+    } else {
+      state.votes[itemId] = vote
+    }
+    writeLocalEditorialState(state)
+    return
+  }
   const sql = neon(databaseUrl)
   await sql.query(`
     insert into newsletter_votes (item_id, vote, updated_at)
@@ -186,7 +201,18 @@ export async function writeVote(itemId: string, vote: VoteValue): Promise<void> 
 
 export async function writeFocus(text: string, scope: 'this_week' | 'ongoing'): Promise<NewsletterFocus | null> {
   const databaseUrl = newsletterDatabaseUrl()
-  if (!databaseUrl) return null
+  if (!databaseUrl) {
+    const state = readLocalEditorialState()
+    const focus: FocusRow = {
+      id: randomUUID(),
+      text,
+      scope,
+      created_at: new Date().toISOString(),
+    }
+    state.focuses = [focus, ...state.focuses].slice(0, 25)
+    writeLocalEditorialState(state)
+    return toFocus(focus)
+  }
   const sql = neon(databaseUrl)
   const rows = await sql.query(`
     insert into newsletter_focuses (text, scope)
@@ -211,6 +237,75 @@ export function sendApiError(res: ApiResponse, error: unknown): void {
 
 function newsletterDatabaseUrl(): string | undefined {
   return process.env.POSTGRES_URL ?? process.env.DATABASE_URL ?? process.env.NEON_DATABASE_URL
+}
+
+function withLocalEditorialState(snapshot: NewsletterSnapshot): NewsletterSnapshot {
+  const state = readLocalEditorialState()
+  return {
+    ...snapshot,
+    items: snapshot.items.map((item) => ({ ...item, vote: state.votes[item.id] ?? item.vote })),
+    focuses: [...state.focuses.map(toFocus), ...snapshot.focuses].slice(0, 25),
+  }
+}
+
+function readLocalEditorialState(): LocalEditorialState {
+  const path = localEditorialStatePath()
+  if (!existsSync(path)) return emptyLocalEditorialState()
+  try {
+    const raw = JSON.parse(readFileSync(path, 'utf8')) as Partial<LocalEditorialState>
+    return {
+      votes: normalizeVotes(raw.votes),
+      focuses: normalizeFocusRows(raw.focuses),
+    }
+  } catch {
+    return emptyLocalEditorialState()
+  }
+}
+
+function writeLocalEditorialState(state: LocalEditorialState): void {
+  const path = localEditorialStatePath()
+  mkdirSync(dirname(path), { recursive: true })
+  writeFileSync(path, `${JSON.stringify(state, null, 2)}\n`)
+}
+
+function localEditorialStatePath(): string {
+  return process.env.VERDUN_LOCAL_STATE_FILE ?? join(process.cwd(), 'crawler', 'data', 'editorial-state.json')
+}
+
+function emptyLocalEditorialState(): LocalEditorialState {
+  return { votes: {}, focuses: [] }
+}
+
+function normalizeVotes(votes: unknown): Record<string, VoteValue> {
+  if (!votes || typeof votes !== 'object' || Array.isArray(votes)) return {}
+  const normalized: Record<string, VoteValue> = {}
+  for (const [itemId, rawVote] of Object.entries(votes)) {
+    const vote = Number(rawVote)
+    if (vote === -1 || vote === 0 || vote === 1) normalized[itemId] = vote
+  }
+  return normalized
+}
+
+function normalizeFocusRows(focuses: unknown): FocusRow[] {
+  if (!Array.isArray(focuses)) return []
+  return focuses
+    .map((focus) => normalizeFocusRow(focus))
+    .filter((focus): focus is FocusRow => Boolean(focus))
+    .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))
+    .slice(0, 25)
+}
+
+function normalizeFocusRow(focus: unknown): FocusRow | null {
+  if (!focus || typeof focus !== 'object' || Array.isArray(focus)) return null
+  const row = focus as Record<string, unknown>
+  const text = typeof row.text === 'string' ? row.text.trim() : ''
+  if (!text) return null
+  return {
+    id: typeof row.id === 'string' && row.id ? row.id : randomUUID(),
+    text,
+    scope: row.scope === 'ongoing' ? 'ongoing' : 'this_week',
+    created_at: typeof row.created_at === 'string' ? row.created_at : new Date().toISOString(),
+  }
 }
 
 function toNewsItem(row: NewsRow): NewsItem {

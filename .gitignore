@@ -8,6 +8,7 @@ crawler/target/
 crawler/data/raw/
 crawler/data/out/
 crawler/data/ulysses/
+crawler/data/editorial-state.json
 *.log
 .env
 .env.local

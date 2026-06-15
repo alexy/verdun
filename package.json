@@ -11,6 +11,7 @@
     "prod:build": "vue-tsc -b && vite build --outDir dist-prod",
     "prod:app": "vite preview --host 127.0.0.1 --port 5174 --strictPort --outDir dist-prod",
     "smoke:app": "node scripts/smoke-app.mjs",
+    "smoke:api": "node scripts/smoke-api-local.mjs",
     "draft": "node scripts/newsletter-draft.mjs",
     "ulysses:draft": "node scripts/newsletter-draft.mjs --ulysses",
     "ghost:draft": "node scripts/publish-ghost.mjs"
