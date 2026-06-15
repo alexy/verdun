@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T23:25:28.433694Z",
+  "generated_at": "2026-06-15T23:34:34.245591Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
@@ -24,6 +24,64 @@
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/cocoindex-io/cocoindex",
         "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "dev-to-2767a56afb44",
+      "title": "Structured LLM Outputs with Pydantic v2: Stop Parsing Freeform JSON and Start Typing Your AI",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://dev.to/peytongreen_dev/structured-llm-outputs-with-pydantic-v2-stop-parsing-freeform-json-and-start-typing-your-ai-5201",
+      "published_at": "2026-05-19T14:00:07Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "The biggest source of subtle bugs in AI applications isn't the model — it's the gap between what you...",
+      "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "python",
+        "ai",
+        "pydantic",
+        "tutorial"
+      ],
+      "score": 56,
+      "raw_json": {
+        "article_id": 3394799,
+        "author": "peytongreen_dev",
+        "collection_stage": "live",
+        "comments": 1,
+        "reactions": 0,
+        "source": "dev-to"
+      }
+    },
+    {
+      "id": "dev-to-eb2d25589cb3",
+      "title": "Pydantic V2 Discriminated Unions in FastAPI: Modeling Polymorphic AI Feature Configs Without Schema Sprawl",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://uguraslim.com/blog/pydantic-v2-discriminated-unions-in-fastapi-modeling-polymor/",
+      "published_at": "2026-06-03T08:00:03Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Use Pydantic V2's discriminated unions to represent different AI feature types (summarization, classification, generation) with type-safe routing in FastAPI, eliminating conditional logic and catching schema mismatches at validation time instead of runtime.",
+      "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "fastapi",
+        "pydantic",
+        "python",
+        "apidesign"
+      ],
+      "score": 57,
+      "raw_json": {
+        "article_id": 3808896,
+        "author": "uaslimcreate",
+        "collection_stage": "live",
+        "comments": 0,
+        "reactions": 2,
+        "source": "dev-to"
       }
     },
     {
@@ -203,33 +261,6 @@
       }
     },
     {
-      "id": "hn-69ae488c5280",
-      "title": "Building an E2E Encrypted Chat Application with LanceDB and Libsodium",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://www.justinrmiller.com/building-an-e2e-encrypted-chat-application-with-lancedb-and-libsodium/",
-      "published_at": "2026-03-28T21:32:59Z",
-      "project": "LanceDB",
-      "topic": "vector data",
-      "summary": "Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar.",
-      "why_it_matters": "Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "lancedb",
-        "lance",
-        "vectors",
-        "hacker-news"
-      ],
-      "score": 89,
-      "raw_json": {
-        "author": "securicat",
-        "collection_stage": "live",
-        "comments": 2,
-        "object_id": "47558284",
-        "points": 27,
-        "source": "hacker-news"
-      }
-    },
-    {
       "id": "hn-7a2fd6799a20",
       "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
       "source": "Hacker News",
@@ -365,6 +396,33 @@
       }
     },
     {
+      "id": "hn-cf8ebfce1399",
+      "title": "Building AI Agents in Python with Pydantic AI",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
+      "published_at": "2026-04-29T12:18:36Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "hacker-news"
+      ],
+      "score": 61,
+      "raw_json": {
+        "author": "eigenBasis",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "47947311",
+        "points": 1,
+        "source": "hacker-news"
+      }
+    },
+    {
       "id": "hn-e7083fb9c9c",
       "title": "Show HN: We built a type-safe Python ORM for RedisGraph/FalkorDB",
       "source": "Hacker News",
@@ -388,33 +446,6 @@
         "comments": 6,
         "object_id": "46796602",
         "points": 5,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-ea531198b925",
-      "title": "Show HN: A lightweight desktop explorer for HelixDB",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/nodfans/helixdb-explorer",
-      "published_at": "2026-02-25T14:09:15Z",
-      "project": "HelixDB",
-      "topic": "graph database",
-      "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
-      "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "helixdb",
-        "graph database",
-        "rust graph",
-        "hacker-news"
-      ],
-      "score": 62,
-      "raw_json": {
-        "author": "jomamax",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "47151691",
-        "points": 2,
         "source": "hacker-news"
       }
     },
@@ -856,14 +887,13 @@
       "source": "Hacker News",
       "kind": "community",
       "status": "ok",
-      "item_count": 11,
+      "item_count": 10,
       "message": "HN Algolia search_by_date",
       "project_counts": {
         "CocoIndex": 2,
         "FalkorDB": 2,
-        "HelixDB": 2,
-        "LanceDB": 1,
-        "Pydantic": 1,
+        "HelixDB": 1,
+        "Pydantic": 2,
         "SurrealDB": 2,
         "Turso": 1
       }
@@ -880,9 +910,11 @@
       "source": "dev.to",
       "kind": "community",
       "status": "ok",
-      "item_count": 0,
+      "item_count": 2,
       "message": "dev.to articles API",
-      "project_counts": {}
+      "project_counts": {
+        "Pydantic": 2
+      }
     },
     {
       "source": "Medium",

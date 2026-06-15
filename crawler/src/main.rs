@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
 use clap::{Parser, Subcommand};
 use regex::Regex;
-use reqwest::blocking::Client;
+use reqwest::{StatusCode, blocking::Client};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
@@ -593,25 +593,42 @@ fn fetch_dev_to(
     source: &Source,
     max_per_project: usize,
 ) -> Result<Vec<NewsItem>> {
-    let articles = client
-        .get("https://dev.to/api/articles")
-        .query(&[("per_page", "100"), ("top", "7")])
-        .send()
-        .context("fetching dev.to articles")?
-        .error_for_status()
-        .context("dev.to returned error")?
-        .json::<Vec<DevToArticle>>()
-        .context("decoding dev.to articles")?;
     let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut seen_articles = BTreeMap::new();
     let mut items = Vec::new();
-    for article in articles {
-        for project in &watchlist.projects {
-            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-            if count >= max_per_project || !dev_to_article_matches_project(&article, project) {
-                continue;
+    for project in &watchlist.projects {
+        for tag in dev_to_tags(project).into_iter().take(2) {
+            let response = client
+                .get("https://dev.to/api/articles")
+                .query(&[("per_page", "20"), ("top", "30"), ("tag", tag.as_str())])
+                .send()
+                .with_context(|| format!("fetching dev.to articles for {}", project.name))?;
+            if response.status() == StatusCode::TOO_MANY_REQUESTS {
+                return Ok(items);
             }
-            items.push(dev_to_item(project, source, &article));
-            counts.insert(project.name.as_str(), count + 1);
+            let articles = response
+                .error_for_status()
+                .with_context(|| format!("dev.to returned error for {}", project.name))?
+                .json::<Vec<DevToArticle>>()
+                .with_context(|| format!("decoding dev.to articles for {}", project.name))?;
+            for article in articles {
+                if seen_articles.insert(article.id, true).is_some() {
+                    continue;
+                }
+                let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+                if count >= max_per_project {
+                    break;
+                }
+                if !dev_to_article_matches_project(&article, project) {
+                    continue;
+                }
+                items.push(dev_to_item(project, source, &article));
+                counts.insert(project.name.as_str(), count + 1);
+            }
+            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+            if count >= max_per_project {
+                break;
+            }
         }
     }
     Ok(items)
@@ -1372,6 +1389,19 @@ fn project_live_terms(project: &Project) -> Vec<String> {
         .map(|keyword| keyword.to_lowercase())
         .filter(|keyword| keyword.len() >= 5 && !generic_terms.contains(&keyword.as_str()))
         .collect()
+}
+
+fn dev_to_tags(project: &Project) -> Vec<String> {
+    let mut tags = vec![slug(&project.name).replace('-', "")];
+    tags.extend(
+        project_live_terms(project)
+            .into_iter()
+            .map(|term| slug(&term).replace('-', ""))
+            .filter(|term| term.len() >= 3),
+    );
+    tags.sort();
+    tags.dedup();
+    tags
 }
 
 fn stable_id(project: &str, url: &str) -> String {

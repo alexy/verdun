@@ -1,8 +1,8 @@
 # Strongly Typed AI/Data Notes: June 15, 2026
 
-This week follows HelixDB, SurrealDB, LanceDB, Pydantic and the systems around them.
+This week follows HelixDB, SurrealDB, Pydantic, LanceDB and the systems around them.
 
-The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. The editorial brief sets the test: More strongly typed graph/database work that can run locally before cloud deployment. The useful links are the ones that turn that appetite into architecture. HelixDB, SurrealDB, LanceDB, and Pydantic give the issue concrete shape.
+The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. The editorial brief sets the test: More strongly typed graph/database work that can run locally before cloud deployment. The useful links are the ones that turn that appetite into architecture. HelixDB, SurrealDB, Pydantic, and LanceDB give the issue concrete shape.
 
 ## Editorial brief
 
@@ -24,15 +24,7 @@ Credo fit: SurrealDB matters here because it touches graph memory in the Strongl
 
 Source: [Hacker News](https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers) · multimodel data · surrealdb, multimodel, graph, hacker-news
 
-## 3. LanceDB: Building an E2E Encrypted Chat Application with LanceDB and Libsodium
-
-Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar. Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.
-
-Credo fit: LanceDB matters here because it touches lakehouse runtime in the Strongly Typed AI stack. Related ontology: Lakehouse runtime.
-
-Source: [Hacker News](https://www.justinrmiller.com/building-an-e2e-encrypted-chat-application-with-lancedb-and-libsodium/) · vector data · lancedb, lance, vectors, hacker-news
-
-## 4. SurrealDB: Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel
+## 3. SurrealDB: Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel
 
 The piece puts SurrealDB into the multimodel data conversation through "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel", a useful signal for typed contracts moving from idea to developer practice. Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
 
@@ -40,7 +32,7 @@ Credo fit: SurrealDB matters here because it touches typed contracts, graph memo
 
 Source: [Medium](https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4) · multimodel data · surrealdb, multimodel, graph, medium
 
-## 5. Pydantic: Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It
+## 4. Pydantic: Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It
 
 The piece puts Pydantic into the typed AI conversation through "Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It", a useful signal for typed contracts moving from idea to developer practice. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
 
@@ -48,7 +40,7 @@ Credo fit: Pydantic matters here because it touches typed contracts in the Stron
 
 Source: [Medium](https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb) · typed AI · pydantic, typed agents, structured outputs, medium
 
-## 6. Pydantic: The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts
+## 5. Pydantic: The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts
 
 Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
 
@@ -56,13 +48,21 @@ Credo fit: Pydantic matters here because it touches typed contracts in the Stron
 
 Source: [Medium](https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db) · typed AI · pydantic, typed agents, structured outputs, medium
 
-## 7. LanceDB: Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline
+## 6. LanceDB: Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline
 
 The piece puts LanceDB into the vector data conversation through "Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline", a useful signal for lakehouse runtime moving from idea to developer practice. Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.
 
 Credo fit: LanceDB matters here because it touches lakehouse runtime in the Strongly Typed AI stack. Related ontology: Lakehouse runtime.
 
 Source: [Medium](https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b) · vector data · lancedb, lance, vectors, medium
+
+## 7. LanceDB: Deploying a Vector Database with LanceDB and S3, connected to EKS
+
+In this blog post, we’ll dive into how to build a scalable vector database using LanceDB and Amazon S3, connected to EKS. Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.
+
+Credo fit: LanceDB matters here because it touches lakehouse runtime in the Strongly Typed AI stack. Related ontology: Lakehouse runtime.
+
+Source: [Medium](https://medium.com/@mendel.litkeor/deploying-a-vector-database-with-lance-s3-and-eks-e1d12f1b7980) · vector data · lancedb, lance, vectors, medium
 
 ## Strongly Typed AI ontology
 
@@ -75,13 +75,13 @@ Source: [Medium](https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-ch
 
 ## Editorial thread
 
-The connective tissue is graph database, multimodel data, vector data, and typed AI. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. That makes "More strongly typed graph/database work that can run locally before cloud deployment." the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.
+The connective tissue is graph database, multimodel data, typed AI, and vector data. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. That makes "More strongly typed graph/database work that can run locally before cloud deployment." the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.
 
 ## Sources watched
 
-- Hacker News: ok, 11 items. HN Algolia search_by_date. Coverage: CocoIndex 2, FalkorDB 2, HelixDB 2, SurrealDB 2, LanceDB 1.
+- Hacker News: ok, 10 items. HN Algolia search_by_date. Coverage: CocoIndex 2, FalkorDB 2, Pydantic 2, SurrealDB 2, HelixDB 1.
 - Lobste.rs: ok, 0 items. Lobste.rs newest.json.
-- dev.to: ok, 0 items. dev.to articles API.
+- dev.to: ok, 2 items. dev.to articles API. Coverage: Pydantic 2.
 - Medium: ok, 6 items. configured RSS/Atom feeds. Coverage: LanceDB 2, Pydantic 2, SurrealDB 2.
 - Substack: ok, 0 items. configured RSS/Atom feeds.
 - LinkedIn: ok, 2 items. manual JSON import. Coverage: LakeSail 1, Pydantic 1.
