@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { runnerImport } from 'vite'
@@ -38,7 +39,7 @@ export async function buildNewsletterDraft(snapshot) {
 }
 
 export async function loadSnapshotFile(input) {
-  return normalizeSnapshot(JSON.parse(await readFile(input, 'utf8')))
+  return applyLocalEditorialState(normalizeSnapshot(JSON.parse(await readFile(input, 'utf8'))))
 }
 
 export function defaultDraftPath(draft, snapshot, ulyssesMode = false) {
@@ -80,6 +81,65 @@ export function normalizeSnapshot(raw) {
       itemCount: run.item_count ?? run.itemCount ?? 0,
       message: run.message,
     })),
+  }
+}
+
+export function applyLocalEditorialState(snapshot) {
+  if (process.env.NEWSLETTER_APPLY_LOCAL_STATE === 'false') return snapshot
+  const state = readLocalEditorialState()
+  if (!state) return snapshot
+  return {
+    ...snapshot,
+    items: snapshot.items.map((item) => ({ ...item, vote: state.votes[item.id] ?? item.vote })),
+    focuses: [...state.focuses, ...snapshot.focuses].slice(0, 25),
+  }
+}
+
+function readLocalEditorialState() {
+  const path = process.env.VERDUN_LOCAL_STATE_FILE ?? join(process.cwd(), 'crawler', 'data', 'editorial-state.json')
+  if (!existsSync(path)) return null
+  try {
+    const raw = JSON.parse(readFileSync(path, 'utf8'))
+    const votes = normalizeVotes(raw.votes)
+    const focuses = normalizeFocuses(raw.focuses)
+    if (!Object.keys(votes).length && !focuses.length) return null
+    return { votes, focuses }
+  } catch {
+    return null
+  }
+}
+
+function normalizeVotes(votes) {
+  if (!votes || typeof votes !== 'object' || Array.isArray(votes)) return {}
+  return Object.fromEntries(
+    Object.entries(votes)
+      .map(([itemId, rawVote]) => [itemId, Number(rawVote)])
+      .filter(([, vote]) => vote === -1 || vote === 0 || vote === 1),
+  )
+}
+
+function normalizeFocuses(focuses) {
+  if (!Array.isArray(focuses)) return []
+  return focuses
+    .map((focus) => normalizeFocus(focus))
+    .filter(Boolean)
+    .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
+    .slice(0, 25)
+}
+
+function normalizeFocus(focus) {
+  if (!focus || typeof focus !== 'object' || Array.isArray(focus)) return null
+  const text = typeof focus.text === 'string' ? focus.text.trim() : ''
+  if (!text) return null
+  return {
+    id: typeof focus.id === 'string' && focus.id ? focus.id : `local-${Date.now()}`,
+    text,
+    scope: focus.scope === 'ongoing' ? 'ongoing' : 'this_week',
+    createdAt: typeof focus.created_at === 'string'
+      ? focus.created_at
+      : typeof focus.createdAt === 'string'
+        ? focus.createdAt
+        : new Date().toISOString(),
   }
 }
 
