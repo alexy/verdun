@@ -57,6 +57,8 @@ Build a local Markdown draft from the current public snapshot:
 npm run draft
 ```
 
+The generated article includes this-week and ongoing editorial focus notes when they are present in the snapshot; in static local mode it uses the same fallback focus as the app preview.
+
 Publish the same generated article to Ghost as a draft post:
 
 ```sh

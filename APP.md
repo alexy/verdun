@@ -17,13 +17,13 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - External DB loader SQL now upserts both newsletter items and `newsletter_source_runs`.
 - Source-health metadata shown in the app sidebar.
 - Live public-source ingestion for Hacker News, Lobste.rs, dev.to, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, LakeSail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, and TypeSec.
-- Deterministic editorial draft generation in the app and from `npm run draft`.
+- Deterministic editorial draft generation in the app and from `npm run draft`, including saved this-week and ongoing focus notes as an editorial brief.
 - Ghost Admin API draft publishing scaffold in `npm run ghost:draft`.
 
 ## Next Work
 
 - Replace manual LinkedIn/X imports with authenticated or policy-aware adapters when credentials and platform policy are settled.
-- Persist editorial votes/focuses from the deployed app into the production database.
+- Add production database export or admin workflow that feeds current votes/focuses directly into Ghost draft publishing.
 - Extract shared UI/API/crawler modules back into Greathouse after the Verdun shape stabilizes.
 
 ## Verification

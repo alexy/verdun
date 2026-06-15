@@ -1,6 +1,15 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
 
+const fallbackFocuses = [
+  {
+    id: 'focus-local-first-graphs',
+    text: 'More strongly typed graph/database work that can run locally before cloud deployment.',
+    scope: 'ongoing',
+    createdAt: new Date().toISOString(),
+  },
+]
+
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const input = process.argv[2] ?? 'public/data/newsletter-snapshot.json'
   const out = process.argv[3]
@@ -34,7 +43,12 @@ export function normalizeSnapshot(raw) {
       score: item.score ?? 0,
       vote: item.vote ?? 0,
     })),
-    focuses: raw.focuses ?? [],
+    focuses: (raw.focuses ?? fallbackFocuses).map((focus) => ({
+      id: focus.id,
+      text: focus.text,
+      scope: focus.scope === 'ongoing' ? 'ongoing' : 'this_week',
+      createdAt: focus.created_at ?? focus.createdAt ?? new Date().toISOString(),
+    })),
     sourceRuns: (raw.source_runs ?? raw.sourceRuns ?? []).map((run) => ({
       source: run.source,
       kind: run.kind,
@@ -47,6 +61,7 @@ export function normalizeSnapshot(raw) {
 
 export function buildNewsletterDraft(snapshot) {
   const items = draftSelection(snapshot.items)
+  const brief = editorialBrief(snapshot.focuses)
   const date = new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(snapshot.generatedAt))
   const title = `Strongly Typed AI/Data Notes: ${date}`
   const subtitle = items.length
@@ -57,12 +72,13 @@ export function buildNewsletterDraft(snapshot) {
     '',
     subtitle,
     '',
-    openingParagraph(items),
+    openingParagraph(items, brief),
     '',
+    ...briefSection(brief),
     ...items.flatMap((item, index) => itemSection(item, index + 1)),
     '## Editorial thread',
     '',
-    editorialThread(items),
+    editorialThread(items, brief),
     '',
     '## Sources watched',
     '',
@@ -95,10 +111,38 @@ function sortedNewsItems(items) {
   })
 }
 
-function openingParagraph(items) {
+function editorialBrief(focuses) {
+  const ordered = focuses
+    .map((focus) => ({ ...focus, text: String(focus.text ?? '').trim() }))
+    .filter((focus) => focus.text)
+    .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
+
+  return {
+    weekly: ordered.filter((focus) => focus.scope === 'this_week').map((focus) => focus.text).slice(0, 3),
+    ongoing: ordered.filter((focus) => focus.scope === 'ongoing').map((focus) => focus.text).slice(0, 3),
+    all: ordered.map((focus) => focus.text).slice(0, 4),
+  }
+}
+
+function briefSection(brief) {
+  if (!brief.all.length) return []
+  return [
+    '## Editorial brief',
+    '',
+    ...brief.weekly.map((text) => `- This week: ${text}`),
+    ...brief.ongoing.map((text) => `- Ongoing: ${text}`),
+    '',
+  ]
+}
+
+function openingParagraph(items, brief) {
   if (!items.length) return 'The queue is empty. Upvote a few items before drafting the week.'
   const projects = unique(items.map((item) => item.project))
-  return `The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. ${sentenceList(projects.slice(0, 5))} give the issue concrete shape.`
+  const focusText = brief.all.slice(0, 3).map(stripTerminalPunctuation)
+  const focusSentence = brief.all.length
+    ? `The editorial brief sets the test: ${sentenceList(focusText)}. The useful links are the ones that turn that appetite into architecture.`
+    : 'The useful links are the ones that turn release notes into architecture.'
+  return `The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. ${focusSentence} ${sentenceList(projects.slice(0, 5))} give the issue concrete shape.`
 }
 
 function itemSection(item, index) {
@@ -112,10 +156,14 @@ function itemSection(item, index) {
   ]
 }
 
-function editorialThread(items) {
+function editorialThread(items, brief) {
   if (!items.length) return 'No editorial thread yet.'
   const topics = unique(items.map((item) => item.topic))
-  return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products.`
+  const intent = brief.weekly[0] ?? brief.ongoing[0]
+  const intentSentence = intent
+    ? `That makes "${intent}" the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.`
+    : 'Each included item should either sharpen the stack, complicate it, or show where production practice is already moving.'
+  return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. ${intentSentence}`
 }
 
 function sentenceList(values) {
@@ -123,6 +171,10 @@ function sentenceList(values) {
   if (values.length === 1) return values[0] ?? ''
   if (values.length === 2) return `${values[0]} and ${values[1]}`
   return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`
+}
+
+function stripTerminalPunctuation(value) {
+  return value.replace(/[.!?]+$/g, '')
 }
 
 function unique(values) {

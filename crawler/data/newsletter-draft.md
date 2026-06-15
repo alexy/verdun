@@ -2,7 +2,11 @@
 
 This week follows HelixDB, SurrealDB, Pydantic and the systems around them.
 
-The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. HelixDB, SurrealDB, and Pydantic give the issue concrete shape.
+The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. The editorial brief sets the test: More strongly typed graph/database work that can run locally before cloud deployment. The useful links are the ones that turn that appetite into architecture. HelixDB, SurrealDB, and Pydantic give the issue concrete shape.
+
+## Editorial brief
+
+- Ongoing: More strongly typed graph/database work that can run locally before cloud deployment.
 
 ## 1. HelixDB: Show HN: HelixDB – A graph database built on object storage
 
@@ -48,7 +52,7 @@ Source: [Medium](https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb800
 
 ## Editorial thread
 
-The connective tissue is graph database, multimodel data, and typed AI. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products.
+The connective tissue is graph database, multimodel data, and typed AI. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. That makes "More strongly typed graph/database work that can run locally before cloud deployment." the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.
 
 ## Sources watched
 

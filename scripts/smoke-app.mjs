@@ -15,6 +15,8 @@ try {
   await page.getByPlaceholder(/Ask for more/).fill('More local-first Rust graph databases and typed query planners.')
   await page.getByRole('button', { name: /Save/ }).click()
   await page.getByText('More local-first Rust graph databases').first().waitFor()
+  await page.locator('.draft-preview__body').getByRole('heading', { name: 'Editorial brief' }).waitFor()
+  await page.locator('.draft-preview__body').getByText('This week: More local-first Rust graph databases and typed query planners.').waitFor()
 } finally {
   await browser.close()
 }

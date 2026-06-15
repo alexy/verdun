@@ -198,6 +198,7 @@ export function draftSelection(items: NewsItem[], limit = 7): NewsItem[] {
 
 export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDraft {
   const items = draftSelection(snapshot.items)
+  const brief = editorialBrief(snapshot.focuses)
   const date = new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(snapshot.generatedAt))
   const title = `Strongly Typed AI/Data Notes: ${date}`
   const subtitle = items.length
@@ -208,12 +209,13 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '',
     subtitle,
     '',
-    openingParagraph(items),
+    openingParagraph(items, brief),
     '',
+    ...briefSection(brief),
     ...items.flatMap((item, index) => itemSection(item, index + 1)),
     '## Editorial thread',
     '',
-    editorialThread(items),
+    editorialThread(items, brief),
     '',
     '## Sources watched',
     '',
@@ -230,12 +232,46 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
   }
 }
 
-function openingParagraph(items: NewsItem[]): string {
+type EditorialBrief = {
+  weekly: string[]
+  ongoing: string[]
+  all: string[]
+}
+
+function editorialBrief(focuses: NewsletterFocus[]): EditorialBrief {
+  const ordered = focuses
+    .map((focus) => ({ ...focus, text: focus.text.trim() }))
+    .filter((focus) => focus.text)
+    .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
+
+  return {
+    weekly: ordered.filter((focus) => focus.scope === 'this_week').map((focus) => focus.text).slice(0, 3),
+    ongoing: ordered.filter((focus) => focus.scope === 'ongoing').map((focus) => focus.text).slice(0, 3),
+    all: ordered.map((focus) => focus.text).slice(0, 4),
+  }
+}
+
+function briefSection(brief: EditorialBrief): string[] {
+  if (!brief.all.length) return []
+  return [
+    '## Editorial brief',
+    '',
+    ...brief.weekly.map((text) => `- This week: ${text}`),
+    ...brief.ongoing.map((text) => `- Ongoing: ${text}`),
+    '',
+  ]
+}
+
+function openingParagraph(items: NewsItem[], brief: EditorialBrief): string {
   if (!items.length) {
     return 'The queue is empty. Upvote a few items before drafting the week.'
   }
   const projects = unique(items.map((item) => item.project))
-  return `The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. ${sentenceList(projects.slice(0, 5))} give the issue concrete shape.`
+  const focusText = brief.all.slice(0, 3).map(stripTerminalPunctuation)
+  const focusSentence = brief.all.length
+    ? `The editorial brief sets the test: ${sentenceList(focusText)}. The useful links are the ones that turn that appetite into architecture.`
+    : 'The useful links are the ones that turn release notes into architecture.'
+  return `The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. ${focusSentence} ${sentenceList(projects.slice(0, 5))} give the issue concrete shape.`
 }
 
 function itemSection(item: NewsItem, index: number): string[] {
@@ -249,10 +285,14 @@ function itemSection(item: NewsItem, index: number): string[] {
   ]
 }
 
-function editorialThread(items: NewsItem[]): string {
+function editorialThread(items: NewsItem[], brief: EditorialBrief): string {
   if (!items.length) return 'No editorial thread yet.'
   const topics = unique(items.map((item) => item.topic))
-  return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products.`
+  const intent = brief.weekly[0] ?? brief.ongoing[0]
+  const intentSentence = intent
+    ? `That makes "${intent}" the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.`
+    : 'Each included item should either sharpen the stack, complicate it, or show where production practice is already moving.'
+  return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. ${intentSentence}`
 }
 
 function sentenceList(values: string[]): string {
@@ -260,6 +300,10 @@ function sentenceList(values: string[]): string {
   if (values.length === 1) return values[0] ?? ''
   if (values.length === 2) return `${values[0]} and ${values[1]}`
   return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`
+}
+
+function stripTerminalPunctuation(value: string): string {
+  return value.replace(/[.!?]+$/g, '')
 }
 
 function unique(values: string[]): string[] {
