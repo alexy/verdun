@@ -54,6 +54,24 @@ topic = "typed security"
 homepage = "https://github.com/ChiefScientist-io/typesec"
 keywords = ["typesec", "capability", "typed policy", "security"]
 
+[[projects]]
+name = "FalkorDB"
+topic = "graph database"
+homepage = "https://www.falkordb.com"
+keywords = ["falkordb", "redis graph", "cypher graph", "graph query"]
+
+[[projects]]
+name = "LadybugDB"
+topic = "embedded graph"
+homepage = "https://github.com/ladybugdb/ladybugdb"
+keywords = ["ladybugdb", "lbug", "embedded graph", "arrow graph"]
+
+[[projects]]
+name = "CocoIndex"
+topic = "incremental indexing"
+homepage = "https://github.com/cocoindex-io/cocoindex"
+keywords = ["cocoindex", "target state", "incremental indexing", "knowledge graph"]
+
 [[sources]]
 name = "Hacker News"
 kind = "community"
@@ -78,6 +96,7 @@ feed_urls = [
   "https://medium.com/feed/tag/surrealdb",
   "https://medium.com/feed/tag/lancedb",
   "https://medium.com/feed/tag/data-engineering",
+  "https://medium.com/feed/tag/knowledge-graph",
   "https://medium.com/feed/tag/rust",
 ]
 

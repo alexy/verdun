@@ -40,7 +40,7 @@ cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-pr
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --out /tmp/verdun-newsletter-load.sql
 ```
 
-Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through the public articles API, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks.
+Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through the public articles API, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks. The watchlist covers the initial AI/data projects plus Grust-adjacent graph and indexing systems including FalkorDB, LadybugDB, and CocoIndex.
 
 Manual social imports live at:
 

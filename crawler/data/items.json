@@ -1,5 +1,53 @@
 [
   {
+    "id": "cocoindex-b8a70bfc0beb",
+    "title": "CocoIndex belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/cocoindex-io/cocoindex",
+    "published_at": "2026-06-04T12:00:00Z",
+    "project": "CocoIndex",
+    "topic": "incremental indexing",
+    "summary": "CocoIndex is being tracked for incremental indexing signals around cocoindex, target state, incremental indexing, knowledge graph.",
+    "why_it_matters": "CocoIndex helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "cocoindex",
+      "target state",
+      "incremental indexing",
+      "knowledge graph"
+    ],
+    "score": 57,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/cocoindex-io/cocoindex",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "falkordb-190182f5cc50",
+    "title": "FalkorDB belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://www.falkordb.com",
+    "published_at": "2026-06-06T12:00:00Z",
+    "project": "FalkorDB",
+    "topic": "graph database",
+    "summary": "FalkorDB is being tracked for graph database signals around falkordb, redis graph, cypher graph, graph query.",
+    "why_it_matters": "FalkorDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "falkordb",
+      "redis graph",
+      "cypher graph",
+      "graph query"
+    ],
+    "score": 63,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://www.falkordb.com",
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
     "id": "grust-210a95e033dd",
     "title": "Grust belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",
@@ -44,6 +92,33 @@
       "collection_stage": "watchlist-seed",
       "homepage": "https://github.com/HelixDB/helix-db",
       "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "hn-15800af278d0",
+    "title": "Show HN: CocoIndex – Open-Source Real-time Data transformation framework",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/cocoindex-io/cocoindex",
+    "published_at": "2025-06-04T15:30:00Z",
+    "project": "CocoIndex",
+    "topic": "incremental indexing",
+    "summary": "Hacker News surfaced this item while tracking CocoIndex keywords: cocoindex, target state, incremental indexing, knowledge graph.",
+    "why_it_matters": "Community discussion can reveal whether CocoIndex is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "cocoindex",
+      "target state",
+      "incremental indexing",
+      "hacker-news"
+    ],
+    "score": 62,
+    "raw_json": {
+      "author": "badmonster",
+      "collection_stage": "live",
+      "comments": 0,
+      "object_id": "44181821",
+      "points": 2,
+      "source": "hacker-news"
     }
   },
   {
@@ -128,6 +203,33 @@
     }
   },
   {
+    "id": "hn-945228e50ee4",
+    "title": "Show HN: CocoIndex – Open-Source Data framework for AI, built for data freshness",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/cocoindex-io/cocoindex",
+    "published_at": "2025-04-23T14:22:33Z",
+    "project": "CocoIndex",
+    "topic": "incremental indexing",
+    "summary": "Hacker News surfaced this item while tracking CocoIndex keywords: cocoindex, target state, incremental indexing, knowledge graph.",
+    "why_it_matters": "Community discussion can reveal whether CocoIndex is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "cocoindex",
+      "target state",
+      "incremental indexing",
+      "hacker-news"
+    ],
+    "score": 85,
+    "raw_json": {
+      "author": "badmonster",
+      "collection_stage": "live",
+      "comments": 11,
+      "object_id": "43772582",
+      "points": 14,
+      "source": "hacker-news"
+    }
+  },
+  {
     "id": "hn-9764ffccaa2c",
     "title": "HTTPX2 by Pydantic",
     "source": "Hacker News",
@@ -151,6 +253,33 @@
       "comments": 0,
       "object_id": "48134261",
       "points": 1,
+      "source": "hacker-news"
+    }
+  },
+  {
+    "id": "hn-ac655bbd91f7",
+    "title": "Show HN: FalkorDB – Open-source graph database major update (C/Rust)",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://news.ycombinator.com",
+    "published_at": "2025-06-12T13:57:08Z",
+    "project": "FalkorDB",
+    "topic": "graph database",
+    "summary": "Hacker News surfaced this item while tracking FalkorDB keywords: falkordb, redis graph, cypher graph, graph query.",
+    "why_it_matters": "Community discussion can reveal whether FalkorDB is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "falkordb",
+      "redis graph",
+      "cypher graph",
+      "hacker-news"
+    ],
+    "score": 70,
+    "raw_json": {
+      "author": "roilipman",
+      "collection_stage": "live",
+      "comments": 3,
+      "object_id": "44257880",
+      "points": 7,
       "source": "hacker-news"
     }
   },
@@ -179,6 +308,57 @@
       "object_id": "41703059",
       "points": 2,
       "source": "hacker-news"
+    }
+  },
+  {
+    "id": "hn-e7083fb9c9c",
+    "title": "Show HN: We built a type-safe Python ORM for RedisGraph/FalkorDB",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://news.ycombinator.com",
+    "published_at": "2026-01-28T15:29:53Z",
+    "project": "FalkorDB",
+    "topic": "graph database",
+    "summary": "Hacker News surfaced this item while tracking FalkorDB keywords: falkordb, redis graph, cypher graph, graph query.",
+    "why_it_matters": "Community discussion can reveal whether FalkorDB is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "falkordb",
+      "redis graph",
+      "cypher graph",
+      "hacker-news"
+    ],
+    "score": 71,
+    "raw_json": {
+      "author": "hello-tmst",
+      "collection_stage": "live",
+      "comments": 6,
+      "object_id": "46796602",
+      "points": 5,
+      "source": "hacker-news"
+    }
+  },
+  {
+    "id": "ladybugdb-b8cc94227aee",
+    "title": "LadybugDB belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/ladybugdb/ladybugdb",
+    "published_at": "2026-06-05T12:00:00Z",
+    "project": "LadybugDB",
+    "topic": "embedded graph",
+    "summary": "LadybugDB is being tracked for embedded graph signals around ladybugdb, lbug, embedded graph, arrow graph.",
+    "why_it_matters": "LadybugDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "ladybugdb",
+      "lbug",
+      "embedded graph",
+      "arrow graph"
+    ],
+    "score": 60,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/ladybugdb/ladybugdb",
+      "source_url": "https://news.ycombinator.com"
     }
   },
   {
