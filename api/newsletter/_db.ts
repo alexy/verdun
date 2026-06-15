@@ -38,6 +38,7 @@ type SourceRunRow = {
   status: SourceRunStatus
   item_count: number
   message: string
+  project_counts?: Record<string, unknown> | null
 }
 
 type StaticNewsRow = {
@@ -61,6 +62,7 @@ type StaticSourceRun = {
   status: 'ok' | 'error' | 'pending' | 'skipped'
   item_count: number
   message: string
+  project_counts?: Record<string, unknown>
 }
 
 type StaticSnapshot = {
@@ -106,7 +108,7 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     limit 25
   `) as FocusRow[]
   const sourceRunRows = await sql.query(`
-    select source, kind, status, item_count, message
+    select source, kind, status, item_count, message, project_counts
     from newsletter_source_runs
     order by
       case status when 'ok' then 0 when 'error' then 1 when 'pending' then 2 else 3 end,
@@ -137,6 +139,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
         status: run.status,
         itemCount: run.item_count,
         message: run.message,
+        projectCounts: normalizeProjectCounts(run.project_counts),
       })),
     }
   }
@@ -322,5 +325,16 @@ function toSourceRun(row: SourceRunRow) {
     status: row.status,
     itemCount: row.item_count,
     message: row.message,
+    projectCounts: normalizeProjectCounts(row.project_counts),
   }
+}
+
+function normalizeProjectCounts(projectCounts: unknown): Record<string, number> {
+  if (!projectCounts || typeof projectCounts !== 'object' || Array.isArray(projectCounts)) return {}
+  const normalized: Record<string, number> = {}
+  for (const [project, rawCount] of Object.entries(projectCounts)) {
+    const count = Number(rawCount)
+    if (project && Number.isFinite(count) && count > 0) normalized[project] = count
+  }
+  return normalized
 }

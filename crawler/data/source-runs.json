@@ -4,48 +4,73 @@
     "kind": "community",
     "status": "ok",
     "item_count": 11,
-    "message": "HN Algolia search_by_date"
+    "message": "HN Algolia search_by_date",
+    "project_counts": {
+      "CocoIndex": 2,
+      "FalkorDB": 2,
+      "HelixDB": 2,
+      "LanceDB": 1,
+      "Pydantic": 1,
+      "SurrealDB": 2,
+      "Turso": 1
+    }
   },
   {
     "source": "Lobste.rs",
     "kind": "community",
     "status": "ok",
     "item_count": 0,
-    "message": "Lobste.rs newest.json"
+    "message": "Lobste.rs newest.json",
+    "project_counts": {}
   },
   {
     "source": "dev.to",
     "kind": "community",
     "status": "ok",
     "item_count": 0,
-    "message": "dev.to articles API"
+    "message": "dev.to articles API",
+    "project_counts": {}
   },
   {
     "source": "Medium",
     "kind": "publication",
     "status": "ok",
     "item_count": 6,
-    "message": "configured RSS/Atom feeds"
+    "message": "configured RSS/Atom feeds",
+    "project_counts": {
+      "LanceDB": 2,
+      "Pydantic": 2,
+      "SurrealDB": 2
+    }
   },
   {
     "source": "Substack",
     "kind": "publication",
     "status": "ok",
     "item_count": 0,
-    "message": "configured RSS/Atom feeds"
+    "message": "configured RSS/Atom feeds",
+    "project_counts": {}
   },
   {
     "source": "LinkedIn",
     "kind": "social",
     "status": "ok",
     "item_count": 2,
-    "message": "manual JSON import"
+    "message": "manual JSON import",
+    "project_counts": {
+      "LakeSail": 1,
+      "Pydantic": 1
+    }
   },
   {
     "source": "X/Twitter",
     "kind": "social",
     "status": "ok",
     "item_count": 2,
-    "message": "manual JSON import"
+    "message": "manual JSON import",
+    "project_counts": {
+      "HelixDB": 1,
+      "Turso": 1
+    }
   }
 ]

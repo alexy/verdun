@@ -12,6 +12,7 @@ try {
   await page.getByText('Verdun').first().waitFor()
   await page.getByText('Strongly typed AI and data news').first().waitFor()
   await page.locator('.ontology').getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
+  await page.locator('.source-health').getByText(/projects covered by live\/manual source matches/).waitFor()
   await page.locator('.readiness').getByRole('heading', { name: 'Publishing readiness' }).waitFor()
   await page.locator('.news-card').first().getByText('Credo fit').waitFor()
   await page.locator('.news-card').first().getByRole('link', { name: /permalink/i }).waitFor()

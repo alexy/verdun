@@ -31,6 +31,7 @@ export type SourceRun = {
   status: SourceRunStatus
   itemCount: number
   message: string
+  projectCounts: Record<string, number>
 }
 
 export type NewsletterSnapshot = {
@@ -78,6 +79,7 @@ export const seedSnapshot: NewsletterSnapshot = {
       status: 'skipped',
       itemCount: 7,
       message: 'Built-in fallback snapshot',
+      projectCounts: {},
     },
   ],
   focuses: [
@@ -259,6 +261,7 @@ export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): Newsl
   const selectedItems = draftSelection(snapshot.items)
   const upvotedCount = snapshot.items.filter((item) => item.vote > 0).length
   const liveSourceCount = snapshot.sourceRuns.filter((run) => run.status === 'ok' && run.itemCount > 0).length
+  const liveProjectCount = unique(snapshot.sourceRuns.flatMap((run) => Object.keys(run.projectCounts))).length
   const focusCount = snapshot.focuses.filter((focus) => focus.text.trim()).length
   const selectedProjectCount = unique(selectedItems.map((item) => item.project)).length
   const sourceErrorCount = snapshot.sourceRuns.filter((run) => run.status === 'error').length
@@ -275,8 +278,8 @@ export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): Newsl
     {
       id: 'source-coverage',
       label: 'Live source coverage',
-      passed: liveSourceCount >= 3,
-      detail: `${liveSourceCount} source${liveSourceCount === 1 ? '' : 's'} returned live items this run.`,
+      passed: liveSourceCount >= 3 && liveProjectCount >= 3,
+      detail: `${liveSourceCount} source${liveSourceCount === 1 ? '' : 's'} returned live items across ${liveProjectCount} project${liveProjectCount === 1 ? '' : 's'}.`,
     },
     {
       id: 'project-spread',

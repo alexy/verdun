@@ -200,6 +200,33 @@
     }
   },
   {
+    "id": "hn-69ae488c5280",
+    "title": "Building an E2E Encrypted Chat Application with LanceDB and Libsodium",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://www.justinrmiller.com/building-an-e2e-encrypted-chat-application-with-lancedb-and-libsodium/",
+    "published_at": "2026-03-28T21:32:59Z",
+    "project": "LanceDB",
+    "topic": "vector data",
+    "summary": "Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar.",
+    "why_it_matters": "Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "lancedb",
+      "lance",
+      "vectors",
+      "hacker-news"
+    ],
+    "score": 89,
+    "raw_json": {
+      "author": "securicat",
+      "collection_stage": "live",
+      "comments": 2,
+      "object_id": "47558284",
+      "points": 27,
+      "source": "hacker-news"
+    }
+  },
+  {
     "id": "hn-7a2fd6799a20",
     "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
     "source": "Hacker News",
@@ -331,33 +358,6 @@
       "comments": 0,
       "object_id": "41703059",
       "points": 2,
-      "source": "hacker-news"
-    }
-  },
-  {
-    "id": "hn-cf8ebfce1399",
-    "title": "Building AI Agents in Python with Pydantic AI",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
-    "published_at": "2026-04-29T12:18:36Z",
-    "project": "Pydantic",
-    "topic": "typed AI",
-    "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
-    "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "pydantic",
-      "typed agents",
-      "structured outputs",
-      "hacker-news"
-    ],
-    "score": 61,
-    "raw_json": {
-      "author": "eigenBasis",
-      "collection_stage": "live",
-      "comments": 0,
-      "object_id": "47947311",
-      "points": 1,
       "source": "hacker-news"
     }
   },

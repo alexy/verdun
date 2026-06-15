@@ -287,6 +287,13 @@ textarea {
   gap: 10px;
 }
 
+.source-health__coverage {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .source-row {
   display: grid;
   grid-template-columns: 10px minmax(0, 1fr);
@@ -304,6 +311,10 @@ textarea {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.source-row__projects {
+  color: var(--accent-dark);
 }
 
 .source-dot {

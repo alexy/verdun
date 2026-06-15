@@ -108,6 +108,7 @@ export function normalizeSnapshot(raw) {
       status: run.status,
       itemCount: run.item_count ?? run.itemCount ?? 0,
       message: run.message,
+      projectCounts: normalizeProjectCounts(run.project_counts ?? run.projectCounts),
     })),
   }
 }
@@ -169,6 +170,15 @@ function normalizeFocus(focus) {
         ? focus.createdAt
         : new Date().toISOString(),
   }
+}
+
+function normalizeProjectCounts(projectCounts) {
+  if (!projectCounts || typeof projectCounts !== 'object' || Array.isArray(projectCounts)) return {}
+  return Object.fromEntries(
+    Object.entries(projectCounts)
+      .map(([project, count]) => [project, Number(count)])
+      .filter(([project, count]) => project && Number.isFinite(count) && count > 0),
+  )
 }
 
 function isHttpUrl(value) {

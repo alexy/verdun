@@ -35,8 +35,12 @@ create table if not exists newsletter_source_runs (
   status text not null check (status in ('ok', 'error', 'pending', 'skipped')),
   item_count integer not null default 0,
   message text not null default '',
+  project_counts jsonb not null default '{}'::jsonb,
   collected_at timestamptz not null default now()
 );
+
+alter table newsletter_source_runs
+  add column if not exists project_counts jsonb not null default '{}'::jsonb;
 
 create index if not exists newsletter_items_rank_idx on newsletter_items (published_at desc, score desc);
 create index if not exists newsletter_items_project_idx on newsletter_items (project);

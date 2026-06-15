@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T23:08:40.706454Z",
+  "generated_at": "2026-06-15T23:25:28.433694Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
@@ -203,6 +203,33 @@
       }
     },
     {
+      "id": "hn-69ae488c5280",
+      "title": "Building an E2E Encrypted Chat Application with LanceDB and Libsodium",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://www.justinrmiller.com/building-an-e2e-encrypted-chat-application-with-lancedb-and-libsodium/",
+      "published_at": "2026-03-28T21:32:59Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar.",
+      "why_it_matters": "Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "lancedb",
+        "lance",
+        "vectors",
+        "hacker-news"
+      ],
+      "score": 89,
+      "raw_json": {
+        "author": "securicat",
+        "collection_stage": "live",
+        "comments": 2,
+        "object_id": "47558284",
+        "points": 27,
+        "source": "hacker-news"
+      }
+    },
+    {
       "id": "hn-7a2fd6799a20",
       "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
       "source": "Hacker News",
@@ -334,33 +361,6 @@
         "comments": 0,
         "object_id": "41703059",
         "points": 2,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-cf8ebfce1399",
-      "title": "Building AI Agents in Python with Pydantic AI",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
-      "published_at": "2026-04-29T12:18:36Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
-      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "structured outputs",
-        "hacker-news"
-      ],
-      "score": 61,
-      "raw_json": {
-        "author": "eigenBasis",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "47947311",
-        "points": 1,
         "source": "hacker-news"
       }
     },
@@ -857,49 +857,74 @@
       "kind": "community",
       "status": "ok",
       "item_count": 11,
-      "message": "HN Algolia search_by_date"
+      "message": "HN Algolia search_by_date",
+      "project_counts": {
+        "CocoIndex": 2,
+        "FalkorDB": 2,
+        "HelixDB": 2,
+        "LanceDB": 1,
+        "Pydantic": 1,
+        "SurrealDB": 2,
+        "Turso": 1
+      }
     },
     {
       "source": "Lobste.rs",
       "kind": "community",
       "status": "ok",
       "item_count": 0,
-      "message": "Lobste.rs newest.json"
+      "message": "Lobste.rs newest.json",
+      "project_counts": {}
     },
     {
       "source": "dev.to",
       "kind": "community",
       "status": "ok",
       "item_count": 0,
-      "message": "dev.to articles API"
+      "message": "dev.to articles API",
+      "project_counts": {}
     },
     {
       "source": "Medium",
       "kind": "publication",
       "status": "ok",
       "item_count": 6,
-      "message": "configured RSS/Atom feeds"
+      "message": "configured RSS/Atom feeds",
+      "project_counts": {
+        "LanceDB": 2,
+        "Pydantic": 2,
+        "SurrealDB": 2
+      }
     },
     {
       "source": "Substack",
       "kind": "publication",
       "status": "ok",
       "item_count": 0,
-      "message": "configured RSS/Atom feeds"
+      "message": "configured RSS/Atom feeds",
+      "project_counts": {}
     },
     {
       "source": "LinkedIn",
       "kind": "social",
       "status": "ok",
       "item_count": 2,
-      "message": "manual JSON import"
+      "message": "manual JSON import",
+      "project_counts": {
+        "LakeSail": 1,
+        "Pydantic": 1
+      }
     },
     {
       "source": "X/Twitter",
       "kind": "social",
       "status": "ok",
       "item_count": 2,
-      "message": "manual JSON import"
+      "message": "manual JSON import",
+      "project_counts": {
+        "HelixDB": 1,
+        "Turso": 1
+      }
     }
   ]
 }

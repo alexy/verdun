@@ -100,6 +100,8 @@ struct SourceRun {
     status: SourceRunStatus,
     item_count: usize,
     message: String,
+    #[serde(default)]
+    project_counts: BTreeMap<String, usize>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -256,7 +258,7 @@ fn export_sql(input: PathBuf, source_runs: PathBuf, out: PathBuf) -> Result<()> 
     }
     for run in &source_runs {
         sql.push_str("insert into newsletter_source_runs (\n");
-        sql.push_str("  source, kind, status, item_count, message, collected_at\n");
+        sql.push_str("  source, kind, status, item_count, message, project_counts, collected_at\n");
         sql.push_str(") values (");
         sql.push_str(&sql_string(&run.source));
         sql.push_str(", ");
@@ -267,10 +269,12 @@ fn export_sql(input: PathBuf, source_runs: PathBuf, out: PathBuf) -> Result<()> 
         sql.push_str(&run.item_count.to_string());
         sql.push_str(", ");
         sql.push_str(&sql_string(&run.message));
-        sql.push_str(", now())\n");
+        sql.push_str(", ");
+        sql.push_str(&sql_string(&serde_json::to_string(&run.project_counts)?));
+        sql.push_str("::jsonb, now())\n");
         sql.push_str("on conflict (source) do update set\n");
         sql.push_str("  kind = excluded.kind,\n  status = excluded.status,\n  item_count = excluded.item_count,\n");
-        sql.push_str("  message = excluded.message,\n  collected_at = excluded.collected_at;\n\n");
+        sql.push_str("  message = excluded.message,\n  project_counts = excluded.project_counts,\n  collected_at = excluded.collected_at;\n\n");
     }
     sql.push_str("commit;\n");
     fs::write(&out, sql).with_context(|| format!("writing {}", out.display()))?;
@@ -427,7 +431,7 @@ fn live_items(
             Ok(mut source_items) => {
                 source_runs.push(ok_source_run(
                     source,
-                    source_items.len(),
+                    &source_items,
                     "HN Algolia search_by_date",
                 ));
                 items.append(&mut source_items);
@@ -444,7 +448,7 @@ fn live_items(
             Ok(mut source_items) => {
                 source_runs.push(ok_source_run(
                     source,
-                    source_items.len(),
+                    &source_items,
                     "Lobste.rs newest.json",
                 ));
                 items.append(&mut source_items);
@@ -459,11 +463,7 @@ fn live_items(
     {
         match fetch_dev_to(&client, watchlist, source, max_per_project) {
             Ok(mut source_items) => {
-                source_runs.push(ok_source_run(
-                    source,
-                    source_items.len(),
-                    "dev.to articles API",
-                ));
+                source_runs.push(ok_source_run(source, &source_items, "dev.to articles API"));
                 items.append(&mut source_items);
             }
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
@@ -478,7 +478,7 @@ fn live_items(
             Ok(mut source_items) => {
                 source_runs.push(ok_source_run(
                     source,
-                    source_items.len(),
+                    &source_items,
                     "configured RSS/Atom feeds",
                 ));
                 items.append(&mut source_items);
@@ -495,7 +495,7 @@ fn live_items(
             Ok(mut source_items) => {
                 source_runs.push(ok_source_run(
                     source,
-                    source_items.len(),
+                    &source_items,
                     "configured RSS/Atom feeds",
                 ));
                 items.append(&mut source_items);
@@ -511,11 +511,7 @@ fn live_items(
         {
             match collect_manual_source(watchlist, source, max_per_project) {
                 Ok(mut source_items) => {
-                    source_runs.push(ok_source_run(
-                        source,
-                        source_items.len(),
-                        "manual JSON import",
-                    ));
+                    source_runs.push(ok_source_run(source, &source_items, "manual JSON import"));
                     items.append(&mut source_items);
                 }
                 Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
@@ -724,18 +720,20 @@ fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
                 status,
                 item_count: 0,
                 message: message.to_string(),
+                project_counts: BTreeMap::new(),
             })
         })
         .collect()
 }
 
-fn ok_source_run(source: &Source, item_count: usize, message: &str) -> SourceRun {
+fn ok_source_run(source: &Source, items: &[NewsItem], message: &str) -> SourceRun {
     SourceRun {
         source: source.name.clone(),
         kind: source.kind.clone(),
         status: SourceRunStatus::Ok,
-        item_count,
+        item_count: items.len(),
         message: message.to_string(),
+        project_counts: project_counts(items),
     }
 }
 
@@ -746,7 +744,16 @@ fn error_source_run(source: &Source, message: &str) -> SourceRun {
         status: SourceRunStatus::Error,
         item_count: 0,
         message: message.to_string(),
+        project_counts: BTreeMap::new(),
     }
+}
+
+fn project_counts(items: &[NewsItem]) -> BTreeMap<String, usize> {
+    let mut counts = BTreeMap::new();
+    for item in items {
+        *counts.entry(item.project.clone()).or_insert(0) += 1;
+    }
+    counts
 }
 
 fn read_watchlist(path: &PathBuf) -> Result<Watchlist> {
