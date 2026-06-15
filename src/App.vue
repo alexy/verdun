@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ArrowDown, ArrowUp, BookOpenText, Check, ClipboardCheck, Copy, Database, Download, ExternalLink, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
+import { BookOpenText, Check, ClipboardCheck, Copy, Database, Download, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
 import AppHeader from './components/AppHeader.vue'
+import NewsItemCard from './components/NewsItemCard.vue'
 import SourceHealthPanel from './components/SourceHealthPanel.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, evaluateNewsletterReadiness, seedSnapshot, sortedNewsItems } from './lib/newsletter'
-import { credoBlurb, ontologyForItem, ontologyNodes } from './lib/ontology'
+import { ontologyNodes } from './lib/ontology'
 import { normalizeSnapshot } from './lib/snapshot'
 
 const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
@@ -154,18 +155,6 @@ function clearFilters(): void {
 
 function uniqueSorted(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right))
-}
-
-function itemAnchor(itemId: string): string {
-  return `item-${itemId.replace(/[^a-zA-Z0-9_-]/g, '-')}`
-}
-
-function sourceDomain(value: string): string {
-  try {
-    return new URL(value).hostname.replace(/^www\./, '')
-  } catch {
-    return value
-  }
 }
 
 async function copyDraftMarkdown(): Promise<void> {
@@ -359,47 +348,7 @@ function isoDate(value: string): string {
 
         <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
 
-        <article v-for="item in filteredItems" :id="itemAnchor(item.id)" :key="item.id" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
-          <div class="vote-rail" aria-label="Vote controls">
-            <button type="button" :class="{ active: item.vote > 0 }" title="Upvote" @click="setVote(item.id, item.vote === 1 ? 0 : 1)">
-              <ArrowUp :size="18" aria-hidden="true" />
-            </button>
-            <span>{{ item.score }}</span>
-            <button type="button" :class="{ active: item.vote < 0 }" title="Downvote" @click="setVote(item.id, item.vote === -1 ? 0 : -1)">
-              <ArrowDown :size="18" aria-hidden="true" />
-            </button>
-          </div>
-          <div class="news-card__body">
-            <div class="item-meta">
-              <span>{{ item.project }}</span>
-              <span>{{ item.sourceKind }}</span>
-              <span>{{ sourceDomain(item.url) }}</span>
-              <span>{{ formatDate(item.publishedAt) }}</span>
-            </div>
-            <h3>
-              <a :href="item.url" target="_blank" rel="noreferrer">
-                {{ item.title }}
-                <ExternalLink :size="15" aria-hidden="true" />
-              </a>
-            </h3>
-            <p>{{ item.summary }}</p>
-            <p class="why">{{ item.whyItMatters }}</p>
-            <div class="credo-fit">
-              <strong>Credo fit</strong>
-              <p>{{ credoBlurb(item) }}</p>
-              <div>
-                <a v-for="node in ontologyForItem(item)" :key="node.id" :href="`#ontology-${node.id}`">{{ node.label }}</a>
-              </div>
-            </div>
-            <div class="item-actions">
-              <a :href="`#${itemAnchor(item.id)}`" :aria-label="`Permalink for ${item.title}`">permalink</a>
-              <a :href="item.url" target="_blank" rel="noreferrer">source</a>
-            </div>
-            <div class="tags">
-              <span v-for="tag in item.tags" :key="tag">{{ tag }}</span>
-            </div>
-          </div>
-        </article>
+        <NewsItemCard v-for="item in filteredItems" :key="item.id" :item="item" @vote="setVote" />
       </section>
     </section>
   </main>
