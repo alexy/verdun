@@ -15,10 +15,12 @@ const fallbackFocuses = [
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const args = process.argv.slice(2)
   const ulyssesMode = args.includes('--ulysses')
-  const positional = args.filter((arg) => arg !== '--ulysses')
+  const requireUpvotes = args.includes('--require-upvotes') || process.env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
+  const positional = args.filter((arg) => arg !== '--ulysses' && arg !== '--require-upvotes')
   const input = positional[0] ?? process.env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
   const snapshot = await loadSnapshotFile(input)
   const draft = await buildNewsletterDraft(snapshot)
+  assertDraftReady(snapshot, draft, { requireUpvotes })
   const out = positional[1] ?? process.env.NEWSLETTER_DRAFT_OUT ?? defaultDraftPath(draft, snapshot, ulyssesMode)
 
   if (out) {
@@ -49,6 +51,15 @@ export async function readSnapshotInput(input) {
     return await response.json()
   }
   return JSON.parse(await readFile(input, 'utf8'))
+}
+
+export function assertDraftReady(snapshot, draft, options = {}) {
+  if (!options.requireUpvotes) return
+  const selectedVotes = new Map(snapshot.items.map((item) => [item.id, item.vote]))
+  const selectedUpvotes = draft.itemIds.filter((itemId) => selectedVotes.get(itemId) > 0)
+  if (!selectedUpvotes.length) {
+    throw new Error('Draft requires at least one upvoted item. Upvote items in the app or unset NEWSLETTER_REQUIRE_UPVOTES.')
+  }
 }
 
 export function defaultDraftPath(draft, snapshot, ulyssesMode = false) {
