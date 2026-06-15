@@ -17,6 +17,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
   - `GET /api/newsletter/items`
   - `POST /api/newsletter/vote`
   - `POST /api/newsletter/focus`
+- Backend route helpers live in `api/newsletter/_http.ts`, leaving `api/newsletter/_db.ts` as the persistence adapter.
 - External Postgres schema in `db/migrations/0001_newsletter.sql`.
 - Local no-database mode persists votes and focus notes to ignored `crawler/data/editorial-state.json`, with `VERDUN_LOCAL_STATE_FILE` available for tests or alternate local state.
 - Rust crawler/loader scaffold under `crawler/`.
@@ -52,6 +53,7 @@ Current local checks:
 - `cargo run --manifest-path crawler/Cargo.toml -- export-sql --input crawler/data/items.json --source-runs crawler/data/source-runs.json --out /tmp/verdun-newsletter-load.sql`
 - `npm run draft`
 - `npm run smoke:api`
+- `npm run smoke:api-http`
 - `npm run smoke:draft`
 - `npm run smoke:draft-url`
 - `npm run smoke:ghost`

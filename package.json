@@ -12,6 +12,7 @@
     "prod:app": "vite preview --host 127.0.0.1 --port 5174 --strictPort --outDir dist-prod",
     "smoke:app": "node scripts/smoke-app.mjs",
     "smoke:api": "node scripts/smoke-api-local.mjs",
+    "smoke:api-http": "node scripts/smoke-api-http.mjs",
     "smoke:draft": "node scripts/smoke-draft-local.mjs",
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",

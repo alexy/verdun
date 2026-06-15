@@ -1,4 +1,5 @@
-import { allowMethods, readSnapshot, sendApiError, sendJson, type ApiRequest, type ApiResponse } from './_db'
+import { readSnapshot } from './_db'
+import { allowMethods, sendApiError, sendJson, type ApiRequest, type ApiResponse } from './_http'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (!allowMethods(req, res, ['GET', 'HEAD'])) return

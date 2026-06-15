@@ -1,4 +1,5 @@
-import { allowMethods, parseBody, sendApiError, sendJson, writeVote, type ApiRequest, type ApiResponse } from './_db'
+import { writeVote } from './_db'
+import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from './_http'
 import type { VoteValue } from '../../src/lib/newsletter'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {

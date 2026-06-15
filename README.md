@@ -12,6 +12,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue` and `SourceHealthPanel.vue`.
+- Backend route mechanics live in `api/newsletter/_http.ts`, while data access and local fallback state stay in `api/newsletter/_db.ts`, matching the Greathouse-style reusable backend boundary.
 
 ## Local app
 
