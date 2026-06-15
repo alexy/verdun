@@ -18,12 +18,13 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Source-health metadata shown in the app sidebar.
 - Live public-source ingestion for Hacker News, Lobste.rs, dev.to, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, LakeSail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, and TypeSec.
 - Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
+- `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
 
 ## Next Work
 
 - Replace manual LinkedIn/X imports with authenticated or policy-aware adapters when credentials and platform policy are settled.
-- Add a local export/import convention for moving the generated Markdown into the user's Ulysses library.
+- Decide whether to automate copying the local Markdown export into the user's actual Ulysses import folder.
 - Extract shared UI/API/crawler modules back into Greathouse after the Verdun shape stabilizes.
 
 ## Verification

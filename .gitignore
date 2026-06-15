@@ -7,6 +7,7 @@ target/
 crawler/target/
 crawler/data/raw/
 crawler/data/out/
+crawler/data/ulysses/
 *.log
 .env
 .env.local

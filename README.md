@@ -63,6 +63,8 @@ The generated article is written to `crawler/data/newsletter-draft.md` by defaul
 NEWSLETTER_DRAFT_OUT=/path/to/ulysses-import/verdun-weekly.md npm run ulysses:draft
 ```
 
+Without `NEWSLETTER_DRAFT_OUT`, `npm run ulysses:draft` writes a dated file under `crawler/data/ulysses/`, such as `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.md`. That directory is ignored by git and is meant as the local Ulysses handoff area. Set `ULYSSES_DRAFT_DIR` to choose another export directory.
+
 An optional Ghost helper remains available for direct API drafts from the same local snapshot, but the editorial publishing sequence is local Markdown into Ulysses:
 
 ```sh

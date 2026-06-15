@@ -12,7 +12,7 @@
     "prod:app": "vite preview --host 127.0.0.1 --port 5174 --strictPort --outDir dist-prod",
     "smoke:app": "node scripts/smoke-app.mjs",
     "draft": "node scripts/newsletter-draft.mjs",
-    "ulysses:draft": "node scripts/newsletter-draft.mjs",
+    "ulysses:draft": "node scripts/newsletter-draft.mjs --ulysses",
     "ghost:draft": "node scripts/publish-ghost.mjs"
   },
   "dependencies": {
