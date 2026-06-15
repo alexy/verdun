@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Activity, ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, RefreshCw, Send, Sparkles } from '@lucide/vue'
+import { Activity, ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, FileText, RefreshCw, Send, Sparkles } from '@lucide/vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
-import { seedSnapshot, sortedNewsItems } from './lib/newsletter'
+import { buildNewsletterDraft, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 
 const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
 const loading = ref(false)
@@ -16,6 +16,7 @@ const sourceCount = computed(() => new Set(snapshot.value.items.map((item) => it
 const sortedItems = computed(() => sortedNewsItems(snapshot.value.items))
 const liveSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'ok' && run.itemCount > 0).length)
 const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
+const draft = computed(() => buildNewsletterDraft(snapshot.value))
 
 onMounted(() => {
   void loadSnapshot()
@@ -200,6 +201,16 @@ function formatDate(value: string): string {
           <p v-if="error" class="status">Local fallback: {{ error }}</p>
           <p v-else class="status">Generated {{ formatDate(snapshot.generatedAt) }}</p>
         </div>
+
+        <article class="draft-preview">
+          <div class="panel-heading">
+            <FileText :size="18" aria-hidden="true" />
+            <h2>Draft preview</h2>
+          </div>
+          <h3>{{ draft.title }}</h3>
+          <p>{{ draft.subtitle }}</p>
+          <div class="draft-preview__body" v-html="draft.html"></div>
+        </article>
 
         <article v-for="item in sortedItems" :key="item.id" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
           <div class="vote-rail" aria-label="Vote controls">

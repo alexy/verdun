@@ -41,6 +41,14 @@ export type NewsletterSnapshot = {
 
 export type VoteValue = -1 | 0 | 1
 
+export type NewsletterDraft = {
+  title: string
+  subtitle: string
+  markdown: string
+  html: string
+  itemIds: string[]
+}
+
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
   theme: 'Strongly typed and functional AI/data systems',
@@ -178,4 +186,119 @@ export function sortedNewsItems(items: NewsItem[]): NewsItem[] {
     if (scoreDelta !== 0) return scoreDelta
     return Date.parse(right.publishedAt) - Date.parse(left.publishedAt)
   })
+}
+
+export function draftSelection(items: NewsItem[], limit = 7): NewsItem[] {
+  const included = sortedNewsItems(items).filter((item) => item.vote > 0)
+  const candidates = included.length
+    ? included
+    : sortedNewsItems(items).filter((item) => item.vote >= 0)
+  return candidates.slice(0, limit)
+}
+
+export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDraft {
+  const items = draftSelection(snapshot.items)
+  const date = new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(snapshot.generatedAt))
+  const title = `Strongly Typed AI/Data Notes: ${date}`
+  const subtitle = items.length
+    ? `This week follows ${unique(items.map((item) => item.project)).slice(0, 4).join(', ')} and the systems around them.`
+    : 'No items have been selected yet.'
+  const sections = [
+    `# ${title}`,
+    '',
+    subtitle,
+    '',
+    openingParagraph(items),
+    '',
+    ...items.flatMap((item, index) => itemSection(item, index + 1)),
+    '## Editorial thread',
+    '',
+    editorialThread(items),
+    '',
+    '## Sources watched',
+    '',
+    ...snapshot.sourceRuns.map((run) => `- ${run.source}: ${run.status}, ${run.itemCount} items. ${run.message}`),
+    '',
+  ]
+  const markdown = sections.join('\n')
+  return {
+    title,
+    subtitle,
+    markdown,
+    html: markdownToHtml(markdown),
+    itemIds: items.map((item) => item.id),
+  }
+}
+
+function openingParagraph(items: NewsItem[]): string {
+  if (!items.length) {
+    return 'The queue is empty. Upvote a few items before drafting the week.'
+  }
+  const projects = unique(items.map((item) => item.project))
+  return `The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. ${sentenceList(projects.slice(0, 5))} give the issue concrete shape.`
+}
+
+function itemSection(item: NewsItem, index: number): string[] {
+  return [
+    `## ${index}. ${item.project}: ${item.title}`,
+    '',
+    `${item.summary} ${item.whyItMatters}`,
+    '',
+    `Source: [${item.source}](${item.url}) · ${item.topic} · ${item.tags.slice(0, 4).join(', ')}`,
+    '',
+  ]
+}
+
+function editorialThread(items: NewsItem[]): string {
+  if (!items.length) return 'No editorial thread yet.'
+  const topics = unique(items.map((item) => item.topic))
+  return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products.`
+}
+
+function sentenceList(values: string[]): string {
+  if (!values.length) return 'the selected items'
+  if (values.length === 1) return values[0] ?? ''
+  if (values.length === 2) return `${values[0]} and ${values[1]}`
+  return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`
+}
+
+function unique(values: string[]): string[] {
+  return Array.from(new Set(values.filter(Boolean)))
+}
+
+function markdownToHtml(markdown: string): string {
+  const lines = markdown.split('\n')
+  const html: string[] = []
+  let listOpen = false
+  for (const line of lines) {
+    if (line.startsWith('- ')) {
+      if (!listOpen) {
+        html.push('<ul>')
+        listOpen = true
+      }
+      html.push(`<li>${inlineMarkdown(line.slice(2))}</li>`)
+      continue
+    }
+    if (listOpen) {
+      html.push('</ul>')
+      listOpen = false
+    }
+    if (line.startsWith('# ')) html.push(`<h1>${escapeHtml(line.slice(2))}</h1>`)
+    else if (line.startsWith('## ')) html.push(`<h2>${escapeHtml(line.slice(3))}</h2>`)
+    else if (line.trim()) html.push(`<p>${inlineMarkdown(line)}</p>`)
+  }
+  if (listOpen) html.push('</ul>')
+  return html.join('\n')
+}
+
+function inlineMarkdown(value: string): string {
+  return escapeHtml(value).replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
 }

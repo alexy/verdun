@@ -40,3 +40,21 @@ cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-pr
 ```
 
 Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, and dev.to through the public articles API, with conservative project-name/distinctive-keyword matching. The next adapters are Medium, Substack, LinkedIn, and X/Twitter with source-specific policy checks and API credentials where required.
+
+## Drafting and Ghost
+
+Build a local Markdown draft from the current public snapshot:
+
+```sh
+npm run draft
+```
+
+Publish the same generated article to Ghost as a draft post:
+
+```sh
+GHOST_ADMIN_API_URL=https://collected.ga \
+GHOST_ADMIN_API_KEY='admin-key-id:admin-key-secret' \
+npm run ghost:draft
+```
+
+`ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. It does not publish a public post unless the status argument is changed.

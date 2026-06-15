@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "prod:build": "vue-tsc -b && vite build --outDir dist-prod",
     "prod:app": "vite preview --host 127.0.0.1 --port 5174 --strictPort --outDir dist-prod",
-    "smoke:app": "node scripts/smoke-app.mjs"
+    "smoke:app": "node scripts/smoke-app.mjs",
+    "draft": "node scripts/newsletter-draft.mjs public/data/newsletter-snapshot.json crawler/data/newsletter-draft.md",
+    "ghost:draft": "node scripts/publish-ghost.mjs public/data/newsletter-snapshot.json draft"
   },
   "dependencies": {
     "@lucide/vue": "^1.17.0",
