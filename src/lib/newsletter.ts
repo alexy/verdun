@@ -233,6 +233,7 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '',
     openingParagraph(items, brief),
     '',
+    ...throughlineSection(items, brief),
     ...briefSection(brief),
     ...items.flatMap((item, index) => itemSection(item, index + 1)),
     '## Strongly Typed AI ontology',
@@ -348,6 +349,31 @@ function briefSection(brief: EditorialBrief): string[] {
     '',
     ...brief.weekly.map((text) => `- This week: ${text}`),
     ...brief.ongoing.map((text) => `- Ongoing: ${text}`),
+    '',
+  ]
+}
+
+function throughlineSection(items: NewsItem[], brief: EditorialBrief): string[] {
+  if (!items.length) return []
+  const projects = unique(items.map((item) => item.project))
+  const topics = unique(items.map((item) => item.topic))
+  const ontologyLabels = unique(items.flatMap((item) => ontologyForItem(item).map((node) => node.label))).slice(0, 4)
+  const sources = unique(items.map((item) => item.source))
+  const sourceMix = sources.length > 1
+    ? `${sources.length} source surfaces`
+    : sources[0] ?? 'the selected source'
+  const focus = brief.weekly[0] ?? brief.ongoing[0]
+  const focusSentence = focus
+    ? `The editorial intent asks for ${stripTerminalPunctuation(focus).toLowerCase()}; the selected items answer by showing where that desire is becoming infrastructure instead of taste.`
+    : 'The selection should read as infrastructure evidence, not a catalog of isolated releases.'
+  return [
+    '## Weekly throughline',
+    '',
+    `The selected queue clusters around ${sentenceList(ontologyLabels.map((label) => label.toLowerCase()))}: ${sentenceList(projects.slice(0, 6))} are all negotiating how much structure AI/data systems should expose to developers.`,
+    '',
+    `${sourceMix} supply the evidence, from community discussion to long-form adoption notes and manually reviewed social signals. Across ${sentenceList(topics.slice(0, 5))}, the useful pattern is the same: make the boundary typed, keep the runtime close, and let databases carry more of the context load.`,
+    '',
+    focusSentence,
     '',
   ]
 }

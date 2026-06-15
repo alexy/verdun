@@ -45,6 +45,15 @@ try {
   if (!draft.markdown.includes('Coverage:')) {
     throw new Error('draft source section did not include project coverage')
   }
+  if (!draft.markdown.includes('## Weekly throughline')) {
+    throw new Error('draft did not include the weekly throughline section')
+  }
+  if (!draft.html.includes('<h2>Weekly throughline</h2>')) {
+    throw new Error('draft HTML did not render the weekly throughline section')
+  }
+  if (!draft.markdown.includes('The selected queue clusters around')) {
+    throw new Error('draft throughline did not synthesize the selected queue')
+  }
   for (const roughText of ['Overview Long-form', 'Author: ', 'Stop Hand-Writing SurrealQL Strings in Rust Long-form', 'Medium surfaced this feed item']) {
     if (draft.markdown.includes(roughText)) {
       throw new Error(`draft leaked rough feed text: ${roughText}`)

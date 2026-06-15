@@ -49,6 +49,12 @@ try {
   if (!draft.markdown.includes('This week: More Sail graph lowering and typed lakehouse execution details.')) {
     throw new Error('local focus was not included in the draft')
   }
+  if (!draft.markdown.includes('## Weekly throughline')) {
+    throw new Error('local draft did not include the weekly throughline')
+  }
+  if (!draft.markdown.includes('The editorial intent asks for more sail graph lowering and typed lakehouse execution details')) {
+    throw new Error('local draft throughline did not use the saved focus')
+  }
 } finally {
   await rm(stateDir, { recursive: true, force: true })
 }
