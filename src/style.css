@@ -252,6 +252,7 @@ textarea {
 
 .focus-list,
 .source-health,
+.ontology,
 .draft {
   padding-top: 12px;
   border-top: 1px solid var(--line);
@@ -326,6 +327,36 @@ textarea {
 
 .source-dot.skipped {
   background: #9ca3af;
+}
+
+.ontology {
+  display: grid;
+  gap: 8px;
+}
+
+.ontology a {
+  padding: 9px 10px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf5;
+  text-decoration: none;
+}
+
+.ontology a:hover {
+  border-color: rgba(15, 118, 110, 0.42);
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.ontology strong {
+  font-size: 13px;
+}
+
+.ontology span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .draft {
@@ -578,6 +609,48 @@ textarea {
 .news-card .why {
   color: var(--accent-dark);
   font-weight: 750;
+}
+
+.credo-fit {
+  margin-top: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  border-left: 3px solid rgba(15, 118, 110, 0.54);
+  border-radius: 0 8px 8px 0;
+  background: #f6f3ea;
+}
+
+.credo-fit strong {
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.credo-fit p {
+  margin-top: 0;
+  color: #33433e;
+  font-size: 14px;
+}
+
+.credo-fit div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.credo-fit a {
+  padding: 4px 8px;
+  border: 1px solid rgba(15, 118, 110, 0.28);
+  border-radius: 6px;
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.credo-fit a:hover {
+  background: rgba(15, 118, 110, 0.1);
 }
 
 .tags {

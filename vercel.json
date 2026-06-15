@@ -2,7 +2,18 @@
   "framework": "vite",
   "buildCommand": "npm run prod:build",
   "outputDirectory": "dist-prod",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/rbage/",
+      "permanent": false
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/rbage/(.*)",
+      "destination": "/index.html"
+    },
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"

@@ -1,13 +1,15 @@
 # Verdun
 
-Verdun is the editorial desk for `collected.ga`: a Vercel/Vue app plus a Rust crawler/loader for weekly strongly typed and functional AI/data news.
+Verdun is the editorial desk for `collected.ga/rbage/`: a Vercel/Vue app plus a Rust crawler/loader for weekly strongly typed and functional AI/data news.
 
 The first slice mirrors the useful Greathouse shape without touching Greathouse:
 
 - Vue/Vite app deployed by Vercel.
+- Vite is built with `/rbage/` as the public base path for `collected.ga/rbage/`.
 - Vercel serverless API routes reading an external Postgres database.
 - Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
 - Editorial UI for upvoting/downvoting newsletter candidates and writing this-week or ongoing focus requests.
+- Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 
 ## Local app
 

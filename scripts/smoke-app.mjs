@@ -1,7 +1,7 @@
 import { chromium } from '@playwright/test'
 import { existsSync } from 'node:fs'
 
-const baseUrl = process.argv[2] ?? 'http://127.0.0.1:5176'
+const baseUrl = process.argv[2] ?? 'http://127.0.0.1:5176/rbage/'
 const chromiumExecutable = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
   ?? (existsSync('/opt/homebrew/bin/chromium') ? '/opt/homebrew/bin/chromium' : undefined)
 const browser = await chromium.launch(chromiumExecutable ? { executablePath: chromiumExecutable } : undefined)
@@ -11,6 +11,8 @@ try {
   await page.goto(baseUrl, { waitUntil: 'networkidle' })
   await page.getByText('Verdun').first().waitFor()
   await page.getByText('Strongly typed AI and data news').first().waitFor()
+  await page.getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
+  await page.locator('.news-card').first().getByText('Credo fit').waitFor()
   await page.getByTitle('Include').first().click()
   await page.getByPlaceholder(/Search titles/).fill('Pydantic')
   await page.locator('.news-card', { hasText: 'Pydantic' }).first().waitFor()

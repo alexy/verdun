@@ -2,12 +2,14 @@
 
 ## Goal
 
-Build a newsletter generator for strongly typed and functional AI/data news. The deployed Vercel app should show candidate news items, allow upvote/downvote editorial triage, and accept text requests for what to collect more of. The publishing sequence is a local Markdown draft for editing/publishing with Ulysses.
+Build a newsletter generator for strongly typed and functional AI/data news. The deployed Vercel app should run at `collected.ga/rbage/`, show candidate news items, allow upvote/downvote editorial triage, and accept text requests for what to collect more of. The publishing sequence is a local Markdown draft for editing/publishing with Ulysses.
 
 ## Current Slice
 
 - Vue/Vite app with a newsroom triage interface.
+- Vite/Vercel configured for the `/rbage/` public path.
 - Inbox filtering by search text, vote state, project, and source for faster editorial review.
+- News cards include HN-style voting, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
 - Vercel API routes:
   - `GET /api/newsletter/items`
   - `POST /api/newsletter/vote`

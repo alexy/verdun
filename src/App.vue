@@ -1,8 +1,54 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { Activity, ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, FileText, RefreshCw, Search, Send, Sparkles, X } from '@lucide/vue'
-import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
+import type { NewsletterFocus, NewsletterSnapshot, NewsItem, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, seedSnapshot, sortedNewsItems } from './lib/newsletter'
+
+type OntologyNode = {
+  id: string
+  label: string
+  description: string
+  keywords: string[]
+}
+
+const ontologyNodes: OntologyNode[] = [
+  {
+    id: 'typed-contracts',
+    label: 'Typed contracts',
+    description: 'Schemas, validators, and type systems that make AI/data boundaries explicit.',
+    keywords: ['typed', 'schema', 'structured outputs', 'validation', 'pydantic', 'type-safe'],
+  },
+  {
+    id: 'graph-memory',
+    label: 'Graph memory',
+    description: 'Graph-shaped state for agents, provenance, policy, and knowledge systems.',
+    keywords: ['graph', 'cypher', 'pggraph', 'helixdb', 'surrealdb', 'falkordb', 'ladybugdb', 'knowledge graph'],
+  },
+  {
+    id: 'local-first-data',
+    label: 'Local-first data',
+    description: 'Systems that run close to the developer before scaling into cloud services.',
+    keywords: ['local', 'embedded', 'sqlite', 'turso', 'lbug', 'rust'],
+  },
+  {
+    id: 'lakehouse-runtime',
+    label: 'Lakehouse runtime',
+    description: 'Arrow, DataFusion, Spark, Delta, and columnar execution as typed data substrate.',
+    keywords: ['arrow', 'datafusion', 'spark', 'sail', 'delta', 'columnar', 'lancedb'],
+  },
+  {
+    id: 'policy-capability',
+    label: 'Policy and capability',
+    description: 'Authorization, capability leases, and typed policy for safer automated systems.',
+    keywords: ['typesec', 'capability', 'policy', 'security', 'rights'],
+  },
+  {
+    id: 'incremental-context',
+    label: 'Incremental context',
+    description: 'Freshness, indexing, and target-state workflows that keep AI context current.',
+    keywords: ['cocoindex', 'incremental', 'target state', 'freshness', 'indexing'],
+  },
+]
 
 const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
 const loading = ref(false)
@@ -125,6 +171,31 @@ function clearFilters(): void {
 function uniqueSorted(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right))
 }
+
+function ontologyForItem(item: NewsItem): OntologyNode[] {
+  const text = [
+    item.title,
+    item.project,
+    item.topic,
+    item.summary,
+    item.whyItMatters,
+    ...item.tags,
+  ].join(' ').toLowerCase()
+  const matches = ontologyNodes.filter((node) => node.keywords.some((keyword) => text.includes(keyword)))
+  return matches.length ? matches.slice(0, 3) : [ontologyNodes[0]]
+}
+
+function credoBlurb(item: NewsItem): string {
+  const nodes = ontologyForItem(item).map((node) => node.label.toLowerCase())
+  return `${item.project} matters here because it touches ${sentenceList(nodes)} in the Strongly Typed AI stack.`
+}
+
+function sentenceList(values: string[]): string {
+  if (!values.length) return 'typed systems'
+  if (values.length === 1) return values[0] ?? ''
+  if (values.length === 2) return `${values[0]} and ${values[1]}`
+  return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`
+}
 </script>
 
 <template>
@@ -220,6 +291,17 @@ function uniqueSorted(values: string[]): string[] {
           <p v-if="pendingSourceCount" class="empty">{{ pendingSourceCount }} credentialed or feed adapters still pending.</p>
         </div>
 
+        <div class="ontology">
+          <div class="panel-heading">
+            <Sparkles :size="18" aria-hidden="true" />
+            <h2>Strongly Typed AI ontology</h2>
+          </div>
+          <a v-for="node in ontologyNodes" :id="`ontology-${node.id}`" :key="node.id" :href="`#ontology-${node.id}`">
+            <strong>{{ node.label }}</strong>
+            <span>{{ node.description }}</span>
+          </a>
+        </div>
+
         <div class="draft">
           <div class="panel-heading">
             <Database :size="18" aria-hidden="true" />
@@ -303,6 +385,13 @@ function uniqueSorted(values: string[]): string[] {
             </h3>
             <p>{{ item.summary }}</p>
             <p class="why">{{ item.whyItMatters }}</p>
+            <div class="credo-fit">
+              <strong>Credo fit</strong>
+              <p>{{ credoBlurb(item) }}</p>
+              <div>
+                <a v-for="node in ontologyForItem(item)" :key="node.id" :href="`#ontology-${node.id}`">{{ node.label }}</a>
+              </div>
+            </div>
             <div class="tags">
               <span v-for="tag in item.tags" :key="tag">{{ tag }}</span>
             </div>
