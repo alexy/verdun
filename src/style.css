@@ -653,6 +653,25 @@ textarea {
   background: rgba(15, 118, 110, 0.1);
 }
 
+.item-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.item-actions a {
+  text-decoration: none;
+}
+
+.item-actions a:hover {
+  color: var(--accent-dark);
+  text-decoration: underline;
+}
+
 .tags {
   flex-wrap: wrap;
   gap: 8px;

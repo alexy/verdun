@@ -127,6 +127,18 @@ function uniqueSorted(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right))
 }
 
+function itemAnchor(itemId: string): string {
+  return `item-${itemId.replace(/[^a-zA-Z0-9_-]/g, '-')}`
+}
+
+function sourceDomain(value: string): string {
+  try {
+    return new URL(value).hostname.replace(/^www\./, '')
+  } catch {
+    return value
+  }
+}
+
 </script>
 
 <template>
@@ -292,7 +304,7 @@ function uniqueSorted(values: string[]): string[] {
 
         <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
 
-        <article v-for="item in filteredItems" :key="item.id" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
+        <article v-for="item in filteredItems" :id="itemAnchor(item.id)" :key="item.id" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
           <div class="vote-rail" aria-label="Vote controls">
             <button type="button" :class="{ active: item.vote > 0 }" title="Include" @click="setVote(item.id, item.vote === 1 ? 0 : 1)">
               <ArrowUp :size="18" aria-hidden="true" />
@@ -306,6 +318,7 @@ function uniqueSorted(values: string[]): string[] {
             <div class="item-meta">
               <span>{{ item.project }}</span>
               <span>{{ item.sourceKind }}</span>
+              <span>{{ sourceDomain(item.url) }}</span>
               <span>{{ formatDate(item.publishedAt) }}</span>
             </div>
             <h3>
@@ -322,6 +335,10 @@ function uniqueSorted(values: string[]): string[] {
               <div>
                 <a v-for="node in ontologyForItem(item)" :key="node.id" :href="`#ontology-${node.id}`">{{ node.label }}</a>
               </div>
+            </div>
+            <div class="item-actions">
+              <a :href="`#${itemAnchor(item.id)}`" :aria-label="`Permalink for ${item.title}`">permalink</a>
+              <a :href="item.url" target="_blank" rel="noreferrer">source</a>
             </div>
             <div class="tags">
               <span v-for="tag in item.tags" :key="tag">{{ tag }}</span>

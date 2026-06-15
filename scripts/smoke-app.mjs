@@ -13,6 +13,7 @@ try {
   await page.getByText('Strongly typed AI and data news').first().waitFor()
   await page.locator('.ontology').getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
   await page.locator('.news-card').first().getByText('Credo fit').waitFor()
+  await page.locator('.news-card').first().getByRole('link', { name: /permalink/i }).waitFor()
   await page.getByTitle('Include').first().click()
   await page.getByPlaceholder(/Search titles/).fill('Pydantic')
   await page.locator('.news-card', { hasText: 'Pydantic' }).first().waitFor()
