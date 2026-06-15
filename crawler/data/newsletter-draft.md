@@ -34,7 +34,7 @@ Source: [Hacker News](https://www.justinrmiller.com/building-an-e2e-encrypted-ch
 
 ## 4. SurrealDB: Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel
 
-Stop Hand-Writing SurrealQL Strings in Rust Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
+The piece puts SurrealDB into the multimodel data conversation through "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel", a useful signal for typed contracts moving from idea to developer practice. Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
 
 Credo fit: SurrealDB matters here because it touches typed contracts, graph memory, and local-first data in the Strongly Typed AI stack. Related ontology: Typed contracts, Graph memory, Local-first data.
 
@@ -42,7 +42,7 @@ Source: [Medium](https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb
 
 ## 5. Pydantic: Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It
 
-Medium surfaced this feed item while tracking Pydantic signals: pydantic, typed agents, structured outputs, validation. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
+The piece puts Pydantic into the typed AI conversation through "Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It", a useful signal for typed contracts moving from idea to developer practice. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
 
 Credo fit: Pydantic matters here because it touches typed contracts in the Strongly Typed AI stack. Related ontology: Typed contracts.
 
@@ -58,7 +58,7 @@ Source: [Medium](https://medium.com/@SuriNaren/the-predictability-crisis-how-to-
 
 ## 7. LanceDB: Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline
 
-Overview Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.
+The piece puts LanceDB into the vector data conversation through "Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline", a useful signal for lakehouse runtime moving from idea to developer practice. Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.
 
 Credo fit: LanceDB matters here because it touches lakehouse runtime in the Strongly Typed AI stack. Related ontology: Lakehouse runtime.
 

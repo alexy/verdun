@@ -69,6 +69,8 @@ The generated article is written to `crawler/data/newsletter-draft.md` by defaul
 
 When no items are explicitly upvoted, the draft builder prefers live/manual collected items over watchlist seed placeholders and caps the fallback spine at two items per project before filling any remaining slots.
 
+The draft renderer also rewrites thin feed snippets such as generic overviews, author labels, and crawler boilerplate into project-aware sentences before Markdown or Ghost HTML is produced.
+
 ```sh
 NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/newsletter/items npm run draft
 NEWSLETTER_REQUIRE_UPVOTES=true npm run ulysses:draft

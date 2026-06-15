@@ -403,13 +403,55 @@ function itemSection(item: NewsItem, index: number): string[] {
   return [
     `## ${index}. ${item.project}: ${item.title}`,
     '',
-    `${item.summary} ${item.whyItMatters}`,
+    itemNarrative(item),
     '',
     `Credo fit: ${credoBlurb(item)} Related ontology: ${ontologyForItem(item).map((node) => node.label).join(', ')}.`,
     '',
     `Source: [${item.source}](${item.url}) · ${item.topic} · ${item.tags.slice(0, 4).join(', ')}`,
     '',
   ]
+}
+
+function itemNarrative(item: NewsItem): string {
+  return `${draftSummary(item)} ${sentence(item.whyItMatters)}`
+}
+
+function draftSummary(item: NewsItem): string {
+  const summary = normalizeSentence(item.summary)
+  if (!isThinSummary(summary)) return summary
+  const title = stripTerminalPunctuation(item.title)
+  const ontology = ontologyForItem(item)[0]?.label.toLowerCase() ?? item.topic
+  return sentence(
+    `The piece puts ${item.project} into the ${item.topic} conversation through "${title}", a useful signal for ${ontology} moving from idea to developer practice`,
+  )
+}
+
+function isThinSummary(summary: string): boolean {
+  const normalized = summary.trim().toLowerCase()
+  if (!normalized) return true
+  if (['overview', 'author'].includes(normalized)) return true
+  if (normalized.startsWith('author:')) return true
+  if (normalized.startsWith('continue reading')) return true
+  if (normalized.startsWith('stop hand-writing')) return true
+  if (normalized.startsWith('medium surfaced this feed item')) return true
+  if (normalized.length < 56 && !/[.!?]$/.test(normalized)) return true
+  return false
+}
+
+function normalizeSentence(value: string): string {
+  return sentence(
+    value
+      .replace(/^Author:\s*/i, '')
+      .replace(/^Overview\s*$/i, '')
+      .replace(/\s+/g, ' ')
+      .trim(),
+  )
+}
+
+function sentence(value: string): string {
+  const text = value.trim()
+  if (!text) return ''
+  return /[.!?]$/.test(text) ? text : `${text}.`
 }
 
 function editorialThread(items: NewsItem[], brief: EditorialBrief): string {
