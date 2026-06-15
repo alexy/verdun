@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ArrowDown, ArrowUp, BookOpenText, ClipboardCheck, Database, ExternalLink, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
+import { ArrowDown, ArrowUp, BookOpenText, Check, ClipboardCheck, Copy, Database, Download, ExternalLink, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
 import AppHeader from './components/AppHeader.vue'
 import SourceHealthPanel from './components/SourceHealthPanel.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
@@ -16,6 +16,7 @@ const searchText = ref('')
 const voteFilter = ref<'all' | 'unreviewed' | 'upvoted' | 'downvoted'>('all')
 const projectFilter = ref('all')
 const sourceFilter = ref('all')
+const copyStatus = ref<'idle' | 'copied' | 'failed'>('idle')
 
 const includedItems = computed(() => sortedNewsItems(snapshot.value.items).filter((item) => item.vote > 0))
 const rejectedItems = computed(() => snapshot.value.items.filter((item) => item.vote < 0).length)
@@ -50,6 +51,8 @@ const liveSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) =>
 const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
 const draft = computed(() => buildNewsletterDraft(snapshot.value))
 const readiness = computed(() => evaluateNewsletterReadiness(snapshot.value))
+const draftDownloadHref = computed(() => `data:text/markdown;charset=utf-8,${encodeURIComponent(draft.value.markdown)}`)
+const draftFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-strongly-typed-ai-data-notes.md`)
 
 onMounted(() => {
   void loadSnapshot()
@@ -140,6 +143,22 @@ function sourceDomain(value: string): string {
   } catch {
     return value
   }
+}
+
+async function copyDraftMarkdown(): Promise<void> {
+  copyStatus.value = 'idle'
+  try {
+    await navigator.clipboard.writeText(draft.value.markdown)
+    copyStatus.value = 'copied'
+  } catch {
+    copyStatus.value = 'failed'
+  }
+}
+
+function isoDate(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return new Date().toISOString().slice(0, 10)
+  return date.toISOString().slice(0, 10)
 }
 
 </script>
@@ -292,12 +311,26 @@ function sourceDomain(value: string): string {
         </div>
 
         <article class="draft-preview">
-          <div class="panel-heading">
-            <FileText :size="18" aria-hidden="true" />
-            <h2>Draft preview</h2>
+          <div class="draft-preview__header">
+            <div class="panel-heading">
+              <FileText :size="18" aria-hidden="true" />
+              <h2>Draft preview</h2>
+            </div>
+            <div class="draft-actions">
+              <a :href="draftDownloadHref" :download="draftFilename">
+                <Download :size="16" aria-hidden="true" />
+                Markdown
+              </a>
+              <button type="button" @click="copyDraftMarkdown">
+                <Check v-if="copyStatus === 'copied'" :size="16" aria-hidden="true" />
+                <Copy v-else :size="16" aria-hidden="true" />
+                {{ copyStatus === 'copied' ? 'Copied' : 'Copy' }}
+              </button>
+            </div>
           </div>
           <h3>{{ draft.title }}</h3>
           <p>{{ draft.subtitle }}</p>
+          <p v-if="copyStatus === 'failed'" class="draft-copy-error">Clipboard access is unavailable in this browser session.</p>
           <div class="draft-preview__body" v-html="draft.html"></div>
         </article>
 
