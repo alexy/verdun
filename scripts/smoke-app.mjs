@@ -11,7 +11,7 @@ try {
   await page.goto(baseUrl, { waitUntil: 'networkidle' })
   await page.getByText('Verdun').first().waitFor()
   await page.getByText('Strongly typed AI and data news').first().waitFor()
-  await page.getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
+  await page.locator('.ontology').getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
   await page.locator('.news-card').first().getByText('Credo fit').waitFor()
   await page.getByTitle('Include').first().click()
   await page.getByPlaceholder(/Search titles/).fill('Pydantic')

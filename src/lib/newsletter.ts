@@ -1,3 +1,5 @@
+import { credoBlurb, ontologyForItem, ontologyNodes } from './ontology'
+
 export type NewsItem = {
   id: string
   title: string
@@ -213,6 +215,10 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '',
     ...briefSection(brief),
     ...items.flatMap((item, index) => itemSection(item, index + 1)),
+    '## Strongly Typed AI ontology',
+    '',
+    ...ontologyNodes.map((node) => `- **${node.label}**: ${node.description}`),
+    '',
     '## Editorial thread',
     '',
     editorialThread(items, brief),
@@ -279,6 +285,8 @@ function itemSection(item: NewsItem, index: number): string[] {
     `## ${index}. ${item.project}: ${item.title}`,
     '',
     `${item.summary} ${item.whyItMatters}`,
+    '',
+    `Credo fit: ${credoBlurb(item)} Related ontology: ${ontologyForItem(item).map((node) => node.label).join(', ')}.`,
     '',
     `Source: [${item.source}](${item.url}) · ${item.topic} · ${item.tags.slice(0, 4).join(', ')}`,
     '',

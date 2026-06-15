@@ -10,6 +10,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Vite/Vercel configured for the `/rbage/` public path.
 - Inbox filtering by search text, vote state, project, and source for faster editorial review.
 - News cards include HN-style voting, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
+- `src/lib/ontology.json` is the shared ontology source for the site and local Markdown drafts.
 - Vercel API routes:
   - `GET /api/newsletter/items`
   - `POST /api/newsletter/vote`

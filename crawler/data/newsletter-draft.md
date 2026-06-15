@@ -12,11 +12,15 @@ The week reads less like a parade of releases than a negotiation over where cont
 
 Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph. Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.
 
+Credo fit: HelixDB matters here because it touches graph memory and local-first data in the Strongly Typed AI stack. Related ontology: Graph memory, Local-first data.
+
 Source: [Hacker News](https://github.com/HelixDB/helix-db/tree/main) · graph database · helixdb, graph database, rust graph, hacker-news
 
 ## 2. SurrealDB: Benchmarking SurrealDB 3.x vs. Postgres, Mongo, Neo4j and Redis (With Fsync)
 
 Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime. Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.
+
+Credo fit: SurrealDB matters here because it touches graph memory in the Strongly Typed AI stack. Related ontology: Graph memory.
 
 Source: [Hacker News](https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers) · multimodel data · surrealdb, multimodel, graph, hacker-news
 
@@ -24,11 +28,15 @@ Source: [Hacker News](https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers) �
 
 Pydantic is being tracked for typed AI signals around pydantic, typed agents, structured outputs, validation. Pydantic helps explain where typed contracts, local execution, and practical AI/data systems are converging.
 
+Credo fit: Pydantic matters here because it touches typed contracts and local-first data in the Strongly Typed AI stack. Related ontology: Typed contracts, Local-first data.
+
 Source: [Hacker News](https://github.com/pydantic/pydantic-ai) · typed AI · pydantic, typed agents, structured outputs, validation
 
 ## 4. SurrealDB: Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel
 
 Stop Hand-Writing SurrealQL Strings in Rust Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
+
+Credo fit: SurrealDB matters here because it touches typed contracts, graph memory, and local-first data in the Strongly Typed AI stack. Related ontology: Typed contracts, Graph memory, Local-first data.
 
 Source: [Medium](https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4) · multimodel data · surrealdb, multimodel, graph, medium
 
@@ -36,11 +44,15 @@ Source: [Medium](https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb
 
 Medium surfaced this feed item while tracking Pydantic signals: pydantic, typed agents, structured outputs, validation. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
 
+Credo fit: Pydantic matters here because it touches typed contracts in the Strongly Typed AI stack. Related ontology: Typed contracts.
+
 Source: [Medium](https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb) · typed AI · pydantic, typed agents, structured outputs, medium
 
 ## 6. Pydantic: The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts
 
 Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
+
+Credo fit: Pydantic matters here because it touches typed contracts in the Strongly Typed AI stack. Related ontology: Typed contracts.
 
 Source: [Medium](https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db) · typed AI · pydantic, typed agents, structured outputs, medium
 
@@ -48,7 +60,18 @@ Source: [Medium](https://medium.com/@SuriNaren/the-predictability-crisis-how-to-
 
 Author: Tobie Morgan Hitchcock Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
 
+Credo fit: SurrealDB matters here because it touches graph memory in the Strongly Typed AI stack. Related ontology: Graph memory.
+
 Source: [Medium](https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb80078638a0) · multimodel data · surrealdb, multimodel, graph, medium
+
+## Strongly Typed AI ontology
+
+- **Typed contracts**: Schemas, validators, and type systems that make AI/data boundaries explicit.
+- **Graph memory**: Graph-shaped state for agents, provenance, policy, and knowledge systems.
+- **Local-first data**: Systems that run close to the developer before scaling into cloud services.
+- **Lakehouse runtime**: Arrow, DataFusion, Spark, Delta, and columnar execution as typed data substrate.
+- **Policy and capability**: Authorization, capability leases, and typed policy for safer automated systems.
+- **Incremental context**: Freshness, indexing, and target-state workflows that keep AI context current.
 
 ## Editorial thread
 

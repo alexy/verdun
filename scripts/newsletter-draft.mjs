@@ -10,6 +10,7 @@ const fallbackFocuses = [
     createdAt: new Date().toISOString(),
   },
 ]
+const ontologyNodes = JSON.parse(await readFile(new URL('../src/lib/ontology.json', import.meta.url), 'utf8'))
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const args = process.argv.slice(2)
@@ -92,6 +93,10 @@ export function buildNewsletterDraft(snapshot) {
     '',
     ...briefSection(brief),
     ...items.flatMap((item, index) => itemSection(item, index + 1)),
+    '## Strongly Typed AI ontology',
+    '',
+    ...ontologyNodes.map((node) => `- **${node.label}**: ${node.description}`),
+    '',
     '## Editorial thread',
     '',
     editorialThread(items, brief),
@@ -167,6 +172,8 @@ function itemSection(item, index) {
     '',
     `${item.summary} ${item.whyItMatters}`,
     '',
+    `Credo fit: ${credoBlurb(item)} Related ontology: ${ontologyForItem(item).map((node) => node.label).join(', ')}.`,
+    '',
     `Source: [${item.source}](${item.url}) · ${item.topic} · ${item.tags.slice(0, 4).join(', ')}`,
     '',
   ]
@@ -180,6 +187,24 @@ function editorialThread(items, brief) {
     ? `That makes "${intent}" the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.`
     : 'Each included item should either sharpen the stack, complicate it, or show where production practice is already moving.'
   return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. ${intentSentence}`
+}
+
+function ontologyForItem(item) {
+  const text = [
+    item.title,
+    item.project,
+    item.topic,
+    item.summary,
+    item.whyItMatters,
+    ...item.tags,
+  ].join(' ').toLowerCase()
+  const matches = ontologyNodes.filter((node) => node.keywords.some((keyword) => text.includes(keyword)))
+  return matches.length ? matches.slice(0, 3) : [ontologyNodes[0]]
+}
+
+function credoBlurb(item) {
+  const nodes = ontologyForItem(item).map((node) => node.label.toLowerCase())
+  return `${item.project} matters here because it touches ${sentenceList(nodes)} in the Strongly Typed AI stack.`
 }
 
 function sentenceList(values) {

@@ -10,6 +10,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
 - Editorial UI for upvoting/downvoting newsletter candidates and writing this-week or ongoing focus requests.
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
+- The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
 
 ## Local app
 
