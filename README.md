@@ -73,9 +73,11 @@ Without `NEWSLETTER_DRAFT_OUT`, `npm run ulysses:draft` writes a dated file unde
 An optional Ghost helper remains available for direct API drafts from the same local snapshot, but the editorial publishing sequence is local Markdown into Ulysses:
 
 ```sh
+npm run ghost:draft -- --dry-run
+
 GHOST_ADMIN_API_URL=https://collected.ga \
 GHOST_ADMIN_API_KEY='admin-key-id:admin-key-secret' \
 npm run ghost:draft
 ```
 
-`ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. It does not publish a public post unless `GHOST_POST_STATUS` or the status argument is changed.
+`ghost:draft -- --dry-run` prints the Ghost Admin API endpoint and post payload without requiring credentials or making a network request. `ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. It does not publish a public post unless `GHOST_POST_STATUS` or the status argument is changed.

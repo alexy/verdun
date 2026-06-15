@@ -28,6 +28,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - The app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/lib/newsletter.ts`.
 - `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
+- `npm run ghost:draft -- --dry-run` validates the Ghost endpoint/payload shape without credentials or network access.
 
 ## Next Work
 
@@ -47,4 +48,5 @@ Current local checks:
 - `cargo run --manifest-path crawler/Cargo.toml -- export-sql --input crawler/data/items.json --source-runs crawler/data/source-runs.json --out /tmp/verdun-newsletter-load.sql`
 - `npm run draft`
 - `npm run smoke:api`
+- `npm run smoke:ghost`
 - `npm run smoke:app -- http://127.0.0.1:5174`

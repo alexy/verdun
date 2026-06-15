@@ -1,31 +1,46 @@
 import { createHmac } from 'node:crypto'
+import { pathToFileURL } from 'node:url'
 import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
 
 const ghostStatuses = new Set(['draft', 'published', 'scheduled', 'sent'])
-const firstArg = process.argv[2]
-const secondArg = process.argv[3]
-const input = firstArg && !ghostStatuses.has(firstArg)
-  ? firstArg
-  : process.env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
-const status = secondArg ?? (firstArg && ghostStatuses.has(firstArg) ? firstArg : process.env.GHOST_POST_STATUS ?? 'draft')
-const apiUrl = process.env.GHOST_ADMIN_API_URL
-const apiKey = process.env.GHOST_ADMIN_API_KEY
 
-if (!apiUrl || !apiKey) {
-  console.error('Set GHOST_ADMIN_API_URL and GHOST_ADMIN_API_KEY to publish a Ghost draft.')
-  process.exit(2)
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  const options = parseGhostArgs(process.argv.slice(2), process.env)
+  const snapshot = await loadSnapshotFile(options.input)
+  const draft = await buildNewsletterDraft(snapshot)
+  const payload = ghostPostPayload(draft, options.status)
+
+  if (options.dryRun) {
+    process.stdout.write(`${JSON.stringify({ endpoint: ghostEndpoint(options.apiUrl ?? 'https://collected.ga'), payload }, null, 2)}\n`)
+  } else {
+    const body = await publishGhostPayload(payload, options)
+    console.log(body)
+  }
 }
 
-const snapshot = await loadSnapshotFile(input)
-const draft = await buildNewsletterDraft(snapshot)
-const endpoint = `${apiUrl.replace(/\/$/, '')}/ghost/api/admin/posts/?source=html`
-const response = await fetch(endpoint, {
-  method: 'POST',
-  headers: {
-    authorization: `Ghost ${ghostJwt(apiKey)}`,
-    'content-type': 'application/json',
-  },
-  body: JSON.stringify({
+export function parseGhostArgs(args, env = process.env) {
+  const dryRun = args.includes('--dry-run')
+  const positional = args.filter((arg) => arg !== '--dry-run')
+  const firstArg = positional[0]
+  const secondArg = positional[1]
+  const input = firstArg && !ghostStatuses.has(firstArg)
+    ? firstArg
+    : env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
+  const status = secondArg ?? (firstArg && ghostStatuses.has(firstArg) ? firstArg : env.GHOST_POST_STATUS ?? 'draft')
+  if (!ghostStatuses.has(status)) {
+    throw new Error(`Ghost status must be one of ${Array.from(ghostStatuses).join(', ')}`)
+  }
+  return {
+    dryRun,
+    input,
+    status,
+    apiUrl: env.GHOST_ADMIN_API_URL,
+    apiKey: env.GHOST_ADMIN_API_KEY,
+  }
+}
+
+export function ghostPostPayload(draft, status = 'draft') {
+  return {
     posts: [
       {
         title: draft.title,
@@ -35,18 +50,34 @@ const response = await fetch(endpoint, {
         tags: ['verdun', 'strongly-typed', 'ai-data'],
       },
     ],
-  }),
-})
-
-const body = await response.text()
-if (!response.ok) {
-  console.error(body)
-  throw new Error(`Ghost API returned ${response.status}`)
+  }
 }
 
-console.log(body)
+export async function publishGhostPayload(payload, options) {
+  if (!options.apiUrl || !options.apiKey) {
+    throw new Error('Set GHOST_ADMIN_API_URL and GHOST_ADMIN_API_KEY to publish a Ghost draft.')
+  }
+  const response = await fetch(ghostEndpoint(options.apiUrl), {
+    method: 'POST',
+    headers: {
+      authorization: `Ghost ${ghostJwt(options.apiKey)}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+  const body = await response.text()
+  if (!response.ok) {
+    console.error(body)
+    throw new Error(`Ghost API returned ${response.status}`)
+  }
+  return body
+}
 
-function ghostJwt(adminApiKey) {
+export function ghostEndpoint(apiUrl) {
+  return `${apiUrl.replace(/\/$/, '')}/ghost/api/admin/posts/?source=html`
+}
+
+export function ghostJwt(adminApiKey) {
   const [id, secret] = adminApiKey.split(':')
   if (!id || !secret) throw new Error('GHOST_ADMIN_API_KEY must have id:secret format')
   const header = { alg: 'HS256', typ: 'JWT', kid: id }

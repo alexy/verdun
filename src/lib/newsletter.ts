@@ -344,7 +344,9 @@ function markdownToHtml(markdown: string): string {
 }
 
 function inlineMarkdown(value: string): string {
-  return escapeHtml(value).replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+  return escapeHtml(value)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)]\(([^)]+)\)/g, '<a href="$2">$1</a>')
 }
 
 function escapeHtml(value: string): string {
