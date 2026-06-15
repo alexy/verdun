@@ -60,7 +60,7 @@ Build a local Markdown draft from the current public snapshot for editing and pu
 npm run draft
 ```
 
-The generated article is written to `crawler/data/newsletter-draft.md` by default and includes this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview.
+The generated article is written to `crawler/data/newsletter-draft.md` by default and includes this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The CLI uses the same `src/lib/newsletter.ts` draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned.
 
 ```sh
 NEWSLETTER_DRAFT_OUT=/path/to/ulysses-import/verdun-weekly.md npm run ulysses:draft

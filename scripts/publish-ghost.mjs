@@ -17,7 +17,7 @@ if (!apiUrl || !apiKey) {
 }
 
 const snapshot = await loadSnapshotFile(input)
-const draft = buildNewsletterDraft(snapshot)
+const draft = await buildNewsletterDraft(snapshot)
 const endpoint = `${apiUrl.replace(/\/$/, '')}/ghost/api/admin/posts/?source=html`
 const response = await fetch(endpoint, {
   method: 'POST',
