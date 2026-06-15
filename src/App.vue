@@ -5,6 +5,7 @@ import EditorialSidebar from './components/EditorialSidebar.vue'
 import InboxControls from './components/InboxControls.vue'
 import NewsItemCard from './components/NewsItemCard.vue'
 import NewsletterDraftPreview from './components/NewsletterDraftPreview.vue'
+import NewsletterHero from './components/NewsletterHero.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, evaluateNewsletterReadiness, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 import { ontologyNodes } from './lib/ontology'
@@ -154,37 +155,13 @@ function isoDate(value: string): string {
   <main class="shell">
     <AppHeader :loading="loading" @refresh="loadSnapshot" />
 
-    <section class="hero">
-      <div class="hero__copy">
-        <p class="eyebrow">Collected.ga editorial desk</p>
-        <h1>Strongly typed AI and data news, ready for weekly judgement.</h1>
-        <p>
-          Triage project releases, community links, and social signals into a focused literary newsletter queue.
-        </p>
-      </div>
-      <div class="metrics" aria-label="Newsletter queue metrics">
-        <div>
-          <span>{{ snapshot.items.length }}</span>
-          <p>items</p>
-        </div>
-        <div>
-          <span>{{ includedItems.length }}</span>
-          <p>upvoted</p>
-        </div>
-        <div>
-          <span>{{ rejectedItems }}</span>
-          <p>downvoted</p>
-        </div>
-        <div>
-          <span>{{ sourceCount }}</span>
-          <p>sources</p>
-        </div>
-        <div>
-          <span>{{ liveSourceCount }}</span>
-          <p>live</p>
-        </div>
-      </div>
-    </section>
+    <NewsletterHero
+      :downvoted-count="rejectedItems"
+      :item-count="snapshot.items.length"
+      :live-source-count="liveSourceCount"
+      :source-count="sourceCount"
+      :upvoted-count="includedItems.length"
+    />
 
     <section class="workspace">
       <EditorialSidebar
