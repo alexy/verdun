@@ -1,8 +1,11 @@
 import { neon } from '@neondatabase/serverless'
 import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type VoteValue } from '../../src/lib/newsletter'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 declare const process: {
   env: Record<string, string | undefined>
+  cwd: () => string
 }
 
 export type ApiRequest = {
@@ -41,6 +44,21 @@ type FocusRow = {
   created_at: string
 }
 
+type StaticNewsRow = {
+  id: string
+  title: string
+  source: string
+  source_kind: string
+  url: string
+  published_at: string
+  project: string
+  topic: string
+  summary: string
+  why_it_matters: string
+  tags: string[]
+  score: number
+}
+
 export function allowMethods(req: ApiRequest, res: ApiResponse, methods: string[]): boolean {
   if (!req.method || methods.includes(req.method)) return true
   res.setHeader('allow', methods.join(', '))
@@ -55,7 +73,7 @@ export function sendJson(res: ApiResponse, body: unknown): void {
 
 export async function readSnapshot(): Promise<NewsletterSnapshot> {
   const databaseUrl = newsletterDatabaseUrl()
-  if (!databaseUrl) return seedSnapshot
+  if (!databaseUrl) return readStaticSnapshot() ?? seedSnapshot
   const sql = neon(databaseUrl)
   const rows = await sql.query(`
     select
@@ -89,6 +107,18 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     theme: 'Strongly typed and functional AI/data systems',
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
+  }
+}
+
+function readStaticSnapshot(): NewsletterSnapshot | null {
+  const path = join(process.cwd(), 'public', 'data', 'newsletter-items.json')
+  if (!existsSync(path)) return null
+  const rows = JSON.parse(readFileSync(path, 'utf8')) as StaticNewsRow[]
+  return {
+    generatedAt: new Date().toISOString(),
+    theme: 'Strongly typed and functional AI/data systems',
+    items: rows.map(toStaticNewsItem),
+    focuses: seedSnapshot.focuses,
   }
 }
 
@@ -148,6 +178,24 @@ function toNewsItem(row: NewsRow): NewsItem {
     tags: row.tags ?? [],
     score: row.score,
     vote: row.vote ?? 0,
+  }
+}
+
+function toStaticNewsItem(row: StaticNewsRow): NewsItem {
+  return {
+    id: row.id,
+    title: row.title,
+    source: row.source,
+    sourceKind: row.source_kind,
+    url: row.url,
+    publishedAt: row.published_at,
+    project: row.project,
+    topic: row.topic,
+    summary: row.summary,
+    whyItMatters: row.why_it_matters,
+    tags: row.tags ?? [],
+    score: row.score,
+    vote: 0,
   }
 }
 
