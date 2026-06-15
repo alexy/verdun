@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { BookOpenText, Check, ClipboardCheck, Copy, Database, Download, FileText, Search, Send, Sparkles, X } from '@lucide/vue'
+import { Check, Copy, Download, FileText, Search, X } from '@lucide/vue'
 import AppHeader from './components/AppHeader.vue'
+import EditorialSidebar from './components/EditorialSidebar.vue'
 import NewsItemCard from './components/NewsItemCard.vue'
-import SourceHealthPanel from './components/SourceHealthPanel.vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, evaluateNewsletterReadiness, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 import { ontologyNodes } from './lib/ontology'
@@ -12,8 +12,6 @@ import { normalizeSnapshot } from './lib/snapshot'
 const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
 const loading = ref(false)
 const error = ref('')
-const focusText = ref('')
-const focusScope = ref<'this_week' | 'ongoing'>('this_week')
 const searchText = ref('')
 const voteFilter = ref<'all' | 'unreviewed' | 'upvoted' | 'downvoted'>('all')
 const projectFilter = ref('all')
@@ -115,16 +113,15 @@ async function setVote(itemId: string, vote: VoteValue): Promise<void> {
   }
 }
 
-async function saveFocus(): Promise<void> {
-  const text = focusText.value.trim()
+async function saveFocus(text: string, scope: 'this_week' | 'ongoing'): Promise<void> {
+  text = text.trim()
   if (!text) return
   const focus: NewsletterFocus = {
     id: `local-${Date.now()}`,
     text,
-    scope: focusScope.value,
+    scope,
     createdAt: new Date().toISOString(),
   }
-  focusText.value = ''
   snapshot.value = {
     ...snapshot.value,
     focuses: [focus, ...snapshot.value.focuses],
@@ -134,7 +131,7 @@ async function saveFocus(): Promise<void> {
     const response = await fetch('/api/newsletter/focus', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text, scope: focus.scope }),
+      body: JSON.stringify({ text, scope }),
     })
     if (!response.ok) throw new Error(`focus API returned ${response.status}`)
   } catch (focusError) {
@@ -212,80 +209,15 @@ function isoDate(value: string): string {
     </section>
 
     <section class="workspace">
-      <aside class="briefing">
-        <div class="panel-heading">
-          <BookOpenText :size="18" aria-hidden="true" />
-          <h2>Weekly intent</h2>
-        </div>
-        <textarea
-          v-model="focusText"
-          rows="6"
-          placeholder="Ask for more: typed agents, Rust dataframes, graph databases, lakehouse runtimes, Postgres extensions..."
-        />
-        <div class="focus-controls">
-          <label>
-            <input v-model="focusScope" type="radio" value="this_week" />
-            This week
-          </label>
-          <label>
-            <input v-model="focusScope" type="radio" value="ongoing" />
-            Ongoing
-          </label>
-          <button type="button" @click="saveFocus">
-            <Send :size="16" aria-hidden="true" />
-            Save
-          </button>
-        </div>
-
-        <div class="focus-list">
-          <h3>Active signals</h3>
-          <p v-for="focus in snapshot.focuses" :key="focus.id">
-            <strong>{{ focus.scope === 'this_week' ? 'This week' : 'Ongoing' }}</strong>
-            {{ focus.text }}
-          </p>
-        </div>
-
-        <SourceHealthPanel :pending-source-count="pendingSourceCount" :source-runs="snapshot.sourceRuns" />
-
-        <div class="readiness" :class="`readiness--${readiness.status}`">
-          <div class="panel-heading">
-            <ClipboardCheck :size="18" aria-hidden="true" />
-            <h2>Publishing readiness</h2>
-          </div>
-          <p class="readiness__summary">{{ readiness.summary }}</p>
-          <ul>
-            <li v-for="check in readiness.checks" :key="check.id" :class="{ passed: check.passed }">
-              <span aria-hidden="true"></span>
-              <div>
-                <strong>{{ check.label }}</strong>
-                <p>{{ check.detail }}</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="ontology">
-          <div class="panel-heading">
-            <Sparkles :size="18" aria-hidden="true" />
-            <h2>Strongly Typed AI ontology</h2>
-          </div>
-          <a v-for="node in ontologyNodes" :id="`ontology-${node.id}`" :key="node.id" :href="`#ontology-${node.id}`">
-            <strong>{{ node.label }}</strong>
-            <span>{{ node.description }}</span>
-          </a>
-        </div>
-
-        <div class="draft">
-          <div class="panel-heading">
-            <Database :size="18" aria-hidden="true" />
-            <h2>Draft spine</h2>
-          </div>
-          <ol>
-            <li v-for="item in includedItems" :key="item.id">{{ item.project }}: {{ item.whyItMatters }}</li>
-          </ol>
-          <p v-if="!includedItems.length" class="empty">Upvote items to assemble the weekly spine.</p>
-        </div>
-      </aside>
+      <EditorialSidebar
+        :focuses="snapshot.focuses"
+        :included-items="includedItems"
+        :ontology-nodes="ontologyNodes"
+        :pending-source-count="pendingSourceCount"
+        :readiness="readiness"
+        :source-runs="snapshot.sourceRuns"
+        @save-focus="saveFocus"
+      />
 
       <section class="news-list" aria-label="News items">
         <div class="list-header">
