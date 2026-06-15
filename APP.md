@@ -7,6 +7,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 ## Current Slice
 
 - Vue/Vite app with a newsroom triage interface.
+- Inbox filtering by search text, vote state, project, and source for faster editorial review.
 - Vercel API routes:
   - `GET /api/newsletter/items`
   - `POST /api/newsletter/vote`

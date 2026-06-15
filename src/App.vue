@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Activity, ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, FileText, RefreshCw, Send, Sparkles } from '@lucide/vue'
+import { Activity, ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, FileText, RefreshCw, Search, Send, Sparkles, X } from '@lucide/vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { buildNewsletterDraft, seedSnapshot, sortedNewsItems } from './lib/newsletter'
 
@@ -9,11 +9,40 @@ const loading = ref(false)
 const error = ref('')
 const focusText = ref('')
 const focusScope = ref<'this_week' | 'ongoing'>('this_week')
+const searchText = ref('')
+const voteFilter = ref<'all' | 'unreviewed' | 'included' | 'rejected'>('all')
+const projectFilter = ref('all')
+const sourceFilter = ref('all')
 
 const includedItems = computed(() => sortedNewsItems(snapshot.value.items).filter((item) => item.vote > 0))
 const rejectedItems = computed(() => snapshot.value.items.filter((item) => item.vote < 0).length)
+const unreviewedItems = computed(() => snapshot.value.items.filter((item) => item.vote === 0).length)
 const sourceCount = computed(() => new Set(snapshot.value.items.map((item) => item.source)).size)
 const sortedItems = computed(() => sortedNewsItems(snapshot.value.items))
+const projectOptions = computed(() => uniqueSorted(snapshot.value.items.map((item) => item.project)))
+const sourceOptions = computed(() => uniqueSorted(snapshot.value.items.map((item) => item.source)))
+const filteredItems = computed(() => {
+  const query = searchText.value.trim().toLowerCase()
+  return sortedItems.value.filter((item) => {
+    if (voteFilter.value === 'unreviewed' && item.vote !== 0) return false
+    if (voteFilter.value === 'included' && item.vote <= 0) return false
+    if (voteFilter.value === 'rejected' && item.vote >= 0) return false
+    if (projectFilter.value !== 'all' && item.project !== projectFilter.value) return false
+    if (sourceFilter.value !== 'all' && item.source !== sourceFilter.value) return false
+    if (!query) return true
+    const haystack = [
+      item.title,
+      item.project,
+      item.source,
+      item.sourceKind,
+      item.topic,
+      item.summary,
+      item.whyItMatters,
+      ...item.tags,
+    ].join(' ').toLowerCase()
+    return haystack.includes(query)
+  })
+})
 const liveSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'ok' && run.itemCount > 0).length)
 const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
 const draft = computed(() => buildNewsletterDraft(snapshot.value))
@@ -84,6 +113,17 @@ async function saveFocus(): Promise<void> {
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(value))
+}
+
+function clearFilters(): void {
+  searchText.value = ''
+  voteFilter.value = 'all'
+  projectFilter.value = 'all'
+  sourceFilter.value = 'all'
+}
+
+function uniqueSorted(values: string[]): string[] {
+  return Array.from(new Set(values.filter(Boolean))).sort((left, right) => left.localeCompare(right))
 }
 </script>
 
@@ -202,6 +242,31 @@ function formatDate(value: string): string {
           <p v-else class="status">Generated {{ formatDate(snapshot.generatedAt) }}</p>
         </div>
 
+        <div class="inbox-controls" aria-label="Inbox filters">
+          <label class="search-field">
+            <Search :size="17" aria-hidden="true" />
+            <input v-model="searchText" type="search" placeholder="Search titles, projects, tags..." />
+          </label>
+          <select v-model="voteFilter" aria-label="Vote status">
+            <option value="all">All votes</option>
+            <option value="unreviewed">Unreviewed ({{ unreviewedItems }})</option>
+            <option value="included">Included ({{ includedItems.length }})</option>
+            <option value="rejected">Rejected ({{ rejectedItems }})</option>
+          </select>
+          <select v-model="projectFilter" aria-label="Project">
+            <option value="all">All projects</option>
+            <option v-for="project in projectOptions" :key="project" :value="project">{{ project }}</option>
+          </select>
+          <select v-model="sourceFilter" aria-label="Source">
+            <option value="all">All sources</option>
+            <option v-for="source in sourceOptions" :key="source" :value="source">{{ source }}</option>
+          </select>
+          <button class="clear-filters" type="button" title="Clear filters" @click="clearFilters">
+            <X :size="16" aria-hidden="true" />
+          </button>
+          <p>{{ filteredItems.length }} of {{ snapshot.items.length }}</p>
+        </div>
+
         <article class="draft-preview">
           <div class="panel-heading">
             <FileText :size="18" aria-hidden="true" />
@@ -212,7 +277,9 @@ function formatDate(value: string): string {
           <div class="draft-preview__body" v-html="draft.html"></div>
         </article>
 
-        <article v-for="item in sortedItems" :key="item.id" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
+        <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
+
+        <article v-for="item in filteredItems" :key="item.id" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
           <div class="vote-rail" aria-label="Vote controls">
             <button type="button" :class="{ active: item.vote > 0 }" title="Include" @click="setVote(item.id, item.vote === 1 ? 0 : 1)">
               <ArrowUp :size="18" aria-hidden="true" />
