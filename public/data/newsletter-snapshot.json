@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T23:34:34.245591Z",
+  "generated_at": "2026-06-15T23:37:46.313397Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
@@ -180,33 +180,6 @@
       }
     },
     {
-      "id": "hn-15800af278d0",
-      "title": "Show HN: CocoIndex – Open-Source Real-time Data transformation framework",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/cocoindex-io/cocoindex",
-      "published_at": "2025-06-04T15:30:00Z",
-      "project": "CocoIndex",
-      "topic": "incremental indexing",
-      "summary": "Hacker News surfaced this item while tracking CocoIndex keywords: cocoindex, target state, incremental indexing, knowledge graph.",
-      "why_it_matters": "Community discussion can reveal whether CocoIndex is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "cocoindex",
-        "target state",
-        "incremental indexing",
-        "hacker-news"
-      ],
-      "score": 62,
-      "raw_json": {
-        "author": "badmonster",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "44181821",
-        "points": 2,
-        "source": "hacker-news"
-      }
-    },
-    {
       "id": "hn-235e2eafb064",
       "title": "Benchmarking SurrealDB 3.x vs. Postgres, Mongo, Neo4j and Redis (With Fsync)",
       "source": "Hacker News",
@@ -288,33 +261,6 @@
       }
     },
     {
-      "id": "hn-945228e50ee4",
-      "title": "Show HN: CocoIndex – Open-Source Data framework for AI, built for data freshness",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/cocoindex-io/cocoindex",
-      "published_at": "2025-04-23T14:22:33Z",
-      "project": "CocoIndex",
-      "topic": "incremental indexing",
-      "summary": "Hacker News surfaced this item while tracking CocoIndex keywords: cocoindex, target state, incremental indexing, knowledge graph.",
-      "why_it_matters": "Community discussion can reveal whether CocoIndex is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "cocoindex",
-        "target state",
-        "incremental indexing",
-        "hacker-news"
-      ],
-      "score": 85,
-      "raw_json": {
-        "author": "badmonster",
-        "collection_stage": "live",
-        "comments": 11,
-        "object_id": "43772582",
-        "points": 14,
-        "source": "hacker-news"
-      }
-    },
-    {
       "id": "hn-9764ffccaa2c",
       "title": "HTTPX2 by Pydantic",
       "source": "Hacker News",
@@ -338,114 +284,6 @@
         "comments": 0,
         "object_id": "48134261",
         "points": 1,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-ac655bbd91f7",
-      "title": "Show HN: FalkorDB – Open-source graph database major update (C/Rust)",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://news.ycombinator.com",
-      "published_at": "2025-06-12T13:57:08Z",
-      "project": "FalkorDB",
-      "topic": "graph database",
-      "summary": "Hacker News surfaced this item while tracking FalkorDB keywords: falkordb, redis graph, cypher graph, graph query.",
-      "why_it_matters": "Community discussion can reveal whether FalkorDB is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "falkordb",
-        "redis graph",
-        "cypher graph",
-        "hacker-news"
-      ],
-      "score": 70,
-      "raw_json": {
-        "author": "roilipman",
-        "collection_stage": "live",
-        "comments": 3,
-        "object_id": "44257880",
-        "points": 7,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-c05aa015acb0",
-      "title": "Improved Turso (libsql) ergonomics in Rust",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://codethoughts.medium.com/improved-turso-libsql-ergonomics-in-rust-b2c0bf134d46",
-      "published_at": "2024-09-30T23:08:07Z",
-      "project": "Turso",
-      "topic": "edge data",
-      "summary": "Hacker News surfaced this item while tracking Turso keywords: turso, libsql, sqlite, replication, edge.",
-      "why_it_matters": "Community discussion can reveal whether Turso is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "turso",
-        "libsql",
-        "sqlite",
-        "hacker-news"
-      ],
-      "score": 62,
-      "raw_json": {
-        "author": "Tehnix",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "41703059",
-        "points": 2,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-cf8ebfce1399",
-      "title": "Building AI Agents in Python with Pydantic AI",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
-      "published_at": "2026-04-29T12:18:36Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
-      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "structured outputs",
-        "hacker-news"
-      ],
-      "score": 61,
-      "raw_json": {
-        "author": "eigenBasis",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "47947311",
-        "points": 1,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-e7083fb9c9c",
-      "title": "Show HN: We built a type-safe Python ORM for RedisGraph/FalkorDB",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://news.ycombinator.com",
-      "published_at": "2026-01-28T15:29:53Z",
-      "project": "FalkorDB",
-      "topic": "graph database",
-      "summary": "Hacker News surfaced this item while tracking FalkorDB keywords: falkordb, redis graph, cypher graph, graph query.",
-      "why_it_matters": "Community discussion can reveal whether FalkorDB is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "falkordb",
-        "redis graph",
-        "cypher graph",
-        "hacker-news"
-      ],
-      "score": 71,
-      "raw_json": {
-        "author": "hello-tmst",
-        "collection_stage": "live",
-        "comments": 6,
-        "object_id": "46796602",
-        "points": 5,
         "source": "hacker-news"
       }
     },
@@ -567,30 +405,6 @@
         "author": "manual import",
         "collection_stage": "manual",
         "source": "linkedin"
-      }
-    },
-    {
-      "id": "medium-20bac10180c4",
-      "title": "Deploying a Vector Database with LanceDB and S3, connected to EKS",
-      "source": "Medium",
-      "source_kind": "publication",
-      "url": "https://medium.com/@mendel.litkeor/deploying-a-vector-database-with-lance-s3-and-eks-e1d12f1b7980",
-      "published_at": "2025-09-30T03:53:45Z",
-      "project": "LanceDB",
-      "topic": "vector data",
-      "summary": "In this blog post, we’ll dive into how to build a scalable vector database using LanceDB and Amazon S3, connected to EKS.",
-      "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
-      "tags": [
-        "lancedb",
-        "lance",
-        "vectors",
-        "medium"
-      ],
-      "score": 88,
-      "raw_json": {
-        "collection_stage": "live",
-        "feed_url": "https://medium.com/feed/tag/lancedb",
-        "source": "medium"
       }
     },
     {
@@ -887,15 +701,12 @@
       "source": "Hacker News",
       "kind": "community",
       "status": "ok",
-      "item_count": 10,
+      "item_count": 4,
       "message": "HN Algolia search_by_date",
       "project_counts": {
-        "CocoIndex": 2,
-        "FalkorDB": 2,
         "HelixDB": 1,
-        "Pydantic": 2,
-        "SurrealDB": 2,
-        "Turso": 1
+        "Pydantic": 1,
+        "SurrealDB": 2
       }
     },
     {
@@ -920,10 +731,10 @@
       "source": "Medium",
       "kind": "publication",
       "status": "ok",
-      "item_count": 6,
+      "item_count": 5,
       "message": "configured RSS/Atom feeds",
       "project_counts": {
-        "LanceDB": 2,
+        "LanceDB": 1,
         "Pydantic": 2,
         "SurrealDB": 2
       }

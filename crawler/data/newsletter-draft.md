@@ -2,7 +2,7 @@
 
 This week follows HelixDB, SurrealDB, Pydantic, LanceDB and the systems around them.
 
-The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. The editorial brief sets the test: More strongly typed graph/database work that can run locally before cloud deployment. The useful links are the ones that turn that appetite into architecture. HelixDB, SurrealDB, Pydantic, and LanceDB give the issue concrete shape.
+The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. The editorial brief sets the test: More strongly typed graph/database work that can run locally before cloud deployment. The useful links are the ones that turn that appetite into architecture. HelixDB, SurrealDB, Pydantic, LanceDB, and LakeSail give the issue concrete shape.
 
 ## Editorial brief
 
@@ -56,13 +56,13 @@ Credo fit: LanceDB matters here because it touches lakehouse runtime in the Stro
 
 Source: [Medium](https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b) · vector data · lancedb, lance, vectors, medium
 
-## 7. LanceDB: Deploying a Vector Database with LanceDB and S3, connected to EKS
+## 7. LakeSail: LakeSail discussion: typed Spark-compatible execution without giving up local Rust
 
-In this blog post, we’ll dive into how to build a scalable vector database using LanceDB and Amazon S3, connected to EKS. Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.
+Several data engineers are watching LakeSail because Spark-compatible APIs, DataFusion, and Arrow make a typed local lakehouse runtime feel plausible. Manually reviewed social posts can capture practitioner interest in LakeSail without relying on unauthenticated scraping.
 
-Credo fit: LanceDB matters here because it touches lakehouse runtime in the Strongly Typed AI stack. Related ontology: Lakehouse runtime.
+Credo fit: LakeSail matters here because it touches typed contracts, local-first data, and lakehouse runtime in the Strongly Typed AI stack. Related ontology: Typed contracts, Local-first data, Lakehouse runtime.
 
-Source: [Medium](https://medium.com/@mendel.litkeor/deploying-a-vector-database-with-lance-s3-and-eks-e1d12f1b7980) · vector data · lancedb, lance, vectors, medium
+Source: [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail) · typed dataframes · sail, spark connect, datafusion, linkedin
 
 ## Strongly Typed AI ontology
 
@@ -75,14 +75,14 @@ Source: [Medium](https://medium.com/@mendel.litkeor/deploying-a-vector-database-
 
 ## Editorial thread
 
-The connective tissue is graph database, multimodel data, typed AI, and vector data. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. That makes "More strongly typed graph/database work that can run locally before cloud deployment." the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.
+The connective tissue is graph database, multimodel data, typed AI, vector data, and typed dataframes. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. That makes "More strongly typed graph/database work that can run locally before cloud deployment." the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.
 
 ## Sources watched
 
-- Hacker News: ok, 10 items. HN Algolia search_by_date. Coverage: CocoIndex 2, FalkorDB 2, Pydantic 2, SurrealDB 2, HelixDB 1.
+- Hacker News: ok, 4 items. HN Algolia search_by_date. Coverage: SurrealDB 2, HelixDB 1, Pydantic 1.
 - Lobste.rs: ok, 0 items. Lobste.rs newest.json.
 - dev.to: ok, 2 items. dev.to articles API. Coverage: Pydantic 2.
-- Medium: ok, 6 items. configured RSS/Atom feeds. Coverage: LanceDB 2, Pydantic 2, SurrealDB 2.
+- Medium: ok, 5 items. configured RSS/Atom feeds. Coverage: Pydantic 2, SurrealDB 2, LanceDB 1.
 - Substack: ok, 0 items. configured RSS/Atom feeds.
 - LinkedIn: ok, 2 items. manual JSON import. Coverage: LakeSail 1, Pydantic 1.
 - X/Twitter: ok, 2 items. manual JSON import. Coverage: HelixDB 1, Turso 1.

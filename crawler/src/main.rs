@@ -29,6 +29,8 @@ enum CommandKind {
         live: bool,
         #[arg(long, default_value_t = 4)]
         max_live_per_project: usize,
+        #[arg(long, default_value_t = 45)]
+        since_days: i64,
     },
     ExportSql {
         #[arg(long, default_value = "crawler/data/items.json")]
@@ -134,6 +136,7 @@ fn main() -> Result<()> {
             public_out,
             live,
             max_live_per_project,
+            since_days,
         } => collect(
             config,
             out,
@@ -141,6 +144,7 @@ fn main() -> Result<()> {
             public_out,
             live,
             max_live_per_project,
+            since_days,
         ),
         CommandKind::ExportSql {
             input,
@@ -158,12 +162,15 @@ fn collect(
     public_out: PathBuf,
     live: bool,
     max_live_per_project: usize,
+    since_days: i64,
 ) -> Result<()> {
     let watchlist = read_watchlist(&config)?;
+    anyhow::ensure!(since_days > 0, "--since-days must be positive");
     let mut items = seed_items(&watchlist);
     let mut source_runs = seed_source_runs(&watchlist, live);
     if live {
-        match live_items(&watchlist, max_live_per_project) {
+        let since = Utc::now() - Duration::days(since_days);
+        match live_items(&watchlist, max_live_per_project, since) {
             Ok((live_items, live_source_runs)) => {
                 items.extend(live_items);
                 source_runs.extend(live_source_runs);
@@ -414,6 +421,7 @@ fn required_source<'a>(watchlist: &'a Watchlist, source_name: &str) -> Result<&'
 fn live_items(
     watchlist: &Watchlist,
     max_per_project: usize,
+    since: DateTime<Utc>,
 ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
     let client = Client::builder()
         .timeout(StdDuration::from_secs(12))
@@ -429,6 +437,7 @@ fn live_items(
     {
         match fetch_hacker_news(&client, watchlist, source, max_per_project) {
             Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
                     source,
                     &source_items,
@@ -446,6 +455,7 @@ fn live_items(
     {
         match fetch_lobsters(&client, watchlist, source, max_per_project) {
             Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
                     source,
                     &source_items,
@@ -463,6 +473,7 @@ fn live_items(
     {
         match fetch_dev_to(&client, watchlist, source, max_per_project) {
             Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(source, &source_items, "dev.to articles API"));
                 items.append(&mut source_items);
             }
@@ -476,6 +487,7 @@ fn live_items(
     {
         match fetch_feed_source(&client, watchlist, source, max_per_project) {
             Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
                     source,
                     &source_items,
@@ -493,6 +505,7 @@ fn live_items(
     {
         match fetch_feed_source(&client, watchlist, source, max_per_project) {
             Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
                     source,
                     &source_items,
@@ -511,6 +524,7 @@ fn live_items(
         {
             match collect_manual_source(watchlist, source, max_per_project) {
                 Ok(mut source_items) => {
+                    retain_recent(&mut source_items, since);
                     source_runs.push(ok_source_run(source, &source_items, "manual JSON import"));
                     items.append(&mut source_items);
                 }
@@ -519,6 +533,10 @@ fn live_items(
         }
     }
     Ok((items, source_runs))
+}
+
+fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
+    items.retain(|item| item.published_at >= since);
 }
 
 fn fetch_hacker_news(

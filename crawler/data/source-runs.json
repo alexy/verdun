@@ -3,15 +3,12 @@
     "source": "Hacker News",
     "kind": "community",
     "status": "ok",
-    "item_count": 10,
+    "item_count": 4,
     "message": "HN Algolia search_by_date",
     "project_counts": {
-      "CocoIndex": 2,
-      "FalkorDB": 2,
       "HelixDB": 1,
-      "Pydantic": 2,
-      "SurrealDB": 2,
-      "Turso": 1
+      "Pydantic": 1,
+      "SurrealDB": 2
     }
   },
   {
@@ -36,10 +33,10 @@
     "source": "Medium",
     "kind": "publication",
     "status": "ok",
-    "item_count": 6,
+    "item_count": 5,
     "message": "configured RSS/Atom feeds",
     "project_counts": {
-      "LanceDB": 2,
+      "LanceDB": 1,
       "Pydantic": 2,
       "SurrealDB": 2
     }
