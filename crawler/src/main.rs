@@ -307,13 +307,8 @@ fn verify(config: PathBuf) -> Result<()> {
             .any(|project| project.name == "LakeSail"),
         "LakeSail must be tracked"
     );
-    anyhow::ensure!(
-        watchlist
-            .sources
-            .iter()
-            .any(|source| source.name == "Hacker News"),
-        "Hacker News must be tracked"
-    );
+    verify_required_projects(&watchlist)?;
+    verify_required_sources(&watchlist)?;
     println!(
         "verified {} projects and {} sources for {}",
         watchlist.projects.len(),
@@ -321,6 +316,94 @@ fn verify(config: PathBuf) -> Result<()> {
         watchlist.theme
     );
     Ok(())
+}
+
+fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
+    for project_name in [
+        "Pydantic",
+        "LakeSail",
+        "Turso",
+        "LanceDB",
+        "HelixDB",
+        "SurrealDB",
+        "pgGraph",
+        "Grust",
+        "TypeSec",
+        "FalkorDB",
+        "LadybugDB",
+        "CocoIndex",
+    ] {
+        let project = watchlist
+            .projects
+            .iter()
+            .find(|candidate| candidate.name == project_name)
+            .with_context(|| format!("{project_name} must be tracked"))?;
+        anyhow::ensure!(
+            !project.topic.trim().is_empty(),
+            "{project_name} must have a topic"
+        );
+        anyhow::ensure!(
+            project.homepage.starts_with("https://"),
+            "{project_name} must have an https homepage"
+        );
+        anyhow::ensure!(
+            project.keywords.len() >= 3,
+            "{project_name} must have at least three matching keywords"
+        );
+    }
+    Ok(())
+}
+
+fn verify_required_sources(watchlist: &Watchlist) -> Result<()> {
+    for source_name in ["Hacker News", "Lobste.rs", "dev.to"] {
+        let source = required_source(watchlist, source_name)?;
+        anyhow::ensure!(
+            source.feed_urls.as_ref().is_none_or(Vec::is_empty),
+            "{source_name} should use its API adapter, not feed_urls"
+        );
+        anyhow::ensure!(
+            source.manual_path.is_none(),
+            "{source_name} should use its API adapter, not manual_path"
+        );
+    }
+    for source_name in ["Medium", "Substack"] {
+        let source = required_source(watchlist, source_name)?;
+        let feeds = source
+            .feed_urls
+            .as_ref()
+            .filter(|feeds| !feeds.is_empty())
+            .with_context(|| format!("{source_name} must configure feed_urls"))?;
+        anyhow::ensure!(
+            feeds.iter().all(|feed| feed.starts_with("https://")),
+            "{source_name} feed_urls must be https"
+        );
+    }
+    for source_name in ["LinkedIn", "X/Twitter"] {
+        let source = required_source(watchlist, source_name)?;
+        let path = source
+            .manual_path
+            .as_ref()
+            .with_context(|| format!("{source_name} must configure manual_path"))?;
+        anyhow::ensure!(
+            path.exists(),
+            "{source_name} manual import file must exist at {}",
+            path.display()
+        );
+    }
+    Ok(())
+}
+
+fn required_source<'a>(watchlist: &'a Watchlist, source_name: &str) -> Result<&'a Source> {
+    let source = watchlist
+        .sources
+        .iter()
+        .find(|candidate| candidate.name == source_name)
+        .with_context(|| format!("{source_name} must be tracked"))?;
+    anyhow::ensure!(
+        source.url.starts_with("https://"),
+        "{source_name} must have an https source URL"
+    );
+    Ok(source)
 }
 
 fn live_items(

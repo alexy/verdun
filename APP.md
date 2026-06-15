@@ -23,6 +23,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - External DB loader SQL now upserts both newsletter items and `newsletter_source_runs`.
 - Source-health metadata shown in the app sidebar.
 - Live public-source ingestion for Hacker News, Lobste.rs, dev.to, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, LakeSail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, TypeSec, FalkorDB, LadybugDB, and CocoIndex.
+- `verdun-crawler verify` guards the required project list, public-source adapters, Medium/Substack feed configuration, and LinkedIn/X manual import files.
 - Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
 - The app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/lib/newsletter.ts`.
 - `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
