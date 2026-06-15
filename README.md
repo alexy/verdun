@@ -8,7 +8,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Vite is built with `/rbage/` as the public base path for `collected.ga/rbage/`.
 - Vercel serverless API routes reading an external Postgres database.
 - Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
-- Editorial UI for upvoting/downvoting newsletter candidates and writing this-week or ongoing focus requests.
+- Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
 

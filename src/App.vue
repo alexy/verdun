@@ -11,7 +11,7 @@ const error = ref('')
 const focusText = ref('')
 const focusScope = ref<'this_week' | 'ongoing'>('this_week')
 const searchText = ref('')
-const voteFilter = ref<'all' | 'unreviewed' | 'included' | 'rejected'>('all')
+const voteFilter = ref<'all' | 'unreviewed' | 'upvoted' | 'downvoted'>('all')
 const projectFilter = ref('all')
 const sourceFilter = ref('all')
 
@@ -26,8 +26,8 @@ const filteredItems = computed(() => {
   const query = searchText.value.trim().toLowerCase()
   return sortedItems.value.filter((item) => {
     if (voteFilter.value === 'unreviewed' && item.vote !== 0) return false
-    if (voteFilter.value === 'included' && item.vote <= 0) return false
-    if (voteFilter.value === 'rejected' && item.vote >= 0) return false
+    if (voteFilter.value === 'upvoted' && item.vote <= 0) return false
+    if (voteFilter.value === 'downvoted' && item.vote >= 0) return false
     if (projectFilter.value !== 'all' && item.project !== projectFilter.value) return false
     if (sourceFilter.value !== 'all' && item.source !== sourceFilter.value) return false
     if (!query) return true
@@ -168,7 +168,7 @@ function sourceDomain(value: string): string {
         </div>
         <div>
           <span>{{ includedItems.length }}</span>
-          <p>included</p>
+          <p>upvoted</p>
         </div>
         <div>
           <span>{{ rejectedItems }}</span>
@@ -275,8 +275,8 @@ function sourceDomain(value: string): string {
           <select v-model="voteFilter" aria-label="Vote status">
             <option value="all">All votes</option>
             <option value="unreviewed">Unreviewed ({{ unreviewedItems }})</option>
-            <option value="included">Included ({{ includedItems.length }})</option>
-            <option value="rejected">Rejected ({{ rejectedItems }})</option>
+            <option value="upvoted">Upvoted ({{ includedItems.length }})</option>
+            <option value="downvoted">Downvoted ({{ rejectedItems }})</option>
           </select>
           <select v-model="projectFilter" aria-label="Project">
             <option value="all">All projects</option>
@@ -306,11 +306,11 @@ function sourceDomain(value: string): string {
 
         <article v-for="item in filteredItems" :id="itemAnchor(item.id)" :key="item.id" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
           <div class="vote-rail" aria-label="Vote controls">
-            <button type="button" :class="{ active: item.vote > 0 }" title="Include" @click="setVote(item.id, item.vote === 1 ? 0 : 1)">
+            <button type="button" :class="{ active: item.vote > 0 }" title="Upvote" @click="setVote(item.id, item.vote === 1 ? 0 : 1)">
               <ArrowUp :size="18" aria-hidden="true" />
             </button>
             <span>{{ item.score }}</span>
-            <button type="button" :class="{ active: item.vote < 0 }" title="Reject" @click="setVote(item.id, item.vote === -1 ? 0 : -1)">
+            <button type="button" :class="{ active: item.vote < 0 }" title="Downvote" @click="setVote(item.id, item.vote === -1 ? 0 : -1)">
               <ArrowDown :size="18" aria-hidden="true" />
             </button>
           </div>
