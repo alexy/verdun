@@ -1,23 +1,9 @@
 [
   {
-    "source": "LinkedIn",
-    "kind": "social",
-    "status": "pending",
-    "item_count": 0,
-    "message": "credentialed social adapter pending"
-  },
-  {
-    "source": "X/Twitter",
-    "kind": "social",
-    "status": "pending",
-    "item_count": 0,
-    "message": "credentialed social adapter pending"
-  },
-  {
     "source": "Hacker News",
     "kind": "community",
     "status": "ok",
-    "item_count": 6,
+    "item_count": 5,
     "message": "HN Algolia search_by_date"
   },
   {
@@ -47,5 +33,19 @@
     "status": "ok",
     "item_count": 0,
     "message": "configured RSS/Atom feeds"
+  },
+  {
+    "source": "LinkedIn",
+    "kind": "social",
+    "status": "ok",
+    "item_count": 2,
+    "message": "manual JSON import"
+  },
+  {
+    "source": "X/Twitter",
+    "kind": "social",
+    "status": "ok",
+    "item_count": 2,
+    "message": "manual JSON import"
   }
 ]

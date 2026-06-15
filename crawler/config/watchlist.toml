@@ -94,8 +94,10 @@ feed_urls = [
 name = "LinkedIn"
 kind = "social"
 url = "https://www.linkedin.com"
+manual_path = "crawler/data/manual/linkedin.json"
 
 [[sources]]
 name = "X/Twitter"
 kind = "social"
 url = "https://x.com"
+manual_path = "crawler/data/manual/x-twitter.json"

@@ -65,6 +65,7 @@ struct Source {
     kind: String,
     url: String,
     feed_urls: Option<Vec<String>>,
+    manual_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -418,6 +419,25 @@ fn live_items(
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
+    for source_name in ["LinkedIn", "X/Twitter"] {
+        if let Some(source) = watchlist
+            .sources
+            .iter()
+            .find(|source| source.name == source_name)
+        {
+            match collect_manual_source(watchlist, source, max_per_project) {
+                Ok(mut source_items) => {
+                    source_runs.push(ok_source_run(
+                        source,
+                        source_items.len(),
+                        "manual JSON import",
+                    ));
+                    items.append(&mut source_items);
+                }
+                Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+            }
+        }
+    }
     Ok((items, source_runs))
 }
 
@@ -554,6 +574,37 @@ fn fetch_feed_source(
     Ok(items)
 }
 
+fn collect_manual_source(
+    watchlist: &Watchlist,
+    source: &Source,
+    max_per_project: usize,
+) -> Result<Vec<NewsItem>> {
+    let path = source
+        .manual_path
+        .as_ref()
+        .with_context(|| format!("{} has no manual_path configured", source.name))?;
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let posts: Vec<ManualPost> = serde_json::from_slice(
+        &fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )
+    .with_context(|| format!("parsing {}", path.display()))?;
+    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut items = Vec::new();
+    for post in posts {
+        for project in &watchlist.projects {
+            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+            if count >= max_per_project || !manual_post_matches_project(&post, project) {
+                continue;
+            }
+            items.push(manual_post_item(project, source, &post));
+            counts.insert(project.name.as_str(), count + 1);
+        }
+    }
+    Ok(items)
+}
+
 fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
     watchlist
         .sources
@@ -579,7 +630,8 @@ fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
                     "run with --live to collect this public source"
                 }
                 "Medium" | "Substack" => "configure feed_urls and run with --live",
-                "LinkedIn" | "X/Twitter" => "credentialed social adapter pending",
+                "LinkedIn" | "X/Twitter" if live && source.manual_path.is_some() => return None,
+                "LinkedIn" | "X/Twitter" => "configure manual_path or authenticated adapter",
                 _ => "adapter pending",
             };
             Some(SourceRun {
@@ -732,6 +784,15 @@ struct DevToArticle {
 #[derive(Debug, Deserialize, Clone)]
 struct DevToUser {
     username: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+struct ManualPost {
+    title: String,
+    url: String,
+    author: Option<String>,
+    published_at: DateTime<Utc>,
+    text: String,
 }
 
 #[derive(Debug, Clone)]
@@ -939,6 +1000,40 @@ fn feed_item(project: &Project, source: &Source, entry: &FeedEntry) -> NewsItem 
     }
 }
 
+fn manual_post_item(project: &Project, source: &Source, post: &ManualPost) -> NewsItem {
+    NewsItem {
+        id: stable_id(
+            &slug(&source.name),
+            &format!("{}:{}", project.name, post.url),
+        ),
+        title: post.title.clone(),
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: post.url.clone(),
+        published_at: post.published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: truncate_text(&post.text, 260),
+        why_it_matters: format!(
+            "Manually reviewed social posts can capture practitioner interest in {} without relying on unauthenticated scraping.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(3)
+            .cloned()
+            .chain([slug(&source.name)])
+            .collect(),
+        score: 76,
+        raw_json: serde_json::json!({
+            "collection_stage": "manual",
+            "source": slug(&source.name),
+            "author": post.author
+        }),
+    }
+}
+
 fn project_query(project: &Project) -> String {
     let mut parts = vec![project.name.clone()];
     parts.extend(project_live_terms(project).into_iter().take(2));
@@ -976,6 +1071,11 @@ fn dev_to_article_matches_project(article: &DevToArticle, project: &Project) -> 
 fn feed_entry_matches_project(entry: &FeedEntry, project: &Project) -> bool {
     let link_without_query = entry.link.split('?').next().unwrap_or(&entry.link);
     let text = format!("{} {} {}", entry.title, link_without_query, entry.summary);
+    text_matches_project(&text, project)
+}
+
+fn manual_post_matches_project(post: &ManualPost, project: &Project) -> bool {
+    let text = format!("{} {} {}", post.title, post.url, post.text);
     text_matches_project(&text, project)
 }
 

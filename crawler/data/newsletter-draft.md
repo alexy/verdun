@@ -52,10 +52,10 @@ The connective tissue is graph database, multimodel data, and typed AI. The most
 
 ## Sources watched
 
-- LinkedIn: pending, 0 items. credentialed social adapter pending
-- X/Twitter: pending, 0 items. credentialed social adapter pending
-- Hacker News: ok, 6 items. HN Algolia search_by_date
+- Hacker News: ok, 5 items. HN Algolia search_by_date
 - Lobste.rs: ok, 0 items. Lobste.rs newest.json
 - dev.to: ok, 0 items. dev.to articles API
 - Medium: ok, 6 items. configured RSS/Atom feeds
 - Substack: ok, 0 items. configured RSS/Atom feeds
+- LinkedIn: ok, 2 items. manual JSON import
+- X/Twitter: ok, 2 items. manual JSON import

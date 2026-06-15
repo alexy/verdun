@@ -182,33 +182,6 @@
     }
   },
   {
-    "id": "hn-cf8ebfce1399",
-    "title": "Building AI Agents in Python with Pydantic AI",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
-    "published_at": "2026-04-29T12:18:36Z",
-    "project": "Pydantic",
-    "topic": "typed AI",
-    "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
-    "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "pydantic",
-      "typed agents",
-      "structured outputs",
-      "hacker-news"
-    ],
-    "score": 61,
-    "raw_json": {
-      "author": "eigenBasis",
-      "collection_stage": "live",
-      "comments": 0,
-      "object_id": "47947311",
-      "points": 1,
-      "source": "hacker-news"
-    }
-  },
-  {
     "id": "lakesail-e5ce5d36852a",
     "title": "LakeSail belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",
@@ -254,6 +227,54 @@
       "collection_stage": "watchlist-seed",
       "homepage": "https://lancedb.com",
       "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "linkedin-3ba44b6aa28a",
+    "title": "LakeSail discussion: typed Spark-compatible execution without giving up local Rust",
+    "source": "LinkedIn",
+    "source_kind": "social",
+    "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail",
+    "published_at": "2026-06-15T10:30:00Z",
+    "project": "LakeSail",
+    "topic": "typed dataframes",
+    "summary": "Several data engineers are watching LakeSail because Spark-compatible APIs, DataFusion, and Arrow make a typed local lakehouse runtime feel plausible.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in LakeSail without relying on unauthenticated scraping.",
+    "tags": [
+      "sail",
+      "spark connect",
+      "datafusion",
+      "linkedin"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "source": "linkedin"
+    }
+  },
+  {
+    "id": "linkedin-b597c19c144b",
+    "title": "Pydantic AI adoption note",
+    "source": "LinkedIn",
+    "source_kind": "social",
+    "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic",
+    "published_at": "2026-06-14T18:00:00Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "Teams are using Pydantic schemas to keep agent outputs typed, auditable, and easier to move into production data workflows.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Pydantic without relying on unauthenticated scraping.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "linkedin"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "source": "linkedin"
     }
   },
   {
@@ -518,6 +539,54 @@
       "collection_stage": "watchlist-seed",
       "homepage": "https://github.com/ChiefScientist-io/typesec",
       "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "x-twitter-71c585c84d97",
+    "title": "Turso and libSQL edge data note",
+    "source": "X/Twitter",
+    "source_kind": "social",
+    "url": "https://x.com/example/status/1000000000000000002",
+    "published_at": "2026-06-13T16:45:00Z",
+    "project": "Turso",
+    "topic": "edge data",
+    "summary": "Turso and libSQL remain useful signals for teams that want embedded SQLite ergonomics with replication at the edge.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Turso without relying on unauthenticated scraping.",
+    "tags": [
+      "turso",
+      "libsql",
+      "sqlite",
+      "x-twitter"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "source": "x-twitter"
+    }
+  },
+  {
+    "id": "x-twitter-829833c6230d",
+    "title": "HelixDB launch chatter",
+    "source": "X/Twitter",
+    "source_kind": "social",
+    "url": "https://x.com/example/status/1000000000000000001",
+    "published_at": "2026-06-15T09:00:00Z",
+    "project": "HelixDB",
+    "topic": "graph database",
+    "summary": "HelixDB keeps appearing in graph database threads because object-storage-backed graph systems are now part of the local-first AI/data conversation.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in HelixDB without relying on unauthenticated scraping.",
+    "tags": [
+      "helixdb",
+      "graph database",
+      "rust graph",
+      "x-twitter"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "source": "x-twitter"
     }
   }
 ]
