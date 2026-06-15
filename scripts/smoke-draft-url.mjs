@@ -31,6 +31,20 @@ try {
   if (!draft.html.includes('<h1>Strongly Typed AI/Data Notes:')) {
     throw new Error('URL snapshot did not build a draft')
   }
+  if (draft.markdown.includes("belongs in this week's typed AI/data systems watch")) {
+    throw new Error('fallback draft used watchlist seed items while live/manual items were available')
+  }
+  const projectCounts = new Map()
+  for (const itemId of draft.itemIds) {
+    const item = snapshot.items.find((candidate) => candidate.id === itemId)
+    projectCounts.set(item.project, (projectCounts.get(item.project) ?? 0) + 1)
+  }
+  if (Array.from(projectCounts.values()).some((count) => count > 2)) {
+    throw new Error('fallback draft did not keep project diversity')
+  }
+  if (!draft.markdown.includes('Coverage:')) {
+    throw new Error('draft source section did not include project coverage')
+  }
 } finally {
   await new Promise((resolve, reject) => {
     server.close((error) => error ? reject(error) : resolve())

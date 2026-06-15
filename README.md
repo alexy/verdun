@@ -67,6 +67,8 @@ npm run draft
 
 The generated article is written to `crawler/data/newsletter-draft.md` by default and includes this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The CLI uses the same `src/lib/newsletter.ts` draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
 
+When no items are explicitly upvoted, the draft builder prefers live/manual collected items over watchlist seed placeholders and caps the fallback spine at two items per project before filling any remaining slots.
+
 ```sh
 NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/newsletter/items npm run draft
 NEWSLETTER_REQUIRE_UPVOTES=true npm run ulysses:draft

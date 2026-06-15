@@ -211,10 +211,11 @@ export function sortedNewsItems(items: NewsItem[]): NewsItem[] {
 
 export function draftSelection(items: NewsItem[], limit = 7): NewsItem[] {
   const included = sortedNewsItems(items).filter((item) => item.vote > 0)
-  const candidates = included.length
-    ? included
-    : sortedNewsItems(items).filter((item) => item.vote >= 0)
-  return candidates.slice(0, limit)
+  if (included.length) return included.slice(0, limit)
+
+  const acceptable = sortedNewsItems(items).filter((item) => item.vote >= 0)
+  const collected = acceptable.filter((item) => !isWatchlistSeed(item))
+  return diverseSelection(collected.length ? collected : acceptable, limit)
 }
 
 export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDraft {
@@ -244,7 +245,7 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '',
     '## Sources watched',
     '',
-    ...snapshot.sourceRuns.map((run) => `- ${run.source}: ${run.status}, ${run.itemCount} items. ${run.message}`),
+    ...snapshot.sourceRuns.map(sourceRunLine),
     '',
   ]
   const markdown = sections.join('\n')
@@ -349,6 +350,41 @@ function briefSection(brief: EditorialBrief): string[] {
     ...brief.ongoing.map((text) => `- Ongoing: ${text}`),
     '',
   ]
+}
+
+function sourceRunLine(run: SourceRun): string {
+  const projects = Object.entries(run.projectCounts)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .slice(0, 5)
+    .map(([project, count]) => `${project} ${count}`)
+  const coverage = projects.length ? ` Coverage: ${projects.join(', ')}.` : ''
+  return `- ${run.source}: ${run.status}, ${run.itemCount} items. ${run.message}.${coverage}`
+}
+
+function diverseSelection(items: NewsItem[], limit: number): NewsItem[] {
+  const selected: NewsItem[] = []
+  const projectCounts = new Map<string, number>()
+
+  for (const item of items) {
+    const projectCount = projectCounts.get(item.project) ?? 0
+    if (projectCount >= 2) continue
+    selected.push(item)
+    projectCounts.set(item.project, projectCount + 1)
+    if (selected.length >= limit) return selected
+  }
+
+  for (const item of items) {
+    if (selected.some((selectedItem) => selectedItem.id === item.id)) continue
+    selected.push(item)
+    if (selected.length >= limit) return selected
+  }
+
+  return selected
+}
+
+function isWatchlistSeed(item: NewsItem): boolean {
+  return item.title.includes("belongs in this week's typed AI/data systems watch")
+    || item.summary.includes('is being tracked for')
 }
 
 function openingParagraph(items: NewsItem[], brief: EditorialBrief): string {
