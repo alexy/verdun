@@ -139,7 +139,7 @@ a {
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1px;
   overflow: hidden;
   border: 1px solid rgba(22, 32, 29, 0.14);
@@ -248,6 +248,7 @@ textarea {
 }
 
 .focus-list,
+.source-health,
 .draft {
   padding-top: 12px;
   border-top: 1px solid var(--line);
@@ -274,6 +275,54 @@ textarea {
 .focus-list strong {
   display: block;
   color: var(--ink);
+}
+
+.source-health {
+  display: grid;
+  gap: 10px;
+}
+
+.source-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+}
+
+.source-row strong {
+  display: block;
+  font-size: 13px;
+}
+
+.source-row p {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.source-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 3px;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.source-dot.ok {
+  background: var(--accent);
+}
+
+.source-dot.error {
+  background: var(--reject);
+}
+
+.source-dot.pending {
+  background: var(--warn);
+}
+
+.source-dot.skipped {
+  background: #9ca3af;
 }
 
 .draft {

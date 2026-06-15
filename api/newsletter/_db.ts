@@ -59,6 +59,21 @@ type StaticNewsRow = {
   score: number
 }
 
+type StaticSourceRun = {
+  source: string
+  kind: string
+  status: 'ok' | 'error' | 'pending' | 'skipped'
+  item_count: number
+  message: string
+}
+
+type StaticSnapshot = {
+  generated_at: string
+  theme: string
+  items: StaticNewsRow[]
+  source_runs: StaticSourceRun[]
+}
+
 export function allowMethods(req: ApiRequest, res: ApiResponse, methods: string[]): boolean {
   if (!req.method || methods.includes(req.method)) return true
   res.setHeader('allow', methods.join(', '))
@@ -107,18 +122,38 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     theme: 'Strongly typed and functional AI/data systems',
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
+    sourceRuns: [],
   }
 }
 
 function readStaticSnapshot(): NewsletterSnapshot | null {
-  const path = join(process.cwd(), 'public', 'data', 'newsletter-items.json')
-  if (!existsSync(path)) return null
-  const rows = JSON.parse(readFileSync(path, 'utf8')) as StaticNewsRow[]
+  const snapshotPath = join(process.cwd(), 'public', 'data', 'newsletter-snapshot.json')
+  if (existsSync(snapshotPath)) {
+    const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf8')) as StaticSnapshot
+    return {
+      generatedAt: snapshot.generated_at,
+      theme: snapshot.theme,
+      items: snapshot.items.map(toStaticNewsItem),
+      focuses: seedSnapshot.focuses,
+      sourceRuns: snapshot.source_runs.map((run) => ({
+        source: run.source,
+        kind: run.kind,
+        status: run.status,
+        itemCount: run.item_count,
+        message: run.message,
+      })),
+    }
+  }
+
+  const itemsPath = join(process.cwd(), 'public', 'data', 'newsletter-items.json')
+  if (!existsSync(itemsPath)) return null
+  const rows = JSON.parse(readFileSync(itemsPath, 'utf8')) as StaticNewsRow[]
   return {
     generatedAt: new Date().toISOString(),
     theme: 'Strongly typed and functional AI/data systems',
     items: rows.map(toStaticNewsItem),
     focuses: seedSnapshot.focuses,
+    sourceRuns: [],
   }
 }
 

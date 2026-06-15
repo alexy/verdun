@@ -1,0 +1,461 @@
+{
+  "generated_at": "2026-06-15T22:02:56.493006Z",
+  "theme": "Strongly typed and functional AI/data systems",
+  "items": [
+    {
+      "id": "grust-210a95e033dd",
+      "title": "Grust belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ChiefScientist-io/grust",
+      "published_at": "2026-06-08T12:00:00Z",
+      "project": "Grust",
+      "topic": "typed graph",
+      "summary": "Grust is being tracked for typed graph signals around grust, typed graph, rust, cypher.",
+      "why_it_matters": "Grust helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "grust",
+        "typed graph",
+        "rust",
+        "cypher"
+      ],
+      "score": 69,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ChiefScientist-io/grust",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "helixdb-8b14f2b883d",
+      "title": "HelixDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/HelixDB/helix-db",
+      "published_at": "2026-06-11T12:00:00Z",
+      "project": "HelixDB",
+      "topic": "graph database",
+      "summary": "HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph.",
+      "why_it_matters": "HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "helixdb",
+        "graph database",
+        "rust graph"
+      ],
+      "score": 78,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/HelixDB/helix-db",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "hn-1d28a3ef4ded",
+      "title": "GPU-Accelerated Indexing in LanceDB",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://blog.lancedb.com/gpu-accelerated-indexing-in-lancedb-27558fa7eee5",
+      "published_at": "2023-11-02T17:31:41Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar.",
+      "why_it_matters": "Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "lancedb",
+        "lance",
+        "vectors",
+        "hacker-news"
+      ],
+      "score": 83,
+      "raw_json": {
+        "author": "yurisagalov",
+        "collection_stage": "live",
+        "comments": 4,
+        "object_id": "38117101",
+        "points": 19,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-235e2eafb064",
+      "title": "Benchmarking SurrealDB 3.x vs. Postgres, Mongo, Neo4j and Redis (With Fsync)",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers",
+      "published_at": "2026-05-29T14:53:27Z",
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
+      "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "surrealdb",
+        "multimodel",
+        "graph",
+        "hacker-news"
+      ],
+      "score": 110,
+      "raw_json": {
+        "author": "itsezc",
+        "collection_stage": "live",
+        "comments": 31,
+        "object_id": "48323844",
+        "points": 75,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-4340e59c1bdd",
+      "title": "Show HN: HelixDB – A graph database built on object storage",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/HelixDB/helix-db/tree/main",
+      "published_at": "2026-06-10T15:47:31Z",
+      "project": "HelixDB",
+      "topic": "graph database",
+      "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
+      "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "helixdb",
+        "graph database",
+        "rust graph",
+        "hacker-news"
+      ],
+      "score": 110,
+      "raw_json": {
+        "author": "GeorgeCurtis",
+        "collection_stage": "live",
+        "comments": 42,
+        "object_id": "48478148",
+        "points": 157,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-4ef9ce6fe4cc",
+      "title": "LanceDB Raises $30M Series A to Build the Multimodal Lakehouse",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://lancedb.com/blog/lancedb-raises-30m-series-a-to-build-the-multimodal-lakehouse/",
+      "published_at": "2025-06-24T11:30:47Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "Hacker News surfaced this item while tracking LanceDB keywords: lancedb, lance, vectors, multimodal, columnar.",
+      "why_it_matters": "Community discussion can reveal whether LanceDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "lancedb",
+        "lance",
+        "vectors",
+        "hacker-news"
+      ],
+      "score": 61,
+      "raw_json": {
+        "author": "Fendy",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "44365003",
+        "points": 1,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-7a2fd6799a20",
+      "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
+      "published_at": "2026-05-28T11:26:06Z",
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
+      "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "surrealdb",
+        "multimodel",
+        "graph",
+        "hacker-news"
+      ],
+      "score": 64,
+      "raw_json": {
+        "author": "itsezc",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "48307443",
+        "points": 4,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-9764ffccaa2c",
+      "title": "HTTPX2 by Pydantic",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://httpx2.pydantic.dev/",
+      "published_at": "2026-05-14T12:09:33Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "hacker-news"
+      ],
+      "score": 61,
+      "raw_json": {
+        "author": "Einenlum",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "48134261",
+        "points": 1,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "hn-c05aa015acb0",
+      "title": "Improved Turso (libsql) ergonomics in Rust",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://codethoughts.medium.com/improved-turso-libsql-ergonomics-in-rust-b2c0bf134d46",
+      "published_at": "2024-09-30T23:08:07Z",
+      "project": "Turso",
+      "topic": "edge data",
+      "summary": "Hacker News surfaced this item while tracking Turso keywords: turso, libsql, sqlite, replication, edge.",
+      "why_it_matters": "Community discussion can reveal whether Turso is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "turso",
+        "libsql",
+        "sqlite",
+        "hacker-news"
+      ],
+      "score": 62,
+      "raw_json": {
+        "author": "Tehnix",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "41703059",
+        "points": 2,
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "lakesail-e5ce5d36852a",
+      "title": "LakeSail belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/lakehq/sail",
+      "published_at": "2026-06-14T12:00:00Z",
+      "project": "LakeSail",
+      "topic": "typed dataframes",
+      "summary": "LakeSail is being tracked for typed dataframes signals around sail, spark connect, datafusion, arrow, rust.",
+      "why_it_matters": "LakeSail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "sail",
+        "spark connect",
+        "datafusion",
+        "arrow"
+      ],
+      "score": 87,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/lakehq/sail",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "lancedb-76fb73c47cb",
+      "title": "LanceDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://lancedb.com",
+      "published_at": "2026-06-12T12:00:00Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar.",
+      "why_it_matters": "LanceDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "lancedb",
+        "lance",
+        "vectors",
+        "multimodal"
+      ],
+      "score": 81,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://lancedb.com",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "pggraph-f1ef2151ecc4",
+      "title": "pgGraph belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/apache/age",
+      "published_at": "2026-06-09T12:00:00Z",
+      "project": "pgGraph",
+      "topic": "postgres graph",
+      "summary": "pgGraph is being tracked for postgres graph signals around postgres graph, apache age, cypher, pggraph.",
+      "why_it_matters": "pgGraph helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "postgres graph",
+        "apache age",
+        "cypher",
+        "pggraph"
+      ],
+      "score": 72,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/apache/age",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "pydantic-19e4620a7634",
+      "title": "Pydantic belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/pydantic/pydantic-ai",
+      "published_at": "2026-06-15T12:00:00Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Pydantic is being tracked for typed AI signals around pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Pydantic helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "validation"
+      ],
+      "score": 90,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/pydantic/pydantic-ai",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "surrealdb-fbad9a0fbf33",
+      "title": "SurrealDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://surrealdb.com",
+      "published_at": "2026-06-10T12:00:00Z",
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "summary": "SurrealDB is being tracked for multimodel data signals around surrealdb, multimodel, graph, realtime.",
+      "why_it_matters": "SurrealDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "surrealdb",
+        "multimodel",
+        "graph",
+        "realtime"
+      ],
+      "score": 75,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://surrealdb.com",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "turso-33e02aa599d3",
+      "title": "Turso belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://turso.tech",
+      "published_at": "2026-06-13T12:00:00Z",
+      "project": "Turso",
+      "topic": "edge data",
+      "summary": "Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge.",
+      "why_it_matters": "Turso helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "turso",
+        "libsql",
+        "sqlite",
+        "replication"
+      ],
+      "score": 84,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://turso.tech",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "typesec-26fcee3223ad",
+      "title": "TypeSec belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ChiefScientist-io/typesec",
+      "published_at": "2026-06-07T12:00:00Z",
+      "project": "TypeSec",
+      "topic": "typed security",
+      "summary": "TypeSec is being tracked for typed security signals around typesec, capability, typed policy, security.",
+      "why_it_matters": "TypeSec helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "typesec",
+        "capability",
+        "typed policy",
+        "security"
+      ],
+      "score": 66,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ChiefScientist-io/typesec",
+        "source_url": "https://news.ycombinator.com"
+      }
+    }
+  ],
+  "source_runs": [
+    {
+      "source": "Medium",
+      "kind": "publication",
+      "status": "pending",
+      "item_count": 0,
+      "message": "feed adapter pending"
+    },
+    {
+      "source": "Substack",
+      "kind": "publication",
+      "status": "pending",
+      "item_count": 0,
+      "message": "feed adapter pending"
+    },
+    {
+      "source": "LinkedIn",
+      "kind": "social",
+      "status": "pending",
+      "item_count": 0,
+      "message": "credentialed social adapter pending"
+    },
+    {
+      "source": "X/Twitter",
+      "kind": "social",
+      "status": "pending",
+      "item_count": 0,
+      "message": "credentialed social adapter pending"
+    },
+    {
+      "source": "Hacker News",
+      "kind": "community",
+      "status": "ok",
+      "item_count": 7,
+      "message": "HN Algolia search_by_date"
+    },
+    {
+      "source": "Lobste.rs",
+      "kind": "community",
+      "status": "ok",
+      "item_count": 0,
+      "message": "Lobste.rs newest.json"
+    },
+    {
+      "source": "dev.to",
+      "kind": "community",
+      "status": "ok",
+      "item_count": 0,
+      "message": "dev.to articles API"
+    }
+  ]
+}

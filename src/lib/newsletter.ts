@@ -21,11 +21,22 @@ export type NewsletterFocus = {
   createdAt: string
 }
 
+export type SourceRunStatus = 'ok' | 'error' | 'pending' | 'skipped'
+
+export type SourceRun = {
+  source: string
+  kind: string
+  status: SourceRunStatus
+  itemCount: number
+  message: string
+}
+
 export type NewsletterSnapshot = {
   generatedAt: string
   theme: string
   items: NewsItem[]
   focuses: NewsletterFocus[]
+  sourceRuns: SourceRun[]
 }
 
 export type VoteValue = -1 | 0 | 1
@@ -33,6 +44,15 @@ export type VoteValue = -1 | 0 | 1
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
   theme: 'Strongly typed and functional AI/data systems',
+  sourceRuns: [
+    {
+      source: 'Seed',
+      kind: 'local',
+      status: 'skipped',
+      itemCount: 7,
+      message: 'Built-in fallback snapshot',
+    },
+  ],
   focuses: [
     {
       id: 'focus-local-first-graphs',

@@ -236,60 +236,6 @@
     }
   },
   {
-    "id": "hn-cf8ebfce1399",
-    "title": "Building AI Agents in Python with Pydantic AI",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
-    "published_at": "2026-04-29T12:18:36Z",
-    "project": "Pydantic",
-    "topic": "typed AI",
-    "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
-    "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "pydantic",
-      "typed agents",
-      "structured outputs",
-      "hacker-news"
-    ],
-    "score": 61,
-    "raw_json": {
-      "author": "eigenBasis",
-      "collection_stage": "live",
-      "comments": 0,
-      "object_id": "47947311",
-      "points": 1,
-      "source": "hacker-news"
-    }
-  },
-  {
-    "id": "hn-ea531198b925",
-    "title": "Show HN: A lightweight desktop explorer for HelixDB",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://github.com/nodfans/helixdb-explorer",
-    "published_at": "2026-02-25T14:09:15Z",
-    "project": "HelixDB",
-    "topic": "graph database",
-    "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
-    "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "helixdb",
-      "graph database",
-      "rust graph",
-      "hacker-news"
-    ],
-    "score": 62,
-    "raw_json": {
-      "author": "jomamax",
-      "collection_stage": "live",
-      "comments": 0,
-      "object_id": "47151691",
-      "points": 2,
-      "source": "hacker-news"
-    }
-  },
-  {
     "id": "lakesail-e5ce5d36852a",
     "title": "LakeSail belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",

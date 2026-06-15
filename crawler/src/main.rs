@@ -20,7 +20,7 @@ enum CommandKind {
         config: PathBuf,
         #[arg(long, default_value = "crawler/data/items.json")]
         out: PathBuf,
-        #[arg(long, default_value = "public/data/newsletter-items.json")]
+        #[arg(long, default_value = "public/data/newsletter-snapshot.json")]
         public_out: PathBuf,
         #[arg(long)]
         live: bool,
@@ -78,6 +78,32 @@ struct NewsItem {
     raw_json: serde_json::Value,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct PublicSnapshot {
+    generated_at: DateTime<Utc>,
+    theme: String,
+    items: Vec<NewsItem>,
+    source_runs: Vec<SourceRun>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SourceRun {
+    source: String,
+    kind: String,
+    status: SourceRunStatus,
+    item_count: usize,
+    message: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum SourceRunStatus {
+    Ok,
+    Error,
+    Pending,
+    Skipped,
+}
+
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
@@ -102,13 +128,18 @@ fn collect(
 ) -> Result<()> {
     let watchlist = read_watchlist(&config)?;
     let mut items = seed_items(&watchlist);
+    let mut source_runs = seed_source_runs(&watchlist, live);
     if live {
         match live_items(&watchlist, max_live_per_project) {
-            Ok(live_items) => items.extend(live_items),
+            Ok((live_items, live_source_runs)) => {
+                items.extend(live_items);
+                source_runs.extend(live_source_runs);
+            }
             Err(error) => eprintln!("live collection skipped after error: {error:#}"),
         }
     }
     let items = dedupe_items(items);
+    let item_count = items.len();
     if let Some(parent) = out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
@@ -117,11 +148,17 @@ fn collect(
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    fs::write(&public_out, payload)
+    let public_snapshot = PublicSnapshot {
+        generated_at: Utc::now(),
+        theme: watchlist.theme,
+        items,
+        source_runs,
+    };
+    fs::write(&public_out, serde_json::to_string_pretty(&public_snapshot)?)
         .with_context(|| format!("writing {}", public_out.display()))?;
     println!(
         "wrote {} newsletter items to {} and {}",
-        items.len(),
+        item_count,
         out.display(),
         public_out.display()
     );
@@ -219,21 +256,32 @@ fn verify(config: PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn live_items(watchlist: &Watchlist, max_per_project: usize) -> Result<Vec<NewsItem>> {
+fn live_items(
+    watchlist: &Watchlist,
+    max_per_project: usize,
+) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
     let client = Client::builder()
         .timeout(StdDuration::from_secs(12))
         .user_agent("verdun-newsletter-crawler/0.1")
         .build()
         .context("building HTTP client")?;
     let mut items = Vec::new();
+    let mut source_runs = Vec::new();
     if let Some(source) = watchlist
         .sources
         .iter()
         .find(|source| source.name == "Hacker News")
     {
         match fetch_hacker_news(&client, watchlist, source, max_per_project) {
-            Ok(mut source_items) => items.append(&mut source_items),
-            Err(error) => eprintln!("Hacker News collection failed: {error:#}"),
+            Ok(mut source_items) => {
+                source_runs.push(ok_source_run(
+                    source,
+                    source_items.len(),
+                    "HN Algolia search_by_date",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
     if let Some(source) = watchlist
@@ -242,11 +290,35 @@ fn live_items(watchlist: &Watchlist, max_per_project: usize) -> Result<Vec<NewsI
         .find(|source| source.name == "Lobste.rs")
     {
         match fetch_lobsters(&client, watchlist, source, max_per_project) {
-            Ok(mut source_items) => items.append(&mut source_items),
-            Err(error) => eprintln!("Lobste.rs collection failed: {error:#}"),
+            Ok(mut source_items) => {
+                source_runs.push(ok_source_run(
+                    source,
+                    source_items.len(),
+                    "Lobste.rs newest.json",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
-    Ok(items)
+    if let Some(source) = watchlist
+        .sources
+        .iter()
+        .find(|source| source.name == "dev.to")
+    {
+        match fetch_dev_to(&client, watchlist, source, max_per_project) {
+            Ok(mut source_items) => {
+                source_runs.push(ok_source_run(
+                    source,
+                    source_items.len(),
+                    "dev.to articles API",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
+    Ok((items, source_runs))
 }
 
 fn fetch_hacker_news(
@@ -313,6 +385,86 @@ fn fetch_lobsters(
         }
     }
     Ok(items)
+}
+
+fn fetch_dev_to(
+    client: &Client,
+    watchlist: &Watchlist,
+    source: &Source,
+    max_per_project: usize,
+) -> Result<Vec<NewsItem>> {
+    let articles = client
+        .get("https://dev.to/api/articles")
+        .query(&[("per_page", "100"), ("top", "7")])
+        .send()
+        .context("fetching dev.to articles")?
+        .error_for_status()
+        .context("dev.to returned error")?
+        .json::<Vec<DevToArticle>>()
+        .context("decoding dev.to articles")?;
+    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut items = Vec::new();
+    for article in articles {
+        for project in &watchlist.projects {
+            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+            if count >= max_per_project || !dev_to_article_matches_project(&article, project) {
+                continue;
+            }
+            items.push(dev_to_item(project, source, &article));
+            counts.insert(project.name.as_str(), count + 1);
+        }
+    }
+    Ok(items)
+}
+
+fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
+    watchlist
+        .sources
+        .iter()
+        .filter_map(|source| {
+            let status = if live {
+                SourceRunStatus::Pending
+            } else {
+                SourceRunStatus::Skipped
+            };
+            let message = match source.name.as_str() {
+                "Hacker News" | "Lobste.rs" | "dev.to" if live => return None,
+                "Hacker News" | "Lobste.rs" | "dev.to" => {
+                    "run with --live to collect this public source"
+                }
+                "Medium" | "Substack" => "feed adapter pending",
+                "LinkedIn" | "X/Twitter" => "credentialed social adapter pending",
+                _ => "adapter pending",
+            };
+            Some(SourceRun {
+                source: source.name.clone(),
+                kind: source.kind.clone(),
+                status,
+                item_count: 0,
+                message: message.to_string(),
+            })
+        })
+        .collect()
+}
+
+fn ok_source_run(source: &Source, item_count: usize, message: &str) -> SourceRun {
+    SourceRun {
+        source: source.name.clone(),
+        kind: source.kind.clone(),
+        status: SourceRunStatus::Ok,
+        item_count,
+        message: message.to_string(),
+    }
+}
+
+fn error_source_run(source: &Source, message: &str) -> SourceRun {
+    SourceRun {
+        source: source.name.clone(),
+        kind: source.kind.clone(),
+        status: SourceRunStatus::Error,
+        item_count: 0,
+        message: message.to_string(),
+    }
 }
 
 fn read_watchlist(path: &PathBuf) -> Result<Watchlist> {
@@ -415,6 +567,25 @@ struct LobstersStory {
     score: Option<i32>,
     comment_count: Option<i32>,
     tags: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+struct DevToArticle {
+    id: i64,
+    title: String,
+    description: Option<String>,
+    url: String,
+    canonical_url: Option<String>,
+    published_at: DateTime<Utc>,
+    positive_reactions_count: Option<i32>,
+    comments_count: Option<i32>,
+    tag_list: Vec<String>,
+    user: DevToUser,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+struct DevToUser {
+    username: String,
 }
 
 fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
@@ -525,6 +696,51 @@ fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> N
     }
 }
 
+fn dev_to_item(project: &Project, source: &Source, article: &DevToArticle) -> NewsItem {
+    let reactions = article.positive_reactions_count.unwrap_or_default();
+    let comments = article.comments_count.unwrap_or_default();
+    NewsItem {
+        id: stable_id("dev-to", &format!("{}:{}", project.name, article.id)),
+        title: article.title.clone(),
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: article
+            .canonical_url
+            .clone()
+            .unwrap_or_else(|| article.url.clone()),
+        published_at: article.published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: article.description.clone().unwrap_or_else(|| {
+            format!(
+                "dev.to surfaced this item while tracking {} signals: {}.",
+                project.name,
+                project.keywords.join(", ")
+            )
+        }),
+        why_it_matters: format!(
+            "Developer essays show whether {} is gaining practical adoption beyond release announcements.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(2)
+            .cloned()
+            .chain(article.tag_list.iter().take(4).cloned())
+            .collect(),
+        score: 55 + reactions.min(30) + comments.min(15),
+        raw_json: serde_json::json!({
+            "collection_stage": "live",
+            "source": "dev-to",
+            "article_id": article.id,
+            "reactions": reactions,
+            "comments": comments,
+            "author": article.user.username
+        }),
+    }
+}
+
 fn project_query(project: &Project) -> String {
     let mut parts = vec![project.name.clone()];
     parts.extend(project_live_terms(project).into_iter().take(2));
@@ -545,6 +761,17 @@ fn hn_hit_matches_project(hit: &HackerNewsHit, project: &Project) -> bool {
 
 fn lobsters_story_matches_project(story: &LobstersStory, project: &Project) -> bool {
     let text = format!("{} {} {}", story.title, story.url, story.tags.join(" "));
+    text_matches_project(&text, project)
+}
+
+fn dev_to_article_matches_project(article: &DevToArticle, project: &Project) -> bool {
+    let text = format!(
+        "{} {} {} {}",
+        article.title,
+        article.description.as_deref().unwrap_or_default(),
+        article.url,
+        article.tag_list.join(" ")
+    );
     text_matches_project(&text, project)
 }
 

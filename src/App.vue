@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, RefreshCw, Send, Sparkles } from '@lucide/vue'
+import { Activity, ArrowDown, ArrowUp, BookOpenText, Database, ExternalLink, RefreshCw, Send, Sparkles } from '@lucide/vue'
 import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from './lib/newsletter'
 import { seedSnapshot, sortedNewsItems } from './lib/newsletter'
 
@@ -14,6 +14,8 @@ const includedItems = computed(() => sortedNewsItems(snapshot.value.items).filte
 const rejectedItems = computed(() => snapshot.value.items.filter((item) => item.vote < 0).length)
 const sourceCount = computed(() => new Set(snapshot.value.items.map((item) => item.source)).size)
 const sortedItems = computed(() => sortedNewsItems(snapshot.value.items))
+const liveSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'ok' && run.itemCount > 0).length)
+const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
 
 onMounted(() => {
   void loadSnapshot()
@@ -121,6 +123,10 @@ function formatDate(value: string): string {
           <span>{{ sourceCount }}</span>
           <p>sources</p>
         </div>
+        <div>
+          <span>{{ liveSourceCount }}</span>
+          <p>live</p>
+        </div>
       </div>
     </section>
 
@@ -156,6 +162,21 @@ function formatDate(value: string): string {
             <strong>{{ focus.scope === 'this_week' ? 'This week' : 'Ongoing' }}</strong>
             {{ focus.text }}
           </p>
+        </div>
+
+        <div class="source-health">
+          <div class="panel-heading">
+            <Activity :size="18" aria-hidden="true" />
+            <h2>Source health</h2>
+          </div>
+          <div class="source-row" v-for="run in snapshot.sourceRuns" :key="run.source">
+            <span class="source-dot" :class="run.status" aria-hidden="true"></span>
+            <div>
+              <strong>{{ run.source }}</strong>
+              <p>{{ run.itemCount }} items · {{ run.message }}</p>
+            </div>
+          </div>
+          <p v-if="pendingSourceCount" class="empty">{{ pendingSourceCount }} credentialed or feed adapters still pending.</p>
         </div>
 
         <div class="draft">
