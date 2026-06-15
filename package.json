@@ -16,6 +16,7 @@
     "smoke:draft": "node scripts/smoke-draft-local.mjs",
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",
+    "smoke:loader": "node scripts/smoke-loader-sql.mjs",
     "smoke:readiness": "node scripts/smoke-readiness.mjs",
     "smoke:recency": "node scripts/smoke-snapshot-recency.mjs",
     "draft": "node scripts/newsletter-draft.mjs",

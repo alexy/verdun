@@ -35,17 +35,18 @@ Apply `db/migrations/0001_newsletter.sql` to the external Postgres database used
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json
-cargo run --manifest-path crawler/Cargo.toml -- export-sql --input crawler/data/items.json --out /tmp/verdun-load.sql
+cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-load.sql
 ```
 
 `collect` writes `crawler/data/items.json` for item loader work, `crawler/data/source-runs.json` for source-health loader work, and `public/data/newsletter-snapshot.json` as the app's static fallback when no external database is configured. The public snapshot includes item rows and source-health metadata.
+`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows and source-health rows from the same collection run. The older `--input` plus `--source-runs` path remains available for debugging split files.
 
 For a weekly public-source pass:
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- verify
 cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2
-cargo run --manifest-path crawler/Cargo.toml -- export-sql --out /tmp/verdun-newsletter-load.sql
+cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql
 ```
 
 Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through project-tagged public article queries, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks. The watchlist covers the initial AI/data projects plus Grust-adjacent graph, Sail/lakehouse, and indexing systems including Grust Sail, FalkorDB, LadybugDB, and CocoIndex. The verifier checks that the required projects, public-source adapters, publication feeds, and manual social import files are all configured before a weekly pass.
