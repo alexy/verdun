@@ -13,6 +13,12 @@ homepage = "https://github.com/lakehq/sail"
 keywords = ["sail", "spark connect", "datafusion", "arrow", "rust"]
 
 [[projects]]
+name = "Grust Sail"
+topic = "lakehouse graph"
+homepage = "https://github.com/ChiefScientist-io/grust"
+keywords = ["grust-sail", "grust sail", "sail graph", "spark connect graph", "graph lakehouse"]
+
+[[projects]]
 name = "Turso"
 topic = "edge data"
 homepage = "https://turso.tech"

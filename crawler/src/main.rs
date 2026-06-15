@@ -322,6 +322,7 @@ fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
     for project_name in [
         "Pydantic",
         "LakeSail",
+        "Grust Sail",
         "Turso",
         "LanceDB",
         "HelixDB",

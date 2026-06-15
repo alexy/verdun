@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T22:41:28.002613Z",
+  "generated_at": "2026-06-15T23:08:40.706454Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
@@ -8,7 +8,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://github.com/cocoindex-io/cocoindex",
-      "published_at": "2026-06-04T12:00:00Z",
+      "published_at": "2026-06-03T12:00:00Z",
       "project": "CocoIndex",
       "topic": "incremental indexing",
       "summary": "CocoIndex is being tracked for incremental indexing signals around cocoindex, target state, incremental indexing, knowledge graph.",
@@ -19,7 +19,7 @@
         "incremental indexing",
         "knowledge graph"
       ],
-      "score": 57,
+      "score": 54,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/cocoindex-io/cocoindex",
@@ -32,7 +32,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://www.falkordb.com",
-      "published_at": "2026-06-06T12:00:00Z",
+      "published_at": "2026-06-05T12:00:00Z",
       "project": "FalkorDB",
       "topic": "graph database",
       "summary": "FalkorDB is being tracked for graph database signals around falkordb, redis graph, cypher graph, graph query.",
@@ -43,7 +43,7 @@
         "cypher graph",
         "graph query"
       ],
-      "score": 63,
+      "score": 60,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://www.falkordb.com",
@@ -56,7 +56,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://github.com/ChiefScientist-io/grust",
-      "published_at": "2026-06-08T12:00:00Z",
+      "published_at": "2026-06-07T12:00:00Z",
       "project": "Grust",
       "topic": "typed graph",
       "summary": "Grust is being tracked for typed graph signals around grust, typed graph, rust, cypher.",
@@ -67,7 +67,31 @@
         "rust",
         "cypher"
       ],
-      "score": 69,
+      "score": 66,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ChiefScientist-io/grust",
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "grust-sail-3683deba292c",
+      "title": "Grust Sail belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ChiefScientist-io/grust",
+      "published_at": "2026-06-13T12:00:00Z",
+      "project": "Grust Sail",
+      "topic": "lakehouse graph",
+      "summary": "Grust Sail is being tracked for lakehouse graph signals around grust-sail, grust sail, sail graph, spark connect graph, graph lakehouse.",
+      "why_it_matters": "Grust Sail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "grust-sail",
+        "grust sail",
+        "sail graph",
+        "spark connect graph"
+      ],
+      "score": 84,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/ChiefScientist-io/grust",
@@ -80,7 +104,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://github.com/HelixDB/helix-db",
-      "published_at": "2026-06-11T12:00:00Z",
+      "published_at": "2026-06-10T12:00:00Z",
       "project": "HelixDB",
       "topic": "graph database",
       "summary": "HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph.",
@@ -90,7 +114,7 @@
         "graph database",
         "rust graph"
       ],
-      "score": 78,
+      "score": 75,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/HelixDB/helix-db",
@@ -314,6 +338,33 @@
       }
     },
     {
+      "id": "hn-cf8ebfce1399",
+      "title": "Building AI Agents in Python with Pydantic AI",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://machinelearningmastery.com/building-ai-agents-in-python-with-pydantic-ai/",
+      "published_at": "2026-04-29T12:18:36Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "hacker-news"
+      ],
+      "score": 61,
+      "raw_json": {
+        "author": "eigenBasis",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "47947311",
+        "points": 1,
+        "source": "hacker-news"
+      }
+    },
+    {
       "id": "hn-e7083fb9c9c",
       "title": "Show HN: We built a type-safe Python ORM for RedisGraph/FalkorDB",
       "source": "Hacker News",
@@ -341,12 +392,39 @@
       }
     },
     {
+      "id": "hn-ea531198b925",
+      "title": "Show HN: A lightweight desktop explorer for HelixDB",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/nodfans/helixdb-explorer",
+      "published_at": "2026-02-25T14:09:15Z",
+      "project": "HelixDB",
+      "topic": "graph database",
+      "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
+      "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "helixdb",
+        "graph database",
+        "rust graph",
+        "hacker-news"
+      ],
+      "score": 62,
+      "raw_json": {
+        "author": "jomamax",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "47151691",
+        "points": 2,
+        "source": "hacker-news"
+      }
+    },
+    {
       "id": "ladybugdb-b8cc94227aee",
       "title": "LadybugDB belongs in this week's typed AI/data systems watch",
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://github.com/ladybugdb/ladybugdb",
-      "published_at": "2026-06-05T12:00:00Z",
+      "published_at": "2026-06-04T12:00:00Z",
       "project": "LadybugDB",
       "topic": "embedded graph",
       "summary": "LadybugDB is being tracked for embedded graph signals around ladybugdb, lbug, embedded graph, arrow graph.",
@@ -357,7 +435,7 @@
         "embedded graph",
         "arrow graph"
       ],
-      "score": 60,
+      "score": 57,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/ladybugdb/ladybugdb",
@@ -394,7 +472,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://lancedb.com",
-      "published_at": "2026-06-12T12:00:00Z",
+      "published_at": "2026-06-11T12:00:00Z",
       "project": "LanceDB",
       "topic": "vector data",
       "summary": "LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar.",
@@ -405,7 +483,7 @@
         "vectors",
         "multimodal"
       ],
-      "score": 81,
+      "score": 78,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://lancedb.com",
@@ -610,7 +688,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://github.com/apache/age",
-      "published_at": "2026-06-09T12:00:00Z",
+      "published_at": "2026-06-08T12:00:00Z",
       "project": "pgGraph",
       "topic": "postgres graph",
       "summary": "pgGraph is being tracked for postgres graph signals around postgres graph, apache age, cypher, pggraph.",
@@ -621,7 +699,7 @@
         "cypher",
         "pggraph"
       ],
-      "score": 72,
+      "score": 69,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/apache/age",
@@ -658,7 +736,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://surrealdb.com",
-      "published_at": "2026-06-10T12:00:00Z",
+      "published_at": "2026-06-09T12:00:00Z",
       "project": "SurrealDB",
       "topic": "multimodel data",
       "summary": "SurrealDB is being tracked for multimodel data signals around surrealdb, multimodel, graph, realtime.",
@@ -669,7 +747,7 @@
         "graph",
         "realtime"
       ],
-      "score": 75,
+      "score": 72,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://surrealdb.com",
@@ -682,7 +760,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://turso.tech",
-      "published_at": "2026-06-13T12:00:00Z",
+      "published_at": "2026-06-12T12:00:00Z",
       "project": "Turso",
       "topic": "edge data",
       "summary": "Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge.",
@@ -693,7 +771,7 @@
         "sqlite",
         "replication"
       ],
-      "score": 84,
+      "score": 81,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://turso.tech",
@@ -706,7 +784,7 @@
       "source": "Hacker News",
       "source_kind": "community",
       "url": "https://github.com/ChiefScientist-io/typesec",
-      "published_at": "2026-06-07T12:00:00Z",
+      "published_at": "2026-06-06T12:00:00Z",
       "project": "TypeSec",
       "topic": "typed security",
       "summary": "TypeSec is being tracked for typed security signals around typesec, capability, typed policy, security.",
@@ -717,7 +795,7 @@
         "typed policy",
         "security"
       ],
-      "score": 66,
+      "score": 63,
       "raw_json": {
         "collection_stage": "watchlist-seed",
         "homepage": "https://github.com/ChiefScientist-io/typesec",
@@ -778,7 +856,7 @@
       "source": "Hacker News",
       "kind": "community",
       "status": "ok",
-      "item_count": 9,
+      "item_count": 11,
       "message": "HN Algolia search_by_date"
     },
     {

@@ -79,7 +79,7 @@ The connective tissue is graph database, multimodel data, and typed AI. The most
 
 ## Sources watched
 
-- Hacker News: ok, 9 items. HN Algolia search_by_date
+- Hacker News: ok, 11 items. HN Algolia search_by_date
 - Lobste.rs: ok, 0 items. Lobste.rs newest.json
 - dev.to: ok, 0 items. dev.to articles API
 - Medium: ok, 6 items. configured RSS/Atom feeds
