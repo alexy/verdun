@@ -93,6 +93,9 @@ if (publishManifest.itemIds.length !== view.draft.value.itemIds.length) {
 if (!publishManifest.selectedItems.some((item) => item.id === 'lakesail-rust-spark' && item.project === 'LakeSail')) {
   throw new Error('publish manifest did not include selected item metadata')
 }
+if (!publishManifest.selectedItems.every((item) => typeof item.selectionReason === 'string' && item.selectionReason.includes('score'))) {
+  throw new Error('publish manifest did not include selected item selection reasons')
+}
 if (publishManifest.votes['lakesail-rust-spark'] !== 1) {
   throw new Error('publish manifest did not include vote state')
 }

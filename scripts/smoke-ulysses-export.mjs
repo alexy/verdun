@@ -92,6 +92,9 @@ try {
   if (!manifest.selectedItems?.some((item) => item.id === 'grust-sail-3683deba292c' && item.project === 'Grust Sail' && item.url)) {
     throw new Error('Ulysses manifest is missing selected item metadata')
   }
+  if (!manifest.selectedItems?.some((item) => item.id === 'grust-sail-3683deba292c' && item.selectionReason?.includes('explicit editorial upvote'))) {
+    throw new Error('Ulysses manifest is missing selected item selection reasons')
+  }
   if (!Array.isArray(manifest.sourceCoverage?.uncoveredProjects)) {
     throw new Error('Ulysses manifest is missing source coverage details')
   }

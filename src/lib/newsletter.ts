@@ -136,6 +136,7 @@ export type NewsletterPublishManifest = {
     url: string
     publishedAt: string
     vote: VoteValue
+    selectionReason: string
   }>
   votes: Record<string, VoteValue>
   focuses: Array<{
@@ -482,6 +483,7 @@ export function buildPublishManifest(
         url: item.url,
         publishedAt: item.publishedAt,
         vote: item.vote,
+        selectionReason: selectionReason(item),
       })),
     votes: buildEditorialStateExport(snapshot).votes,
     focuses: snapshot.focuses.map((focus) => ({
@@ -737,6 +739,8 @@ function itemSection(item: NewsItem, index: number): string[] {
     '',
     `Credo fit: ${credoBlurb(item)} Related ontology: ${ontologyForItem(item).map((node) => node.label).join(', ')}.`,
     '',
+    `Selection: ${selectionReason(item)}`,
+    '',
     `Source: [${item.source}](${item.url}) · ${item.topic} · ${item.tags.slice(0, 4).join(', ')}`,
     ...itemEvidenceLine(item),
     '',
@@ -751,6 +755,22 @@ function itemEvidenceLine(item: NewsItem): string[] {
     '',
     `Evidence: ${stageLabel(item.provenance.stage)} via ${item.provenance.adapter}.${keywordText}`,
   ]
+}
+
+function selectionReason(item: NewsItem): string {
+  if (item.vote > 0) {
+    return `explicit editorial upvote; score ${item.score}`
+  }
+  if (item.provenance?.stage === 'manual') {
+    return `manually reviewed source evidence; score ${item.score}`
+  }
+  if (item.provenance?.stage === 'live') {
+    return `live source ranking from ${item.source}; score ${item.score}`
+  }
+  if (isWatchlistSeed(item)) {
+    return `watchlist fallback coverage; score ${item.score}`
+  }
+  return `fallback ranking; score ${item.score}`
 }
 
 function stageLabel(stage: string): string {

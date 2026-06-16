@@ -42,6 +42,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - `verdun-crawler verify` guards the required project list, public-source adapters, Medium/Substack feed configuration, and LinkedIn/X manual import files.
 - Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
 - Draft generation now opens with a weekly throughline that synthesizes selected projects by ontology, source evidence, topic, and saved editorial intent before the item list.
+- Draft item sections and publish manifests include selection reasons so upvotes, live/manual evidence, and fallback ranking are auditable.
 - Draft item sections include provenance evidence lines when crawler/API evidence is available.
 - Fallback draft selection prefers live/manual collected items over watchlist seed placeholders and keeps project diversity unless the editor explicitly upvotes different items.
 - Draft rendering normalizes thin feed snippets such as author labels, generic overviews, and crawler boilerplate into fuller project-aware prose before Markdown/Ghost output.
