@@ -46,6 +46,10 @@ try {
   if (Array.from(projectCounts.values()).some((count) => count > 2)) {
     throw new Error('fallback draft did not keep project diversity')
   }
+  const selectedProjects = Array.from(projectCounts.keys())
+  if (!selectedProjects.some((project) => ['BAML', 'DSPy', 'Ibis', 'Dagster'].includes(project))) {
+    throw new Error('fallback draft did not preserve a functional/composable AI-data item')
+  }
   if (!draft.markdown.includes('Coverage:')) {
     throw new Error('draft source section did not include project coverage')
   }

@@ -347,7 +347,7 @@ export function draftSelection(items: NewsItem[], limit = 7): NewsItem[] {
 
   const acceptable = sortedNewsItems(items).filter((item) => item.vote >= 0)
   const collected = acceptable.filter((item) => !isWatchlistSeed(item))
-  return diverseSelection(collected.length ? collected : acceptable, limit)
+  return ontologyBalancedSelection(collected.length ? collected : acceptable, limit)
 }
 
 export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDraft {
@@ -923,22 +923,27 @@ function coverageGapSummary(projects: string[]): string {
   return `${sentenceList(visible)}${suffix}`
 }
 
-function diverseSelection(items: NewsItem[], limit: number): NewsItem[] {
+function ontologyBalancedSelection(items: NewsItem[], limit: number): NewsItem[] {
   const selected: NewsItem[] = []
   const projectCounts = new Map<string, number>()
+  const sorted = sortedNewsItems(items)
 
-  for (const item of items) {
-    const projectCount = projectCounts.get(item.project) ?? 0
-    if (projectCount >= 2) continue
-    selected.push(item)
-    projectCounts.set(item.project, projectCount + 1)
-    if (selected.length >= limit) return selected
+  const addCandidate = (candidate: NewsItem): boolean => {
+    if (selected.some((item) => item.id === candidate.id)) return false
+    const projectCount = projectCounts.get(candidate.project) ?? 0
+    if (projectCount >= 2) return false
+    selected.push(candidate)
+    projectCounts.set(candidate.project, projectCount + 1)
+    return selected.length >= limit
   }
 
-  for (const item of items) {
-    if (selected.some((selectedItem) => selectedItem.id === item.id)) continue
-    selected.push(item)
-    if (selected.length >= limit) return selected
+  for (const node of ontologyNodes) {
+    const candidate = sorted.find((item) => ontologyForItem(item).some((itemNode) => itemNode.id === node.id))
+    if (candidate && addCandidate(candidate)) return selected
+  }
+
+  for (const item of sorted) {
+    if (addCandidate(item)) return selected
   }
 
   return selected
