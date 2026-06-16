@@ -40,7 +40,7 @@ npm run check:deployed
 npm run check:deployed -- --require-ready
 ```
 
-That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the static public snapshot, and `GET /api/newsletter/items`. Add `--require-ready` after editorial review to apply the same publishing readiness criteria used by Ulysses export to the deployed/static/API snapshots. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring the Vercel API route.
+That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the static public snapshot, and `GET /api/newsletter/items`. Add `--require-ready` after editorial review to apply the same publishing readiness criteria used by Ulysses export to the deployed/static/API snapshots. For a Vercel deployment protected by Vercel Authentication, verify the route and API with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/newsletter/items --deployment <deployment-url>` from the linked project directory. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring the Vercel API route.
 
 ## Database
 

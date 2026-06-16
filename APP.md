@@ -11,6 +11,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Frontend snapshot loading plus optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`; filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`, leaving `App.vue` as component composition.
 - Vite/Vercel configured for the `/rbage/` public path.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.
+- Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/newsletter/items --deployment <deployment-url>`.
 - Inbox filtering by search text, vote state, project, and source for faster editorial review.
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
 - News cards surface crawler provenance as editorial evidence from the API/static snapshot.

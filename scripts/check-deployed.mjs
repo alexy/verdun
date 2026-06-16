@@ -32,7 +32,7 @@ function normalizeBaseUrl(value) {
 
 async function fetchText(url, label) {
   const response = await fetch(url)
-  if (!response.ok) throw new Error(`${label} returned ${response.status} at ${url}`)
+  if (!response.ok) throw new Error(responseError(label, url, response.status))
   const contentType = response.headers.get('content-type') ?? ''
   if (!contentType.includes('text/html')) {
     throw new Error(`${label} returned ${contentType || 'unknown content-type'} at ${url}`)
@@ -42,8 +42,15 @@ async function fetchText(url, label) {
 
 async function fetchJson(url, label) {
   const response = await fetch(url)
-  if (!response.ok) throw new Error(`${label} returned ${response.status} at ${url}`)
+  if (!response.ok) throw new Error(responseError(label, url, response.status))
   return await response.json()
+}
+
+function responseError(label, url, status) {
+  const hint = status === 401
+    ? ' If this is a Vercel Authentication-protected deployment, verify it with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/newsletter/items --deployment <deployment-url>`.'
+    : ''
+  return `${label} returned ${status} at ${url}.${hint}`
 }
 
 async function validateSnapshot(snapshot, label) {
