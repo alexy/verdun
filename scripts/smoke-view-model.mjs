@@ -79,6 +79,13 @@ if (view.publishManifestFilename.value !== '2026-06-15-strongly-typed-ai-data-no
 if (view.draftItems.value.length !== view.draft.value.itemIds.length) {
   throw new Error('draft item list did not resolve the current draft spine')
 }
+const sourceSummaryTotal = view.draftSourceSummary.value.reduce((sum, source) => sum + source.count, 0)
+if (sourceSummaryTotal !== view.draftItems.value.length) {
+  throw new Error('draft source summary did not account for every draft item')
+}
+if (!view.draftSourceSummary.value.some((source) => source.projects.includes('LakeSail'))) {
+  throw new Error('draft source summary did not expose draft projects by source')
+}
 view.voteFilter.value = 'draft'
 if (view.filteredItems.value.length !== view.draftItems.value.length) {
   throw new Error('draft spine filter did not show the current draft items')

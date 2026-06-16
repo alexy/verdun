@@ -58,6 +58,8 @@ try {
   await page.getByText('CocoIndex belongs in this week').first().waitFor()
   if (await page.getByText(/Local fallback:/).count()) throw new Error('app fell back to the embedded seed instead of the static snapshot')
   await page.locator('.readiness').getByRole('heading', { name: 'Publishing readiness' }).waitFor()
+  await page.locator('.draft').getByText('Source mix').waitFor()
+  await page.locator('.draft li').first().locator('strong').waitFor()
   const markdownLink = page.locator('.draft-actions').getByRole('link', { name: 'Markdown', exact: true })
   await markdownLink.waitFor()
   const markdownHref = await markdownLink.getAttribute('href')

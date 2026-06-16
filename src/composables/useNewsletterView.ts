@@ -3,6 +3,11 @@ import type { NewsletterPublishManifest, NewsletterSnapshot } from '../lib/newsl
 import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, buildSourceGapReviewMarkdown, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
 
 export type VoteFilter = 'all' | 'draft' | 'unreviewed' | 'upvoted' | 'downvoted'
+export type DraftSourceSummary = {
+  source: string
+  count: number
+  projects: string[]
+}
 
 export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const searchText = ref('')
@@ -22,6 +27,22 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const draftItems = computed(() => draft.value.itemIds
     .map((itemId) => snapshot.value.items.find((item) => item.id === itemId))
     .filter((item): item is NewsletterSnapshot['items'][number] => Boolean(item)))
+  const draftSourceSummary = computed<DraftSourceSummary[]>(() => {
+    const bySource = new Map<string, { count: number, projects: Set<string> }>()
+    for (const item of draftItems.value) {
+      const summary = bySource.get(item.source) ?? { count: 0, projects: new Set<string>() }
+      summary.count += 1
+      summary.projects.add(item.project)
+      bySource.set(item.source, summary)
+    }
+    return Array.from(bySource.entries())
+      .map(([source, summary]) => ({
+        source,
+        count: summary.count,
+        projects: Array.from(summary.projects).sort((left, right) => left.localeCompare(right)),
+      }))
+      .sort((left, right) => right.count - left.count || left.source.localeCompare(right.source))
+  })
   const filteredItems = computed(() => {
     const query = searchText.value.trim().toLowerCase()
     return sortedItems.value.filter((item) => {
@@ -65,6 +86,7 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
     draftFilename,
     draftItemIds,
     draftItems,
+    draftSourceSummary,
     editorialStateFilename,
     editorialStateJson,
     filteredItems,

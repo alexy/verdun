@@ -282,6 +282,11 @@ textarea {
   line-height: 1.45;
 }
 
+.draft li strong {
+  display: block;
+  color: var(--ink);
+}
+
 .focus-list p + p {
   margin-top: 8px;
 }
@@ -289,6 +294,28 @@ textarea {
 .focus-list strong {
   display: block;
   color: var(--ink);
+}
+
+.draft-source-mix {
+  display: grid;
+  gap: 5px;
+}
+
+.draft-source-mix strong {
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.draft-source-mix p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.draft-source-mix p span {
+  display: block;
+  color: var(--accent-dark);
+  font-weight: 900;
 }
 
 .source-health {

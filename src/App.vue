@@ -17,6 +17,7 @@ const {
   draftFilename,
   draftItemIds,
   draftItems,
+  draftSourceSummary,
   editorialStateFilename,
   editorialStateJson,
   filteredItems,
@@ -66,8 +67,9 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
 
     <section class="workspace">
       <EditorialSidebar
+        :draft-items="draftItems"
+        :draft-source-summary="draftSourceSummary"
         :focuses="snapshot.focuses"
-        :included-items="includedItems"
         :ontology-nodes="ontologyNodes"
         :pending-source-count="pendingSourceCount"
         :query-plans="snapshot.queryPlans"

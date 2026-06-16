@@ -3,11 +3,13 @@ import { ref } from 'vue'
 import { BookOpenText, ClipboardCheck, Database, Send, Sparkles } from '@lucide/vue'
 import type { NewsItem, NewsletterFocus, NewsletterReadiness, ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
 import type { OntologyNode } from '../lib/ontology'
+import type { DraftSourceSummary } from '../composables/useNewsletterView'
 import SourceHealthPanel from './SourceHealthPanel.vue'
 
 defineProps<{
+  draftItems: NewsItem[]
+  draftSourceSummary: DraftSourceSummary[]
   focuses: NewsletterFocus[]
-  includedItems: NewsItem[]
   ontologyNodes: OntologyNode[]
   pendingSourceCount: number
   queryPlans: ProjectQueryPlan[]
@@ -110,10 +112,20 @@ function submitFocus(): void {
         <Database :size="18" aria-hidden="true" />
         <h2>Draft spine</h2>
       </div>
+      <div v-if="draftSourceSummary.length" class="draft-source-mix" aria-label="Draft source mix">
+        <strong>Source mix</strong>
+        <p v-for="source in draftSourceSummary" :key="source.source">
+          <span>{{ source.source }} {{ source.count }}</span>
+          {{ source.projects.slice(0, 3).join(', ') }}
+        </p>
+      </div>
       <ol>
-        <li v-for="item in includedItems" :key="item.id">{{ item.project }}: {{ item.whyItMatters }}</li>
+        <li v-for="item in draftItems" :key="item.id">
+          <strong>{{ item.project }}</strong>
+          {{ item.whyItMatters }}
+        </li>
       </ol>
-      <p v-if="!includedItems.length" class="empty">Upvote items to assemble the weekly spine.</p>
+      <p v-if="!draftItems.length" class="empty">Upvote items to assemble the weekly spine.</p>
     </div>
   </aside>
 </template>
