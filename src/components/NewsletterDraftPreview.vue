@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Check, Copy, Download, FileJson, FileText, Upload } from '@lucide/vue'
-import type { NewsletterDraft } from '../lib/newsletter'
+import type { NewsletterDraft, NewsletterPublishManifest } from '../lib/newsletter'
 
 const props = defineProps<{
   draft: NewsletterDraft
@@ -9,6 +9,7 @@ const props = defineProps<{
   editorialStateJson: string
   filename: string
   importSummary: string
+  publishManifest: NewsletterPublishManifest
   publishManifestFilename: string
   publishManifestJson: string
 }>()
@@ -25,6 +26,8 @@ const editorialStateDownloadHref = computed(() => `data:application/json;charset
 const publishManifestDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.publishManifestJson)}`)
 const serverMarkdownHref = '/api/newsletter/draft?format=markdown'
 const serverManifestHref = '/api/newsletter/draft?format=manifest'
+const failedReadinessChecks = computed(() => props.publishManifest.readiness.checks.filter((check) => !check.passed).slice(0, 2))
+const failedProseChecks = computed(() => props.publishManifest.proseQuality.checks.filter((check) => !check.passed).slice(0, 2))
 
 async function copyDraftMarkdown(): Promise<void> {
   copyStatus.value = 'idle'
@@ -98,6 +101,42 @@ async function importStateFile(event: Event): Promise<void> {
     </div>
     <h3>{{ draft.title }}</h3>
     <p>{{ draft.subtitle }}</p>
+    <section class="publish-audit" aria-label="Publish audit">
+      <div>
+        <strong>{{ publishManifest.issue.date }}</strong>
+        <span>{{ publishManifest.issue.slug }}</span>
+      </div>
+      <dl>
+        <div>
+          <dt>Selected</dt>
+          <dd>{{ publishManifest.issue.selectedItemCount }}</dd>
+        </div>
+        <div>
+          <dt>Projects</dt>
+          <dd>{{ publishManifest.issue.projectCount }}</dd>
+        </div>
+        <div>
+          <dt>Sources</dt>
+          <dd>{{ publishManifest.issue.sourceCount }}</dd>
+        </div>
+        <div>
+          <dt>Focus</dt>
+          <dd>{{ publishManifest.issue.focusCount }}</dd>
+        </div>
+      </dl>
+      <p>
+        <span :class="`audit-pill audit-pill--${publishManifest.readiness.status}`">
+          Readiness: {{ publishManifest.readiness.status === 'ready' ? 'ready' : 'needs review' }}
+        </span>
+        <span :class="`audit-pill audit-pill--${publishManifest.proseQuality.status}`">
+          Prose: {{ publishManifest.proseQuality.status === 'ready' ? 'ready' : 'needs review' }}
+        </span>
+      </p>
+      <ul v-if="failedReadinessChecks.length || failedProseChecks.length">
+        <li v-for="check in failedReadinessChecks" :key="`readiness-${check.id}`">{{ check.label }}: {{ check.detail }}</li>
+        <li v-for="check in failedProseChecks" :key="`prose-${check.id}`">{{ check.label }}: {{ check.detail }}</li>
+      </ul>
+    </section>
     <p v-if="importStatus || importSummary" class="draft-import-status">{{ importStatus }}<span v-if="importStatus && importSummary"> · </span>{{ importSummary }}</p>
     <p v-if="copyStatus === 'failed'" class="draft-copy-error">Clipboard access is unavailable in this browser session.</p>
     <div class="draft-preview__body" v-html="draft.html"></div>

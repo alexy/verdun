@@ -102,6 +102,10 @@ try {
   }
   const manifestHref = await manifestLink.getAttribute('href')
   const manifestJson = JSON.parse(decodeURIComponent(manifestHref.split(',')[1] ?? ''))
+  await page.locator('.publish-audit').getByText(manifestJson.issue.slug).waitFor()
+  await page.locator('.publish-audit').getByText(String(manifestJson.issue.selectedItemCount)).first().waitFor()
+  await page.locator('.publish-audit').getByText(/Readiness:/).waitFor()
+  await page.locator('.publish-audit').getByText(/Prose:/).waitFor()
   if (!manifestJson.itemIds?.length || !manifestJson.selectedItems?.length) {
     throw new Error('publish manifest export did not include selected item audit data')
   }

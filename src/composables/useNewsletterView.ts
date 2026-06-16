@@ -1,5 +1,5 @@
 import { computed, ref, type Ref } from 'vue'
-import type { NewsletterSnapshot } from '../lib/newsletter'
+import type { NewsletterPublishManifest, NewsletterSnapshot } from '../lib/newsletter'
 import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
 
 export type VoteFilter = 'all' | 'unreviewed' | 'upvoted' | 'downvoted'
@@ -46,9 +46,10 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const sourceCoverage = computed(() => evaluateSourceCoverage(snapshot.value))
   const draftFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-strongly-typed-ai-data-notes.md`)
   const publishManifestFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-strongly-typed-ai-data-notes.manifest.json`)
-  const publishManifestJson = computed(() => JSON.stringify(buildPublishManifest(draft.value, snapshot.value, {
+  const publishManifest = computed<NewsletterPublishManifest>(() => buildPublishManifest(draft.value, snapshot.value, {
     markdownPath: draftFilename.value,
-  }), null, 2))
+  }))
+  const publishManifestJson = computed(() => JSON.stringify(publishManifest.value, null, 2))
   const editorialStateJson = computed(() => JSON.stringify(buildEditorialStateExport(snapshot.value), null, 2))
   const editorialStateFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-verdun-editorial-state.json`)
 
@@ -63,6 +64,7 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
     pendingSourceCount,
     projectFilter,
     projectOptions,
+    publishManifest,
     publishManifestFilename,
     publishManifestJson,
     readiness,

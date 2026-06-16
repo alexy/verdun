@@ -23,6 +23,7 @@ const {
   pendingSourceCount,
   projectFilter,
   projectOptions,
+  publishManifest,
   publishManifestFilename,
   publishManifestJson,
   readiness,
@@ -97,6 +98,7 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
           :editorial-state-json="editorialStateJson"
           :filename="draftFilename"
           :import-summary="editorialStateImportSummary"
+          :publish-manifest="publishManifest"
           :publish-manifest-filename="publishManifestFilename"
           :publish-manifest-json="publishManifestJson"
           @import-editorial-state="handleEditorialStateImport"
