@@ -53,21 +53,8 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 
 Current local checks:
 
-- `npm run build`
+- `npm run smoke:all`
 - `npm run prod:build`
-- `cargo check --manifest-path crawler/Cargo.toml`
-- `cargo run --manifest-path crawler/Cargo.toml -- verify`
 - `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2`
-- `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`
-- `npm run smoke:loader`
 - `npm run draft`
-- `npm run smoke:api`
-- `npm run smoke:api-http`
-- `npm run smoke:draft`
-- `npm run smoke:draft-url`
-- `npm run smoke:ghost`
-- `npm run smoke:readiness`
-- `npm run smoke:recency`
-- `npm run smoke:snapshot`
-- `npm run smoke:view`
 - `npm run smoke:app -- http://127.0.0.1:5174`

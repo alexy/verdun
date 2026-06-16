@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "prod:build": "vue-tsc -b && vite build --outDir dist-prod",
     "prod:app": "vite preview --host 127.0.0.1 --port 5174 --strictPort --outDir dist-prod",
+    "smoke:all": "node scripts/smoke-all.mjs",
     "smoke:app": "node scripts/smoke-app.mjs",
     "smoke:api": "node scripts/smoke-api-local.mjs",
     "smoke:api-http": "node scripts/smoke-api-http.mjs",
