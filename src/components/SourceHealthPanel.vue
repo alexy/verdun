@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Activity } from '@lucide/vue'
+import { Activity, Plus } from '@lucide/vue'
 import type { ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
 
 const props = defineProps<{
@@ -7,6 +7,10 @@ const props = defineProps<{
   queryPlans: ProjectQueryPlan[]
   sourceCoverage: SourceCoverageSummary
   sourceRuns: SourceRun[]
+}>()
+
+const emit = defineEmits<{
+  saveFocus: [text: string, scope: 'this_week' | 'ongoing']
 }>()
 
 function projectSummary(run: SourceRun): string {
@@ -31,6 +35,10 @@ function coverageGapPlans(): ProjectQueryPlan[] {
   const uncovered = new Set(props.sourceCoverage.uncoveredProjects)
   return props.queryPlans.filter((plan) => uncovered.has(plan.project)).slice(0, 4)
 }
+
+function requestMoreCoverage(plan: ProjectQueryPlan): void {
+  emit('saveFocus', `More source material on ${plan.project}: ${queryPlanSummary(plan) || plan.hackerNewsQuery}.`, 'this_week')
+}
 </script>
 
 <template>
@@ -50,8 +58,13 @@ function coverageGapPlans(): ProjectQueryPlan[] {
       </p>
       <ul v-if="coverageGapPlans().length">
         <li v-for="plan in coverageGapPlans()" :key="plan.project">
-          <strong>{{ plan.project }}</strong>
-          <span>{{ queryPlanSummary(plan) }}</span>
+          <div>
+            <strong>{{ plan.project }}</strong>
+            <span>{{ queryPlanSummary(plan) }}</span>
+          </div>
+          <button type="button" :title="`Ask for more ${plan.project}`" @click="requestMoreCoverage(plan)">
+            <Plus :size="14" aria-hidden="true" />
+          </button>
         </li>
       </ul>
     </div>

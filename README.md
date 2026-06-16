@@ -13,7 +13,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 - Public item cards surface crawler provenance as editorial evidence, including the adapter/stage that brought each item into the queue.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, and healthy watched sources before local Ulysses export.
-- Source health calls out watched projects that lack live/manual source coverage and shows crawler query hints for those gaps, so the editor can turn them into this-week collection requests.
+- Source health calls out watched projects that lack live/manual source coverage, shows crawler query hints for those gaps, and lets the editor save a this-week collection request from a gap with one click.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
 - Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, while filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`.

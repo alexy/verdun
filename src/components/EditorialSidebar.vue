@@ -70,6 +70,7 @@ function submitFocus(): void {
       :query-plans="queryPlans"
       :source-coverage="sourceCoverage"
       :source-runs="sourceRuns"
+      @save-focus="(text, scope) => emit('saveFocus', text, scope)"
     />
 
     <div class="readiness" :class="`readiness--${readiness.status}`">

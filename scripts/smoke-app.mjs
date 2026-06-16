@@ -36,6 +36,8 @@ try {
   const apacheArrowGap = page.locator('.source-gaps li', { hasText: 'Apache Arrow' })
   await apacheArrowGap.waitFor()
   await apacheArrowGap.getByText(/apache arrow/).waitFor()
+  await apacheArrowGap.getByTitle('Ask for more Apache Arrow').click()
+  await page.getByText('More source material on Apache Arrow').first().waitFor()
   await page.locator('.query-plans').getByText('Crawler query plan · 23 projects').waitFor()
   await page.locator('.query-plans summary').click()
   await page.locator('.query-plans').getByText('BAML baml').waitFor()
@@ -81,6 +83,9 @@ try {
   }
   if (!stateJson.focuses?.some((focus) => focus.text.includes('More local-first Rust graph databases'))) {
     throw new Error('editorial state export did not include the saved focus')
+  }
+  if (!stateJson.focuses?.some((focus) => focus.text.includes('More source material on Apache Arrow'))) {
+    throw new Error('editorial state export did not include the coverage-gap focus')
   }
   const manifestHref = await manifestLink.getAttribute('href')
   const manifestJson = JSON.parse(decodeURIComponent(manifestHref.split(',')[1] ?? ''))
