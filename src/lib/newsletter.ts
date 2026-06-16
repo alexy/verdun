@@ -488,12 +488,29 @@ function sourceRunLine(run: SourceRun): string {
 function coverageGapSection(snapshot: NewsletterSnapshot): string[] {
   const coverage = evaluateSourceCoverage(snapshot)
   if (!coverage.uncoveredProjects.length) return []
+  const hints = coverageGapHints(coverage.uncoveredProjects, snapshot.queryPlans)
   return [
     '',
     '## Coverage gaps',
     '',
     `Ask for more source material on ${coverageGapSummary(coverage.uncoveredProjects)}.`,
+    ...hints,
   ]
+}
+
+function coverageGapHints(projects: string[], queryPlans: ProjectQueryPlan[]): string[] {
+  const projectSet = new Set(projects)
+  const hints = queryPlans
+    .filter((plan) => projectSet.has(plan.project))
+    .slice(0, 5)
+    .map((plan) => `- ${plan.project}: ${queryPlanHint(plan)}`)
+  return hints.length ? ['', 'Crawler query hints:', '', ...hints] : []
+}
+
+function queryPlanHint(plan: ProjectQueryPlan): string {
+  const terms = plan.liveTerms.slice(0, 3).join(', ')
+  const tags = plan.devToTags.slice(0, 2).map((tag) => `#${tag}`).join(', ')
+  return [terms, tags].filter(Boolean).join(' · ')
 }
 
 function coverageGapSummary(projects: string[]): string {

@@ -48,6 +48,9 @@ try {
   if (!draft.markdown.includes('plus ')) {
     throw new Error('draft coverage gaps did not report hidden uncovered projects')
   }
+  if (!draft.markdown.includes('Crawler query hints:') || !draft.markdown.includes('Apache Arrow: apache arrow')) {
+    throw new Error('draft coverage gaps did not include crawler query hints')
+  }
   if (!draft.markdown.includes('Evidence:')) {
     throw new Error('draft item sections did not include provenance evidence')
   }

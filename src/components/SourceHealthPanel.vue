@@ -2,7 +2,7 @@
 import { Activity } from '@lucide/vue'
 import type { ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
 
-defineProps<{
+const props = defineProps<{
   pendingSourceCount: number
   queryPlans: ProjectQueryPlan[]
   sourceCoverage: SourceCoverageSummary
@@ -26,6 +26,11 @@ function queryPlanSummary(plan: ProjectQueryPlan): string {
   const tags = plan.devToTags.slice(0, 2).map((tag) => `#${tag}`).join(', ')
   return [terms, tags].filter(Boolean).join(' · ')
 }
+
+function coverageGapPlans(): ProjectQueryPlan[] {
+  const uncovered = new Set(props.sourceCoverage.uncoveredProjects)
+  return props.queryPlans.filter((plan) => uncovered.has(plan.project)).slice(0, 4)
+}
 </script>
 
 <template>
@@ -43,6 +48,12 @@ function queryPlanSummary(plan: ProjectQueryPlan): string {
         {{ sourceCoverage.uncoveredProjects.slice(0, 8).join(', ') }}
         <span v-if="extraGapCount(sourceCoverage.uncoveredProjects)">plus {{ extraGapCount(sourceCoverage.uncoveredProjects) }} more</span>
       </p>
+      <ul v-if="coverageGapPlans().length">
+        <li v-for="plan in coverageGapPlans()" :key="plan.project">
+          <strong>{{ plan.project }}</strong>
+          <span>{{ queryPlanSummary(plan) }}</span>
+        </li>
+      </ul>
     </div>
     <div class="source-row" v-for="run in sourceRuns" :key="run.source">
       <span class="source-dot" :class="run.status" aria-hidden="true"></span>

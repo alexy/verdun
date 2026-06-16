@@ -121,3 +121,11 @@ The connective tissue is graph database, multimodel data, typed AI, vector data,
 ## Coverage gaps
 
 Ask for more source material on Apache Arrow, BAML, CocoIndex, Dagster, DataFusion, Delta Lake, DSPy, and FalkorDB, plus 9 more.
+
+Crawler query hints:
+
+- BAML: baml · #baml
+- DSPy: dspy · #dspy
+- Instructor: instructor, pydantic · #instructor, #pydantic
+- Apache Arrow: apache arrow, arrow ipc, arrow flight · #apachearrow, #arrowflight
+- DataFusion: datafusion, query engine, sql planner · #datafusion, #queryengine

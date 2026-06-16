@@ -29,7 +29,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - External DB loader SQL can export from the cohesive public snapshot and upserts both newsletter items and `newsletter_source_runs`.
 - `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` checks that the SQL export preserves required projects, source runs, tags, URLs, and provenance JSON before applying it to external Postgres.
 - Source-health metadata shown in the app sidebar, including per-project coverage for each watched source.
-- Source-health coverage gaps identify watched projects without live/manual source matches, and the same gap signal is included in local Markdown drafts.
+- Source-health coverage gaps identify watched projects without live/manual source matches, show crawler query hints for the first gaps, and include the same actionable gap signal in local Markdown drafts.
 - Live public-source ingestion for Hacker News, Lobste.rs, project-tagged dev.to queries, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, BAML, DSPy, Instructor, LakeSail, Apache Arrow, DataFusion, Delta Lake, Ibis, Dagster, Grust Sail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, TypeSec, Garde, zod-rs, FalkorDB, LadybugDB, and CocoIndex.
 - `verdun-crawler queries` prints the non-network query plan for watched projects before a live collection run.
 - Live/manual collection defaults to a 45-day recency window via `--since-days`, so weekly drafts do not pull stale search hits.
