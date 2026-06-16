@@ -798,23 +798,53 @@ function stageLabel(stage: string): string {
 }
 
 function itemNarrative(item: NewsItem): string {
-  return `${draftSummary(item)} ${sentence(item.whyItMatters)}`
+  const summary = draftSummary(item)
+  const matter = sentence(item.whyItMatters)
+  if (summary === matter) return summary
+  return `${summary} ${matter}`
 }
 
 function draftSummary(item: NewsItem): string {
   const summary = normalizeSentence(item.summary)
-  if (!isThinSummary(summary)) return summary
+  if (!isThinSummary(summary) && !isCrawlerBoilerplateSummary(summary, item)) return summary
   const title = stripTerminalPunctuation(item.title)
   const ontology = ontologyForItem(item)[0]?.label.toLowerCase() ?? item.topic
+  const sourceContext = sourceContextPhrase(item)
   return sentence(
-    `The piece puts ${item.project} into the ${item.topic} conversation through "${title}", a useful signal for ${ontology} moving from idea to developer practice`,
+    `${sourceContext} "${title}" puts ${item.project} into the ${item.topic} conversation, a useful signal for ${ontology} moving from idea to developer practice`,
   )
+}
+
+function sourceContextPhrase(item: NewsItem): string {
+  if (item.source === 'Hacker News') return 'The community discussion around'
+  if (item.source === 'Lobste.rs') return 'The systems-reader discussion around'
+  if (item.source === 'dev.to') return 'The developer write-up around'
+  if (item.source === 'Medium') return 'The long-form essay'
+  if (item.source === 'Substack') return 'The newsletter item'
+  if (item.sourceKind === 'social') return 'The manually reviewed social signal'
+  if (item.provenance?.stage === 'manual') return 'The manually reviewed source note'
+  return 'The source item'
+}
+
+function isCrawlerBoilerplateSummary(summary: string, item: NewsItem): boolean {
+  const normalized = summary.trim().toLowerCase()
+  return normalized.startsWith('hacker news surfaced this item while tracking')
+    || normalized.startsWith('lobste.rs matched this story against')
+    || normalized.startsWith('dev.to surfaced this item while tracking')
+    || normalized.startsWith('medium surfaced this feed item while tracking')
+    || normalized.startsWith('substack surfaced this feed item while tracking')
+    || normalized === 'the weekly data engineering newsletter.'
+    || normalized === 'the weekly data engineering newsletter'
+    || normalized === 'a quiet day.'
+    || normalized === 'a quiet day'
+    || normalized === `${item.source.toLowerCase()} surfaced this feed item while tracking ${item.project.toLowerCase()} signals: ${item.tags.join(', ').toLowerCase()}.`
 }
 
 function isThinSummary(summary: string): boolean {
   const normalized = summary.trim().toLowerCase()
   if (!normalized) return true
   if (['overview', 'author'].includes(normalized)) return true
+  if (['a quiet day', 'a quiet day.', 'the weekly data engineering newsletter', 'the weekly data engineering newsletter.'].includes(normalized)) return true
   if (normalized.startsWith('author:')) return true
   if (normalized.startsWith('continue reading')) return true
   if (normalized.startsWith('stop hand-writing')) return true

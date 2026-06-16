@@ -75,7 +75,17 @@ try {
   if (!draft.markdown.includes('Lead with')) {
     throw new Error('draft editorial arc did not identify a lead item')
   }
-  for (const roughText of ['Overview Long-form', 'Author: ', 'Stop Hand-Writing SurrealQL Strings in Rust Long-form', 'Medium surfaced this feed item']) {
+  for (const roughText of [
+    'Overview Long-form',
+    'Author: ',
+    'Stop Hand-Writing SurrealQL Strings in Rust Long-form',
+    'Medium surfaced this feed item',
+    'Hacker News surfaced this item while tracking',
+    'Lobste.rs matched this story against',
+    'dev.to surfaced this item while tracking',
+    'The Weekly Data Engineering Newsletter',
+    'a quiet day',
+  ]) {
     if (draft.markdown.includes(roughText)) {
       throw new Error(`draft leaked rough feed text: ${roughText}`)
     }
