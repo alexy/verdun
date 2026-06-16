@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BookOpenText, ClipboardCheck, Database, Send, Sparkles } from '@lucide/vue'
-import type { NewsItem, NewsletterFocus, NewsletterReadiness, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
+import type { NewsItem, NewsletterFocus, NewsletterReadiness, ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
 import type { OntologyNode } from '../lib/ontology'
 import SourceHealthPanel from './SourceHealthPanel.vue'
 
@@ -10,6 +10,7 @@ defineProps<{
   includedItems: NewsItem[]
   ontologyNodes: OntologyNode[]
   pendingSourceCount: number
+  queryPlans: ProjectQueryPlan[]
   readiness: NewsletterReadiness
   sourceCoverage: SourceCoverageSummary
   sourceRuns: SourceRun[]
@@ -66,6 +67,7 @@ function submitFocus(): void {
 
     <SourceHealthPanel
       :pending-source-count="pendingSourceCount"
+      :query-plans="queryPlans"
       :source-coverage="sourceCoverage"
       :source-runs="sourceRuns"
     />

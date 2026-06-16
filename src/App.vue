@@ -55,6 +55,7 @@ onMounted(() => {
         :included-items="includedItems"
         :ontology-nodes="ontologyNodes"
         :pending-source-count="pendingSourceCount"
+        :query-plans="snapshot.queryPlans"
         :readiness="readiness"
         :source-coverage="sourceCoverage"
         :source-runs="snapshot.sourceRuns"

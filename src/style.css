@@ -365,6 +365,46 @@ textarea {
   background: #9ca3af;
 }
 
+.query-plans {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf5;
+}
+
+.query-plans summary {
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 900;
+  list-style-position: outside;
+  cursor: pointer;
+}
+
+.query-plan-row {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(22, 32, 29, 0.1);
+}
+
+.query-plan-row strong {
+  display: block;
+  font-size: 12px;
+}
+
+.query-plan-row p,
+.query-plan-row span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.query-plan-row span {
+  color: var(--accent-dark);
+}
+
 .readiness {
   display: grid;
   gap: 10px;

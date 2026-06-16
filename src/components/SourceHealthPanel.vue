@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Activity } from '@lucide/vue'
-import type { SourceCoverageSummary, SourceRun } from '../lib/newsletter'
+import type { ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
 
 defineProps<{
   pendingSourceCount: number
+  queryPlans: ProjectQueryPlan[]
   sourceCoverage: SourceCoverageSummary
   sourceRuns: SourceRun[]
 }>()
@@ -18,6 +19,12 @@ function projectSummary(run: SourceRun): string {
 
 function extraGapCount(projects: string[]): number {
   return Math.max(0, projects.length - 8)
+}
+
+function queryPlanSummary(plan: ProjectQueryPlan): string {
+  const terms = plan.liveTerms.slice(0, 3).join(', ')
+  const tags = plan.devToTags.slice(0, 2).map((tag) => `#${tag}`).join(', ')
+  return [terms, tags].filter(Boolean).join(' · ')
 }
 </script>
 
@@ -46,5 +53,13 @@ function extraGapCount(projects: string[]): number {
       </div>
     </div>
     <p v-if="pendingSourceCount" class="empty">{{ pendingSourceCount }} credentialed or feed adapters still pending.</p>
+    <details v-if="queryPlans.length" class="query-plans">
+      <summary>Crawler query plan · {{ queryPlans.length }} projects</summary>
+      <div class="query-plan-row" v-for="plan in queryPlans" :key="plan.project">
+        <strong>{{ plan.project }}</strong>
+        <p>{{ plan.hackerNewsQuery }}</p>
+        <span>{{ queryPlanSummary(plan) }}</span>
+      </div>
+    </details>
   </div>
 </template>
