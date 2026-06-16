@@ -39,6 +39,15 @@ create table if not exists newsletter_source_runs (
   collected_at timestamptz not null default now()
 );
 
+create table if not exists newsletter_query_plans (
+  project text primary key,
+  topic text not null,
+  hacker_news_query text not null,
+  live_terms text[] not null default '{}',
+  dev_to_tags text[] not null default '{}',
+  updated_at timestamptz not null default now()
+);
+
 alter table newsletter_source_runs
   add column if not exists project_counts jsonb not null default '{}'::jsonb;
 
@@ -46,3 +55,4 @@ create index if not exists newsletter_items_rank_idx on newsletter_items (publis
 create index if not exists newsletter_items_project_idx on newsletter_items (project);
 create index if not exists newsletter_items_topic_idx on newsletter_items (topic);
 create index if not exists newsletter_source_runs_status_idx on newsletter_source_runs (status, collected_at desc);
+create index if not exists newsletter_query_plans_topic_idx on newsletter_query_plans (topic);

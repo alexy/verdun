@@ -52,8 +52,8 @@ cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-load.sql
 ```
 
-`collect` writes `crawler/data/items.json` for item loader work, `crawler/data/source-runs.json` for source-health loader work, and `public/data/newsletter-snapshot.json` as the app's static fallback when no external database is configured. The public snapshot includes item rows and source-health metadata.
-`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows and source-health rows from the same collection run. The older `--input` plus `--source-runs` path remains available for debugging split files.
+`collect` writes `crawler/data/items.json` for item loader work, `crawler/data/source-runs.json` for source-health loader work, and `public/data/newsletter-snapshot.json` as the app's static fallback when no external database is configured. The public snapshot includes item rows, source-health metadata, and crawler query plans.
+`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows, source-health rows, and query-plan rows from the same collection run. The older `--input` plus `--source-runs` path remains available for debugging split files.
 
 For a weekly public-source pass:
 
@@ -81,7 +81,7 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify` and `cargo run --manifest-path crawler/Cargo.toml -- queries` before network collection to confirm the watchlist, source adapters, and search terms.
 2. Run `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2` to refresh `public/data/newsletter-snapshot.json`.
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
-4. Run `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` before applying SQL to the external database; it checks row counts, source-run metadata, required projects, tags, URLs, and provenance JSON.
+4. Run `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` before applying SQL to the external database; it checks row counts, source-run metadata, query plans, required projects, tags, URLs, and provenance JSON.
 5. Apply `/tmp/verdun-newsletter-load.sql` to the external Postgres database, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
 6. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
 

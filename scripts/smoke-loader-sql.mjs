@@ -12,14 +12,19 @@ const itemCount = (snapshot.items ?? []).length
 const sourceRunCount = (snapshot.source_runs ?? snapshot.sourceRuns ?? []).length
 const items = snapshot.items ?? []
 const sourceRuns = snapshot.source_runs ?? snapshot.sourceRuns ?? []
+const queryPlans = snapshot.query_plans ?? snapshot.queryPlans ?? []
 const itemInserts = countMatches(sql, 'insert into newsletter_items')
 const sourceRunInserts = countMatches(sql, 'insert into newsletter_source_runs')
+const queryPlanInserts = countMatches(sql, 'insert into newsletter_query_plans')
 
 if (itemInserts !== itemCount) {
   throw new Error(`expected ${itemCount} newsletter_items inserts, found ${itemInserts}`)
 }
 if (sourceRunInserts !== sourceRunCount) {
   throw new Error(`expected ${sourceRunCount} newsletter_source_runs inserts, found ${sourceRunInserts}`)
+}
+if (queryPlanInserts !== queryPlans.length) {
+  throw new Error(`expected ${queryPlans.length} newsletter_query_plans inserts, found ${queryPlanInserts}`)
 }
 for (const source of ['Hacker News', 'Medium', 'LinkedIn', 'X/Twitter']) {
   if (!sql.includes(sqlString(source))) throw new Error(`SQL export is missing source run for ${source}`)
@@ -39,10 +44,27 @@ if (!sql.includes('on conflict (id) do update set')) {
 if (!sql.includes('on conflict (source) do update set')) {
   throw new Error('SQL export is missing source-run upsert clause')
 }
+if (!sql.includes('on conflict (project) do update set')) {
+  throw new Error('SQL export is missing query-plan upsert clause')
+}
 
 for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
   if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)
   if (!sql.includes(sqlString(project))) throw new Error(`SQL export is missing required project ${project}`)
+  if (!queryPlans.some((plan) => plan.project === project)) throw new Error(`snapshot is missing query plan for ${project}`)
+}
+
+for (const plan of representativeQueryPlans(queryPlans)) {
+  if (!sql.includes(sqlString(plan.project))) throw new Error(`SQL export is missing query plan project ${plan.project}`)
+  if (!sql.includes(sqlString(plan.hacker_news_query ?? plan.hackerNewsQuery))) {
+    throw new Error(`SQL export is missing Hacker News query for ${plan.project}`)
+  }
+  if (!sql.includes(sqlTextArray(plan.live_terms ?? plan.liveTerms ?? []))) {
+    throw new Error(`SQL export is missing live terms for ${plan.project}`)
+  }
+  if (!sql.includes(sqlTextArray(plan.dev_to_tags ?? plan.devToTags ?? []))) {
+    throw new Error(`SQL export is missing dev.to tags for ${plan.project}`)
+  }
 }
 
 for (const item of representativeItems(items)) {
@@ -84,6 +106,20 @@ function representativeItems(items) {
   ].filter((item) => {
     if (!item || seen.has(item.id)) return false
     seen.add(item.id)
+    return true
+  })
+}
+
+function representativeQueryPlans(queryPlans) {
+  const seen = new Set()
+  return [
+    queryPlans.find((plan) => plan.project === 'Pydantic'),
+    queryPlans.find((plan) => plan.project === 'LakeSail'),
+    queryPlans.find((plan) => plan.project === 'Grust Sail'),
+    queryPlans[0],
+  ].filter((plan) => {
+    if (!plan || seen.has(plan.project)) return false
+    seen.add(plan.project)
     return true
   })
 }

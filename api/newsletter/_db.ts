@@ -42,6 +42,14 @@ type SourceRunRow = {
   project_counts?: Record<string, unknown> | null
 }
 
+type QueryPlanRow = {
+  project: string
+  topic: string
+  hacker_news_query: string
+  live_terms: string[]
+  dev_to_tags: string[]
+}
+
 type StaticNewsRow = {
   id: string
   title: string
@@ -126,6 +134,11 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
       case status when 'ok' then 0 when 'error' then 1 when 'pending' then 2 else 3 end,
       source
   `) as SourceRunRow[]
+  const queryPlanRows = await sql.query(`
+    select project, topic, hacker_news_query, live_terms, dev_to_tags
+    from newsletter_query_plans
+    order by project
+  `) as QueryPlanRow[]
 
   return {
     generatedAt: new Date().toISOString(),
@@ -133,7 +146,7 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
     sourceRuns: sourceRunRows.map(toSourceRun),
-    queryPlans: [],
+    queryPlans: queryPlanRows.map(toQueryPlan),
   }
 }
 
@@ -374,7 +387,7 @@ function toSourceRun(row: SourceRunRow) {
   }
 }
 
-function toQueryPlan(row: StaticQueryPlan): ProjectQueryPlan {
+function toQueryPlan(row: StaticQueryPlan | QueryPlanRow): ProjectQueryPlan {
   return {
     project: row.project,
     topic: row.topic,
