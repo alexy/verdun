@@ -571,9 +571,11 @@ function snapshotFreshness(generatedAt: string): { fresh: boolean, detail: strin
   }
 }
 
-export function evaluateNewsletterProseQuality(draft: NewsletterDraft): NewsletterProseQuality {
+export function evaluateNewsletterProseQuality(draft: NewsletterDraft, snapshot?: NewsletterSnapshot): NewsletterProseQuality {
   const markdown = draft.markdown
   const lowerMarkdown = markdown.toLowerCase()
+  const selectedItems = snapshot ? selectedItemsForDraft(draft, snapshot) : []
+  const hasSelectedItems = selectedItems.length > 0
   const roughPhrases = [
     'hacker news surfaced this item while tracking',
     'lobste.rs matched this story against',
@@ -586,6 +588,10 @@ export function evaluateNewsletterProseQuality(draft: NewsletterDraft): Newslett
     'a quiet day',
   ]
   const leakedPhrase = roughPhrases.find((phrase) => lowerMarkdown.includes(phrase))
+  const missingEvidence = hasSelectedItems ? selectedItems.filter((item) => !itemHasEvidenceLine(markdown, item)) : []
+  const missingSourceLinks = hasSelectedItems ? selectedItems.filter((item) => !itemHasSourceLink(markdown, item)) : []
+  const missingCredoFit = hasSelectedItems ? selectedItems.filter((item) => !itemHasCredoFit(markdown, item)) : []
+  const missingSelectionAudit = hasSelectedItems ? selectedItems.filter((item) => !itemHasSelectionAudit(markdown, item)) : []
   const checks: NewsletterProseQualityCheck[] = [
     {
       id: 'throughline',
@@ -606,26 +612,54 @@ export function evaluateNewsletterProseQuality(draft: NewsletterDraft): Newslett
     {
       id: 'evidence-lines',
       label: 'Source evidence',
-      passed: !draft.itemIds.length || markdown.includes('Evidence:'),
-      detail: !draft.itemIds.length || markdown.includes('Evidence:')
-        ? 'Selected items include source evidence where available.'
-        : 'Selected items need source evidence lines for editorial audit.',
+      passed: hasSelectedItems
+        ? missingEvidence.length === 0
+        : !draft.itemIds.length || markdown.includes('Evidence:'),
+      detail: hasSelectedItems
+        ? missingEvidence.length === 0
+          ? 'Every selected item includes source-linked evidence.'
+          : `Missing source-linked evidence for ${missingEvidence.map((item) => item.project).join(', ')}.`
+        : !draft.itemIds.length || markdown.includes('Evidence:')
+          ? 'Selected items include source evidence where available.'
+          : 'Selected items need source evidence lines for editorial audit.',
+    },
+    {
+      id: 'source-links',
+      label: 'Source links',
+      passed: hasSelectedItems ? missingSourceLinks.length === 0 : !draft.itemIds.length || markdown.includes('Source: ['),
+      detail: hasSelectedItems
+        ? missingSourceLinks.length === 0
+          ? 'Every selected item links to its source item.'
+          : `Missing source links for ${missingSourceLinks.map((item) => item.project).join(', ')}.`
+        : !draft.itemIds.length || markdown.includes('Source: [')
+          ? 'Selected items include source links.'
+          : 'Selected items need source links.',
     },
     {
       id: 'credo-fit',
       label: 'Credo fit',
-      passed: !draft.itemIds.length || markdown.includes('Credo fit:') && markdown.includes('Related ontology:'),
-      detail: !draft.itemIds.length || markdown.includes('Credo fit:') && markdown.includes('Related ontology:')
-        ? 'Selected items are tied back to the Strongly Typed AI ontology.'
-        : 'Tie selected items back to the Strongly Typed AI ontology.',
+      passed: hasSelectedItems
+        ? missingCredoFit.length === 0
+        : !draft.itemIds.length || markdown.includes('Credo fit:') && markdown.includes('Related ontology:'),
+      detail: hasSelectedItems
+        ? missingCredoFit.length === 0
+          ? 'Every selected item is tied back to the Strongly Typed AI ontology.'
+          : `Missing credo or ontology fit for ${missingCredoFit.map((item) => item.project).join(', ')}.`
+        : !draft.itemIds.length || markdown.includes('Credo fit:') && markdown.includes('Related ontology:')
+          ? 'Selected items are tied back to the Strongly Typed AI ontology.'
+          : 'Tie selected items back to the Strongly Typed AI ontology.',
     },
     {
       id: 'selection-audit',
       label: 'Selection audit',
-      passed: !draft.itemIds.length || markdown.includes('Selection:'),
-      detail: !draft.itemIds.length || markdown.includes('Selection:')
-        ? 'Selected items include a visible selection reason.'
-        : 'Add selection reasons for selected items.',
+      passed: hasSelectedItems ? missingSelectionAudit.length === 0 : !draft.itemIds.length || markdown.includes('Selection:'),
+      detail: hasSelectedItems
+        ? missingSelectionAudit.length === 0
+          ? 'Every selected item includes a visible selection reason.'
+          : `Missing selection reasons for ${missingSelectionAudit.map((item) => item.project).join(', ')}.`
+        : !draft.itemIds.length || markdown.includes('Selection:')
+          ? 'Selected items include a visible selection reason.'
+          : 'Add selection reasons for selected items.',
     },
   ]
   const passedCount = checks.filter((check) => check.passed).length
@@ -699,7 +733,7 @@ export function buildPublishManifest(
       createdAt: focus.createdAt,
     })),
     readiness: evaluateNewsletterReadiness(snapshot),
-    proseQuality: evaluateNewsletterProseQuality(draft),
+    proseQuality: evaluateNewsletterProseQuality(draft, snapshot),
     sourceCoverage: evaluateSourceCoverage(snapshot),
     selectedEvidence: selectedEvidenceAudit(selectedItems),
     sourceRuns: snapshot.sourceRuns,
@@ -1038,6 +1072,47 @@ function openingParagraph(items: NewsItem[], brief: EditorialBrief): string {
   return `The week reads less like a parade of releases than a negotiation over where contracts should live: in Python schemas, Rust planners, Postgres extensions, graph stores, and the data systems that increasingly have to host AI without becoming vague. ${focusSentence} ${sentenceList(projects.slice(0, 5))} give the issue concrete shape.`
 }
 
+function selectedItemsForDraft(draft: NewsletterDraft, snapshot: NewsletterSnapshot): NewsItem[] {
+  const itemsById = new Map(snapshot.items.map((item) => [item.id, item]))
+  return draft.itemIds
+    .map((itemId) => itemsById.get(itemId))
+    .filter((item): item is NewsItem => Boolean(item))
+}
+
+function itemHasEvidenceLine(markdown: string, item: NewsItem): boolean {
+  if (!item.provenance?.evidenceUrl) return false
+  const section = itemMarkdownSection(markdown, item)
+  return section.includes('Evidence:')
+    && section.includes(`[Evidence link](${item.provenance.evidenceUrl})`)
+}
+
+function itemHasSourceLink(markdown: string, item: NewsItem): boolean {
+  const section = itemMarkdownSection(markdown, item)
+  return section.includes(`Source: [${item.source}](${item.url})`)
+}
+
+function itemHasCredoFit(markdown: string, item: NewsItem): boolean {
+  const section = itemMarkdownSection(markdown, item)
+  return section.includes('Credo fit:')
+    && section.includes('Related ontology:')
+    && ontologyForItem(item).some((node) => section.includes(node.label))
+}
+
+function itemHasSelectionAudit(markdown: string, item: NewsItem): boolean {
+  const section = itemMarkdownSection(markdown, item)
+  return section.includes(`Selection: ${selectionReason(item)}`)
+}
+
+function itemMarkdownSection(markdown: string, item: NewsItem): string {
+  const headingNeedle = `${item.project}: ${item.title}`
+  const headingIndex = markdown.indexOf(headingNeedle)
+  if (headingIndex === -1) return ''
+  const sectionStart = markdown.lastIndexOf('\n## ', headingIndex)
+  const start = sectionStart === -1 ? headingIndex : sectionStart + 1
+  const nextSection = markdown.indexOf('\n## ', headingIndex + headingNeedle.length)
+  return markdown.slice(start, nextSection === -1 ? undefined : nextSection)
+}
+
 function itemSection(item: NewsItem, index: number): string[] {
   return [
     `## ${index}. ${item.project}: ${item.title}`,
@@ -1058,9 +1133,12 @@ function itemEvidenceLine(item: NewsItem): string[] {
   if (!item.provenance) return []
   const keywords = item.provenance.matchedKeywords.slice(0, 4)
   const keywordText = keywords.length ? ` Matched: ${keywords.join(', ')}.` : ''
+  const evidenceLink = item.provenance.evidenceUrl
+    ? ` [Evidence link](${item.provenance.evidenceUrl}).`
+    : ''
   return [
     '',
-    `Evidence: ${stageLabel(item.provenance.stage)} via ${item.provenance.adapter}.${keywordText}`,
+    `Evidence: ${stageLabel(item.provenance.stage)} via ${item.provenance.adapter}.${evidenceLink}${keywordText}`,
   ]
 }
 

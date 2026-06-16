@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { assertDraftReady, buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
+import { assertDraftReady, buildNewsletterDraft, evaluateNewsletterProseQuality, loadSnapshotFile } from './newsletter-draft.mjs'
 
 const stateDir = await mkdtemp(join(tmpdir(), 'verdun-draft-'))
 const stateFile = join(stateDir, 'editorial-state.json')
@@ -73,8 +73,23 @@ try {
   if (!draft.markdown.includes('Evidence:')) {
     throw new Error('local draft did not include item provenance evidence')
   }
+  if (!draft.markdown.includes('[Evidence link](')) {
+    throw new Error('local draft evidence was not linked to the source evidence URL')
+  }
   if (!draft.markdown.includes('The editorial intent asks for more sail graph lowering and typed lakehouse execution details')) {
     throw new Error('local draft throughline did not use the saved focus')
+  }
+  const weakDraft = {
+    ...draft,
+    markdown: draft.markdown.replace(/\nEvidence: [^\n]+/, ''),
+  }
+  const weakQuality = await evaluateNewsletterProseQuality(weakDraft, snapshot)
+  if (weakQuality.status !== 'needs_review') {
+    throw new Error('prose quality gate did not reject a selected item without source-linked evidence')
+  }
+  const evidenceCheck = weakQuality.checks.find((check) => check.id === 'evidence-lines')
+  if (evidenceCheck?.passed || !evidenceCheck?.detail.includes('Grust Sail')) {
+    throw new Error('prose quality evidence check did not identify the selected item missing evidence')
   }
 } finally {
   await rm(stateDir, { recursive: true, force: true })

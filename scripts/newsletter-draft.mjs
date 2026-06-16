@@ -97,12 +97,12 @@ export async function evaluateSourceCoverage(snapshot) {
   return module.evaluateSourceCoverage(snapshot)
 }
 
-export async function evaluateNewsletterProseQuality(draft) {
+export async function evaluateNewsletterProseQuality(draft, snapshot) {
   const { module } = await runnerImport('./src/lib/newsletter.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
-  return module.evaluateNewsletterProseQuality(draft)
+  return module.evaluateNewsletterProseQuality(draft, snapshot)
 }
 
 export async function sharedBuildPublishManifest(draft, snapshot, options = {}) {
@@ -137,7 +137,7 @@ export async function assertDraftReady(snapshot, draft, options = {}) {
 
   if (options.requireReady) {
     const readiness = await evaluateNewsletterReadiness(snapshot)
-    const proseQuality = await evaluateNewsletterProseQuality(draft)
+    const proseQuality = await evaluateNewsletterProseQuality(draft, snapshot)
     if (readiness.status !== 'ready') {
       const failedChecks = readiness.checks
         .filter((check) => !check.passed)
