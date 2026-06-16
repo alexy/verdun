@@ -6,6 +6,7 @@ const snapshotPath = 'public/data/newsletter-snapshot.json'
 const steps = [
   ['npm', ['run', 'build']],
   ['cargo', ['check', '--manifest-path', 'crawler/Cargo.toml']],
+  ['cargo', ['test', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'verify']],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--snapshot', snapshotPath, '--out', sqlPath]],
   ['npm', ['run', 'smoke:loader', '--', sqlPath, snapshotPath]],

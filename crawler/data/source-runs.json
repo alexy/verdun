@@ -15,19 +15,22 @@
     "source": "Lobste.rs",
     "kind": "community",
     "status": "ok",
-    "item_count": 0,
-    "message": "Lobste.rs newest.json",
-    "project_counts": {}
+    "item_count": 1,
+    "message": "Lobste.rs search",
+    "project_counts": {
+      "Pydantic": 1
+    }
   },
   {
     "source": "dev.to",
     "kind": "community",
     "status": "ok",
-    "item_count": 11,
+    "item_count": 12,
     "message": "dev.to articles API",
     "project_counts": {
       "DSPy": 2,
       "Delta Lake": 1,
+      "FalkorDB": 1,
       "Instructor": 2,
       "Pydantic": 2,
       "SurrealDB": 2,

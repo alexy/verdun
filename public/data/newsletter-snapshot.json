@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-16T14:40:47.926358Z",
+  "generated_at": "2026-06-16T15:15:24.747137Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
@@ -23,7 +23,7 @@
       "raw_json": {
         "author": "GeorgeCurtis",
         "collection_stage": "live",
-        "comments": 42,
+        "comments": 43,
         "object_id": "48478148",
         "points": 157,
         "provenance": {
@@ -94,6 +94,47 @@
           "stage": "live"
         },
         "source": "hacker-news"
+      }
+    },
+    {
+      "id": "lobsters-bb3f9b1f010f",
+      "title": "httpx2 - Fork by Pydantic",
+      "source": "Lobste.rs",
+      "source_kind": "community",
+      "url": "https://lobste.rs/s/nzqsjf/httpx2_fork_by_pydantic",
+      "published_at": "2026-05-13T19:49:20Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Lobste.rs matched this story against Pydantic signals: pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Lobste.rs is a useful technical filter for whether Pydantic has substance with systems-oriented readers.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "python"
+      ],
+      "score": 97,
+      "raw_json": {
+        "collection_stage": "live",
+        "comments": 11,
+        "provenance": {
+          "adapter": "lobsters-search",
+          "evidence_url": "https://lobste.rs/s/nzqsjf/httpx2_fork_by_pydantic",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "Lobste.rs",
+          "source_kind": "community",
+          "source_url": "https://lobste.rs",
+          "stage": "live"
+        },
+        "score": 24,
+        "short_id": "nzqsjf",
+        "source": "lobsters",
+        "story_url": "https://tildeweb.nl/~michiel/httpx2.html"
       }
     },
     {
@@ -2082,6 +2123,50 @@
       }
     },
     {
+      "id": "dev-to-6ff47fc62fd4",
+      "title": "How FalkorDB Stores Edges: Why Neighbor Lookup Is O(degree)",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://dev.to/eyanpen/how-falkordb-stores-edges-why-neighbor-lookup-is-odegree-3013",
+      "published_at": "2026-05-20T07:35:07Z",
+      "project": "FalkorDB",
+      "topic": "graph database",
+      "summary": "Many people have a question when they first see FalkorDB's architecture:   It doesn't use traditional...",
+      "why_it_matters": "Developer essays show whether FalkorDB is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "falkordb",
+        "redis graph",
+        "falkordb",
+        "sparsematrix",
+        "graphdatabase",
+        "graphblas"
+      ],
+      "score": 55,
+      "raw_json": {
+        "article_id": 3707181,
+        "author": "eyanpen",
+        "collection_stage": "live",
+        "comments": 0,
+        "provenance": {
+          "adapter": "dev-to-articles",
+          "evidence_url": "https://dev.to/eyanpen/how-falkordb-stores-edges-why-neighbor-lookup-is-odegree-3013",
+          "matched_keywords": [
+            "falkordb",
+            "redis graph",
+            "cypher graph",
+            "graph query"
+          ],
+          "project": "FalkorDB",
+          "source": "dev.to",
+          "source_kind": "community",
+          "source_url": "https://dev.to",
+          "stage": "live"
+        },
+        "reactions": 0,
+        "source": "dev-to"
+      }
+    },
+    {
       "id": "lancedb-76fb73c47cb",
       "title": "LanceDB belongs in this week's typed AI/data systems watch",
       "source": "Hacker News",
@@ -2529,19 +2614,22 @@
       "source": "Lobste.rs",
       "kind": "community",
       "status": "ok",
-      "item_count": 0,
-      "message": "Lobste.rs newest.json",
-      "project_counts": {}
+      "item_count": 1,
+      "message": "Lobste.rs search",
+      "project_counts": {
+        "Pydantic": 1
+      }
     },
     {
       "source": "dev.to",
       "kind": "community",
       "status": "ok",
-      "item_count": 11,
+      "item_count": 12,
       "message": "dev.to articles API",
       "project_counts": {
         "DSPy": 2,
         "Delta Lake": 1,
+        "FalkorDB": 1,
         "Instructor": 2,
         "Pydantic": 2,
         "SurrealDB": 2,

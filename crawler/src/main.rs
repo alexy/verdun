@@ -678,11 +678,7 @@ fn live_items(
         match fetch_lobsters(&client, watchlist, source, max_per_project) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
-                source_runs.push(ok_source_run(
-                    source,
-                    &source_items,
-                    "Lobste.rs newest.json",
-                ));
+                source_runs.push(ok_source_run(source, &source_items, "Lobste.rs search"));
                 items.append(&mut source_items);
             }
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
@@ -811,27 +807,153 @@ fn fetch_lobsters(
     source: &Source,
     max_per_project: usize,
 ) -> Result<Vec<NewsItem>> {
-    let stories = client
-        .get("https://lobste.rs/newest.json")
-        .send()
-        .context("fetching Lobste.rs newest stories")?
-        .error_for_status()
-        .context("Lobste.rs returned error")?
-        .json::<Vec<LobstersStory>>()
-        .context("decoding Lobste.rs newest stories")?;
-    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    if max_per_project == 0 {
+        return Ok(Vec::new());
+    }
+
+    let mut seen_stories: BTreeMap<String, bool> = BTreeMap::new();
     let mut items = Vec::new();
-    for story in stories {
-        for project in &watchlist.projects {
-            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-            if count >= max_per_project || !lobsters_story_matches_project(&story, project) {
+    for project in &watchlist.projects {
+        let mut project_count = 0;
+        let query = project_query(project);
+        let html = client
+            .get("https://lobste.rs/search")
+            .query(&[
+                ("q", query.as_str()),
+                ("what", "stories"),
+                ("order", "newest"),
+            ])
+            .send()
+            .with_context(|| format!("fetching Lobste.rs search for {}", project.name))?;
+        if html.status() == StatusCode::TOO_MANY_REQUESTS {
+            break;
+        }
+        let html = html
+            .error_for_status()
+            .with_context(|| format!("Lobste.rs search returned error for {}", project.name))?
+            .text()
+            .with_context(|| format!("decoding Lobste.rs search for {}", project.name))?;
+        for story in parse_lobsters_search_stories(&html)
+            .into_iter()
+            .filter(|story| lobsters_story_matches_project(story, project))
+        {
+            let story_key = story.short_id.clone().unwrap_or_else(|| story.url.clone());
+            if seen_stories.contains_key(&story_key) {
                 continue;
             }
             items.push(lobsters_item(project, source, &story));
-            counts.insert(project.name.as_str(), count + 1);
+            seen_stories.insert(story_key, true);
+            project_count += 1;
+            if project_count >= max_per_project {
+                break;
+            }
         }
     }
     Ok(items)
+}
+
+fn parse_lobsters_search_stories(html: &str) -> Vec<LobstersStory> {
+    let short_id_re = Regex::new(r#"data-shortid="([^"]+)""#).expect("valid short id regex");
+    let title_re = Regex::new(r#"(?s)<a class="u-url" href="([^"]+)"[^>]*>(.*?)</a>"#)
+        .expect("valid Lobste.rs title regex");
+    let datetime_re = Regex::new(r#"datetime="([^"]+)""#).expect("valid Lobste.rs time regex");
+    let score_re = Regex::new(r#"(?s)<a class="upvoter"[^>]*>\s*(\d+)\s*</a>"#)
+        .expect("valid Lobste.rs score regex");
+    let comments_re = Regex::new(
+        r#"(?s)<span class="comments_label">.*?<a[^>]*href="([^"]+)"[^>]*>\s*(\d+) comments?"#,
+    )
+    .expect("valid Lobste.rs comments regex");
+    let tag_re = Regex::new(r#"(?s)<a class="tag [^"]*"[^>]*>(.*?)</a>"#).expect("valid tag regex");
+
+    lobsters_story_blocks(html)
+        .into_iter()
+        .filter_map(|block| {
+            let short_id = html_unescape(short_id_re.captures(block)?.get(1)?.as_str());
+            let title_captures = title_re.captures(block)?;
+            let story_url = html_unescape(title_captures.get(1)?.as_str());
+            let title = html_text(title_captures.get(2)?.as_str());
+            let created_at = datetime_re
+                .captures(block)
+                .and_then(|captures| parse_lobsters_datetime(captures.get(1)?.as_str()))
+                .unwrap_or_else(Utc::now);
+            let score = score_re
+                .captures(block)
+                .and_then(|captures| captures.get(1)?.as_str().parse::<i32>().ok());
+            let (short_id_url, comment_count) = comments_re
+                .captures(block)
+                .map(|captures| {
+                    let path = captures.get(1).map(|match_| match_.as_str()).unwrap_or("");
+                    let comments = captures
+                        .get(2)
+                        .and_then(|match_| match_.as_str().parse::<i32>().ok());
+                    (Some(lobsters_absolute_url(path)), comments)
+                })
+                .unwrap_or_else(|| (Some(format!("https://lobste.rs/s/{short_id}")), None));
+            let tags = tag_re
+                .captures_iter(block)
+                .filter_map(|captures| captures.get(1).map(|match_| html_text(match_.as_str())))
+                .collect();
+
+            Some(LobstersStory {
+                short_id: Some(short_id),
+                short_id_url,
+                title,
+                url: story_url,
+                created_at,
+                score,
+                comment_count,
+                tags,
+            })
+        })
+        .collect()
+}
+
+fn lobsters_story_blocks(html: &str) -> Vec<&str> {
+    let mut blocks = Vec::new();
+    let mut cursor = html;
+    while let Some(start) = cursor.find("<li id=\"story_") {
+        let story = &cursor[start..];
+        let end = story[1..]
+            .find("\n<li id=\"story_")
+            .map(|index| index + 1)
+            .or_else(|| story.find("\n</ol>"))
+            .unwrap_or(story.len());
+        blocks.push(&story[..end]);
+        cursor = &story[end..];
+    }
+    blocks
+}
+
+fn parse_lobsters_datetime(value: &str) -> Option<DateTime<Utc>> {
+    chrono::NaiveDateTime::parse_from_str(value, "%Y-%m-%d %H:%M:%S")
+        .ok()
+        .map(|datetime| datetime.and_utc())
+}
+
+fn lobsters_absolute_url(path: &str) -> String {
+    if path.starts_with("http://") || path.starts_with("https://") {
+        html_unescape(path)
+    } else {
+        format!("https://lobste.rs{}", html_unescape(path))
+    }
+}
+
+fn html_text(value: &str) -> String {
+    let tag_re = Regex::new(r"(?s)<[^>]+>").expect("valid html tag regex");
+    html_unescape(&tag_re.replace_all(value, "").replace('\n', " "))
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn html_unescape(value: &str) -> String {
+    value
+        .replace("&amp;", "&")
+        .replace("&quot;", "\"")
+        .replace("&#39;", "'")
+        .replace("&#x27;", "'")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
 }
 
 fn fetch_dev_to(
@@ -1410,7 +1532,7 @@ fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> N
         score: 62 + score.min(25) + comments.min(15),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "lobsters-newest", source, project, &url),
+            "provenance": provenance("live", "lobsters-search", source, project, &url),
             "source": "lobsters",
             "short_id": story.short_id,
             "score": score,
@@ -1973,4 +2095,61 @@ fn sql_text_array(values: &[String]) -> String {
         .collect::<Vec<_>>()
         .join(", ");
     format!("array[{}]::text[]", values)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_lobsters_search_story() {
+        let html = r#"
+            <li id="story_abc123" data-shortid="abc123" class="story">
+              <div class="details">
+                <span class="link">
+                  <a class="u-url" href="https://example.com/post?x=1&amp;y=2" rel="ugc noreferrer">Pydantic&#39;s typed adapter</a>
+                </span>
+              </div>
+              <a class="tag tag_python" href="/t/python">python</a>
+              <a class="tag tag_databases" href="/t/databases">databases</a>
+              <time title="2026-05-13 19:49:20" datetime="2026-05-13 19:49:20" data-at-unix="1778719760">1 month ago</time>
+              <details class="caches" name="caches">
+                <summary>caches</summary>
+                <ul>
+                  <li><a href="https://web.archive.org/">Archive.org</a></li>
+                </ul>
+              </details>
+              <a class="upvoter" href="/login">24</a>
+              <span class="comments_label"><a role="heading" aria-level="2" href="/s/abc123/pydantic_typed_adapter">11 comments</a></span>
+            </li>
+        "#;
+
+        let stories = parse_lobsters_search_stories(html);
+
+        assert_eq!(stories.len(), 1);
+        let story = &stories[0];
+        assert_eq!(story.short_id.as_deref(), Some("abc123"));
+        assert_eq!(story.title, "Pydantic's typed adapter");
+        assert_eq!(story.url, "https://example.com/post?x=1&y=2");
+        assert_eq!(
+            story.short_id_url.as_deref(),
+            Some("https://lobste.rs/s/abc123/pydantic_typed_adapter")
+        );
+        assert_eq!(story.score, Some(24));
+        assert_eq!(story.comment_count, Some(11));
+        assert_eq!(story.tags, vec!["python", "databases"]);
+        assert_eq!(
+            story.created_at,
+            DateTime::parse_from_rfc3339("2026-05-13T19:49:20Z")
+                .unwrap()
+                .with_timezone(&Utc)
+        );
+    }
+
+    #[test]
+    fn parses_lobsters_empty_search() {
+        let stories = parse_lobsters_search_stories("<ol class=\"stories\"></ol>");
+
+        assert!(stories.is_empty());
+    }
 }
