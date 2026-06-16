@@ -97,6 +97,8 @@ The app's draft preview also exposes Markdown download and copy controls for the
 
 The generated article is written to `crawler/data/newsletter-draft.md` by default and includes a weekly throughline, item evidence lines from crawler provenance, source coverage gaps, plus this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The CLI uses the same `src/lib/newsletter.ts` draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
 
+The app's draft preview also offers an `Editorial state` JSON download. It contains the current `{ votes, focuses }` payload in the same shape as `crawler/data/editorial-state.json`, so a browser-only review session can be audited or reused by setting `VERDUN_LOCAL_STATE_FILE` before running `npm run ulysses:ready`.
+
 When no items are explicitly upvoted, the draft builder prefers live/manual collected items over watchlist seed placeholders and caps the fallback spine at two items per project before filling any remaining slots.
 
 The draft renderer also rewrites thin feed snippets such as generic overviews, author labels, and crawler boilerplate into project-aware sentences before Markdown or Ghost HTML is produced.

@@ -90,6 +90,16 @@ export type NewsletterReadiness = {
   checks: NewsletterReadinessCheck[]
 }
 
+export type EditorialStateExport = {
+  votes: Record<string, VoteValue>
+  focuses: Array<{
+    id: string
+    text: string
+    scope: 'this_week' | 'ongoing'
+    created_at: string
+  }>
+}
+
 export type SourceCoverageSummary = {
   watchedProjects: string[]
   coveredProjects: string[]
@@ -367,6 +377,22 @@ export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): Newsl
     liveSourceCount,
     focusCount,
     checks,
+  }
+}
+
+export function buildEditorialStateExport(snapshot: NewsletterSnapshot): EditorialStateExport {
+  return {
+    votes: Object.fromEntries(
+      snapshot.items
+        .filter((item) => item.vote !== 0)
+        .map((item) => [item.id, item.vote]),
+    ),
+    focuses: snapshot.focuses.map((focus) => ({
+      id: focus.id,
+      text: focus.text,
+      scope: focus.scope,
+      created_at: focus.createdAt,
+    })),
   }
 }
 

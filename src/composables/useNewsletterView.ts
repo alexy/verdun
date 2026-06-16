@@ -1,6 +1,6 @@
 import { computed, ref, type Ref } from 'vue'
 import type { NewsletterSnapshot } from '../lib/newsletter'
-import { buildNewsletterDraft, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
+import { buildEditorialStateExport, buildNewsletterDraft, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
 
 export type VoteFilter = 'all' | 'unreviewed' | 'upvoted' | 'downvoted'
 
@@ -45,10 +45,14 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const readiness = computed(() => evaluateNewsletterReadiness(snapshot.value))
   const sourceCoverage = computed(() => evaluateSourceCoverage(snapshot.value))
   const draftFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-strongly-typed-ai-data-notes.md`)
+  const editorialStateJson = computed(() => JSON.stringify(buildEditorialStateExport(snapshot.value), null, 2))
+  const editorialStateFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-verdun-editorial-state.json`)
 
   return {
     draft,
     draftFilename,
+    editorialStateFilename,
+    editorialStateJson,
     filteredItems,
     includedItems,
     liveSourceCount,

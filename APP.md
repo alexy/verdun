@@ -45,6 +45,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Draft and Ghost scripts support `--require-ready` / `NEWSLETTER_REQUIRE_READY=true` to apply the same publishing readiness checks used by the app before writing or posting a draft.
 - The app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/lib/newsletter.ts`.
 - The app draft preview offers direct Markdown download/copy controls for the exact draft shown on screen.
+- The app draft preview also exports the current `{ votes, focuses }` editorial state JSON in the same shape consumed by `VERDUN_LOCAL_STATE_FILE` for local Ulysses export.
 - `npm run ulysses:ready` gates local Ulysses Markdown export on explicit upvotes and publishing readiness, failing until local editorial state is ready.
 - `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.

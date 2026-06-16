@@ -625,6 +625,7 @@ textarea {
 }
 
 .draft-actions {
+  flex-wrap: wrap;
   gap: 8px;
 }
 

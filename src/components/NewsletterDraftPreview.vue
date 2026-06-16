@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Check, Copy, Download, FileText } from '@lucide/vue'
+import { Check, Copy, Download, FileJson, FileText } from '@lucide/vue'
 import type { NewsletterDraft } from '../lib/newsletter'
 
 const props = defineProps<{
   draft: NewsletterDraft
+  editorialStateFilename: string
+  editorialStateJson: string
   filename: string
 }>()
 
 const copyStatus = ref<'idle' | 'copied' | 'failed'>('idle')
 const draftDownloadHref = computed(() => `data:text/markdown;charset=utf-8,${encodeURIComponent(props.draft.markdown)}`)
+const editorialStateDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.editorialStateJson)}`)
 
 async function copyDraftMarkdown(): Promise<void> {
   copyStatus.value = 'idle'
@@ -33,6 +36,10 @@ async function copyDraftMarkdown(): Promise<void> {
         <a :href="draftDownloadHref" :download="filename">
           <Download :size="16" aria-hidden="true" />
           Markdown
+        </a>
+        <a :href="editorialStateDownloadHref" :download="editorialStateFilename">
+          <FileJson :size="16" aria-hidden="true" />
+          Editorial state
         </a>
         <button type="button" @click="copyDraftMarkdown">
           <Check v-if="copyStatus === 'copied'" :size="16" aria-hidden="true" />

@@ -25,6 +25,10 @@ try {
   await markdownLink.waitFor()
   const markdownHref = await markdownLink.getAttribute('href')
   if (!markdownHref?.startsWith('data:text/markdown')) throw new Error('draft Markdown download link is missing')
+  const stateLink = page.locator('.draft-actions').getByRole('link', { name: /Editorial state/ })
+  await stateLink.waitFor()
+  const initialStateHref = await stateLink.getAttribute('href')
+  if (!initialStateHref?.startsWith('data:application/json')) throw new Error('editorial state download link is missing')
   await page.locator('.news-card').first().getByText('Credo fit').waitFor()
   await page.locator('.news-card').first().getByText('Evidence').waitFor()
   await page.locator('.news-card').first().getByRole('link', { name: /permalink/i }).waitFor()
@@ -44,6 +48,14 @@ try {
   await page.getByPlaceholder(/Ask for more/).fill('More local-first Rust graph databases and typed query planners.')
   await page.getByRole('button', { name: /Save/ }).click()
   await page.getByText('More local-first Rust graph databases').first().waitFor()
+  const stateHref = await stateLink.getAttribute('href')
+  const stateJson = JSON.parse(decodeURIComponent(stateHref.split(',')[1] ?? ''))
+  if (!Object.values(stateJson.votes ?? {}).includes(1) || !Object.values(stateJson.votes ?? {}).includes(-1)) {
+    throw new Error('editorial state export did not include current votes')
+  }
+  if (!stateJson.focuses?.some((focus) => focus.text.includes('More local-first Rust graph databases'))) {
+    throw new Error('editorial state export did not include the saved focus')
+  }
   await page.locator('.draft-preview__body').getByRole('heading', { name: 'Editorial brief' }).waitFor()
   await page.locator('.draft-preview__body').getByText('This week: More local-first Rust graph databases and typed query planners.').waitFor()
 } finally {

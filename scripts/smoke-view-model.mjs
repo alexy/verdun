@@ -70,6 +70,16 @@ if (view.sourceCoverage.value.uncoveredProjects.length <= 8 && view.draft.value.
 if (view.draftFilename.value !== '2026-06-15-strongly-typed-ai-data-notes.md') {
   throw new Error('draft filename did not use snapshot date')
 }
+if (view.editorialStateFilename.value !== '2026-06-15-verdun-editorial-state.json') {
+  throw new Error('editorial state filename did not use snapshot date')
+}
+const editorialState = JSON.parse(view.editorialStateJson.value)
+if (!editorialState.votes || Object.values(editorialState.votes).filter((vote) => vote === 1).length !== 2) {
+  throw new Error('editorial state export did not include upvoted items')
+}
+if (!Array.isArray(editorialState.focuses)) {
+  throw new Error('editorial state export did not include focuses')
+}
 if (!view.draft.value.markdown.includes('## Weekly throughline')) {
   throw new Error('view model draft did not use the shared draft builder')
 }

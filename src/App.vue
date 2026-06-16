@@ -14,6 +14,8 @@ const { error, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsle
 const {
   draft,
   draftFilename,
+  editorialStateFilename,
+  editorialStateJson,
   filteredItems,
   includedItems,
   liveSourceCount,
@@ -80,7 +82,12 @@ onMounted(() => {
           :upvoted-count="includedItems.length"
         />
 
-        <NewsletterDraftPreview :draft="draft" :filename="draftFilename" />
+        <NewsletterDraftPreview
+          :draft="draft"
+          :editorial-state-filename="editorialStateFilename"
+          :editorial-state-json="editorialStateJson"
+          :filename="draftFilename"
+        />
 
         <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
 
