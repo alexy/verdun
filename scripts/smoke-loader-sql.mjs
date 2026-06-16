@@ -16,6 +16,7 @@ const queryPlans = snapshot.query_plans ?? snapshot.queryPlans ?? []
 const itemInserts = countMatches(sql, 'insert into newsletter_items')
 const sourceRunInserts = countMatches(sql, 'insert into newsletter_source_runs')
 const queryPlanInserts = countMatches(sql, 'insert into newsletter_query_plans')
+const snapshotGeneratedAt = snapshot.generated_at ?? snapshot.generatedAt
 
 if (itemInserts !== itemCount) {
   throw new Error(`expected ${itemCount} newsletter_items inserts, found ${itemInserts}`)
@@ -25,6 +26,15 @@ if (sourceRunInserts !== sourceRunCount) {
 }
 if (queryPlanInserts !== queryPlans.length) {
   throw new Error(`expected ${queryPlans.length} newsletter_query_plans inserts, found ${queryPlanInserts}`)
+}
+if (sourceRuns.length) {
+  if (!snapshotGeneratedAt) throw new Error('snapshot is missing generated_at')
+  if (!hasSnapshotCollectedAt(sql, snapshotGeneratedAt)) {
+    throw new Error('SQL export is missing snapshot generated_at for source-run collected_at')
+  }
+  if (/insert into newsletter_source_runs[\s\S]*?::jsonb, now\(\)/.test(sql)) {
+    throw new Error('SQL export uses now() for source-run collected_at instead of snapshot generated_at')
+  }
 }
 for (const source of ['Hacker News', 'Medium', 'Substack', 'LinkedIn', 'X/Twitter']) {
   if (!sql.includes(sqlString(source))) throw new Error(`SQL export is missing source run for ${source}`)
@@ -103,6 +113,17 @@ function sqlString(value) {
 
 function sqlTextArray(values) {
   return `array[${values.map(sqlString).join(", ")}]`
+}
+
+function hasSnapshotCollectedAt(sql, snapshotGeneratedAt) {
+  const utcText = snapshotGeneratedAt.replace(/Z$/, '+00:00')
+  const candidates = new Set([
+    snapshotGeneratedAt,
+    utcText,
+    new Date(snapshotGeneratedAt).toISOString(),
+    new Date(snapshotGeneratedAt).toISOString().replace(/Z$/, '+00:00'),
+  ])
+  return [...candidates].some((candidate) => sql.includes(`${sqlString(candidate)}::timestamptz`))
 }
 
 function representativeItems(items) {
