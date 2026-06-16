@@ -51,10 +51,11 @@ Apply `db/migrations/0001_newsletter.sql` to the external Postgres database used
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-load.sql
+npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot public/data/newsletter-snapshot.json
 ```
 
 `collect` writes `crawler/data/items.json` for item loader work, `crawler/data/source-runs.json` for source-health loader work, and `public/data/newsletter-snapshot.json` as the app's static fallback when no external database is configured. The public snapshot includes item rows, source-health metadata, and crawler query plans. `collect` and `queries` read `crawler/data/editorial-state.json` by default when it exists, so saved this-week focus requests can add `focus_terms` to matching project query plans; use `--editorial-state path/to/state.json` to point at an exported editorial state file.
-`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows, source-health rows, and query-plan rows from the same collection run. The older `--input` plus `--source-runs` path remains available for debugging split files.
+`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows, source-health rows, and query-plan rows from the same collection run. The older `--input` plus `--source-runs` path remains available for debugging split files. `npm run db:apply` validates the SQL against the paired snapshot and stops as a dry run by default; pass `--apply` with `POSTGRES_URL`, `DATABASE_URL`, `NEON_DATABASE_URL`, or `--database-url` to apply `db/migrations/0001_newsletter.sql` and then the generated load through `psql`.
 
 For a weekly public-source pass:
 
@@ -64,6 +65,8 @@ cargo run --manifest-path crawler/Cargo.toml -- queries
 cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql
 npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json
+npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json
+npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --apply
 ```
 
 Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through project-tagged public article queries, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks. Manual social imports report how many reviewed posts were considered and mark the source run as stale when the newest reviewed post is outside the active `--since-days` window, which feeds the same source-health readiness gate used by Ulysses export. `queries` prints the non-network query plan for each watched project, including HN query text, distinctive live terms, and dev.to tags. Each item carries normalized provenance in `raw_json.provenance` so downstream loaders and editorial tools can audit which adapter produced the evidence. The watchlist covers the initial AI/data projects plus functional/composable AI/data tools such as BAML, DSPy, Instructor, Ibis, and Dagster; Grust-adjacent graph, Sail/lakehouse, Arrow/DataFusion/Delta substrate, validation crates such as Garde and zod-rs, and indexing systems including Grust Sail, FalkorDB, LadybugDB, and CocoIndex. The verifier checks that the required projects, public-source adapters, publication feeds, and manual social import files are all configured before a weekly pass.
@@ -82,8 +85,8 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify` and `cargo run --manifest-path crawler/Cargo.toml -- queries` before network collection to confirm the watchlist, source adapters, and search terms.
 2. Run `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2` to refresh `public/data/newsletter-snapshot.json`.
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
-4. Run `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` before applying SQL to the external database; it checks row counts, source-run metadata, query plans, required projects, tags, URLs, and provenance JSON.
-5. Apply `/tmp/verdun-newsletter-load.sql` to the external Postgres database, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
+4. Run `npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, query plans, required projects, tags, URLs, and provenance JSON.
+5. Run `npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --apply` with the external Postgres URL set, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
 6. Run `npm run check:deployed -- --require-ready` to verify the deployed route/API are serving a publishing-ready reviewed snapshot.
 7. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
 
