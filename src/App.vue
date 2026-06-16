@@ -18,6 +18,7 @@ const {
   draftItemIds,
   draftItems,
   draftSourceSummary,
+  evidenceFilter,
   editorialStateFilename,
   editorialStateJson,
   filteredItems,
@@ -84,6 +85,7 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
       <section class="news-list" aria-label="News items">
         <InboxControls
           v-model:project-filter="projectFilter"
+          v-model:evidence-filter="evidenceFilter"
           v-model:search-text="searchText"
           v-model:source-filter="sourceFilter"
           v-model:vote-filter="voteFilter"

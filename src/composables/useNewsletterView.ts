@@ -3,6 +3,7 @@ import type { NewsletterPublishManifest, NewsletterSnapshot } from '../lib/newsl
 import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, buildSourceGapReviewMarkdown, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
 
 export type VoteFilter = 'all' | 'draft' | 'unreviewed' | 'upvoted' | 'downvoted'
+export type EvidenceFilter = 'all' | 'collected' | 'live' | 'manual' | 'seed'
 export type DraftSourceSummary = {
   source: string
   count: number
@@ -14,6 +15,7 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const voteFilter = ref<VoteFilter>('all')
   const projectFilter = ref('all')
   const sourceFilter = ref('all')
+  const evidenceFilter = ref<EvidenceFilter>('all')
 
   const includedItems = computed(() => sortedNewsItems(snapshot.value.items).filter((item) => item.vote > 0))
   const rejectedItems = computed(() => snapshot.value.items.filter((item) => item.vote < 0).length)
@@ -52,6 +54,7 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
       if (voteFilter.value === 'downvoted' && item.vote >= 0) return false
       if (projectFilter.value !== 'all' && item.project !== projectFilter.value) return false
       if (sourceFilter.value !== 'all' && item.source !== sourceFilter.value) return false
+      if (!matchesEvidenceFilter(item, evidenceFilter.value)) return false
       if (!query) return true
       const haystack = [
         item.title,
@@ -87,6 +90,7 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
     draftItemIds,
     draftItems,
     draftSourceSummary,
+    evidenceFilter,
     editorialStateFilename,
     editorialStateJson,
     filteredItems,
@@ -110,6 +114,14 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
     unreviewedItems,
     voteFilter,
   }
+}
+
+function matchesEvidenceFilter(item: NewsletterSnapshot['items'][number], filter: EvidenceFilter): boolean {
+  if (filter === 'all') return true
+  const stage = item.provenance?.stage ?? ''
+  if (filter === 'collected') return stage === 'live' || stage === 'manual'
+  if (filter === 'seed') return stage === 'watchlist-seed'
+  return stage === filter
 }
 
 function uniqueSorted(values: string[]): string[] {

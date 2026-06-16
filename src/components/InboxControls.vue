@@ -20,12 +20,14 @@ const searchText = defineModel<string>('searchText', { required: true })
 const voteFilter = defineModel<'all' | 'draft' | 'unreviewed' | 'upvoted' | 'downvoted'>('voteFilter', { required: true })
 const projectFilter = defineModel<string>('projectFilter', { required: true })
 const sourceFilter = defineModel<string>('sourceFilter', { required: true })
+const evidenceFilter = defineModel<'all' | 'collected' | 'live' | 'manual' | 'seed'>('evidenceFilter', { required: true })
 
 function clearFilters(): void {
   searchText.value = ''
   voteFilter.value = 'all'
   projectFilter.value = 'all'
   sourceFilter.value = 'all'
+  evidenceFilter.value = 'all'
 }
 
 function formatDate(value: string): string {
@@ -68,6 +70,13 @@ function persistenceLabel(value: 'database' | 'local_file' | 'browser'): string 
     <select v-model="sourceFilter" aria-label="Source">
       <option value="all">All sources</option>
       <option v-for="source in sourceOptions" :key="source" :value="source">{{ source }}</option>
+    </select>
+    <select v-model="evidenceFilter" aria-label="Evidence type">
+      <option value="all">All evidence</option>
+      <option value="collected">Live/manual</option>
+      <option value="live">Live only</option>
+      <option value="manual">Manual social</option>
+      <option value="seed">Watchlist seed</option>
     </select>
     <button class="clear-filters" type="button" title="Clear filters" @click="clearFilters">
       <X :size="16" aria-hidden="true" />

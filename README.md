@@ -14,6 +14,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 - Public item cards surface crawler provenance as editorial evidence, including the adapter/stage that brought each item into the queue.
+- Inbox filters can isolate live/manual collected evidence from watchlist seed placeholders for faster publish review.
 - `GET /api/newsletter/draft` exposes the same generated draft as JSON, Markdown, HTML, or publish manifest for local automation and audit.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, and healthy watched sources before local Ulysses export.
 - Source health calls out watched projects that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.

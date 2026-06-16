@@ -97,6 +97,13 @@ try {
   await page.getByLabel('Vote status').selectOption('upvoted')
   await page.locator('.news-card.included').first().waitFor()
   await page.getByTitle('Clear filters').click()
+  await page.getByLabel('Evidence type').selectOption('collected')
+  await page.locator('.news-card').first().getByText('Evidence').waitFor()
+  const collectedText = await page.locator('.news-card').first().textContent()
+  if (!collectedText?.match(/live via|manual via/)) {
+    throw new Error('collected evidence filter did not show live/manual evidence cards')
+  }
+  await page.getByTitle('Clear filters').click()
   const currentManifestHref = await manifestLink.getAttribute('href')
   const currentManifestJson = JSON.parse(decodeURIComponent(currentManifestHref.split(',')[1] ?? ''))
   await page.getByLabel('Vote status').selectOption('draft')

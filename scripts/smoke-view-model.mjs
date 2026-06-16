@@ -26,6 +26,80 @@ if (!view.projectOptions.value.includes('Pydantic') || !view.sourceOptions.value
   throw new Error('project/source filter options were not derived')
 }
 
+snapshot.value = {
+  ...snapshot.value,
+  items: [
+    {
+      ...snapshot.value.items[0],
+      id: 'smoke-live-item',
+      title: 'Live collected Pydantic item',
+      project: 'Pydantic',
+      vote: 0,
+      provenance: {
+        stage: 'live',
+        adapter: 'hn-algolia',
+        source: 'Hacker News',
+        sourceKind: 'community',
+        sourceUrl: 'https://news.ycombinator.com',
+        evidenceUrl: 'https://example.com/live',
+        project: 'Pydantic',
+        matchedKeywords: ['pydantic'],
+      },
+    },
+    {
+      ...snapshot.value.items[1],
+      id: 'smoke-manual-item',
+      title: 'Manual reviewed LakeSail item',
+      project: 'LakeSail',
+      vote: 0,
+      provenance: {
+        stage: 'manual',
+        adapter: 'manual-json',
+        source: 'LinkedIn',
+        sourceKind: 'social',
+        sourceUrl: 'https://www.linkedin.com',
+        evidenceUrl: 'https://example.com/manual',
+        project: 'LakeSail',
+        matchedKeywords: ['lakesail'],
+      },
+    },
+    {
+      ...snapshot.value.items[2],
+      id: 'smoke-seed-item',
+      title: 'Watchlist seed Turso item',
+      project: 'Turso',
+      vote: 0,
+      provenance: {
+        stage: 'watchlist-seed',
+        adapter: 'watchlist',
+        source: 'Hacker News',
+        sourceKind: 'community',
+        sourceUrl: 'https://news.ycombinator.com',
+        evidenceUrl: 'https://example.com/seed',
+        project: 'Turso',
+        matchedKeywords: ['turso'],
+      },
+    },
+  ],
+}
+view.evidenceFilter.value = 'collected'
+if (view.filteredItems.value.length !== 2 || view.filteredItems.value.some((item) => item.provenance?.stage === 'watchlist-seed')) {
+  throw new Error('collected evidence filter did not isolate live/manual items')
+}
+view.evidenceFilter.value = 'manual'
+if (view.filteredItems.value.length !== 1 || view.filteredItems.value[0]?.id !== 'smoke-manual-item') {
+  throw new Error('manual evidence filter did not isolate manual items')
+}
+view.evidenceFilter.value = 'seed'
+if (view.filteredItems.value.length !== 1 || view.filteredItems.value[0]?.id !== 'smoke-seed-item') {
+  throw new Error('seed evidence filter did not isolate watchlist seed items')
+}
+view.evidenceFilter.value = 'all'
+snapshot.value = {
+  ...newsletterModule.seedSnapshot,
+  items: newsletterModule.seedSnapshot.items.map((item) => ({ ...item })),
+}
+
 view.searchText.value = 'lakehouse'
 if (!view.filteredItems.value.some((item) => item.project === 'LakeSail')) {
   throw new Error('search filter did not include LakeSail lakehouse item')
