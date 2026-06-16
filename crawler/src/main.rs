@@ -391,6 +391,10 @@ fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
             project.keywords.len() >= 3,
             "{project_name} must have at least three matching keywords"
         );
+        anyhow::ensure!(
+            !project_live_terms(project).is_empty(),
+            "{project_name} must have at least one distinctive live-search term"
+        );
     }
     Ok(())
 }
@@ -1431,28 +1435,43 @@ fn project_live_terms(project: &Project) -> Vec<String> {
     let generic_terms = [
         "ai",
         "arrow",
+        "backend",
         "capability",
         "columnar",
         "cypher",
+        "data orchestration",
+        "dataframes",
+        "declarative lm",
         "edge",
         "embedded graph",
+        "expression api",
         "graph",
         "graph database",
         "graph query",
         "knowledge graph",
         "lance",
+        "language model programs",
+        "llm",
         "multimodal",
         "multimodel",
+        "optimizers",
+        "prompt functions",
+        "python",
         "realtime",
         "replication",
         "rust",
         "rust graph",
+        "schema",
         "security",
         "sqlite",
+        "software-defined assets",
+        "sql compiler",
         "spark connect",
         "structured outputs",
         "typed agents",
+        "typed extraction",
         "typed graph",
+        "typed llm",
         "typed policy",
         "validation",
         "vectors",
@@ -1461,7 +1480,7 @@ fn project_live_terms(project: &Project) -> Vec<String> {
         .keywords
         .iter()
         .map(|keyword| keyword.to_lowercase())
-        .filter(|keyword| keyword.len() >= 5 && !generic_terms.contains(&keyword.as_str()))
+        .filter(|keyword| keyword.len() >= 4 && !generic_terms.contains(&keyword.as_str()))
         .collect()
 }
 
