@@ -23,6 +23,7 @@ if (!staticOnly) {
   await validateSnapshot(apiSnapshot, 'items API')
   const apiStatus = await fetchJson(new URL('/api/newsletter/status', origin), 'status API')
   validateStatus(apiStatus)
+  await validateDraftApi(origin)
 }
 
 console.log(`verified Verdun deployment at ${baseUrl}${staticOnly ? ' (static only)' : ''}${requireReady ? ' with readiness gate' : ''}${requireDatabase ? ' with database gate' : ''}`)
@@ -135,6 +136,50 @@ function validateStatus(status) {
   if (Number(status.itemCount) < 23) throw new Error(`status API has too few items: ${status.itemCount}`)
   if (Number(status.sourceRunCount) < 3) throw new Error(`status API has too few source runs: ${status.sourceRunCount}`)
   if (Number(status.queryPlanCount) < 23) throw new Error(`status API has too few query plans: ${status.queryPlanCount}`)
+}
+
+async function validateDraftApi(origin) {
+  const draftUrl = new URL('/api/newsletter/draft', origin)
+  const draft = await fetchJson(draftUrl, 'draft API')
+  if (!draft?.draft?.markdown?.includes('## Weekly throughline')) {
+    throw new Error('draft API did not return generated Markdown with a weekly throughline')
+  }
+  if (!draft?.manifest?.issue?.slug || !Array.isArray(draft?.manifest?.itemIds)) {
+    throw new Error('draft API did not return a publish manifest with issue identity')
+  }
+  if (!draft?.readiness?.checks?.length || !draft?.proseQuality?.checks?.length) {
+    throw new Error('draft API did not return readiness and prose-quality checks')
+  }
+
+  const markdownUrl = new URL('/api/newsletter/draft?format=markdown', origin)
+  const markdown = await fetchTextContent(markdownUrl, 'draft Markdown API', 'text/markdown')
+  if (!markdown.includes('Strongly Typed AI/Data Notes') || !markdown.includes('## Sources watched')) {
+    throw new Error('draft Markdown API did not return the newsletter draft body')
+  }
+
+  const manifestUrl = new URL('/api/newsletter/draft?format=manifest', origin)
+  const manifest = await fetchJson(manifestUrl, 'draft manifest API')
+  if (manifest?.snapshotInput !== 'api/newsletter/items' || manifest?.issue?.selectedItemCount !== manifest?.itemIds?.length) {
+    throw new Error('draft manifest API did not return a coherent publish manifest')
+  }
+
+  if (requireReady) {
+    const readyUrl = new URL('/api/newsletter/draft?require-ready=true', origin)
+    const readyDraft = await fetchJson(readyUrl, 'ready draft API')
+    if (readyDraft?.manifest?.readiness?.status !== 'ready' || readyDraft?.manifest?.proseQuality?.status !== 'ready') {
+      throw new Error('ready draft API did not return a ready publish manifest')
+    }
+  }
+}
+
+async function fetchTextContent(url, label, expectedContentType) {
+  const response = await safeFetch(url, label)
+  if (!response.ok) throw new Error(responseError(label, url, response.status))
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes(expectedContentType)) {
+    throw new Error(`${label} returned ${contentType || 'unknown content-type'} at ${url}`)
+  }
+  return await response.text()
 }
 
 function deploymentReadiness(snapshot) {

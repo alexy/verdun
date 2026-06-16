@@ -41,21 +41,73 @@ const browserStatusJson = JSON.stringify({
   writable: false,
 })
 let statusJson = databaseStatusJson
+const draftMarkdown = `# Strongly Typed AI/Data Notes: June 16, 2026
+
+## Weekly throughline
+
+Typed lakehouse and graph systems are moving from experiments into practical infrastructure.
+
+## Sources watched
+
+- Hacker News: 5 items
+`
+const draftManifest = {
+  snapshotInput: 'api/newsletter/items',
+  issue: {
+    date: '2026-06-16',
+    slug: 'strongly-typed-ai-data-notes-june-16-2026',
+    title: 'Strongly Typed AI/Data Notes: June 16, 2026',
+    selectedItemCount: 2,
+  },
+  title: 'Strongly Typed AI/Data Notes: June 16, 2026',
+  itemIds: ['grust-sail-3683deba292c', 'lakesail-e5ce5d36852a'],
+  readiness: { status: 'ready', checks: [{ id: 'upvotes', passed: true }] },
+  proseQuality: { status: 'ready', checks: [{ id: 'throughline', passed: true }] },
+}
+const draftJson = JSON.stringify({
+  draft: {
+    title: draftManifest.title,
+    markdown: draftMarkdown,
+    html: '<h1>Strongly Typed AI/Data Notes: June 16, 2026</h1>',
+    itemIds: draftManifest.itemIds,
+  },
+  manifest: draftManifest,
+  readiness: draftManifest.readiness,
+  proseQuality: draftManifest.proseQuality,
+  sourceCoverage: { watchedProjects: [], coveredProjects: [], uncoveredProjects: [] },
+})
 
 const server = createServer((request, response) => {
-  if (request.url === '/rbage/' || request.url === '/rbage/index.html') {
+  const url = new URL(request.url ?? '/', 'http://127.0.0.1')
+  if (url.pathname === '/rbage/' || url.pathname === '/rbage/index.html') {
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
     response.end('<!doctype html><div id="app"></div><script type="module" src="/rbage/assets/index.js"></script>')
     return
   }
-  if (request.url === '/rbage/data/newsletter-snapshot.json' || request.url === '/api/newsletter/items') {
+  if (url.pathname === '/rbage/data/newsletter-snapshot.json' || url.pathname === '/api/newsletter/items') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(snapshotJson)
     return
   }
-  if (request.url === '/api/newsletter/status') {
+  if (url.pathname === '/api/newsletter/status') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(statusJson)
+    return
+  }
+  if (url.pathname === '/api/newsletter/draft') {
+    const format = url.searchParams.get('format')
+    if (format === 'markdown') {
+      response.writeHead(200, { 'content-type': 'text/markdown; charset=utf-8' })
+      response.end(draftMarkdown)
+      return
+    }
+    if (format === 'manifest') {
+      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+      response.end(JSON.stringify(draftManifest))
+      return
+    }
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+    response.end(draftJson)
     return
   }
   response.writeHead(404, { 'content-type': 'text/plain' })
