@@ -40,6 +40,14 @@ try {
   if (readiness.upvotedCount !== 2 || readiness.focusCount < 1 || readiness.liveSourceCount < 3) {
     throw new Error('readiness counters did not reflect the editorial state')
   }
+  const staleReadiness = await evaluateNewsletterReadiness({
+    ...snapshot,
+    generatedAt: '2026-01-01T00:00:00Z',
+  })
+  const staleCheck = staleReadiness.checks.find((check) => check.id === 'snapshot-freshness')
+  if (staleReadiness.status !== 'needs_review' || staleCheck?.passed !== false || !staleCheck.detail.includes('rerun collect --live')) {
+    throw new Error(`readiness should reject stale snapshots before publishing: ${JSON.stringify(staleCheck)}`)
+  }
 } finally {
   await rm(stateDir, { recursive: true, force: true })
 }

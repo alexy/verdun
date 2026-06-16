@@ -487,6 +487,7 @@ export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): Newsl
   const focusCount = snapshot.focuses.filter((focus) => focus.text.trim()).length
   const selectedProjectCount = unique(selectedItems.map((item) => item.project)).length
   const sourceErrorCount = snapshot.sourceRuns.filter((run) => run.status === 'error').length
+  const freshness = snapshotFreshness(snapshot.generatedAt)
 
   const checks: NewsletterReadinessCheck[] = [
     {
@@ -527,6 +528,12 @@ export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): Newsl
         ? 'No watched source is currently reporting an error.'
         : `${sourceErrorCount} watched source${sourceErrorCount === 1 ? '' : 's'} need attention.`,
     },
+    {
+      id: 'snapshot-freshness',
+      label: 'Snapshot freshness',
+      passed: freshness.fresh,
+      detail: freshness.detail,
+    },
   ]
   const passedCount = checks.filter((check) => check.passed).length
   const status = checks.every((check) => check.passed) ? 'ready' : 'needs_review'
@@ -540,6 +547,27 @@ export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): Newsl
     liveSourceCount,
     focusCount,
     checks,
+  }
+}
+
+function snapshotFreshness(generatedAt: string): { fresh: boolean, detail: string } {
+  const generated = Date.parse(generatedAt)
+  if (!Number.isFinite(generated)) {
+    return {
+      fresh: false,
+      detail: 'Snapshot generated_at is not a valid date.',
+    }
+  }
+  const ageDays = Math.floor(Math.max(0, Date.now() - generated) / (24 * 60 * 60 * 1000))
+  if (ageDays <= 14) {
+    return {
+      fresh: true,
+      detail: ageDays === 0 ? 'Snapshot was generated today.' : `Snapshot was generated ${ageDays} day${ageDays === 1 ? '' : 's'} ago.`,
+    }
+  }
+  return {
+    fresh: false,
+    detail: `Snapshot was generated ${ageDays} days ago; rerun collect --live before publishing.`,
   }
 }
 

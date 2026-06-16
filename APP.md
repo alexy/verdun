@@ -19,7 +19,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - News cards surface crawler provenance as editorial evidence from the API/static snapshot.
 - News cards expose stable item anchors/permalinks and source domains for sharing and review.
 - `src/lib/ontology.json` is the shared ontology source for the site and local Markdown drafts.
-- Shared publishing readiness checks in `src/lib/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, and source health before Ulysses export.
+- Shared publishing readiness checks in `src/lib/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
 - Vercel API routes:
   - `GET /api/newsletter/items`
   - `GET /api/newsletter/status`

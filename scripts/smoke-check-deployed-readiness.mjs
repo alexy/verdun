@@ -3,8 +3,10 @@ import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 
 const rawSnapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
-const reviewedSnapshot = {
+const freshGeneratedAt = new Date().toISOString()
+let reviewedSnapshot = {
   ...rawSnapshot,
+  generated_at: freshGeneratedAt,
   editorial_persistence: 'database',
   items: rawSnapshot.items.map((item) => ({
     ...item,
@@ -19,28 +21,34 @@ const reviewedSnapshot = {
     },
   ],
 }
-const snapshotJson = JSON.stringify(reviewedSnapshot)
-const databaseStatusJson = JSON.stringify({
-  editorialPersistence: 'database',
-  generatedAt: reviewedSnapshot.generated_at,
-  itemCount: reviewedSnapshot.items.length,
-  focusCount: reviewedSnapshot.focuses.length,
-  voteCount: 2,
-  sourceRunCount: reviewedSnapshot.source_runs.length,
-  queryPlanCount: reviewedSnapshot.query_plans.length,
-  writable: true,
-})
-const browserStatusJson = JSON.stringify({
-  editorialPersistence: 'browser',
-  generatedAt: reviewedSnapshot.generated_at,
-  itemCount: reviewedSnapshot.items.length,
-  focusCount: reviewedSnapshot.focuses.length,
-  voteCount: 0,
-  sourceRunCount: reviewedSnapshot.source_runs.length,
-  queryPlanCount: reviewedSnapshot.query_plans.length,
-  writable: false,
-})
-let statusJson = databaseStatusJson
+function snapshotJson() {
+  return JSON.stringify(reviewedSnapshot)
+}
+function databaseStatusJson() {
+  return JSON.stringify({
+    editorialPersistence: 'database',
+    generatedAt: reviewedSnapshot.generated_at,
+    itemCount: reviewedSnapshot.items.length,
+    focusCount: reviewedSnapshot.focuses.length,
+    voteCount: 2,
+    sourceRunCount: reviewedSnapshot.source_runs.length,
+    queryPlanCount: reviewedSnapshot.query_plans.length,
+    writable: true,
+  })
+}
+function browserStatusJson() {
+  return JSON.stringify({
+    editorialPersistence: 'browser',
+    generatedAt: reviewedSnapshot.generated_at,
+    itemCount: reviewedSnapshot.items.length,
+    focusCount: reviewedSnapshot.focuses.length,
+    voteCount: 0,
+    sourceRunCount: reviewedSnapshot.source_runs.length,
+    queryPlanCount: reviewedSnapshot.query_plans.length,
+    writable: false,
+  })
+}
+let statusJson = databaseStatusJson()
 const draftMarkdown = `# Strongly Typed AI/Data Notes: June 16, 2026
 
 ## Weekly throughline
@@ -86,7 +94,7 @@ const server = createServer((request, response) => {
   }
   if (url.pathname === '/rbage/data/newsletter-snapshot.json' || url.pathname === '/api/newsletter/items') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(snapshotJson)
+    response.end(snapshotJson())
     return
   }
   if (url.pathname === '/api/newsletter/status') {
@@ -133,6 +141,24 @@ try {
   if (!result.stdout.includes('with readiness gate')) {
     throw new Error('check-deployed readiness smoke did not report the readiness gate')
   }
+  reviewedSnapshot = {
+    ...reviewedSnapshot,
+    generated_at: '2026-01-01T00:00:00Z',
+  }
+  statusJson = databaseStatusJson()
+  const staleResult = await runCheckDeployed([
+    'scripts/check-deployed.mjs',
+    `http://127.0.0.1:${address.port}/rbage/`,
+    '--require-ready',
+  ])
+  if (staleResult.status === 0 || !staleResult.stderr.includes('Snapshot freshness')) {
+    throw new Error(`check-deployed readiness gate should reject stale snapshots\n${staleResult.stdout}\n${staleResult.stderr}`)
+  }
+  reviewedSnapshot = {
+    ...reviewedSnapshot,
+    generated_at: freshGeneratedAt,
+  }
+  statusJson = databaseStatusJson()
   const databaseResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
     `http://127.0.0.1:${address.port}/rbage/`,
@@ -141,7 +167,7 @@ try {
   if (databaseResult.status !== 0 || !databaseResult.stdout.includes('with database gate')) {
     throw new Error(`check-deployed database smoke failed\n${databaseResult.stdout}\n${databaseResult.stderr}`)
   }
-  statusJson = browserStatusJson
+  statusJson = browserStatusJson()
   const browserResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
     `http://127.0.0.1:${address.port}/rbage/`,

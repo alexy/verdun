@@ -193,6 +193,7 @@ function deploymentReadiness(snapshot) {
   const focusCount = focuses.filter((focus) => typeof focus?.text === 'string' && focus.text.trim()).length
   const selectedProjectCount = new Set(selectedItems.map((item) => item?.project).filter(Boolean)).size
   const sourceErrorCount = sourceRuns.filter((run) => sourceRunStatus(run) === 'error').length
+  const freshness = snapshotFreshness(snapshot.generatedAt ?? snapshot.generated_at)
   const checks = [
     {
       label: 'Editorial picks',
@@ -219,6 +220,11 @@ function deploymentReadiness(snapshot) {
       passed: sourceErrorCount === 0,
       detail: sourceErrorCount === 0 ? 'No watched source is currently reporting an error.' : `${sourceErrorCount} watched sources need attention.`,
     },
+    {
+      label: 'Snapshot freshness',
+      passed: freshness.fresh,
+      detail: freshness.detail,
+    },
   ]
   const passedCount = checks.filter((check) => check.passed).length
   const status = checks.every((check) => check.passed) ? 'ready' : 'needs_review'
@@ -226,6 +232,27 @@ function deploymentReadiness(snapshot) {
     status,
     summary: status === 'ready' ? 'Ready for deployment publishing.' : `${passedCount}/${checks.length} readiness checks pass.`,
     checks,
+  }
+}
+
+function snapshotFreshness(generatedAt) {
+  const generated = Date.parse(generatedAt ?? '')
+  if (!Number.isFinite(generated)) {
+    return {
+      fresh: false,
+      detail: 'Snapshot generated_at is not a valid date.',
+    }
+  }
+  const ageDays = Math.floor(Math.max(0, Date.now() - generated) / (24 * 60 * 60 * 1000))
+  if (ageDays <= 14) {
+    return {
+      fresh: true,
+      detail: ageDays === 0 ? 'Snapshot was generated today.' : `Snapshot was generated ${ageDays} day${ageDays === 1 ? '' : 's'} ago.`,
+    }
+  }
+  return {
+    fresh: false,
+    detail: `Snapshot was generated ${ageDays} days ago; rerun collect --live before publishing.`,
   }
 }
 
