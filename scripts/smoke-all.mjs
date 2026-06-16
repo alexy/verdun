@@ -22,6 +22,7 @@ const steps = [
   ['npm', ['run', 'smoke:draft']],
   ['npm', ['run', 'smoke:draft-url']],
   ['npm', ['run', 'smoke:ghost']],
+  ['npm', ['run', 'smoke:grust-watchlist']],
   ['npm', ['run', 'smoke:public-snapshot']],
   ['npm', ['run', 'smoke:queries']],
   ['npm', ['run', 'smoke:readiness']],

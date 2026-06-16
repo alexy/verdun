@@ -8,6 +8,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Vite is built with `/rbage/` as the public base path for `collected.ga/rbage/`.
 - Vercel serverless API routes reading an external Postgres database.
 - Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
+- Grust watchlist audit that checks Verdun still tracks the backend and typed-validation projects surfaced by the local `/Users/alexy/src/grust` workspace.
 - Crawler output keeps normalized provenance inside each item's `raw_json`, including source adapter, evidence URL, matched project, and matched keywords.
 - Crawler output deduplicates live/manual items by canonical URL, preferring stronger reviewed evidence while retaining duplicate source records in `raw_json.duplicates`.
 - Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
@@ -62,11 +63,14 @@ npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot public/data/newsletter
 `collect` writes `crawler/data/items.json` for item loader work, `crawler/data/source-runs.json` for source-health loader work, and `public/data/newsletter-snapshot.json` as the app's static fallback when no external database is configured. The public snapshot includes item rows, source-health metadata, and crawler query plans with source-specific review targets for HN, Lobste.rs, dev.to, Medium, Substack, LinkedIn, and X/Twitter. `collect` and `queries` read `crawler/data/editorial-state.json` by default when it exists, so saved this-week focus requests can add `focus_terms` to matching project query plans; use `--editorial-state path/to/state.json` to point at an exported editorial state file.
 `export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows, source-health rows, and query-plan rows from the same collection run. The older `--input` plus `--source-runs` path remains available for debugging split files. `npm run db:apply` validates the SQL against the paired snapshot and stops as a dry run by default; pass `--apply` with `POSTGRES_URL`, `DATABASE_URL`, `NEON_DATABASE_URL`, or `--database-url` to apply `db/migrations/0001_newsletter.sql` and then the generated load through `psql`.
 
+`npm run audit:grust` reads the local Grust workspace, derives the backend and typed-validation projects it exposes through crates, dependencies, and docs, and writes an ignored `crawler/data/grust-watchlist-audit.md`. The command fails if Verdun stops watching a Grust-derived project such as HelixDB, SurrealDB, pgGraph, FalkorDB, LadybugDB, LanceDB, Grust Sail, CocoIndex, Garde, zod-rs, Apache Arrow, or Delta Lake. Use `-- --grust-root /path/to/grust` when auditing a different checkout.
+
 For a weekly public-source pass:
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- verify
 cargo run --manifest-path crawler/Cargo.toml -- queries
+npm run audit:grust
 cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql
 npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json
@@ -87,7 +91,7 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 
 ## Weekly Operating Sequence
 
-1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify` and `cargo run --manifest-path crawler/Cargo.toml -- queries` before network collection to confirm the watchlist, source adapters, and search terms.
+1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify`, `cargo run --manifest-path crawler/Cargo.toml -- queries`, and `npm run audit:grust` before network collection to confirm the watchlist, Grust alignment, source adapters, and search terms.
 2. Run `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2` to refresh `public/data/newsletter-snapshot.json`.
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
 4. Run `npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, query plans, required projects, tags, URLs, and provenance JSON.

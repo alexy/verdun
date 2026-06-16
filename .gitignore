@@ -9,6 +9,7 @@ crawler/data/raw/
 crawler/data/out/
 crawler/data/ulysses/
 crawler/data/editorial-state.json
+crawler/data/grust-watchlist-audit.md
 crawler/data/source-gap-review.md
 crawler/data/*.manifest.json
 *.log

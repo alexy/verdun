@@ -27,6 +27,7 @@
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:feed-content": "node scripts/smoke-feed-content.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",
+    "smoke:grust-watchlist": "node scripts/smoke-grust-watchlist.mjs",
     "smoke:loader": "node scripts/smoke-loader-sql.mjs",
     "smoke:manual-source": "node scripts/smoke-manual-source-freshness.mjs",
     "smoke:public-snapshot": "node scripts/smoke-public-snapshot-coverage.mjs",
@@ -39,6 +40,7 @@
     "smoke:view": "node scripts/smoke-view-model.mjs",
     "draft": "node scripts/newsletter-draft.mjs",
     "review:gaps": "node scripts/source-gap-review.mjs",
+    "audit:grust": "node scripts/grust-watchlist-audit.mjs",
     "ulysses:draft": "node scripts/newsletter-draft.mjs --ulysses",
     "ulysses:ready": "node scripts/newsletter-draft.mjs --ulysses --require-upvotes --require-ready",
     "ghost:draft": "node scripts/publish-ghost.mjs"
