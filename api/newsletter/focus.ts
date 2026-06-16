@@ -1,5 +1,5 @@
-import { writeFocus } from './_db'
-import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from './_http'
+import { writeFocus } from './_db.js'
+import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from './_http.js'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (!allowMethods(req, res, ['POST'])) return

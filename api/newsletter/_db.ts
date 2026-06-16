@@ -1,8 +1,9 @@
+/// <reference types="node" />
+
 import { neon } from '@neondatabase/serverless'
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type ProjectQueryPlan, type SourceRunStatus, type VoteValue } from '../../src/lib/newsletter'
-import { randomUUID } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { randomUUID } from 'crypto'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
+import { dirname, join } from 'path'
 
 declare const process: {
   env: Record<string, string | undefined>
@@ -24,6 +25,72 @@ type NewsRow = {
   score: number
   raw_json?: unknown
   vote: VoteValue | null
+}
+
+export type VoteValue = -1 | 0 | 1
+
+type NewsletterFocus = {
+  id: string
+  text: string
+  scope: 'this_week' | 'ongoing'
+  createdAt: string
+}
+
+type NewsItemProvenance = {
+  stage: string
+  adapter: string
+  source: string
+  sourceKind: string
+  sourceUrl: string
+  evidenceUrl: string
+  project: string
+  matchedKeywords: string[]
+}
+
+type NewsItem = {
+  id: string
+  title: string
+  source: string
+  sourceKind: string
+  url: string
+  publishedAt: string
+  project: string
+  topic: string
+  summary: string
+  whyItMatters: string
+  tags: string[]
+  score: number
+  vote: VoteValue
+  provenance?: NewsItemProvenance
+}
+
+type SourceRunStatus = 'ok' | 'error' | 'pending' | 'skipped'
+
+type SourceRun = {
+  source: string
+  kind: string
+  status: SourceRunStatus
+  itemCount: number
+  message: string
+  projectCounts: Record<string, number>
+}
+
+type ProjectQueryPlan = {
+  project: string
+  topic: string
+  hackerNewsQuery: string
+  liveTerms: string[]
+  devToTags: string[]
+  focusTerms: string[]
+}
+
+type NewsletterSnapshot = {
+  generatedAt: string
+  theme: string
+  items: NewsItem[]
+  focuses: NewsletterFocus[]
+  sourceRuns: SourceRun[]
+  queryPlans: ProjectQueryPlan[]
 }
 
 type FocusRow = {
@@ -98,9 +165,18 @@ type LocalEditorialState = {
   focuses: FocusRow[]
 }
 
+const seedFocuses: NewsletterFocus[] = [
+  {
+    id: 'focus-local-first-graphs',
+    text: 'More strongly typed graph/database work that can run locally before cloud deployment.',
+    scope: 'ongoing',
+    createdAt: new Date().toISOString(),
+  },
+]
+
 export async function readSnapshot(): Promise<NewsletterSnapshot> {
   const databaseUrl = newsletterDatabaseUrl()
-  if (!databaseUrl) return withLocalEditorialState(readStaticSnapshot() ?? seedSnapshot)
+  if (!databaseUrl) return withLocalEditorialState(readStaticSnapshot() ?? emptySnapshot())
   const sql = neon(databaseUrl)
   const rows = await sql.query(`
     select
@@ -160,7 +236,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
       generatedAt: snapshot.generated_at,
       theme: snapshot.theme,
       items: snapshot.items.map(toStaticNewsItem),
-      focuses: seedSnapshot.focuses,
+      focuses: seedFocuses,
       sourceRuns: snapshot.source_runs.map((run) => ({
         source: run.source,
         kind: run.kind,
@@ -180,7 +256,18 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
     generatedAt: new Date().toISOString(),
     theme: 'Strongly typed and functional AI/data systems',
     items: rows.map(toStaticNewsItem),
-    focuses: seedSnapshot.focuses,
+    focuses: seedFocuses,
+    sourceRuns: [],
+    queryPlans: [],
+  }
+}
+
+function emptySnapshot(): NewsletterSnapshot {
+  return {
+    generatedAt: new Date().toISOString(),
+    theme: 'Strongly typed and functional AI/data systems',
+    items: [],
+    focuses: seedFocuses,
     sourceRuns: [],
     queryPlans: [],
   }
