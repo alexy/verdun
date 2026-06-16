@@ -108,6 +108,7 @@ export function normalizeSnapshot(raw) {
       tags: item.tags ?? [],
       score: item.score ?? 0,
       vote: item.vote ?? 0,
+      provenance: normalizeProvenance(item.provenance ?? rawJsonProvenance(item.raw_json), item),
     })),
     focuses: (raw.focuses ?? fallbackFocuses).map((focus) => ({
       id: focus.id,
@@ -124,6 +125,35 @@ export function normalizeSnapshot(raw) {
       projectCounts: normalizeProjectCounts(run.project_counts ?? run.projectCounts),
     })),
   }
+}
+
+function rawJsonProvenance(rawJson) {
+  if (!rawJson || typeof rawJson !== 'object' || Array.isArray(rawJson)) return null
+  return rawJson.provenance ?? rawJson
+}
+
+function normalizeProvenance(raw, item) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined
+  const stage = stringValue(raw.stage ?? raw.collection_stage)
+  const source = stringValue(raw.source) || stringValue(item.source) || 'Unknown'
+  const evidenceUrl = stringValue(raw.evidence_url) || stringValue(item.url)
+  if (!stage || !source || !evidenceUrl) return undefined
+  return {
+    stage,
+    adapter: stringValue(raw.adapter) || source,
+    source,
+    sourceKind: stringValue(raw.source_kind) || stringValue(item.source_kind ?? item.sourceKind) || 'unknown',
+    sourceUrl: stringValue(raw.source_url) || evidenceUrl,
+    evidenceUrl,
+    project: stringValue(raw.project) || stringValue(item.project) || 'Unknown',
+    matchedKeywords: Array.isArray(raw.matched_keywords)
+      ? raw.matched_keywords.map((keyword) => String(keyword)).filter(Boolean)
+      : [],
+  }
+}
+
+function stringValue(value) {
+  return typeof value === 'string' ? value : ''
 }
 
 export function applyLocalEditorialState(snapshot) {

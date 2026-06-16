@@ -52,6 +52,9 @@ try {
   if (!draft.markdown.includes('## Weekly throughline')) {
     throw new Error('local draft did not include the weekly throughline')
   }
+  if (!draft.markdown.includes('Evidence:')) {
+    throw new Error('local draft did not include item provenance evidence')
+  }
   if (!draft.markdown.includes('The editorial intent asks for more sail graph lowering and typed lakehouse execution details')) {
     throw new Error('local draft throughline did not use the saved focus')
   }

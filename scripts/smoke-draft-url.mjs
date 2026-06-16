@@ -45,6 +45,9 @@ try {
   if (!draft.markdown.includes('Coverage:')) {
     throw new Error('draft source section did not include project coverage')
   }
+  if (!draft.markdown.includes('Evidence:')) {
+    throw new Error('draft item sections did not include provenance evidence')
+  }
   if (!draft.markdown.includes('## Weekly throughline')) {
     throw new Error('draft did not include the weekly throughline section')
   }

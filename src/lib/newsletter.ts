@@ -482,8 +482,24 @@ function itemSection(item: NewsItem, index: number): string[] {
     `Credo fit: ${credoBlurb(item)} Related ontology: ${ontologyForItem(item).map((node) => node.label).join(', ')}.`,
     '',
     `Source: [${item.source}](${item.url}) · ${item.topic} · ${item.tags.slice(0, 4).join(', ')}`,
+    ...itemEvidenceLine(item),
     '',
   ]
+}
+
+function itemEvidenceLine(item: NewsItem): string[] {
+  if (!item.provenance) return []
+  const keywords = item.provenance.matchedKeywords.slice(0, 4)
+  const keywordText = keywords.length ? ` Matched: ${keywords.join(', ')}.` : ''
+  return [
+    '',
+    `Evidence: ${stageLabel(item.provenance.stage)} via ${item.provenance.adapter}.${keywordText}`,
+  ]
+}
+
+function stageLabel(stage: string): string {
+  if (stage === 'watchlist-seed') return 'watchlist seed'
+  return stage.replace(/[-_]+/g, ' ')
 }
 
 function itemNarrative(item: NewsItem): string {
