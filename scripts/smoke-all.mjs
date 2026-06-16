@@ -16,6 +16,7 @@ const steps = [
   ['npm', ['run', 'smoke:check-deployed']],
   ['npm', ['run', 'smoke:api']],
   ['npm', ['run', 'smoke:api-http']],
+  ['npm', ['run', 'smoke:health']],
   ['npm', ['run', 'smoke:crawler-dedupe']],
   ['npm', ['run', 'smoke:feed-content']],
   ['npm', ['run', 'smoke:crawler-provenance']],

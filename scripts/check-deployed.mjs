@@ -23,6 +23,8 @@ if (!staticOnly) {
   await validateSnapshot(apiSnapshot, 'items API')
   const apiStatus = await fetchJson(new URL('/api/newsletter/status', origin), 'status API')
   validateStatus(apiStatus)
+  const apiHealth = await fetchJson(new URL('/api/newsletter/health', origin), 'health API')
+  validateHealth(apiHealth, apiStatus)
   await validateDraftApi(origin)
 }
 
@@ -136,6 +138,42 @@ function validateStatus(status) {
   if (Number(status.itemCount) < 23) throw new Error(`status API has too few items: ${status.itemCount}`)
   if (Number(status.sourceRunCount) < 3) throw new Error(`status API has too few source runs: ${status.sourceRunCount}`)
   if (Number(status.queryPlanCount) < 23) throw new Error(`status API has too few query plans: ${status.queryPlanCount}`)
+}
+
+function validateHealth(health, status) {
+  if (!health || typeof health !== 'object' || Array.isArray(health)) {
+    throw new Error('health API did not return an object')
+  }
+  if (health.ok !== true || health.service !== 'newsletter' || health.surface !== 'health') {
+    throw new Error('health API did not identify the newsletter health surface')
+  }
+  if (!['database_configured', 'database_not_configured'].includes(health.state)) {
+    throw new Error(`health API returned unexpected state: ${health.state}`)
+  }
+  if (typeof health.databaseConfigured !== 'boolean') {
+    throw new Error('health API did not report databaseConfigured')
+  }
+  if (health.editorialPersistence !== status.editorialPersistence) {
+    throw new Error(`health API persistence does not match status API: ${health.editorialPersistence} vs ${status.editorialPersistence}`)
+  }
+  if (requireDatabase && health.state !== 'database_configured') {
+    throw new Error(`health API is not database-configured: ${health.state}`)
+  }
+  if (!arrayValue(health.readSurfaces).includes('draft') || !arrayValue(health.readSurfaces).includes('health')) {
+    throw new Error('health API did not list expected read surfaces')
+  }
+  if (!arrayValue(health.writeSurfaces).includes('editorial-state')) {
+    throw new Error('health API did not list editorial-state write surface')
+  }
+  if (!arrayValue(health.publishingSurfaces).includes('ghost:ready') || !arrayValue(health.publishingSurfaces).includes('ulysses:ready')) {
+    throw new Error('health API did not list guarded publishing surfaces')
+  }
+  if (!String(health.weeklyUpdate?.loader ?? '').includes('db:deploy')) {
+    throw new Error('health API did not reference the guarded database loader')
+  }
+  if (Number(health.weeklyUpdate?.activeSnapshot?.itemCount) !== Number(status.itemCount)) {
+    throw new Error('health API active snapshot count does not match status API')
+  }
 }
 
 async function validateDraftApi(origin) {

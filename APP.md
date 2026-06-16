@@ -23,11 +23,13 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Vercel API routes:
   - `GET /api/newsletter/items`
   - `GET /api/newsletter/status`
+  - `GET /api/newsletter/health`
   - `GET /api/newsletter/draft`
   - `POST /api/newsletter/vote`
   - `POST /api/newsletter/focus`
   - `POST /api/newsletter/editorial-state`
 - Backend route helpers live in `api/newsletter/_http.ts`, leaving `api/newsletter/_db.ts` as the persistence adapter.
+- `GET /api/newsletter/health` follows the Greathouse service-health pattern and reports database env state, read/write surfaces, guarded publishing surfaces, the Rust loader command, and active snapshot counts.
 - Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local development without a database uses ignored `crawler/data/editorial-state.json`.
 - The app can import exported `{ votes, focuses }` editorial-state JSON into writable API modes, so a browser-local review session can be promoted into durable Postgres-backed state after the external database is configured.
 - External Postgres schema in `db/migrations/0001_newsletter.sql`.

@@ -49,6 +49,29 @@ function browserStatusJson() {
   })
 }
 let statusJson = databaseStatusJson()
+function healthJson() {
+  const status = JSON.parse(statusJson)
+  const databaseConfigured = status.editorialPersistence === 'database'
+  return JSON.stringify({
+    ok: true,
+    service: 'newsletter',
+    surface: 'health',
+    state: databaseConfigured ? 'database_configured' : 'database_not_configured',
+    databaseConfigured,
+    editorialPersistence: status.editorialPersistence,
+    readSurfaces: ['items', 'status', 'draft', 'health'],
+    writeSurfaces: ['vote', 'focus', 'editorial-state'],
+    publishingSurfaces: ['ulysses:draft', 'ulysses:ready', 'ghost:dry-run', 'ghost:ready'],
+    weeklyUpdate: {
+      loader: 'Rust verdun-crawler export-sql plus npm run db:deploy',
+      expectedStore: 'External Postgres',
+      activeSnapshot: status,
+      currentRequirement: databaseConfigured
+        ? 'run npm run db:deploy -- --apply'
+        : 'attach POSTGRES_URL, DATABASE_URL, or NEON_DATABASE_URL',
+    },
+  })
+}
 const draftMarkdown = `# Strongly Typed AI/Data Notes: June 16, 2026
 
 ## Weekly throughline
@@ -100,6 +123,11 @@ const server = createServer((request, response) => {
   if (url.pathname === '/api/newsletter/status') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(statusJson)
+    return
+  }
+  if (url.pathname === '/api/newsletter/health') {
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+    response.end(healthJson())
     return
   }
   if (url.pathname === '/api/newsletter/draft') {
