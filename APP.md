@@ -12,6 +12,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Vite/Vercel configured for the `/rbage/` public path.
 - Vercel has `collected.ga` attached to the `garbage` project and aliased to the latest production deployment; `npm run check:deployed` is the public DNS/route check, while `npx vercel domains inspect collected.ga` and `npx vercel alias ls` verify Vercel-side domain state during DNS propagation.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.
+- `npm run check:deployed -- --require-database` verifies the deployed API is backed by writable external database persistence rather than browser-local fallback.
 - Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/newsletter/items --deployment <deployment-url>`.
 - Inbox filtering by search text, vote state, project, and source for faster editorial review.
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
@@ -21,6 +22,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Shared publishing readiness checks in `src/lib/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, and source health before Ulysses export.
 - Vercel API routes:
   - `GET /api/newsletter/items`
+  - `GET /api/newsletter/status`
   - `POST /api/newsletter/vote`
   - `POST /api/newsletter/focus`
   - `POST /api/newsletter/editorial-state`

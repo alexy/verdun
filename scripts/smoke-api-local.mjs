@@ -16,6 +16,13 @@ try {
   if (firstSnapshot.editorialPersistence !== 'local_file') {
     throw new Error(`local API snapshot expected local_file persistence, found ${firstSnapshot.editorialPersistence}`)
   }
+  const firstStatus = await module.readStatus()
+  if (firstStatus.editorialPersistence !== 'local_file' || !firstStatus.writable) {
+    throw new Error(`local API status expected writable local_file persistence: ${JSON.stringify(firstStatus)}`)
+  }
+  if (firstStatus.itemCount < 23 || firstStatus.queryPlanCount < 23) {
+    throw new Error(`local API status reported incomplete snapshot counts: ${JSON.stringify(firstStatus)}`)
+  }
   const item = firstSnapshot.items[0]
   if (!item) throw new Error('snapshot has no items')
   if (!item.provenance?.stage || !item.provenance?.evidenceUrl) {
@@ -70,6 +77,10 @@ try {
   const deployedSnapshot = await module.readSnapshot()
   if (deployedSnapshot.editorialPersistence !== 'browser') {
     throw new Error(`deployed no-database snapshot expected browser persistence, found ${deployedSnapshot.editorialPersistence}`)
+  }
+  const deployedStatus = await module.readStatus()
+  if (deployedStatus.editorialPersistence !== 'browser' || deployedStatus.writable) {
+    throw new Error(`deployed no-database status expected read-only browser persistence: ${JSON.stringify(deployedStatus)}`)
   }
   let blockedDeployedWrite = false
   try {

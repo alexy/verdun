@@ -102,6 +102,17 @@ type NewsletterSnapshot = {
   queryPlans: ProjectQueryPlan[]
 }
 
+export type NewsletterStatus = {
+  editorialPersistence: NewsletterSnapshot['editorialPersistence']
+  generatedAt: string
+  itemCount: number
+  focusCount: number
+  voteCount: number
+  sourceRunCount: number
+  queryPlanCount: number
+  writable: boolean
+}
+
 type FocusRow = {
   id: string
   text: string
@@ -242,6 +253,49 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     focuses: focusRows.map(toFocus),
     sourceRuns: sourceRunRows.map(toSourceRun),
     queryPlans: queryPlanRows.map(toQueryPlan),
+  }
+}
+
+export async function readStatus(): Promise<NewsletterStatus> {
+  const databaseUrl = newsletterDatabaseUrl()
+  if (!databaseUrl) {
+    const snapshot = withLocalEditorialState(readStaticSnapshot() ?? emptySnapshot())
+    return {
+      editorialPersistence: snapshot.editorialPersistence,
+      generatedAt: snapshot.generatedAt,
+      itemCount: snapshot.items.length,
+      focusCount: snapshot.focuses.length,
+      voteCount: snapshot.items.filter((item) => item.vote !== 0).length,
+      sourceRunCount: snapshot.sourceRuns.length,
+      queryPlanCount: snapshot.queryPlans.length,
+      writable: editorialPersistenceMode() === 'local_file',
+    }
+  }
+  const sql = neon(databaseUrl)
+  const rows = await sql.query(`
+    select
+      (select count(*)::int from newsletter_items) as item_count,
+      (select count(*)::int from newsletter_focuses) as focus_count,
+      (select count(*)::int from newsletter_votes where vote <> 0) as vote_count,
+      (select count(*)::int from newsletter_source_runs) as source_run_count,
+      (select count(*)::int from newsletter_query_plans) as query_plan_count
+  `) as Array<{
+    item_count: number
+    focus_count: number
+    vote_count: number
+    source_run_count: number
+    query_plan_count: number
+  }>
+  const row = rows[0]
+  return {
+    editorialPersistence: 'database',
+    generatedAt: new Date().toISOString(),
+    itemCount: Number(row?.item_count ?? 0),
+    focusCount: Number(row?.focus_count ?? 0),
+    voteCount: Number(row?.vote_count ?? 0),
+    sourceRunCount: Number(row?.source_run_count ?? 0),
+    queryPlanCount: Number(row?.query_plan_count ?? 0),
+    writable: true,
   }
 }
 

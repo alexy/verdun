@@ -2,6 +2,7 @@ const defaultBaseUrl = 'https://collected.ga/rbage/'
 const args = process.argv.slice(2)
 const staticOnly = args.includes('--static-only')
 const requireReady = args.includes('--require-ready')
+const requireDatabase = args.includes('--require-database')
 const baseArg = args.find((arg) => !arg.startsWith('--')) ?? process.env.VERDUN_DEPLOYED_URL ?? defaultBaseUrl
 const baseUrl = normalizeBaseUrl(baseArg)
 const origin = new URL(baseUrl).origin
@@ -20,9 +21,11 @@ await validateSnapshot(staticSnapshot, 'static snapshot')
 if (!staticOnly) {
   const apiSnapshot = await fetchJson(new URL('/api/newsletter/items', origin), 'items API')
   await validateSnapshot(apiSnapshot, 'items API')
+  const apiStatus = await fetchJson(new URL('/api/newsletter/status', origin), 'status API')
+  validateStatus(apiStatus)
 }
 
-console.log(`verified Verdun deployment at ${baseUrl}${staticOnly ? ' (static only)' : ''}${requireReady ? ' with readiness gate' : ''}`)
+console.log(`verified Verdun deployment at ${baseUrl}${staticOnly ? ' (static only)' : ''}${requireReady ? ' with readiness gate' : ''}${requireDatabase ? ' with database gate' : ''}`)
 
 function normalizeBaseUrl(value) {
   const url = new URL(value)
@@ -114,6 +117,24 @@ async function validateSnapshot(snapshot, label) {
       throw new Error(`${label} is not publishing-ready: ${failedChecks.join(' ') || readiness.summary}`)
     }
   }
+}
+
+function validateStatus(status) {
+  if (!status || typeof status !== 'object' || Array.isArray(status)) {
+    throw new Error('status API did not return an object')
+  }
+  if (!['database', 'local_file', 'browser'].includes(status.editorialPersistence)) {
+    throw new Error('status API did not report editorial persistence mode')
+  }
+  if (requireDatabase && status.editorialPersistence !== 'database') {
+    throw new Error(`status API is not database-backed: ${status.editorialPersistence}`)
+  }
+  if (requireDatabase && status.writable !== true) {
+    throw new Error('status API is not writable')
+  }
+  if (Number(status.itemCount) < 23) throw new Error(`status API has too few items: ${status.itemCount}`)
+  if (Number(status.sourceRunCount) < 3) throw new Error(`status API has too few source runs: ${status.sourceRunCount}`)
+  if (Number(status.queryPlanCount) < 23) throw new Error(`status API has too few query plans: ${status.queryPlanCount}`)
 }
 
 function deploymentReadiness(snapshot) {

@@ -20,6 +20,27 @@ const reviewedSnapshot = {
   ],
 }
 const snapshotJson = JSON.stringify(reviewedSnapshot)
+const databaseStatusJson = JSON.stringify({
+  editorialPersistence: 'database',
+  generatedAt: reviewedSnapshot.generated_at,
+  itemCount: reviewedSnapshot.items.length,
+  focusCount: reviewedSnapshot.focuses.length,
+  voteCount: 2,
+  sourceRunCount: reviewedSnapshot.source_runs.length,
+  queryPlanCount: reviewedSnapshot.query_plans.length,
+  writable: true,
+})
+const browserStatusJson = JSON.stringify({
+  editorialPersistence: 'browser',
+  generatedAt: reviewedSnapshot.generated_at,
+  itemCount: reviewedSnapshot.items.length,
+  focusCount: reviewedSnapshot.focuses.length,
+  voteCount: 0,
+  sourceRunCount: reviewedSnapshot.source_runs.length,
+  queryPlanCount: reviewedSnapshot.query_plans.length,
+  writable: false,
+})
+let statusJson = databaseStatusJson
 
 const server = createServer((request, response) => {
   if (request.url === '/rbage/' || request.url === '/rbage/index.html') {
@@ -30,6 +51,11 @@ const server = createServer((request, response) => {
   if (request.url === '/rbage/data/newsletter-snapshot.json' || request.url === '/api/newsletter/items') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(snapshotJson)
+    return
+  }
+  if (request.url === '/api/newsletter/status') {
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+    response.end(statusJson)
     return
   }
   response.writeHead(404, { 'content-type': 'text/plain' })
@@ -54,6 +80,23 @@ try {
   }
   if (!result.stdout.includes('with readiness gate')) {
     throw new Error('check-deployed readiness smoke did not report the readiness gate')
+  }
+  const databaseResult = await runCheckDeployed([
+    'scripts/check-deployed.mjs',
+    `http://127.0.0.1:${address.port}/rbage/`,
+    '--require-database',
+  ])
+  if (databaseResult.status !== 0 || !databaseResult.stdout.includes('with database gate')) {
+    throw new Error(`check-deployed database smoke failed\n${databaseResult.stdout}\n${databaseResult.stderr}`)
+  }
+  statusJson = browserStatusJson
+  const browserResult = await runCheckDeployed([
+    'scripts/check-deployed.mjs',
+    `http://127.0.0.1:${address.port}/rbage/`,
+    '--require-database',
+  ])
+  if (browserResult.status === 0 || !browserResult.stderr.includes('not database-backed')) {
+    throw new Error(`check-deployed database gate should reject browser persistence\n${browserResult.stdout}\n${browserResult.stderr}`)
   }
 } finally {
   server.closeIdleConnections?.()
