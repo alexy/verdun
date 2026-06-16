@@ -100,6 +100,12 @@ export type EditorialStateExport = {
   }>
 }
 
+export type EditorialStateImportResult = {
+  snapshot: NewsletterSnapshot
+  importedVotes: number
+  importedFocuses: number
+}
+
 export type SourceCoverageSummary = {
   watchedProjects: string[]
   coveredProjects: string[]
@@ -394,6 +400,76 @@ export function buildEditorialStateExport(snapshot: NewsletterSnapshot): Editori
       scope: focus.scope,
       created_at: focus.createdAt,
     })),
+  }
+}
+
+export function applyEditorialStateExport(snapshot: NewsletterSnapshot, raw: unknown): EditorialStateImportResult {
+  const state = normalizeEditorialStateExport(raw)
+  const importedVoteIds = new Set(Object.keys(state.votes))
+  const existingFocusIds = new Set(snapshot.focuses.map((focus) => focus.id))
+  const importedFocuses = state.focuses.filter((focus) => !existingFocusIds.has(focus.id))
+  return {
+    snapshot: {
+      ...snapshot,
+      items: snapshot.items.map((item) => ({
+        ...item,
+        vote: state.votes[item.id] ?? item.vote,
+      })),
+      focuses: [...importedFocuses.map(fromEditorialStateFocus), ...snapshot.focuses].slice(0, 25),
+    },
+    importedVotes: snapshot.items.filter((item) => importedVoteIds.has(item.id)).length,
+    importedFocuses: importedFocuses.length,
+  }
+}
+
+function normalizeEditorialStateExport(raw: unknown): EditorialStateExport {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { votes: {}, focuses: [] }
+  const record = raw as Record<string, unknown>
+  return {
+    votes: normalizeEditorialVotes(record.votes),
+    focuses: normalizeEditorialFocuses(record.focuses),
+  }
+}
+
+function normalizeEditorialVotes(raw: unknown): Record<string, VoteValue> {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {}
+  const votes: Record<string, VoteValue> = {}
+  for (const [itemId, rawVote] of Object.entries(raw)) {
+    const vote = Number(rawVote)
+    if (itemId && (vote === -1 || vote === 0 || vote === 1)) votes[itemId] = vote
+  }
+  return votes
+}
+
+function normalizeEditorialFocuses(raw: unknown): EditorialStateExport['focuses'] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((focus) => {
+      if (!focus || typeof focus !== 'object' || Array.isArray(focus)) return null
+      const record = focus as Record<string, unknown>
+      const text = typeof record.text === 'string' ? record.text.trim() : ''
+      if (!text) return null
+      return {
+        id: typeof record.id === 'string' && record.id ? record.id : `imported-${Date.now()}`,
+        text,
+        scope: record.scope === 'ongoing' ? 'ongoing' : 'this_week',
+        created_at: typeof record.created_at === 'string'
+          ? record.created_at
+          : typeof record.createdAt === 'string'
+            ? record.createdAt
+            : new Date().toISOString(),
+      }
+    })
+    .filter((focus): focus is EditorialStateExport['focuses'][number] => Boolean(focus))
+    .slice(0, 25)
+}
+
+function fromEditorialStateFocus(focus: EditorialStateExport['focuses'][number]): NewsletterFocus {
+  return {
+    id: focus.id,
+    text: focus.text,
+    scope: focus.scope,
+    createdAt: focus.created_at,
   }
 }
 

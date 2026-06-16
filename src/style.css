@@ -54,6 +54,15 @@ a {
   color: inherit;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .shell {
   min-height: 100svh;
 }
@@ -683,10 +692,15 @@ textarea {
   line-height: 1.45;
 }
 
-.draft-copy-error {
+.draft-copy-error,
+.draft-import-status {
   color: var(--warn);
   font-size: 13px;
   font-weight: 750;
+}
+
+.draft-import-status {
+  color: var(--accent-dark);
 }
 
 .draft-preview__body {

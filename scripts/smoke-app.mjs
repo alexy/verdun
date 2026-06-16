@@ -1,13 +1,32 @@
 import { chromium } from '@playwright/test'
 import { existsSync } from 'node:fs'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 const baseUrl = process.argv[2] ?? 'http://127.0.0.1:5176/rbage/'
 const chromiumExecutable = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
   ?? (existsSync('/opt/homebrew/bin/chromium') ? '/opt/homebrew/bin/chromium' : undefined)
 const browser = await chromium.launch(chromiumExecutable ? { executablePath: chromiumExecutable } : undefined)
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
+const stateDir = await mkdtemp(join(tmpdir(), 'verdun-state-import-'))
+const stateFile = join(stateDir, 'editorial-state.json')
 
 try {
+  await writeFile(stateFile, JSON.stringify({
+    votes: {
+      'lakesail-e5ce5d36852a': 1,
+    },
+    focuses: [
+      {
+        id: 'focus-browser-import',
+        text: 'Imported focus on lakehouse graph execution.',
+        scope: 'this_week',
+        created_at: '2026-06-15T18:00:00Z',
+      },
+    ],
+  }))
+
   await page.goto(baseUrl, { waitUntil: 'networkidle' })
   await page.getByText('Verdun').first().waitFor()
   await page.getByText('Strongly typed AI and data news').first().waitFor()
@@ -59,8 +78,12 @@ try {
   if (!stateJson.focuses?.some((focus) => focus.text.includes('More local-first Rust graph databases'))) {
     throw new Error('editorial state export did not include the saved focus')
   }
+  await page.locator('input[type="file"]').setInputFiles(stateFile)
+  await page.getByText('Imported 1 vote and 1 focus note.').waitFor()
+  await page.getByText('Imported focus on lakehouse graph execution.').first().waitFor()
   await page.locator('.draft-preview__body').getByRole('heading', { name: 'Editorial brief' }).waitFor()
   await page.locator('.draft-preview__body').getByText('This week: More local-first Rust graph databases and typed query planners.').waitFor()
 } finally {
   await browser.close()
+  await rm(stateDir, { recursive: true, force: true })
 }

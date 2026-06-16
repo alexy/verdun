@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import EditorialSidebar from './components/EditorialSidebar.vue'
 import InboxControls from './components/InboxControls.vue'
@@ -10,7 +10,8 @@ import { useNewsletterSnapshot } from './composables/useNewsletterSnapshot'
 import { useNewsletterView } from './composables/useNewsletterView'
 import { ontologyNodes } from './lib/ontology'
 
-const { error, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()
+const { error, importEditorialState, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()
+const editorialStateImportSummary = ref('')
 const {
   draft,
   draftFilename,
@@ -36,6 +37,11 @@ const {
 onMounted(() => {
   void loadSnapshot()
 })
+
+function handleEditorialStateImport(state: unknown): void {
+  const result = importEditorialState(state)
+  editorialStateImportSummary.value = `Imported ${result.importedVotes} vote${result.importedVotes === 1 ? '' : 's'} and ${result.importedFocuses} focus note${result.importedFocuses === 1 ? '' : 's'}.`
+}
 
 </script>
 
@@ -87,6 +93,8 @@ onMounted(() => {
           :editorial-state-filename="editorialStateFilename"
           :editorial-state-json="editorialStateJson"
           :filename="draftFilename"
+          :import-summary="editorialStateImportSummary"
+          @import-editorial-state="handleEditorialStateImport"
         />
 
         <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>

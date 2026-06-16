@@ -1,6 +1,6 @@
 import { ref } from 'vue'
-import type { NewsletterFocus, NewsletterSnapshot, VoteValue } from '../lib/newsletter'
-import { seedSnapshot } from '../lib/newsletter'
+import type { EditorialStateImportResult, NewsletterFocus, NewsletterSnapshot, VoteValue } from '../lib/newsletter'
+import { applyEditorialStateExport, seedSnapshot } from '../lib/newsletter'
 import { normalizeSnapshot } from '../lib/snapshot'
 
 type SnapshotLoadResult = {
@@ -76,8 +76,15 @@ export function useNewsletterSnapshot() {
     }
   }
 
+  function importEditorialState(raw: unknown): EditorialStateImportResult {
+    const result = applyEditorialStateExport(snapshot.value, raw)
+    snapshot.value = result.snapshot
+    return result
+  }
+
   return {
     error,
+    importEditorialState,
     loadSnapshot,
     loading,
     saveFocus,

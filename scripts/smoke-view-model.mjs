@@ -80,6 +80,30 @@ if (!editorialState.votes || Object.values(editorialState.votes).filter((vote) =
 if (!Array.isArray(editorialState.focuses)) {
   throw new Error('editorial state export did not include focuses')
 }
+const imported = newsletterModule.applyEditorialStateExport(snapshot.value, {
+  votes: {
+    'lakesail-rust-spark': 1,
+    'missing-item': 1,
+    'bad-vote': 9,
+  },
+  focuses: [
+    {
+      id: 'focus-imported-smoke',
+      text: 'Imported state should restore a weekly focus.',
+      scope: 'this_week',
+      created_at: '2026-06-15T18:00:00Z',
+    },
+  ],
+})
+if (imported.importedVotes !== 1 || imported.importedFocuses !== 1) {
+  throw new Error('editorial state import did not report applied votes/focuses')
+}
+if (!imported.snapshot.items.some((item) => item.id === 'lakesail-rust-spark' && item.vote === 1)) {
+  throw new Error('editorial state import did not apply the matching vote')
+}
+if (!imported.snapshot.focuses.some((focus) => focus.id === 'focus-imported-smoke')) {
+  throw new Error('editorial state import did not add the imported focus')
+}
 if (!view.draft.value.markdown.includes('## Weekly throughline')) {
   throw new Error('view model draft did not use the shared draft builder')
 }
