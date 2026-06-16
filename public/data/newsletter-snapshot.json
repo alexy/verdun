@@ -968,5 +968,237 @@
         "Turso": 1
       }
     }
+  ],
+  "query_plans": [
+    {
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "hacker_news_query": "Pydantic pydantic",
+      "live_terms": [
+        "pydantic"
+      ],
+      "dev_to_tags": [
+        "pydantic"
+      ]
+    },
+    {
+      "project": "BAML",
+      "topic": "typed LLM functions",
+      "hacker_news_query": "BAML baml",
+      "live_terms": [
+        "baml"
+      ],
+      "dev_to_tags": [
+        "baml"
+      ]
+    },
+    {
+      "project": "DSPy",
+      "topic": "declarative AI programs",
+      "hacker_news_query": "DSPy dspy",
+      "live_terms": [
+        "dspy"
+      ],
+      "dev_to_tags": [
+        "dspy"
+      ]
+    },
+    {
+      "project": "Instructor",
+      "topic": "typed structured outputs",
+      "hacker_news_query": "Instructor instructor pydantic",
+      "live_terms": [
+        "instructor",
+        "pydantic"
+      ],
+      "dev_to_tags": [
+        "instructor",
+        "pydantic"
+      ]
+    },
+    {
+      "project": "LakeSail",
+      "topic": "typed dataframes",
+      "hacker_news_query": "LakeSail sail datafusion",
+      "live_terms": [
+        "sail",
+        "datafusion"
+      ],
+      "dev_to_tags": [
+        "datafusion",
+        "lakesail",
+        "sail"
+      ]
+    },
+    {
+      "project": "Ibis",
+      "topic": "functional dataframes",
+      "hacker_news_query": "Ibis ibis",
+      "live_terms": [
+        "ibis"
+      ],
+      "dev_to_tags": [
+        "ibis"
+      ]
+    },
+    {
+      "project": "Dagster",
+      "topic": "functional data orchestration",
+      "hacker_news_query": "Dagster dagster asset graph",
+      "live_terms": [
+        "dagster",
+        "asset graph"
+      ],
+      "dev_to_tags": [
+        "assetgraph",
+        "dagster"
+      ]
+    },
+    {
+      "project": "Grust Sail",
+      "topic": "lakehouse graph",
+      "hacker_news_query": "Grust Sail grust-sail grust sail",
+      "live_terms": [
+        "grust-sail",
+        "grust sail",
+        "sail graph",
+        "spark connect graph",
+        "graph lakehouse"
+      ],
+      "dev_to_tags": [
+        "graphlakehouse",
+        "grustsail",
+        "sailgraph",
+        "sparkconnectgraph"
+      ]
+    },
+    {
+      "project": "Turso",
+      "topic": "edge data",
+      "hacker_news_query": "Turso turso libsql",
+      "live_terms": [
+        "turso",
+        "libsql"
+      ],
+      "dev_to_tags": [
+        "libsql",
+        "turso"
+      ]
+    },
+    {
+      "project": "LanceDB",
+      "topic": "vector data",
+      "hacker_news_query": "LanceDB lancedb",
+      "live_terms": [
+        "lancedb"
+      ],
+      "dev_to_tags": [
+        "lancedb"
+      ]
+    },
+    {
+      "project": "HelixDB",
+      "topic": "graph database",
+      "hacker_news_query": "HelixDB helixdb",
+      "live_terms": [
+        "helixdb"
+      ],
+      "dev_to_tags": [
+        "helixdb"
+      ]
+    },
+    {
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "hacker_news_query": "SurrealDB surrealdb",
+      "live_terms": [
+        "surrealdb"
+      ],
+      "dev_to_tags": [
+        "surrealdb"
+      ]
+    },
+    {
+      "project": "pgGraph",
+      "topic": "postgres graph",
+      "hacker_news_query": "pgGraph postgres graph apache age",
+      "live_terms": [
+        "postgres graph",
+        "apache age",
+        "pggraph"
+      ],
+      "dev_to_tags": [
+        "apacheage",
+        "pggraph",
+        "postgresgraph"
+      ]
+    },
+    {
+      "project": "Grust",
+      "topic": "typed graph",
+      "hacker_news_query": "Grust grust",
+      "live_terms": [
+        "grust"
+      ],
+      "dev_to_tags": [
+        "grust"
+      ]
+    },
+    {
+      "project": "TypeSec",
+      "topic": "typed security",
+      "hacker_news_query": "TypeSec typesec",
+      "live_terms": [
+        "typesec"
+      ],
+      "dev_to_tags": [
+        "typesec"
+      ]
+    },
+    {
+      "project": "FalkorDB",
+      "topic": "graph database",
+      "hacker_news_query": "FalkorDB falkordb redis graph",
+      "live_terms": [
+        "falkordb",
+        "redis graph",
+        "cypher graph"
+      ],
+      "dev_to_tags": [
+        "cyphergraph",
+        "falkordb",
+        "redisgraph"
+      ]
+    },
+    {
+      "project": "LadybugDB",
+      "topic": "embedded graph",
+      "hacker_news_query": "LadybugDB ladybugdb lbug",
+      "live_terms": [
+        "ladybugdb",
+        "lbug",
+        "arrow graph"
+      ],
+      "dev_to_tags": [
+        "arrowgraph",
+        "ladybugdb",
+        "lbug"
+      ]
+    },
+    {
+      "project": "CocoIndex",
+      "topic": "incremental indexing",
+      "hacker_news_query": "CocoIndex cocoindex target state",
+      "live_terms": [
+        "cocoindex",
+        "target state",
+        "incremental indexing"
+      ],
+      "dev_to_tags": [
+        "cocoindex",
+        "incrementalindexing",
+        "targetstate"
+      ]
+    }
   ]
 }

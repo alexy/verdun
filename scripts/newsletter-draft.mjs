@@ -124,6 +124,13 @@ export function normalizeSnapshot(raw) {
       message: run.message,
       projectCounts: normalizeProjectCounts(run.project_counts ?? run.projectCounts),
     })),
+    queryPlans: (raw.query_plans ?? raw.queryPlans ?? []).map((plan) => ({
+      project: plan.project,
+      topic: plan.topic ?? '',
+      hackerNewsQuery: plan.hacker_news_query ?? plan.hackerNewsQuery ?? '',
+      liveTerms: plan.live_terms ?? plan.liveTerms ?? [],
+      devToTags: plan.dev_to_tags ?? plan.devToTags ?? [],
+    })),
   }
 }
 

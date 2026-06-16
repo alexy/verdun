@@ -46,12 +46,21 @@ export type SourceRun = {
   projectCounts: Record<string, number>
 }
 
+export type ProjectQueryPlan = {
+  project: string
+  topic: string
+  hackerNewsQuery: string
+  liveTerms: string[]
+  devToTags: string[]
+}
+
 export type NewsletterSnapshot = {
   generatedAt: string
   theme: string
   items: NewsItem[]
   focuses: NewsletterFocus[]
   sourceRuns: SourceRun[]
+  queryPlans: ProjectQueryPlan[]
 }
 
 export type VoteValue = -1 | 0 | 1
@@ -90,6 +99,7 @@ export type SourceCoverageSummary = {
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
   theme: 'Strongly typed and functional AI/data systems',
+  queryPlans: [],
   sourceRuns: [
     {
       source: 'Seed',

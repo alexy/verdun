@@ -99,6 +99,8 @@ struct PublicSnapshot {
     theme: String,
     items: Vec<NewsItem>,
     source_runs: Vec<SourceRun>,
+    #[serde(default)]
+    query_plans: Vec<ProjectQueryPlan>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -163,7 +165,7 @@ fn main() -> Result<()> {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct ProjectQueryPlan {
     project: String,
     topic: String,
@@ -213,11 +215,13 @@ fn collect(
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
+    let query_plans = query_plans(&watchlist);
     let public_snapshot = PublicSnapshot {
         generated_at: Utc::now(),
         theme: watchlist.theme,
         items,
         source_runs,
+        query_plans,
     };
     fs::write(&public_out, serde_json::to_string_pretty(&public_snapshot)?)
         .with_context(|| format!("writing {}", public_out.display()))?;
@@ -369,7 +373,15 @@ fn verify(config: PathBuf) -> Result<()> {
 
 fn queries(config: PathBuf) -> Result<()> {
     let watchlist = read_watchlist(&config)?;
-    let plans = watchlist
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&query_plans(&watchlist))?
+    );
+    Ok(())
+}
+
+fn query_plans(watchlist: &Watchlist) -> Vec<ProjectQueryPlan> {
+    watchlist
         .projects
         .iter()
         .map(|project| ProjectQueryPlan {
@@ -379,9 +391,7 @@ fn queries(config: PathBuf) -> Result<()> {
             live_terms: project_live_terms(project),
             dev_to_tags: dev_to_tags(project),
         })
-        .collect::<Vec<_>>();
-    println!("{}", serde_json::to_string_pretty(&plans)?);
-    Ok(())
+        .collect::<Vec<_>>()
 }
 
 fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {

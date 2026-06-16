@@ -1,4 +1,4 @@
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type SourceRun, type SourceRunStatus, type VoteValue } from './newsletter'
+import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type ProjectQueryPlan, type SourceRun, type SourceRunStatus, type VoteValue } from './newsletter'
 
 type RawRecord = Record<string, unknown>
 
@@ -13,6 +13,9 @@ export function normalizeSnapshot(raw: unknown): NewsletterSnapshot {
     sourceRuns: arrayValue(record.sourceRuns ?? record.source_runs)
       .map(normalizeSourceRun)
       .filter((run): run is SourceRun => Boolean(run)),
+    queryPlans: arrayValue(record.queryPlans ?? record.query_plans)
+      .map(normalizeQueryPlan)
+      .filter((plan): plan is ProjectQueryPlan => Boolean(plan)),
   }
 }
 
@@ -90,6 +93,20 @@ function normalizeSourceRun(raw: unknown): SourceRun | null {
     itemCount: numberValue(record.itemCount ?? record.item_count, 0),
     message: stringValue(record.message, ''),
     projectCounts: normalizeProjectCounts(record.projectCounts ?? record.project_counts),
+  }
+}
+
+function normalizeQueryPlan(raw: unknown): ProjectQueryPlan | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const record = raw as RawRecord
+  const project = stringValue(record.project, '')
+  if (!project) return null
+  return {
+    project,
+    topic: stringValue(record.topic, ''),
+    hackerNewsQuery: stringValue(record.hackerNewsQuery ?? record.hacker_news_query, ''),
+    liveTerms: arrayValue(record.liveTerms ?? record.live_terms).map((term) => String(term)).filter(Boolean),
+    devToTags: arrayValue(record.devToTags ?? record.dev_to_tags).map((tag) => String(tag)).filter(Boolean),
   }
 }
 

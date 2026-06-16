@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless'
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type SourceRunStatus, type VoteValue } from '../../src/lib/newsletter'
+import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type ProjectQueryPlan, type SourceRunStatus, type VoteValue } from '../../src/lib/newsletter'
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -67,11 +67,20 @@ type StaticSourceRun = {
   project_counts?: Record<string, unknown>
 }
 
+type StaticQueryPlan = {
+  project: string
+  topic: string
+  hacker_news_query: string
+  live_terms: string[]
+  dev_to_tags: string[]
+}
+
 type StaticSnapshot = {
   generated_at: string
   theme: string
   items: StaticNewsRow[]
   source_runs: StaticSourceRun[]
+  query_plans?: StaticQueryPlan[]
 }
 
 type LocalEditorialState = {
@@ -124,6 +133,7 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
     sourceRuns: sourceRunRows.map(toSourceRun),
+    queryPlans: [],
   }
 }
 
@@ -144,6 +154,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
         message: run.message,
         projectCounts: normalizeProjectCounts(run.project_counts),
       })),
+      queryPlans: (snapshot.query_plans ?? []).map(toQueryPlan),
     }
   }
 
@@ -156,6 +167,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
     items: rows.map(toStaticNewsItem),
     focuses: seedSnapshot.focuses,
     sourceRuns: [],
+    queryPlans: [],
   }
 }
 
@@ -359,6 +371,16 @@ function toSourceRun(row: SourceRunRow) {
     itemCount: row.item_count,
     message: row.message,
     projectCounts: normalizeProjectCounts(row.project_counts),
+  }
+}
+
+function toQueryPlan(row: StaticQueryPlan): ProjectQueryPlan {
+  return {
+    project: row.project,
+    topic: row.topic,
+    hackerNewsQuery: row.hacker_news_query,
+    liveTerms: row.live_terms ?? [],
+    devToTags: row.dev_to_tags ?? [],
   }
 }
 
