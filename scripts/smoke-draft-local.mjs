@@ -52,8 +52,17 @@ try {
   if (!draft.markdown.includes('## Weekly throughline')) {
     throw new Error('local draft did not include the weekly throughline')
   }
+  if (!draft.markdown.includes('## Editor\'s letter')) {
+    throw new Error('local draft did not include the editor letter')
+  }
   if (!draft.markdown.includes('## Editorial arc')) {
     throw new Error('local draft did not include the editorial arc')
+  }
+  if (!draft.markdown.includes('## Closing note')) {
+    throw new Error('local draft did not include the closing note')
+  }
+  if (!draft.markdown.includes('AI systems do not become safer or more useful by becoming more mystical')) {
+    throw new Error('local draft editor letter did not include literary synthesis')
   }
   if (!draft.markdown.includes('Lead with Grust Sail')) {
     throw new Error('local draft editorial arc did not use the selected lead item')

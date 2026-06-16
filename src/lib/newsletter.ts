@@ -365,6 +365,7 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '',
     openingParagraph(items, brief),
     '',
+    ...editorLetterSection(items, brief),
     ...throughlineSection(items, brief),
     ...briefSection(brief),
     ...editorialArcSection(items, brief),
@@ -377,6 +378,7 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '',
     editorialThread(items, brief),
     '',
+    ...closingNoteSection(items, brief),
     '## Sources watched',
     '',
     ...snapshot.sourceRuns.map(sourceRunLine),
@@ -540,10 +542,10 @@ export function evaluateNewsletterProseQuality(draft: NewsletterDraft): Newslett
     {
       id: 'throughline',
       label: 'Weekly throughline',
-      passed: markdown.includes('## Weekly throughline') && markdown.includes('## Editorial arc'),
-      detail: markdown.includes('## Weekly throughline') && markdown.includes('## Editorial arc')
-        ? 'Draft includes a synthesized throughline and editorial arc.'
-        : 'Add both a weekly throughline and an editorial arc before publishing.',
+      passed: markdown.includes('## Editor\'s letter') && markdown.includes('## Weekly throughline') && markdown.includes('## Editorial arc') && markdown.includes('## Closing note'),
+      detail: markdown.includes('## Editor\'s letter') && markdown.includes('## Weekly throughline') && markdown.includes('## Editorial arc') && markdown.includes('## Closing note')
+        ? 'Draft includes a synthesized letter, throughline, editorial arc, and closing note.'
+        : 'Add the editor letter, weekly throughline, editorial arc, and closing note before publishing.',
     },
     {
       id: 'crawler-boilerplate',
@@ -771,6 +773,28 @@ function briefSection(brief: EditorialBrief): string[] {
     '',
     ...brief.weekly.map((text) => `- This week: ${text}`),
     ...brief.ongoing.map((text) => `- Ongoing: ${text}`),
+    '',
+  ]
+}
+
+function editorLetterSection(items: NewsItem[], brief: EditorialBrief): string[] {
+  if (!items.length) return []
+  const lead = items[0]
+  const supporting = items.find((item) => item.project !== lead.project)
+  const final = items[items.length - 1]
+  const intent = brief.weekly[0] ?? brief.ongoing[0]
+  const intentClause = intent
+    ? `The brief asks for ${stripTerminalPunctuation(intent).toLowerCase()}, so this issue follows the projects that make that wish operational.`
+    : 'This issue follows the projects that turn architecture taste into operational evidence.'
+  const supportClause = supporting
+    ? `${supporting.project} gives the lead a second witness; ${final.project} keeps the question honest at the data substrate.`
+    : `${final.project} keeps the question honest at the data substrate.`
+  return [
+    '## Editor\'s letter',
+    '',
+    `${lead.project} is the front door this week because it makes the abstract problem concrete: AI systems do not become safer or more useful by becoming more mystical; they become useful when their memory, data, and interfaces can be inspected.`,
+    '',
+    `${intentClause} ${supportClause}`,
     '',
   ]
 }
@@ -1064,6 +1088,23 @@ function editorialThread(items: NewsItem[], brief: EditorialBrief): string {
     ? `That makes "${stripTerminalPunctuation(intent)}" the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.`
     : 'Each included item should either sharpen the stack, complicate it, or show where production practice is already moving.'
   return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. ${intentSentence}`
+}
+
+function closingNoteSection(items: NewsItem[], brief: EditorialBrief): string[] {
+  if (!items.length) return []
+  const projects = unique(items.map((item) => item.project)).slice(0, 4)
+  const intent = brief.weekly[0] ?? brief.ongoing[0]
+  const finalQuestion = intent
+    ? `Next week, the useful test is whether ${stripTerminalPunctuation(intent).toLowerCase()} produces better evidence, not just better slogans.`
+    : 'Next week, the useful test is whether the stack produces better evidence, not just better slogans.'
+  return [
+    '## Closing note',
+    '',
+    `${sentenceList(projects)} are worth watching together because they pull the same thread from different ends: explicit contracts, inspectable data movement, and state that can survive contact with production.`,
+    '',
+    finalQuestion,
+    '',
+  ]
 }
 
 function sentenceList(values: string[]): string {

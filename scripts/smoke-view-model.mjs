@@ -138,8 +138,14 @@ if (!imported.snapshot.focuses.some((focus) => focus.id === 'focus-imported-smok
 if (!view.draft.value.markdown.includes('## Weekly throughline')) {
   throw new Error('view model draft did not use the shared draft builder')
 }
+if (!view.draft.value.markdown.includes('## Editor\'s letter')) {
+  throw new Error('view model draft did not include the editor letter')
+}
 if (!view.draft.value.markdown.includes('## Editorial arc')) {
   throw new Error('view model draft did not include the editorial arc')
+}
+if (!view.draft.value.markdown.includes('## Closing note')) {
+  throw new Error('view model draft did not include the closing note')
 }
 if (!view.draft.value.markdown.includes('## Coverage gaps')) {
   throw new Error('view model draft did not include coverage gaps')

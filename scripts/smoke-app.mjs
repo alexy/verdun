@@ -130,6 +130,8 @@ try {
   await page.getByText('Imported 1 vote and 1 focus note.').waitFor()
   await page.getByText('Imported focus on lakehouse graph execution.').first().waitFor()
   await page.locator('.draft-preview__body').getByRole('heading', { name: 'Editorial brief' }).waitFor()
+  await page.locator('.draft-preview__body').getByRole('heading', { name: "Editor's letter" }).waitFor()
+  await page.locator('.draft-preview__body').getByRole('heading', { name: 'Closing note' }).waitFor()
   await page.locator('.draft-preview__body').getByText('This week: More local-first Rust graph databases and typed query planners.').waitFor()
 } finally {
   await browser.close()
