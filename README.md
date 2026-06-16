@@ -29,8 +29,7 @@ npm run dev:app
 
 Open `http://127.0.0.1:5176`.
 
-Without `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL`, the API uses the checked-in static crawler snapshot. In browser-only preview, the app also tries `/rbage/data/newsletter-snapshot.json` before falling back to the embedded seed snapshot.
-Local votes and focus notes are persisted to ignored `crawler/data/editorial-state.json` so the triage workflow survives refreshes before an external database is configured. Set `VERDUN_LOCAL_STATE_FILE` to use a different local state file.
+Without `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL`, the API uses the checked-in static crawler snapshot. On Vercel this is a read-only API snapshot, so the app reports `Browser-local edits` and persists votes/focus notes to browser storage for refresh-safe review, editorial-state export/import, and Ulysses handoff. In local development without a database, votes and focus notes are persisted to ignored `crawler/data/editorial-state.json`; set `VERDUN_LOCAL_STATE_FILE` to use a different local state file. In browser-only preview, the app also tries `/rbage/data/newsletter-snapshot.json` before falling back to the embedded seed snapshot.
 
 Run the deterministic local checks with `npm run smoke:all`. Browser coverage for the production `/rbage/` path runs with `npm run smoke:browser`, which builds, starts a local preview server, runs Playwright against `http://127.0.0.1:5174/rbage/`, and then stops the server.
 

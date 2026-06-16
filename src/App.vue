@@ -10,7 +10,7 @@ import { useNewsletterSnapshot } from './composables/useNewsletterSnapshot'
 import { useNewsletterView } from './composables/useNewsletterView'
 import { ontologyNodes } from './lib/ontology'
 
-const { error, importEditorialState, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()
+const { editorialPersistence, error, importEditorialState, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()
 const editorialStateImportSummary = ref('')
 const {
   draft,
@@ -79,6 +79,7 @@ function handleEditorialStateImport(state: unknown): void {
           v-model:source-filter="sourceFilter"
           v-model:vote-filter="voteFilter"
           :downvoted-count="rejectedItems"
+          :editorial-persistence="editorialPersistence"
           :error="error"
           :filtered-count="filteredItems.length"
           :generated-at="snapshot.generatedAt"

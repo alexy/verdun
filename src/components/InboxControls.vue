@@ -3,6 +3,7 @@ import { Search, X } from '@lucide/vue'
 
 defineProps<{
   downvotedCount: number
+  editorialPersistence: 'database' | 'local_file' | 'browser'
   error: string
   filteredCount: number
   generatedAt: string
@@ -29,6 +30,12 @@ function clearFilters(): void {
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(value))
 }
+
+function persistenceLabel(value: 'database' | 'local_file' | 'browser'): string {
+  if (value === 'database') return 'Database-backed edits'
+  if (value === 'local_file') return 'Local file edits'
+  return 'Browser-local edits'
+}
 </script>
 
 <template>
@@ -38,7 +45,7 @@ function formatDate(value: string): string {
       <h2>{{ theme }}</h2>
     </div>
     <p v-if="error" class="status">Local fallback: {{ error }}</p>
-    <p v-else class="status">Generated {{ formatDate(generatedAt) }}</p>
+    <p v-else class="status">Generated {{ formatDate(generatedAt) }} · {{ persistenceLabel(editorialPersistence) }}</p>
   </div>
 
   <div class="inbox-controls" aria-label="Inbox filters">

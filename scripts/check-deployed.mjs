@@ -85,6 +85,10 @@ async function validateSnapshot(snapshot, label) {
   const items = arrayValue(snapshot.items)
   const sourceRuns = arrayValue(snapshot.sourceRuns ?? snapshot.source_runs)
   const queryPlans = arrayValue(snapshot.queryPlans ?? snapshot.query_plans)
+  const editorialPersistence = snapshot.editorialPersistence ?? snapshot.editorial_persistence ?? (label === 'static snapshot' ? 'browser' : undefined)
+  if (!['database', 'local_file', 'browser'].includes(editorialPersistence)) {
+    throw new Error(`${label} did not report editorial persistence mode`)
+  }
   if (items.length < 23) throw new Error(`${label} has too few newsletter items: ${items.length}`)
   if (!sourceRuns.length) throw new Error(`${label} has no source health metadata`)
   if (queryPlans.length < 23) throw new Error(`${label} has too few crawler query plans: ${queryPlans.length}`)

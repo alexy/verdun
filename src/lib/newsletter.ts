@@ -66,6 +66,7 @@ export type ReviewTarget = {
 export type NewsletterSnapshot = {
   generatedAt: string
   theme: string
+  editorialPersistence: 'database' | 'local_file' | 'browser'
   items: NewsItem[]
   focuses: NewsletterFocus[]
   sourceRuns: SourceRun[]
@@ -171,6 +172,7 @@ export type NewsletterPublishManifestOptions = {
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
   theme: 'Strongly typed and functional AI/data systems',
+  editorialPersistence: 'browser',
   queryPlans: [],
   sourceRuns: [
     {

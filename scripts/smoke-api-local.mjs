@@ -13,6 +13,9 @@ try {
     optimizeDeps: { noDiscovery: true },
   })
   const firstSnapshot = await module.readSnapshot()
+  if (firstSnapshot.editorialPersistence !== 'local_file') {
+    throw new Error(`local API snapshot expected local_file persistence, found ${firstSnapshot.editorialPersistence}`)
+  }
   const item = firstSnapshot.items[0]
   if (!item) throw new Error('snapshot has no items')
   if (!item.provenance?.stage || !item.provenance?.evidenceUrl) {
@@ -39,6 +42,20 @@ try {
   if (!state.focuses.some((candidate) => candidate.id === focus.id)) {
     throw new Error('state file did not record focus')
   }
+
+  process.env.VERCEL = '1'
+  const deployedSnapshot = await module.readSnapshot()
+  if (deployedSnapshot.editorialPersistence !== 'browser') {
+    throw new Error(`deployed no-database snapshot expected browser persistence, found ${deployedSnapshot.editorialPersistence}`)
+  }
+  let blockedDeployedWrite = false
+  try {
+    await module.writeVote(item.id, -1)
+  } catch (error) {
+    blockedDeployedWrite = error?.statusCode === 503 && error?.code === 'editorial_persistence_unavailable'
+  }
+  if (!blockedDeployedWrite) throw new Error('deployed no-database writes should be reported as unavailable')
 } finally {
+  delete process.env.VERCEL
   await rm(stateDir, { recursive: true, force: true })
 }

@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises'
 const rawSnapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
 const reviewedSnapshot = {
   ...rawSnapshot,
+  editorial_persistence: 'database',
   items: rawSnapshot.items.map((item) => ({
     ...item,
     vote: ['grust-sail-3683deba292c', 'lakesail-e5ce5d36852a'].includes(item.id) ? 1 : 0,

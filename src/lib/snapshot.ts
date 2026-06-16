@@ -8,6 +8,7 @@ export function normalizeSnapshot(raw: unknown): NewsletterSnapshot {
   return {
     generatedAt: stringValue(record.generatedAt ?? record.generated_at, seedSnapshot.generatedAt),
     theme: stringValue(record.theme, seedSnapshot.theme),
+    editorialPersistence: editorialPersistence(record.editorialPersistence ?? record.editorial_persistence),
     items: arrayValue(record.items).map(normalizeItem).filter((item): item is NewsItem => Boolean(item)),
     focuses: arrayValue(record.focuses).map(normalizeFocus).filter((focus): focus is NewsletterFocus => Boolean(focus)),
     sourceRuns: arrayValue(record.sourceRuns ?? record.source_runs)
@@ -17,6 +18,10 @@ export function normalizeSnapshot(raw: unknown): NewsletterSnapshot {
       .map(normalizeQueryPlan)
       .filter((plan): plan is ProjectQueryPlan => Boolean(plan)),
   }
+}
+
+function editorialPersistence(raw: unknown): NewsletterSnapshot['editorialPersistence'] {
+  return raw === 'database' || raw === 'local_file' || raw === 'browser' ? raw : 'browser'
 }
 
 function normalizeItem(raw: unknown): NewsItem | null {

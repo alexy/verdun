@@ -24,6 +24,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
   - `POST /api/newsletter/vote`
   - `POST /api/newsletter/focus`
 - Backend route helpers live in `api/newsletter/_http.ts`, leaving `api/newsletter/_db.ts` as the persistence adapter.
+- Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local development without a database uses ignored `crawler/data/editorial-state.json`.
 - External Postgres schema in `db/migrations/0001_newsletter.sql`.
 - Local no-database mode persists votes and focus notes to ignored `crawler/data/editorial-state.json`, with `VERDUN_LOCAL_STATE_FILE` available for tests or alternate local state.
 - Rust crawler/loader scaffold under `crawler/`.

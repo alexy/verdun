@@ -46,6 +46,7 @@ const baseSnapshot = {
 }
 
 await smokeApiBackedSnapshot()
+await smokeBrowserPersistenceSnapshot()
 await smokeVoteRollback()
 await smokeStaticFallbackSnapshot()
 
@@ -53,7 +54,7 @@ async function smokeApiBackedSnapshot() {
   const calls = []
   globalThis.fetch = async (url, options) => {
     calls.push({ options, url: String(url) })
-    if (url === '/api/newsletter/items') return jsonResponse(baseSnapshot)
+    if (url === '/api/newsletter/items') return jsonResponse({ ...baseSnapshot, editorial_persistence: 'database' })
     if (url === '/api/newsletter/vote') return jsonResponse({ ok: true })
     if (url === '/api/newsletter/focus') return jsonResponse({ ok: true })
     return jsonResponse({ error: 'not_found' }, false, 404)
@@ -85,9 +86,50 @@ async function smokeApiBackedSnapshot() {
   }
 }
 
+async function smokeBrowserPersistenceSnapshot() {
+  const calls = []
+  const storage = new Map()
+  globalThis.localStorage = {
+    getItem: (key) => storage.has(key) ? storage.get(key) : null,
+    setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: (key) => storage.delete(key),
+  }
+  globalThis.fetch = async (url, options) => {
+    calls.push({ options, url: String(url) })
+    if (url === '/api/newsletter/items') {
+      return jsonResponse({
+        ...baseSnapshot,
+        editorial_persistence: 'browser',
+      })
+    }
+    return jsonResponse({ error: 'unexpected_post' }, false, 500)
+  }
+
+  const state = snapshotModule.useNewsletterSnapshot()
+  await state.loadSnapshot()
+  if (state.editorialPersistence.value !== 'browser') throw new Error('browser-mode API did not expose browser persistence')
+  await state.setVote('smoke-item', 1)
+  await state.saveFocus('Browser-local focus', 'ongoing')
+  if (calls.some((call) => call.options?.method === 'POST')) {
+    throw new Error('browser persistence mode should not POST edits')
+  }
+  if (state.snapshot.value.items[0]?.vote !== 1) throw new Error('browser vote was not kept locally')
+  if (!state.snapshot.value.focuses.some((focus) => focus.text === 'Browser-local focus')) {
+    throw new Error('browser focus was not kept locally')
+  }
+
+  const reloaded = snapshotModule.useNewsletterSnapshot()
+  await reloaded.loadSnapshot()
+  if (reloaded.snapshot.value.items[0]?.vote !== 1) throw new Error('browser vote was not restored after reload')
+  if (!reloaded.snapshot.value.focuses.some((focus) => focus.text === 'Browser-local focus')) {
+    throw new Error('browser focus was not restored after reload')
+  }
+  delete globalThis.localStorage
+}
+
 async function smokeVoteRollback() {
   globalThis.fetch = async (url) => {
-    if (url === '/api/newsletter/items') return jsonResponse(baseSnapshot)
+    if (url === '/api/newsletter/items') return jsonResponse({ ...baseSnapshot, editorial_persistence: 'database' })
     if (url === '/api/newsletter/vote') return jsonResponse({ error: 'failed' }, false, 500)
     return jsonResponse({ error: 'not_found' }, false, 404)
   }

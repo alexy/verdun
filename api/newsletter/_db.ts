@@ -95,6 +95,7 @@ type ReviewTarget = {
 type NewsletterSnapshot = {
   generatedAt: string
   theme: string
+  editorialPersistence: 'database' | 'local_file' | 'browser'
   items: NewsItem[]
   focuses: NewsletterFocus[]
   sourceRuns: SourceRun[]
@@ -231,6 +232,7 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
   return {
     generatedAt: new Date().toISOString(),
     theme: 'Strongly typed and functional AI/data systems',
+    editorialPersistence: editorialPersistenceMode(),
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
     sourceRuns: sourceRunRows.map(toSourceRun),
@@ -245,6 +247,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
     return {
       generatedAt: snapshot.generated_at,
       theme: snapshot.theme,
+      editorialPersistence: editorialPersistenceMode(),
       items: snapshot.items.map(toStaticNewsItem),
       focuses: seedFocuses,
       sourceRuns: snapshot.source_runs.map((run) => ({
@@ -265,6 +268,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
   return {
     generatedAt: new Date().toISOString(),
     theme: 'Strongly typed and functional AI/data systems',
+    editorialPersistence: editorialPersistenceMode(),
     items: rows.map(toStaticNewsItem),
     focuses: seedFocuses,
     sourceRuns: [],
@@ -276,6 +280,7 @@ function emptySnapshot(): NewsletterSnapshot {
   return {
     generatedAt: new Date().toISOString(),
     theme: 'Strongly typed and functional AI/data systems',
+    editorialPersistence: editorialPersistenceMode(),
     items: [],
     focuses: seedFocuses,
     sourceRuns: [],
@@ -286,6 +291,7 @@ function emptySnapshot(): NewsletterSnapshot {
 export async function writeVote(itemId: string, vote: VoteValue): Promise<void> {
   const databaseUrl = newsletterDatabaseUrl()
   if (!databaseUrl) {
+    assertLocalEditorialWritesAvailable()
     const state = readLocalEditorialState()
     if (vote === 0) {
       delete state.votes[itemId]
@@ -307,6 +313,7 @@ export async function writeVote(itemId: string, vote: VoteValue): Promise<void> 
 export async function writeFocus(text: string, scope: 'this_week' | 'ongoing'): Promise<NewsletterFocus | null> {
   const databaseUrl = newsletterDatabaseUrl()
   if (!databaseUrl) {
+    assertLocalEditorialWritesAvailable()
     const state = readLocalEditorialState()
     const focus: FocusRow = {
       id: randomUUID(),
@@ -329,6 +336,19 @@ export async function writeFocus(text: string, scope: 'this_week' | 'ongoing'): 
 
 function newsletterDatabaseUrl(): string | undefined {
   return process.env.POSTGRES_URL ?? process.env.DATABASE_URL ?? process.env.NEON_DATABASE_URL
+}
+
+function editorialPersistenceMode(): NewsletterSnapshot['editorialPersistence'] {
+  if (newsletterDatabaseUrl()) return 'database'
+  return process.env.VERCEL === '1' ? 'browser' : 'local_file'
+}
+
+function assertLocalEditorialWritesAvailable(): void {
+  if (editorialPersistenceMode() !== 'local_file') {
+    const error = new Error('This deployment is read-only until POSTGRES_URL, DATABASE_URL, or NEON_DATABASE_URL is configured. Browser-local editorial state can still be exported for Ulysses.')
+    Object.assign(error, { statusCode: 503, code: 'editorial_persistence_unavailable' })
+    throw error
+  }
 }
 
 function withLocalEditorialState(snapshot: NewsletterSnapshot): NewsletterSnapshot {
