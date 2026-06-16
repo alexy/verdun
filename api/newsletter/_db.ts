@@ -10,6 +10,8 @@ declare const process: {
   cwd: () => string
 }
 
+type SqlClient = ReturnType<typeof neon>
+
 type NewsRow = {
   id: string
   title: string
@@ -192,6 +194,11 @@ export type EditorialStateImportResult = {
   importedVotes: number
 }
 
+type DatabaseSnapshotOptions = {
+  sql?: SqlClient
+  databaseUrl?: string
+}
+
 const seedFocuses: NewsletterFocus[] = [
   {
     id: 'focus-local-first-graphs',
@@ -204,7 +211,12 @@ const seedFocuses: NewsletterFocus[] = [
 export async function readSnapshot(): Promise<NewsletterSnapshot> {
   const databaseUrl = newsletterDatabaseUrl()
   if (!databaseUrl) return withLocalEditorialState(readStaticSnapshot() ?? emptySnapshot())
-  const sql = neon(databaseUrl)
+  return readDatabaseSnapshot({ databaseUrl })
+}
+
+export async function readDatabaseSnapshot(options: DatabaseSnapshotOptions): Promise<NewsletterSnapshot> {
+  const databaseUrl = options.databaseUrl ?? newsletterDatabaseUrl()
+  const sql = options.sql ?? neon(databaseUrl ?? '')
   const rows = await sql.query(`
     select
       i.id,
@@ -244,11 +256,12 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
     from newsletter_query_plans
     order by project
   `) as QueryPlanRow[]
+  const generatedAt = await readDatabaseGeneratedAt(sql)
 
   return {
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     theme: 'Strongly typed and functional AI/data systems',
-    editorialPersistence: editorialPersistenceMode(),
+    editorialPersistence: 'database',
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
     sourceRuns: sourceRunRows.map(toSourceRun),
@@ -271,25 +284,36 @@ export async function readStatus(): Promise<NewsletterStatus> {
       writable: editorialPersistenceMode() === 'local_file',
     }
   }
-  const sql = neon(databaseUrl)
+  return readDatabaseStatus({ databaseUrl })
+}
+
+export async function readDatabaseStatus(options: DatabaseSnapshotOptions): Promise<NewsletterStatus> {
+  const databaseUrl = options.databaseUrl ?? newsletterDatabaseUrl()
+  const sql = options.sql ?? neon(databaseUrl ?? '')
   const rows = await sql.query(`
     select
       (select count(*)::int from newsletter_items) as item_count,
       (select count(*)::int from newsletter_focuses) as focus_count,
       (select count(*)::int from newsletter_votes where vote <> 0) as vote_count,
       (select count(*)::int from newsletter_source_runs) as source_run_count,
-      (select count(*)::int from newsletter_query_plans) as query_plan_count
+      (select count(*)::int from newsletter_query_plans) as query_plan_count,
+      coalesce(
+        (select max(collected_at)::text from newsletter_source_runs),
+        (select max(updated_at)::text from newsletter_items),
+        now()::text
+      ) as generated_at
   `) as Array<{
     item_count: number
     focus_count: number
     vote_count: number
     source_run_count: number
     query_plan_count: number
+    generated_at: string
   }>
   const row = rows[0]
   return {
     editorialPersistence: 'database',
-    generatedAt: new Date().toISOString(),
+    generatedAt: row?.generated_at ?? new Date().toISOString(),
     itemCount: Number(row?.item_count ?? 0),
     focusCount: Number(row?.focus_count ?? 0),
     voteCount: Number(row?.vote_count ?? 0),
@@ -297,6 +321,17 @@ export async function readStatus(): Promise<NewsletterStatus> {
     queryPlanCount: Number(row?.query_plan_count ?? 0),
     writable: true,
   }
+}
+
+async function readDatabaseGeneratedAt(sql: SqlClient): Promise<string> {
+  const rows = await sql.query(`
+    select coalesce(
+      (select max(collected_at)::text from newsletter_source_runs),
+      (select max(updated_at)::text from newsletter_items),
+      now()::text
+    ) as generated_at
+  `) as Array<{ generated_at: string }>
+  return rows[0]?.generated_at ?? new Date().toISOString()
 }
 
 function readStaticSnapshot(): NewsletterSnapshot | null {

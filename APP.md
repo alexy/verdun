@@ -39,6 +39,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - External DB loader SQL can export from the cohesive public snapshot and upserts newsletter items, `newsletter_source_runs`, and `newsletter_query_plans`.
 - `npm run db:apply` validates a generated SQL load against its paired snapshot, applies the database migration, and loads external Postgres only when `--apply` and a database URL are present.
 - `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` checks that the SQL export preserves required projects, source runs, query plans, tags, URLs, and provenance JSON before applying it to external Postgres.
+- Database-backed API snapshots and status responses preserve the source collection timestamp from `newsletter_source_runs.collected_at`, so deployed draft issue dates follow the crawler/load run rather than serverless request time.
 - Source-health metadata shown in the app sidebar, including per-project coverage for each watched source.
 - Source-health coverage gaps identify watched projects without live/manual source matches, show crawler query hints and source-specific review links for the first gaps, can be saved directly as this-week focus requests, and include the same actionable gap signal in local Markdown drafts.
 - `npm run review:gaps` writes an ignored Markdown checklist of uncovered projects and their public/manual review targets for issue preparation.

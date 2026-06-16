@@ -32,6 +32,7 @@ try {
   if (!pydanticPlan?.reviewTargets?.some((target) => target.source === 'LinkedIn' && target.url.startsWith('https://'))) {
     throw new Error('local API snapshot did not expose query-plan review targets')
   }
+  await smokeDatabaseSnapshotTimestamp(module)
 
   await module.writeVote(item.id, 1)
   const focus = await module.writeFocus('More local graph databases with typed query planning.', 'this_week')
@@ -92,4 +93,90 @@ try {
 } finally {
   delete process.env.VERCEL
   await rm(stateDir, { recursive: true, force: true })
+}
+
+async function smokeDatabaseSnapshotTimestamp(module) {
+  const collectedAt = '2026-06-16 15:15:24.747137+00'
+  const queries = []
+  const sql = {
+    query: async (query) => {
+      queries.push(query)
+      if (query.includes('count(*)::int from newsletter_items')) {
+        return [
+          {
+            item_count: 1,
+            focus_count: 0,
+            vote_count: 1,
+            source_run_count: 1,
+            query_plan_count: 0,
+            generated_at: collectedAt,
+          },
+        ]
+      }
+      if (query.includes('max(collected_at)::text')) return [{ generated_at: collectedAt }]
+      if (query.includes('from newsletter_items i')) {
+        return [
+          {
+            id: 'db-smoke-item',
+            title: 'Database smoke item',
+            source: 'Hacker News',
+            source_kind: 'community',
+            url: 'https://example.com/db-smoke',
+            published_at: '2026-06-15 12:00:00+00',
+            project: 'Pydantic',
+            topic: 'typed AI',
+            summary: 'Smoke summary',
+            why_it_matters: 'Smoke reason',
+            tags: ['pydantic'],
+            score: 44,
+            raw_json: {
+              provenance: {
+                stage: 'live',
+                adapter: 'hn-algolia',
+                source: 'Hacker News',
+                source_kind: 'community',
+                source_url: 'https://news.ycombinator.com',
+                evidence_url: 'https://example.com/db-smoke',
+                project: 'Pydantic',
+                matched_keywords: ['pydantic'],
+              },
+            },
+            vote: 1,
+          },
+        ]
+      }
+      if (query.includes('from newsletter_focuses')) return []
+      if (query.includes('from newsletter_source_runs')) {
+        return [
+          {
+            source: 'Hacker News',
+            kind: 'community',
+            status: 'ok',
+            item_count: 1,
+            message: 'HN Algolia search_by_date',
+            project_counts: { Pydantic: 1 },
+          },
+        ]
+      }
+      if (query.includes('from newsletter_query_plans')) return []
+      throw new Error(`unexpected SQL in smokeDatabaseSnapshotTimestamp: ${query}`)
+    },
+  }
+  const snapshot = await module.readDatabaseSnapshot({ sql })
+  if (snapshot.editorialPersistence !== 'database') {
+    throw new Error(`database snapshot did not report database persistence: ${snapshot.editorialPersistence}`)
+  }
+  if (snapshot.generatedAt !== collectedAt) {
+    throw new Error(`database snapshot did not preserve collected timestamp: ${snapshot.generatedAt}`)
+  }
+  if (snapshot.items[0]?.id !== 'db-smoke-item' || snapshot.items[0]?.vote !== 1) {
+    throw new Error('database snapshot did not normalize item rows')
+  }
+  if (!queries.some((query) => query.includes('max(collected_at)::text'))) {
+    throw new Error('database snapshot did not query source-run collection time')
+  }
+  const status = await module.readDatabaseStatus({ sql })
+  if (status.generatedAt !== collectedAt || !status.writable) {
+    throw new Error(`database status did not preserve collected timestamp: ${JSON.stringify(status)}`)
+  }
 }
