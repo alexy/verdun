@@ -11,6 +11,14 @@
   ],
   "rewrites": [
     {
+      "source": "/rbage/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/rbage/data/(.*)",
+      "destination": "/data/$1"
+    },
+    {
       "source": "/rbage/(.*)",
       "destination": "/index.html"
     },

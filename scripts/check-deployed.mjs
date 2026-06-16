@@ -31,7 +31,7 @@ function normalizeBaseUrl(value) {
 }
 
 async function fetchText(url, label) {
-  const response = await fetch(url)
+  const response = await safeFetch(url, label)
   if (!response.ok) throw new Error(responseError(label, url, response.status))
   const contentType = response.headers.get('content-type') ?? ''
   if (!contentType.includes('text/html')) {
@@ -41,9 +41,34 @@ async function fetchText(url, label) {
 }
 
 async function fetchJson(url, label) {
-  const response = await fetch(url)
+  const response = await safeFetch(url, label)
   if (!response.ok) throw new Error(responseError(label, url, response.status))
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('application/json')) {
+    throw new Error(`${label} returned ${contentType || 'unknown content-type'} at ${url}`)
+  }
   return await response.json()
+}
+
+async function safeFetch(url, label) {
+  try {
+    return await fetch(url)
+  } catch (error) {
+    throw new Error(networkError(label, url, error))
+  }
+}
+
+function networkError(label, url, error) {
+  const cause = error?.cause ?? error
+  const code = typeof cause?.code === 'string' ? cause.code : ''
+  const hostname = new URL(url).hostname
+  if (code === 'ENOTFOUND') {
+    return `${label} could not resolve ${hostname}. If this is a newly attached Vercel custom domain, verify it with \`npx vercel domains inspect ${hostname}\`, \`npx vercel alias ls\`, and retry after DNS propagation.`
+  }
+  if (code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || code === 'ENETUNREACH') {
+    return `${label} could not reach ${url}: ${code}. Check network access or verify the protected deployment with \`npx vercel curl /rbage/ --deployment <deployment-url>\`.`
+  }
+  return `${label} fetch failed at ${url}: ${cause?.message ?? error?.message ?? error}`
 }
 
 function responseError(label, url, status) {
