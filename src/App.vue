@@ -12,6 +12,7 @@ import { ontologyNodes } from './lib/ontology'
 
 const { editorialPersistence, error, importEditorialState, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()
 const editorialStateImportSummary = ref('')
+const infoOpen = ref(false)
 const {
   draft,
   draftFilename,
@@ -52,11 +53,15 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
   editorialStateImportSummary.value = `Imported ${result.importedVotes} vote${result.importedVotes === 1 ? '' : 's'} and ${result.importedFocuses} focus note${result.importedFocuses === 1 ? '' : 's'}.`
 }
 
+function toggleInfo(): void {
+  infoOpen.value = !infoOpen.value
+}
+
 </script>
 
 <template>
   <main class="shell">
-    <AppHeader :loading="loading" @refresh="loadSnapshot" />
+    <AppHeader :info-open="infoOpen" :loading="loading" @refresh="loadSnapshot" @toggle-info="toggleInfo" />
 
     <NewsletterHero
       :downvoted-count="rejectedItems"
@@ -67,22 +72,23 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
     />
 
     <section class="workspace">
-      <EditorialSidebar
-        :draft-items="draftItems"
-        :draft-source-summary="draftSourceSummary"
-        :focuses="snapshot.focuses"
-        :ontology-nodes="ontologyNodes"
-        :pending-source-count="pendingSourceCount"
-        :query-plans="snapshot.queryPlans"
-        :readiness="readiness"
-        :source-coverage="sourceCoverage"
-        :source-gap-review-filename="sourceGapReviewFilename"
-        :source-gap-review-markdown="sourceGapReviewMarkdown"
-        :source-runs="snapshot.sourceRuns"
-        @save-focus="saveFocus"
-      />
-
       <section class="news-list" aria-label="News items">
+        <EditorialSidebar
+          mode="action"
+          :draft-items="draftItems"
+          :draft-source-summary="draftSourceSummary"
+          :focuses="snapshot.focuses"
+          :ontology-nodes="ontologyNodes"
+          :pending-source-count="pendingSourceCount"
+          :query-plans="snapshot.queryPlans"
+          :readiness="readiness"
+          :source-coverage="sourceCoverage"
+          :source-gap-review-filename="sourceGapReviewFilename"
+          :source-gap-review-markdown="sourceGapReviewMarkdown"
+          :source-runs="snapshot.sourceRuns"
+          @save-focus="saveFocus"
+        />
+
         <InboxControls
           v-model:project-filter="projectFilter"
           v-model:evidence-filter="evidenceFilter"
@@ -103,6 +109,10 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
           :upvoted-count="includedItems.length"
         />
 
+        <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
+
+        <NewsItemCard v-for="item in filteredItems" :key="item.id" :in-draft="draftItemIds.has(item.id)" :item="item" @vote="setVote" />
+
         <NewsletterDraftPreview
           :draft="draft"
           :editorial-state-filename="editorialStateFilename"
@@ -114,11 +124,33 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
           :publish-manifest-json="publishManifestJson"
           @import-editorial-state="handleEditorialStateImport"
         />
-
-        <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
-
-        <NewsItemCard v-for="item in filteredItems" :key="item.id" :in-draft="draftItemIds.has(item.id)" :item="item" @vote="setVote" />
       </section>
+    </section>
+
+    <button v-if="infoOpen" class="info-backdrop" type="button" aria-label="Close info menu" @click="infoOpen = false"></button>
+    <section id="info-drawer" class="info-drawer" :class="{ 'info-drawer--open': infoOpen }" aria-label="Info menu">
+      <div class="info-drawer__header">
+        <div>
+          <p class="eyebrow">Info</p>
+          <h2>Context and checks</h2>
+        </div>
+        <button class="close-info" type="button" @click="infoOpen = false">Close</button>
+      </div>
+      <EditorialSidebar
+        mode="info"
+        :draft-items="draftItems"
+        :draft-source-summary="draftSourceSummary"
+        :focuses="snapshot.focuses"
+        :ontology-nodes="ontologyNodes"
+        :pending-source-count="pendingSourceCount"
+        :query-plans="snapshot.queryPlans"
+        :readiness="readiness"
+        :source-coverage="sourceCoverage"
+        :source-gap-review-filename="sourceGapReviewFilename"
+        :source-gap-review-markdown="sourceGapReviewMarkdown"
+        :source-runs="snapshot.sourceRuns"
+        @save-focus="saveFocus"
+      />
     </section>
   </main>
 </template>

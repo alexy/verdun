@@ -10,6 +10,7 @@ defineProps<{
   draftItems: NewsItem[]
   draftSourceSummary: DraftSourceSummary[]
   focuses: NewsletterFocus[]
+  mode: 'action' | 'info'
   ontologyNodes: OntologyNode[]
   pendingSourceCount: number
   queryPlans: ProjectQueryPlan[]
@@ -37,39 +38,43 @@ function submitFocus(): void {
 
 <template>
   <aside class="briefing">
-    <div class="panel-heading">
-      <BookOpenText :size="18" aria-hidden="true" />
-      <h2>Weekly intent</h2>
-    </div>
-    <textarea
-      v-model="focusText"
-      rows="6"
-      placeholder="Ask for more: typed agents, Rust dataframes, graph databases, lakehouse runtimes, Postgres extensions..."
-    />
-    <div class="focus-controls">
-      <label>
-        <input v-model="focusScope" type="radio" value="this_week" />
-        This week
-      </label>
-      <label>
-        <input v-model="focusScope" type="radio" value="ongoing" />
-        Ongoing
-      </label>
-      <button type="button" @click="submitFocus">
-        <Send :size="16" aria-hidden="true" />
-        Save
-      </button>
-    </div>
+    <section v-if="mode === 'action'" class="focus-editor action-panel" aria-label="Weekly intent editor">
+      <div class="panel-heading">
+        <BookOpenText :size="18" aria-hidden="true" />
+        <h2>Weekly intent</h2>
+        <span class="role-pill role-pill--action">Action</span>
+      </div>
+      <textarea
+        v-model="focusText"
+        rows="6"
+        placeholder="Ask for more: typed agents, Rust dataframes, graph databases, lakehouse runtimes, Postgres extensions..."
+      />
+      <div class="focus-controls">
+        <label>
+          <input v-model="focusScope" type="radio" value="this_week" />
+          This week
+        </label>
+        <label>
+          <input v-model="focusScope" type="radio" value="ongoing" />
+          Ongoing
+        </label>
+        <button type="button" @click="submitFocus">
+          <Send :size="16" aria-hidden="true" />
+          Save
+        </button>
+      </div>
+    </section>
 
-    <div class="focus-list">
+    <section v-if="mode === 'info'" class="focus-list info-panel" aria-label="Active editorial signals">
       <h3>Active signals</h3>
       <p v-for="focus in focuses" :key="focus.id">
         <strong>{{ focus.scope === 'this_week' ? 'This week' : 'Ongoing' }}</strong>
         {{ focus.text }}
       </p>
-    </div>
+    </section>
 
     <SourceHealthPanel
+      v-if="mode === 'info'"
       :pending-source-count="pendingSourceCount"
       :query-plans="queryPlans"
       :source-coverage="sourceCoverage"
@@ -79,10 +84,11 @@ function submitFocus(): void {
       @save-focus="(text, scope) => emit('saveFocus', text, scope)"
     />
 
-    <div class="readiness" :class="`readiness--${readiness.status}`">
+    <section v-if="mode === 'info'" class="readiness info-panel" :class="`readiness--${readiness.status}`" aria-label="Publishing readiness">
       <div class="panel-heading">
         <ClipboardCheck :size="18" aria-hidden="true" />
         <h2>Publishing readiness</h2>
+        <span class="role-pill role-pill--info">Info</span>
       </div>
       <p class="readiness__summary">{{ readiness.summary }}</p>
       <ul>
@@ -94,23 +100,25 @@ function submitFocus(): void {
           </div>
         </li>
       </ul>
-    </div>
+    </section>
 
-    <div class="ontology">
+    <section v-if="mode === 'info'" class="ontology info-panel" aria-label="Strongly Typed AI ontology">
       <div class="panel-heading">
         <Sparkles :size="18" aria-hidden="true" />
         <h2>Strongly Typed AI ontology</h2>
+        <span class="role-pill role-pill--info">Info</span>
       </div>
       <a v-for="node in ontologyNodes" :id="`ontology-${node.id}`" :key="node.id" :href="`#ontology-${node.id}`">
         <strong>{{ node.label }}</strong>
         <span>{{ node.description }}</span>
       </a>
-    </div>
+    </section>
 
-    <div class="draft">
+    <section v-if="mode === 'info'" class="draft info-panel" aria-label="Draft spine">
       <div class="panel-heading">
         <Database :size="18" aria-hidden="true" />
         <h2>Draft spine</h2>
+        <span class="role-pill role-pill--info">Info</span>
       </div>
       <div v-if="draftSourceSummary.length" class="draft-source-mix" aria-label="Draft source mix">
         <strong>Source mix</strong>
@@ -126,6 +134,6 @@ function submitFocus(): void {
         </li>
       </ol>
       <p v-if="!draftItems.length" class="empty">Upvote items to assemble the weekly spine.</p>
-    </div>
+    </section>
   </aside>
 </template>

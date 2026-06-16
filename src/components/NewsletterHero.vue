@@ -18,6 +18,7 @@ defineProps<{
       </p>
     </div>
     <div class="metrics" aria-label="Newsletter queue metrics">
+      <span class="role-pill role-pill--info">Info</span>
       <div>
         <span>{{ itemCount }}</span>
         <p>items</p>

@@ -65,8 +65,10 @@ async function importStateFile(event: Event): Promise<void> {
       <div class="panel-heading">
         <FileText :size="18" aria-hidden="true" />
         <h2>Draft preview</h2>
+        <span class="role-pill role-pill--info">Info</span>
       </div>
       <div class="draft-actions">
+        <span class="role-pill role-pill--action">Action</span>
         <a :href="draftDownloadHref" :download="filename">
           <Download :size="16" aria-hidden="true" />
           Markdown
@@ -101,7 +103,7 @@ async function importStateFile(event: Event): Promise<void> {
     </div>
     <h3>{{ draft.title }}</h3>
     <p>{{ draft.subtitle }}</p>
-    <section class="publish-audit" aria-label="Publish audit">
+    <section class="publish-audit info-panel" aria-label="Publish audit">
       <div>
         <strong>{{ publishManifest.issue.date }}</strong>
         <span>{{ publishManifest.issue.slug }}</span>

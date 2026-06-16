@@ -10,6 +10,12 @@ const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
 try {
   await page.goto(baseUrl, { waitUntil: 'networkidle' })
   await page.getByText('Verdun').first().waitFor()
+  await page.getByTitle('Open info menu').click()
+  await page.locator('#info-drawer.info-drawer--open').waitFor()
+  await page.locator('#info-drawer').getByText('Context and checks').waitFor()
+  await page.locator('#info-drawer').getByRole('heading', { name: 'Source health' }).waitFor()
+  await page.locator('#info-drawer').getByRole('button', { name: 'Close' }).click()
+  await page.locator('#info-drawer.info-drawer--open').waitFor({ state: 'detached' })
   await page.locator('.news-card').first().waitFor()
 
   const card = page.locator('.news-card').first()

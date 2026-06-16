@@ -42,7 +42,7 @@ function persistenceLabel(value: 'database' | 'local_file' | 'browser'): string 
 </script>
 
 <template>
-  <div class="list-header">
+  <div class="list-header info-panel">
     <div>
       <p class="eyebrow">Inbox</p>
       <h2>{{ theme }}</h2>
@@ -52,6 +52,7 @@ function persistenceLabel(value: 'database' | 'local_file' | 'browser'): string 
   </div>
 
   <div class="inbox-controls" aria-label="Inbox filters">
+    <span class="role-pill role-pill--action">Action</span>
     <label class="search-field">
       <Search :size="17" aria-hidden="true" />
       <input v-model="searchText" type="search" placeholder="Search titles, projects, tags..." />

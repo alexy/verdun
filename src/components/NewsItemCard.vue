@@ -41,6 +41,7 @@ function stageLabel(stage: string): string {
 <template>
   <article :id="itemAnchor(item.id)" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0, 'in-draft': inDraft }">
     <div class="vote-rail" aria-label="Vote controls">
+      <span class="role-pill role-pill--action vote-role">Action</span>
       <button
         type="button"
         :aria-pressed="item.vote > 0"

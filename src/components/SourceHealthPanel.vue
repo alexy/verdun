@@ -60,15 +60,17 @@ function requestMoreCoverage(plan: ProjectQueryPlan): void {
 </script>
 
 <template>
-  <div class="source-health">
+  <section class="source-health info-panel" aria-label="Source health">
     <div class="panel-heading">
       <Activity :size="18" aria-hidden="true" />
       <h2>Source health</h2>
+      <span class="role-pill role-pill--info">Info</span>
     </div>
     <p class="source-health__coverage">
       {{ sourceCoverage.coveredProjects.length }} of {{ sourceCoverage.watchedProjects.length }} watched projects covered by live/manual source matches.
     </p>
-    <div v-if="sourceCoverage.uncoveredProjects.length" class="source-gaps">
+    <div v-if="sourceCoverage.uncoveredProjects.length" class="source-gaps action-panel">
+      <span class="role-pill role-pill--action">Action</span>
       <strong>Coverage gaps</strong>
       <p>
         {{ sourceCoverage.uncoveredProjects.slice(0, 8).join(', ') }}
@@ -122,5 +124,5 @@ function requestMoreCoverage(plan: ProjectQueryPlan): void {
         </div>
       </div>
     </details>
-  </div>
+  </section>
 </template>
