@@ -33,6 +33,14 @@ Local votes and focus notes are persisted to ignored `crawler/data/editorial-sta
 
 Run the deterministic local checks with `npm run smoke:all`. Browser coverage for the production `/rbage/` path runs with `npm run smoke:browser`, which builds, starts a local preview server, runs Playwright against `http://127.0.0.1:5174/rbage/`, and then stops the server.
 
+After deployment, verify the public Collected route and data endpoints with:
+
+```sh
+npm run check:deployed
+```
+
+That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the static public snapshot, and `GET /api/newsletter/items`. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring the Vercel API route.
+
 ## Database
 
 Apply `db/migrations/0001_newsletter.sql` to the external Postgres database used by Vercel.

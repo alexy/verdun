@@ -63,6 +63,8 @@ Current local checks:
 - `npm run smoke:browser`
 - `npm run smoke:ulysses`
 - `npm run prod:build`
+- `npm run check:deployed`
+- `npm run check:preview`
 - `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2`
 - `cargo run --manifest-path crawler/Cargo.toml -- queries`
 - `npm run draft`
