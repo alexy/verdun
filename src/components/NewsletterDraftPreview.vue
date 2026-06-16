@@ -123,7 +123,23 @@ async function importStateFile(event: Event): Promise<void> {
           <dt>Focus</dt>
           <dd>{{ publishManifest.issue.focusCount }}</dd>
         </div>
+        <div>
+          <dt>Live</dt>
+          <dd>{{ publishManifest.selectedEvidence.liveCount }}</dd>
+        </div>
+        <div>
+          <dt>Manual</dt>
+          <dd>{{ publishManifest.selectedEvidence.manualCount }}</dd>
+        </div>
+        <div>
+          <dt>Seed</dt>
+          <dd>{{ publishManifest.selectedEvidence.seedCount }}</dd>
+        </div>
       </dl>
+      <p v-if="publishManifest.selectedEvidence.sourceMix.length" class="publish-audit__source-mix">
+        Evidence mix:
+        {{ publishManifest.selectedEvidence.sourceMix.map((source) => `${source.source} ${source.count}`).slice(0, 4).join(' · ') }}
+      </p>
       <p>
         <span :class="`audit-pill audit-pill--${publishManifest.readiness.status}`">
           Readiness: {{ publishManifest.readiness.status === 'ready' ? 'ready' : 'needs review' }}

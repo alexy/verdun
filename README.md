@@ -16,6 +16,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Public item cards surface crawler provenance as editorial evidence, including the adapter/stage that brought each item into the queue.
 - Inbox filters can isolate live/manual collected evidence from watchlist seed placeholders for faster publish review.
 - `GET /api/newsletter/draft` exposes the same generated draft as JSON, Markdown, HTML, or publish manifest for local automation and audit.
+- Publish manifests and the draft preview summarize selected evidence by live/manual/seed counts and source mix before Ulysses or Ghost handoff.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, and healthy watched sources before local Ulysses export.
 - Source health calls out watched projects from the crawler query plan that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.

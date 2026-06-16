@@ -108,6 +108,12 @@ try {
   if (!Array.isArray(manifest.sourceCoverage?.uncoveredProjects)) {
     throw new Error('Ulysses manifest is missing source coverage details')
   }
+  if (!manifest.selectedEvidence?.sourceMix?.length) {
+    throw new Error('Ulysses manifest is missing selected evidence source mix')
+  }
+  if (manifest.selectedEvidence.liveCount + manifest.selectedEvidence.manualCount + manifest.selectedEvidence.seedCount + manifest.selectedEvidence.unknownCount !== manifest.itemIds.length) {
+    throw new Error('Ulysses manifest selected evidence audit did not account for every selected item')
+  }
   if (manifest.queryPlanCount !== 23) {
     throw new Error(`Ulysses manifest recorded unexpected query plan count: ${manifest.queryPlanCount}`)
   }

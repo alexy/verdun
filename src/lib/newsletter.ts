@@ -135,6 +135,21 @@ export type SourceCoverageSummary = {
   uncoveredProjects: string[]
 }
 
+export type SelectedEvidenceAudit = {
+  liveCount: number
+  manualCount: number
+  seedCount: number
+  unknownCount: number
+  sourceMix: Array<{
+    source: string
+    count: number
+  }>
+  evidenceStages: Array<{
+    stage: string
+    count: number
+  }>
+}
+
 export type NewsletterIssueMetadata = {
   date: string
   slug: string
@@ -185,6 +200,7 @@ export type NewsletterPublishManifest = {
   readiness: NewsletterReadiness
   proseQuality: NewsletterProseQuality
   sourceCoverage: SourceCoverageSummary
+  selectedEvidence: SelectedEvidenceAudit
   sourceRuns: SourceRun[]
   queryPlanCount: number
 }
@@ -657,8 +673,32 @@ export function buildPublishManifest(
     readiness: evaluateNewsletterReadiness(snapshot),
     proseQuality: evaluateNewsletterProseQuality(draft),
     sourceCoverage: evaluateSourceCoverage(snapshot),
+    selectedEvidence: selectedEvidenceAudit(selectedItems),
     sourceRuns: snapshot.sourceRuns,
     queryPlanCount: snapshot.queryPlans.length,
+  }
+}
+
+function selectedEvidenceAudit(items: NewsItem[]): SelectedEvidenceAudit {
+  const sourceCounts = new Map<string, number>()
+  const stageCounts = new Map<string, number>()
+  for (const item of items) {
+    sourceCounts.set(item.source, (sourceCounts.get(item.source) ?? 0) + 1)
+    const stage = item.provenance?.stage ?? 'unknown'
+    stageCounts.set(stage, (stageCounts.get(stage) ?? 0) + 1)
+  }
+  const count = (stage: string) => stageCounts.get(stage) ?? 0
+  return {
+    liveCount: count('live'),
+    manualCount: count('manual'),
+    seedCount: count('watchlist-seed'),
+    unknownCount: count('unknown'),
+    sourceMix: Array.from(sourceCounts.entries())
+      .map(([source, sourceCount]) => ({ source, count: sourceCount }))
+      .sort((left, right) => right.count - left.count || left.source.localeCompare(right.source)),
+    evidenceStages: Array.from(stageCounts.entries())
+      .map(([stage, stageCount]) => ({ stage, count: stageCount }))
+      .sort((left, right) => right.count - left.count || left.stage.localeCompare(right.stage)),
   }
 }
 

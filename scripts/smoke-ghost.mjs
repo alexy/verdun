@@ -81,6 +81,9 @@ if (!fileOutput.manifest.selectedItems?.length || fileOutput.manifest.selectedIt
 if (fileOutput.manifest.proseQuality?.status !== 'ready') {
   throw new Error('ghost manifest file did not include ready prose quality')
 }
+if (!fileOutput.manifest.selectedEvidence?.sourceMix?.length) {
+  throw new Error('ghost manifest file did not include selected evidence source mix')
+}
 if (!fileOutput.manifest.issue?.slug || fileOutput.manifest.issue.title !== fileOutput.manifest.title) {
   throw new Error('ghost manifest file did not include issue identity metadata')
 }

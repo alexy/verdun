@@ -131,6 +131,7 @@ try {
   const manifestJson = JSON.parse(decodeURIComponent(manifestHref.split(',')[1] ?? ''))
   await page.locator('.publish-audit').getByText(manifestJson.issue.slug).waitFor()
   await page.locator('.publish-audit').getByText(String(manifestJson.issue.selectedItemCount)).first().waitFor()
+  await page.locator('.publish-audit').getByText('Evidence mix:').waitFor()
   await page.locator('.publish-audit').getByText(/Readiness:/).waitFor()
   await page.locator('.publish-audit').getByText(/Prose:/).waitFor()
   if (!manifestJson.itemIds?.length || !manifestJson.selectedItems?.length) {
@@ -144,6 +145,9 @@ try {
   }
   if (!Array.isArray(manifestJson.sourceCoverage?.uncoveredProjects)) {
     throw new Error('publish manifest export did not include source coverage')
+  }
+  if (!manifestJson.selectedEvidence?.sourceMix?.length) {
+    throw new Error('publish manifest export did not include selected evidence source mix')
   }
   await page.locator('input[type="file"]').setInputFiles(stateFile)
   await page.getByText('Imported 1 vote and 1 focus note.').waitFor()

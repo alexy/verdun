@@ -220,6 +220,12 @@ if (publishManifest.votes['lakesail-rust-spark'] !== 1) {
 if (!Array.isArray(publishManifest.sourceCoverage.uncoveredProjects)) {
   throw new Error('publish manifest did not include source coverage')
 }
+if (!publishManifest.selectedEvidence || !Array.isArray(publishManifest.selectedEvidence.sourceMix)) {
+  throw new Error('publish manifest did not include selected evidence audit')
+}
+if (publishManifest.selectedEvidence.liveCount + publishManifest.selectedEvidence.manualCount + publishManifest.selectedEvidence.seedCount + publishManifest.selectedEvidence.unknownCount !== publishManifest.itemIds.length) {
+  throw new Error('publish manifest selected evidence audit did not account for every selected item')
+}
 if (publishManifest.readiness.status !== view.readiness.value.status) {
   throw new Error('publish manifest readiness did not match view readiness')
 }
