@@ -3,7 +3,7 @@
     "id": "typed-contracts",
     "label": "Typed contracts",
     "description": "Schemas, validators, and type systems that make AI/data boundaries explicit.",
-    "keywords": ["typed", "schema", "structured outputs", "validation", "pydantic", "type-safe", "baml", "instructor"]
+    "keywords": ["typed", "schema", "structured outputs", "validation", "pydantic", "type-safe", "baml", "instructor", "garde", "zod-rs", "zod rs"]
   },
   {
     "id": "composable-programs",
@@ -27,7 +27,7 @@
     "id": "lakehouse-runtime",
     "label": "Lakehouse runtime",
     "description": "Arrow, DataFusion, Spark, Delta, and columnar execution as typed data substrate.",
-    "keywords": ["arrow", "datafusion", "spark", "sail", "delta", "columnar", "lancedb"]
+    "keywords": ["arrow", "apache arrow", "datafusion", "spark", "sail", "delta", "delta lake", "columnar", "lancedb"]
   },
   {
     "id": "policy-capability",

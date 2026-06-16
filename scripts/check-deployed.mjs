@@ -52,15 +52,15 @@ function validateSnapshot(snapshot, label) {
   const items = arrayValue(snapshot.items)
   const sourceRuns = arrayValue(snapshot.sourceRuns ?? snapshot.source_runs)
   const queryPlans = arrayValue(snapshot.queryPlans ?? snapshot.query_plans)
-  if (items.length < 18) throw new Error(`${label} has too few newsletter items: ${items.length}`)
+  if (items.length < 23) throw new Error(`${label} has too few newsletter items: ${items.length}`)
   if (!sourceRuns.length) throw new Error(`${label} has no source health metadata`)
-  if (queryPlans.length < 18) throw new Error(`${label} has too few crawler query plans: ${queryPlans.length}`)
-  for (const project of ['Pydantic', 'LakeSail', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph']) {
+  if (queryPlans.length < 23) throw new Error(`${label} has too few crawler query plans: ${queryPlans.length}`)
+  for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
     if (!items.some((item) => item?.project === project)) {
       throw new Error(`${label} is missing required project item: ${project}`)
     }
   }
-  for (const project of ['BAML', 'DSPy', 'Ibis', 'Dagster']) {
+  for (const project of ['BAML', 'DSPy', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Ibis', 'Dagster', 'Garde', 'zod-rs']) {
     if (!queryPlans.some((plan) => plan?.project === project)) {
       throw new Error(`${label} is missing required query plan: ${project}`)
     }

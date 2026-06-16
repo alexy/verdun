@@ -893,6 +893,206 @@
         },
         "source_url": "https://news.ycombinator.com"
       }
+    },
+    {
+      "id": "apache-arrow-d81d1a84d3c6",
+      "title": "Apache Arrow belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://arrow.apache.org",
+      "published_at": "2026-06-10T12:00:00Z",
+      "project": "Apache Arrow",
+      "topic": "typed columnar memory",
+      "summary": "Apache Arrow is being tracked for typed columnar memory signals around apache arrow, arrow ipc, arrow flight, columnar memory, typed columnar.",
+      "why_it_matters": "Apache Arrow helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "apache arrow",
+        "arrow ipc",
+        "arrow flight",
+        "columnar memory"
+      ],
+      "score": 75,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://arrow.apache.org",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://arrow.apache.org",
+          "matched_keywords": [
+            "apache arrow",
+            "arrow ipc",
+            "arrow flight",
+            "columnar memory",
+            "typed columnar"
+          ],
+          "project": "Apache Arrow",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "datafusion-67e16086c66b",
+      "title": "DataFusion belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://datafusion.apache.org",
+      "published_at": "2026-06-09T12:00:00Z",
+      "project": "DataFusion",
+      "topic": "typed query engine",
+      "summary": "DataFusion is being tracked for typed query engine signals around datafusion, query engine, arrow, sql planner, rust.",
+      "why_it_matters": "DataFusion helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "datafusion",
+        "query engine",
+        "arrow",
+        "sql planner"
+      ],
+      "score": 72,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://datafusion.apache.org",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://datafusion.apache.org",
+          "matched_keywords": [
+            "datafusion",
+            "query engine",
+            "arrow",
+            "sql planner",
+            "rust"
+          ],
+          "project": "DataFusion",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "delta-lake-c9484788fa7c",
+      "title": "Delta Lake belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://delta.io",
+      "published_at": "2026-06-08T12:00:00Z",
+      "project": "Delta Lake",
+      "topic": "lakehouse transactions",
+      "summary": "Delta Lake is being tracked for lakehouse transactions signals around delta lake, deltalake, transaction log, lakehouse table, merge into.",
+      "why_it_matters": "Delta Lake helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "delta lake",
+        "deltalake",
+        "transaction log",
+        "lakehouse table"
+      ],
+      "score": 69,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://delta.io",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://delta.io",
+          "matched_keywords": [
+            "delta lake",
+            "deltalake",
+            "transaction log",
+            "lakehouse table",
+            "merge into"
+          ],
+          "project": "Delta Lake",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "garde-284864e88b4",
+      "title": "Garde belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/jprochazk/garde",
+      "published_at": "2026-05-28T12:00:00Z",
+      "project": "Garde",
+      "topic": "typed Rust validation",
+      "summary": "Garde is being tracked for typed Rust validation signals around garde, rust validation, typed validation, derive validate, schema checks.",
+      "why_it_matters": "Garde helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "garde",
+        "rust validation",
+        "typed validation",
+        "derive validate"
+      ],
+      "score": 36,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/jprochazk/garde",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/jprochazk/garde",
+          "matched_keywords": [
+            "garde",
+            "rust validation",
+            "typed validation",
+            "derive validate",
+            "schema checks"
+          ],
+          "project": "Garde",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "zod-rs-e6fc31f756d0",
+      "title": "zod-rs belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/maulanasdqn/zod-rs",
+      "published_at": "2026-05-27T12:00:00Z",
+      "project": "zod-rs",
+      "topic": "Rust schema validation",
+      "summary": "zod-rs is being tracked for Rust schema validation signals around zod-rs, zod rs, rust schema validation, typed schemas, validation.",
+      "why_it_matters": "zod-rs helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "zod-rs",
+        "zod rs",
+        "rust schema validation",
+        "typed schemas"
+      ],
+      "score": 33,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/maulanasdqn/zod-rs",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/maulanasdqn/zod-rs",
+          "matched_keywords": [
+            "zod-rs",
+            "zod rs",
+            "rust schema validation",
+            "typed schemas",
+            "validation"
+          ],
+          "project": "zod-rs",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
     }
   ],
   "source_runs": [
@@ -1031,6 +1231,58 @@
       ]
     },
     {
+      "project": "Apache Arrow",
+      "topic": "typed columnar memory",
+      "hacker_news_query": "Apache Arrow apache arrow arrow ipc",
+      "live_terms": [
+        "apache arrow",
+        "arrow ipc",
+        "arrow flight",
+        "columnar memory",
+        "typed columnar"
+      ],
+      "dev_to_tags": [
+        "apachearrow",
+        "arrowflight",
+        "arrowipc",
+        "columnarmemory",
+        "typedcolumnar"
+      ]
+    },
+    {
+      "project": "DataFusion",
+      "topic": "typed query engine",
+      "hacker_news_query": "DataFusion datafusion query engine",
+      "live_terms": [
+        "datafusion",
+        "query engine",
+        "sql planner"
+      ],
+      "dev_to_tags": [
+        "datafusion",
+        "queryengine",
+        "sqlplanner"
+      ]
+    },
+    {
+      "project": "Delta Lake",
+      "topic": "lakehouse transactions",
+      "hacker_news_query": "Delta Lake delta lake deltalake",
+      "live_terms": [
+        "delta lake",
+        "deltalake",
+        "transaction log",
+        "lakehouse table",
+        "merge into"
+      ],
+      "dev_to_tags": [
+        "deltalake",
+        "lakehousetable",
+        "mergeinto",
+        "transactionlog"
+      ]
+    },
+    {
       "project": "Ibis",
       "topic": "functional dataframes",
       "hacker_news_query": "Ibis ibis",
@@ -1153,6 +1405,41 @@
       ],
       "dev_to_tags": [
         "typesec"
+      ]
+    },
+    {
+      "project": "Garde",
+      "topic": "typed Rust validation",
+      "hacker_news_query": "Garde garde rust validation",
+      "live_terms": [
+        "garde",
+        "rust validation",
+        "typed validation",
+        "derive validate",
+        "schema checks"
+      ],
+      "dev_to_tags": [
+        "derivevalidate",
+        "garde",
+        "rustvalidation",
+        "schemachecks",
+        "typedvalidation"
+      ]
+    },
+    {
+      "project": "zod-rs",
+      "topic": "Rust schema validation",
+      "hacker_news_query": "zod-rs zod-rs zod rs",
+      "live_terms": [
+        "zod-rs",
+        "zod rs",
+        "rust schema validation",
+        "typed schemas"
+      ],
+      "dev_to_tags": [
+        "rustschemavalidation",
+        "typedschemas",
+        "zodrs"
       ]
     },
     {

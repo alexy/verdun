@@ -40,7 +40,7 @@ if (!sql.includes('on conflict (source) do update set')) {
   throw new Error('SQL export is missing source-run upsert clause')
 }
 
-for (const project of ['Pydantic', 'LakeSail', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph']) {
+for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
   if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)
   if (!sql.includes(sqlString(project))) throw new Error(`SQL export is missing required project ${project}`)
 }

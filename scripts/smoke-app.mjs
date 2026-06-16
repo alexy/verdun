@@ -14,7 +14,7 @@ try {
   await page.locator('.ontology').getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
   await page.locator('.source-health').getByText(/projects covered by live\/manual source matches/).waitFor()
   await page.locator('.source-health').getByText('Coverage gaps').waitFor()
-  await page.locator('.query-plans').getByText('Crawler query plan · 18 projects').waitFor()
+  await page.locator('.query-plans').getByText('Crawler query plan · 23 projects').waitFor()
   await page.locator('.query-plans summary').click()
   await page.locator('.query-plans').getByText('BAML baml').waitFor()
   await page.locator('.query-plans').getByText('#dspy').waitFor()
