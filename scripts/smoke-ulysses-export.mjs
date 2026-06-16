@@ -75,6 +75,9 @@ try {
   if (manifest.snapshotInput !== 'public/data/newsletter-snapshot.json') {
     throw new Error('Ulysses manifest did not record the snapshot input')
   }
+  if (!manifest.issue?.slug || manifest.issue.date !== expectedDate || manifest.issue.selectedItemCount !== manifest.itemIds.length) {
+    throw new Error('Ulysses manifest did not include coherent issue metadata')
+  }
   if (manifest.editorialStateInput !== stateFile) {
     throw new Error('Ulysses manifest did not record the explicit editorial-state input')
   }

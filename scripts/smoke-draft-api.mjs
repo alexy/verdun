@@ -41,6 +41,9 @@ if (!json.body?.draft?.markdown?.includes('## Weekly throughline')) {
 if (!json.body?.manifest?.selectedItems?.length) {
   throw new Error('draft JSON manifest did not include selected items')
 }
+if (!json.body?.manifest?.issue?.slug || json.body.manifest.issue.selectedItemCount !== json.body.manifest.itemIds.length) {
+  throw new Error('draft JSON manifest did not include coherent issue metadata')
+}
 if (!json.body?.readiness?.checks?.length || !json.body?.proseQuality?.checks?.length) {
   throw new Error('draft JSON did not include readiness and prose checks')
 }
@@ -56,6 +59,9 @@ if (!String(markdown.body).includes('Strongly Typed AI/Data Notes')) {
 const manifest = await callDraft({ format: 'manifest' })
 if (manifest.code !== 200 || manifest.body?.snapshotInput !== 'api/newsletter/items') {
   throw new Error('draft manifest did not report the API snapshot input')
+}
+if (!manifest.body?.issue?.date || manifest.body.issue.title !== manifest.body.title) {
+  throw new Error('draft manifest did not include issue identity metadata')
 }
 
 const gated = await callDraft({ requireUpvotes: 'true' })

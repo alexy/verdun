@@ -135,9 +135,23 @@ export type SourceCoverageSummary = {
   uncoveredProjects: string[]
 }
 
+export type NewsletterIssueMetadata = {
+  date: string
+  slug: string
+  title: string
+  subtitle: string
+  snapshotGeneratedAt: string
+  selectedItemCount: number
+  upvotedItemCount: number
+  projectCount: number
+  sourceCount: number
+  focusCount: number
+}
+
 export type NewsletterPublishManifest = {
   generatedAt: string
   snapshotGeneratedAt: string
+  issue: NewsletterIssueMetadata
   title: string
   subtitle: string
   markdownPath?: string
@@ -551,9 +565,13 @@ export function buildPublishManifest(
   options: NewsletterPublishManifestOptions = {},
 ): NewsletterPublishManifest {
   const itemsById = new Map(snapshot.items.map((item) => [item.id, item]))
+  const selectedItems = draft.itemIds
+    .map((itemId) => itemsById.get(itemId))
+    .filter((item): item is NewsItem => Boolean(item))
   return {
     generatedAt: options.generatedAt ?? new Date().toISOString(),
     snapshotGeneratedAt: snapshot.generatedAt,
+    issue: issueMetadata(draft, snapshot, selectedItems),
     title: draft.title,
     subtitle: draft.subtitle,
     markdownPath: options.markdownPath,
@@ -565,21 +583,18 @@ export function buildPublishManifest(
       requireReady: Boolean(options.requireReady),
     },
     itemIds: draft.itemIds,
-    selectedItems: draft.itemIds
-      .map((itemId) => itemsById.get(itemId))
-      .filter((item): item is NewsItem => Boolean(item))
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        project: item.project,
-        topic: item.topic,
-        source: item.source,
-        sourceKind: item.sourceKind,
-        url: item.url,
-        publishedAt: item.publishedAt,
-        vote: item.vote,
-        selectionReason: selectionReason(item),
-      })),
+    selectedItems: selectedItems.map((item) => ({
+      id: item.id,
+      title: item.title,
+      project: item.project,
+      topic: item.topic,
+      source: item.source,
+      sourceKind: item.sourceKind,
+      url: item.url,
+      publishedAt: item.publishedAt,
+      vote: item.vote,
+      selectionReason: selectionReason(item),
+    })),
     votes: buildEditorialStateExport(snapshot).votes,
     focuses: snapshot.focuses.map((focus) => ({
       id: focus.id,
@@ -592,6 +607,25 @@ export function buildPublishManifest(
     sourceCoverage: evaluateSourceCoverage(snapshot),
     sourceRuns: snapshot.sourceRuns,
     queryPlanCount: snapshot.queryPlans.length,
+  }
+}
+
+function issueMetadata(
+  draft: NewsletterDraft,
+  snapshot: NewsletterSnapshot,
+  selectedItems: NewsItem[],
+): NewsletterIssueMetadata {
+  return {
+    date: isoDate(snapshot.generatedAt),
+    slug: slug(draft.title),
+    title: draft.title,
+    subtitle: draft.subtitle,
+    snapshotGeneratedAt: snapshot.generatedAt,
+    selectedItemCount: selectedItems.length,
+    upvotedItemCount: snapshot.items.filter((item) => item.vote > 0).length,
+    projectCount: unique(selectedItems.map((item) => item.project)).length,
+    sourceCount: unique(selectedItems.map((item) => item.source)).length,
+    focusCount: snapshot.focuses.filter((focus) => focus.text.trim()).length,
   }
 }
 
@@ -980,6 +1014,21 @@ function stripTerminalPunctuation(value: string): string {
 
 function unique(values: string[]): string[] {
   return Array.from(new Set(values.filter(Boolean)))
+}
+
+function isoDate(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return new Date().toISOString().slice(0, 10)
+  return date.toISOString().slice(0, 10)
+}
+
+function slug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 96)
 }
 
 function markdownToHtml(markdown: string): string {

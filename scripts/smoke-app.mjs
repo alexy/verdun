@@ -50,7 +50,7 @@ try {
   await page.getByText('CocoIndex belongs in this week').first().waitFor()
   if (await page.getByText(/Local fallback:/).count()) throw new Error('app fell back to the embedded seed instead of the static snapshot')
   await page.locator('.readiness').getByRole('heading', { name: 'Publishing readiness' }).waitFor()
-  const markdownLink = page.locator('.draft-actions').getByRole('link', { name: /Markdown/ })
+  const markdownLink = page.locator('.draft-actions').getByRole('link', { name: 'Markdown', exact: true })
   await markdownLink.waitFor()
   const markdownHref = await markdownLink.getAttribute('href')
   if (!markdownHref?.startsWith('data:text/markdown')) throw new Error('draft Markdown download link is missing')
@@ -58,10 +58,12 @@ try {
   await stateLink.waitFor()
   const initialStateHref = await stateLink.getAttribute('href')
   if (!initialStateHref?.startsWith('data:application/json')) throw new Error('editorial state download link is missing')
-  const manifestLink = page.locator('.draft-actions').getByRole('link', { name: /Manifest/ })
+  const manifestLink = page.locator('.draft-actions').getByRole('link', { name: 'Manifest', exact: true })
   await manifestLink.waitFor()
   const initialManifestHref = await manifestLink.getAttribute('href')
   if (!initialManifestHref?.startsWith('data:application/json')) throw new Error('publish manifest download link is missing')
+  await page.locator('.draft-actions').getByRole('link', { name: 'Server Markdown', exact: true }).waitFor()
+  await page.locator('.draft-actions').getByRole('link', { name: 'Server Manifest', exact: true }).waitFor()
   await page.locator('.news-card').first().getByText('Credo fit').waitFor()
   const firstCredoLink = page.locator('.news-card .credo-fit a').first()
   await firstCredoLink.waitFor()
@@ -102,6 +104,9 @@ try {
   const manifestJson = JSON.parse(decodeURIComponent(manifestHref.split(',')[1] ?? ''))
   if (!manifestJson.itemIds?.length || !manifestJson.selectedItems?.length) {
     throw new Error('publish manifest export did not include selected item audit data')
+  }
+  if (!manifestJson.issue?.slug || manifestJson.issue.selectedItemCount !== manifestJson.itemIds.length) {
+    throw new Error('publish manifest export did not include coherent issue metadata')
   }
   if (!manifestJson.votes || !Object.values(manifestJson.votes).includes(1)) {
     throw new Error('publish manifest export did not include current vote state')

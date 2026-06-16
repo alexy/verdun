@@ -72,6 +72,9 @@ if (!fileOutput.manifest.selectedItems?.length || fileOutput.manifest.selectedIt
 if (fileOutput.manifest.proseQuality?.status !== 'ready') {
   throw new Error('ghost manifest file did not include ready prose quality')
 }
+if (!fileOutput.manifest.issue?.slug || fileOutput.manifest.issue.title !== fileOutput.manifest.title) {
+  throw new Error('ghost manifest file did not include issue identity metadata')
+}
 if (dryRunOutput.manifest.snapshotInput !== 'public/data/newsletter-snapshot.json') {
   throw new Error('dry-run output did not include manifest snapshot input')
 }
