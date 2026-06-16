@@ -20,6 +20,7 @@
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",
     "smoke:loader": "node scripts/smoke-loader-sql.mjs",
+    "smoke:public-snapshot": "node scripts/smoke-public-snapshot-coverage.mjs",
     "smoke:readiness": "node scripts/smoke-readiness.mjs",
     "smoke:recency": "node scripts/smoke-snapshot-recency.mjs",
     "smoke:snapshot": "node scripts/smoke-snapshot-composable.mjs",

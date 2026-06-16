@@ -694,6 +694,205 @@
         "collection_stage": "manual",
         "source": "x-twitter"
       }
+    },
+    {
+      "id": "baml-39f6e4ec82b",
+      "title": "BAML belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/BoundaryML/baml",
+      "published_at": "2026-06-14T12:00:00Z",
+      "project": "BAML",
+      "topic": "typed LLM functions",
+      "summary": "BAML is being tracked for typed LLM functions signals around baml, typed llm, prompt functions, structured outputs, schema.",
+      "why_it_matters": "BAML helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "baml",
+        "typed llm",
+        "prompt functions",
+        "structured outputs"
+      ],
+      "score": 87,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/BoundaryML/baml",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/BoundaryML/baml",
+          "matched_keywords": [
+            "baml",
+            "typed llm",
+            "prompt functions",
+            "structured outputs",
+            "schema"
+          ],
+          "project": "BAML",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "dagster-e41635731d59",
+      "title": "Dagster belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/dagster-io/dagster",
+      "published_at": "2026-06-09T12:00:00Z",
+      "project": "Dagster",
+      "topic": "functional data orchestration",
+      "summary": "Dagster is being tracked for functional data orchestration signals around dagster, software-defined assets, data orchestration, asset graph, python.",
+      "why_it_matters": "Dagster helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "dagster",
+        "software-defined assets",
+        "data orchestration",
+        "asset graph"
+      ],
+      "score": 72,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/dagster-io/dagster",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/dagster-io/dagster",
+          "matched_keywords": [
+            "dagster",
+            "software-defined assets",
+            "data orchestration",
+            "asset graph",
+            "python"
+          ],
+          "project": "Dagster",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "dspy-598e33a5d5f7",
+      "title": "DSPy belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/stanfordnlp/dspy",
+      "published_at": "2026-06-13T12:00:00Z",
+      "project": "DSPy",
+      "topic": "declarative AI programs",
+      "summary": "DSPy is being tracked for declarative AI programs signals around dspy, declarative lm, language model programs, optimizers.",
+      "why_it_matters": "DSPy helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "dspy",
+        "declarative lm",
+        "language model programs",
+        "optimizers"
+      ],
+      "score": 84,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/stanfordnlp/dspy",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/stanfordnlp/dspy",
+          "matched_keywords": [
+            "dspy",
+            "declarative lm",
+            "language model programs",
+            "optimizers"
+          ],
+          "project": "DSPy",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "ibis-46f219cbb2b4",
+      "title": "Ibis belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ibis-project/ibis",
+      "published_at": "2026-06-10T12:00:00Z",
+      "project": "Ibis",
+      "topic": "functional dataframes",
+      "summary": "Ibis is being tracked for functional dataframes signals around ibis, expression api, dataframes, sql compiler, backend.",
+      "why_it_matters": "Ibis helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "ibis",
+        "expression api",
+        "dataframes",
+        "sql compiler"
+      ],
+      "score": 75,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ibis-project/ibis",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/ibis-project/ibis",
+          "matched_keywords": [
+            "ibis",
+            "expression api",
+            "dataframes",
+            "sql compiler",
+            "backend"
+          ],
+          "project": "Ibis",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "instructor-e3008bab94fb",
+      "title": "Instructor belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/instructor-ai/instructor",
+      "published_at": "2026-06-12T12:00:00Z",
+      "project": "Instructor",
+      "topic": "typed structured outputs",
+      "summary": "Instructor is being tracked for typed structured outputs signals around instructor, structured outputs, pydantic, typed extraction, llm.",
+      "why_it_matters": "Instructor helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "instructor",
+        "structured outputs",
+        "pydantic",
+        "typed extraction"
+      ],
+      "score": 81,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/instructor-ai/instructor",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/instructor-ai/instructor",
+          "matched_keywords": [
+            "instructor",
+            "structured outputs",
+            "pydantic",
+            "typed extraction",
+            "llm"
+          ],
+          "project": "Instructor",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
     }
   ],
   "source_runs": [
