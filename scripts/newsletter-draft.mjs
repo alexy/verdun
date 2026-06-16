@@ -25,9 +25,15 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const out = positional[1] ?? process.env.NEWSLETTER_DRAFT_OUT ?? defaultDraftPath(draft, snapshot, ulyssesMode)
 
   if (out) {
-    await mkdir(dirname(out), { recursive: true })
-    await writeFile(out, draft.markdown)
+    const { manifestPath } = await writeDraftArtifacts(out, draft, snapshot, {
+      input,
+      markdownPath: out,
+      requireReady,
+      requireUpvotes,
+      ulyssesMode,
+    })
     console.log(`wrote newsletter draft to ${out}`)
+    console.log(`wrote publish manifest to ${manifestPath}`)
   } else {
     process.stdout.write(draft.markdown)
   }
@@ -47,6 +53,14 @@ export async function evaluateNewsletterReadiness(snapshot) {
     optimizeDeps: { noDiscovery: true },
   })
   return module.evaluateNewsletterReadiness(snapshot)
+}
+
+export async function evaluateSourceCoverage(snapshot) {
+  const { module } = await runnerImport('./src/lib/newsletter.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
+  return module.evaluateSourceCoverage(snapshot)
 }
 
 export async function loadSnapshotFile(input) {
@@ -88,6 +102,68 @@ export function defaultDraftPath(draft, snapshot, ulyssesMode = false) {
   const exportDir = process.env.ULYSSES_DRAFT_DIR ?? 'crawler/data/ulysses'
   const dateStem = isoDate(snapshot.generatedAt)
   return join(exportDir, `${dateStem}-${slug(draft.title)}.md`)
+}
+
+export async function writeDraftArtifacts(out, draft, snapshot, options = {}) {
+  await mkdir(dirname(out), { recursive: true })
+  await writeFile(out, draft.markdown)
+  const manifestPath = manifestPathForDraft(out)
+  await writeFile(manifestPath, `${JSON.stringify(await buildPublishManifest(draft, snapshot, options), null, 2)}\n`)
+  return { manifestPath }
+}
+
+export function manifestPathForDraft(out) {
+  return out.endsWith('.md') ? out.replace(/\.md$/, '.manifest.json') : `${out}.manifest.json`
+}
+
+export async function buildPublishManifest(draft, snapshot, options = {}) {
+  const itemsById = new Map(snapshot.items.map((item) => [item.id, item]))
+  return {
+    generatedAt: new Date().toISOString(),
+    snapshotGeneratedAt: snapshot.generatedAt,
+    title: draft.title,
+    subtitle: draft.subtitle,
+    markdownPath: options.markdownPath,
+    snapshotInput: options.input,
+    ulyssesMode: Boolean(options.ulyssesMode),
+    gates: {
+      requireUpvotes: Boolean(options.requireUpvotes),
+      requireReady: Boolean(options.requireReady),
+    },
+    itemIds: draft.itemIds,
+    selectedItems: draft.itemIds
+      .map((itemId) => itemsById.get(itemId))
+      .filter(Boolean)
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        project: item.project,
+        topic: item.topic,
+        source: item.source,
+        sourceKind: item.sourceKind,
+        url: item.url,
+        publishedAt: item.publishedAt,
+        vote: item.vote,
+      })),
+    votes: Object.fromEntries(snapshot.items.filter((item) => item.vote !== 0).map((item) => [item.id, item.vote])),
+    focuses: snapshot.focuses.map((focus) => ({
+      id: focus.id,
+      text: focus.text,
+      scope: focus.scope,
+      createdAt: focus.createdAt,
+    })),
+    readiness: await evaluateNewsletterReadiness(snapshot),
+    sourceCoverage: await evaluateSourceCoverage(snapshot),
+    sourceRuns: snapshot.sourceRuns.map((run) => ({
+      source: run.source,
+      kind: run.kind,
+      status: run.status,
+      itemCount: run.itemCount,
+      message: run.message,
+      projectCounts: run.projectCounts,
+    })),
+    queryPlanCount: snapshot.queryPlans.length,
+  }
 }
 
 export function normalizeSnapshot(raw) {
