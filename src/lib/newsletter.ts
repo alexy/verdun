@@ -411,6 +411,52 @@ export function evaluateSourceCoverage(snapshot: NewsletterSnapshot): SourceCove
   }
 }
 
+export function buildSourceGapReviewMarkdown(
+  snapshot: NewsletterSnapshot,
+  snapshotLabel = 'public/data/newsletter-snapshot.json',
+): string {
+  const covered = coveredProjectsFromRuns(snapshot.sourceRuns)
+  const watchedProjects = unique(snapshot.queryPlans.map((plan) => plan.project))
+  const watchedProjectCount = watchedProjects.length
+  const coveredWatchedCount = watchedProjects.filter((project) => covered.has(project)).length
+  const uncovered = new Set(watchedProjects.filter((project) => !covered.has(project)))
+  const uncoveredPlans = snapshot.queryPlans.filter((plan) => uncovered.has(plan.project))
+  const lines = [
+    `# Source Gap Review: ${isoDate(snapshot.generatedAt)}`,
+    '',
+    `Snapshot: \`${snapshotLabel}\``,
+    '',
+    `Coverage: ${coveredWatchedCount} of ${watchedProjectCount} watched projects have live/manual source matches.`,
+    '',
+  ]
+
+  if (!uncoveredPlans.length) {
+    lines.push('All watched projects have current live/manual source coverage.', '')
+    return lines.join('\n')
+  }
+
+  lines.push(
+    'Use this checklist before Ulysses export. For useful social/manual finds, add a reviewed entry to `crawler/data/manual/linkedin.json` or `crawler/data/manual/x-twitter.json`, then rerun `collect --live`.',
+    '',
+  )
+
+  for (const plan of uncoveredPlans) {
+    lines.push(`## ${plan.project}`, '')
+    if (plan.topic) lines.push(`Topic: ${plan.topic}`, '')
+    lines.push(`HN query: \`${plan.hackerNewsQuery}\``)
+    if (plan.liveTerms.length) lines.push(`Live terms: ${plan.liveTerms.map((term) => `\`${term}\``).join(', ')}`)
+    if (plan.devToTags.length) lines.push(`dev.to tags: ${plan.devToTags.map((tag) => `\`#${tag}\``).join(', ')}`)
+    if (plan.focusTerms.length) lines.push(`Editorial focus terms: ${plan.focusTerms.map((term) => `\`${term}\``).join(', ')}`)
+    lines.push('', 'Review targets:')
+    for (const target of orderedReviewTargets(plan.reviewTargets)) {
+      lines.push(`- [ ] ${target.source}: [${target.label}](${target.url}) (${target.adapter})`)
+    }
+    lines.push('')
+  }
+
+  return lines.join('\n')
+}
+
 export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): NewsletterReadiness {
   const selectedItems = draftSelection(snapshot.items)
   const upvotedCount = snapshot.items.filter((item) => item.vote > 0).length
@@ -825,6 +871,25 @@ function queryPlanHint(plan: ProjectQueryPlan): string {
 function preferredReviewSourceIndex(source: string, preferredSources: string[]): number {
   const index = preferredSources.indexOf(source)
   return index === -1 ? preferredSources.length : index
+}
+
+function coveredProjectsFromRuns(sourceRuns: SourceRun[]): Set<string> {
+  const covered = new Set<string>()
+  for (const run of sourceRuns) {
+    if (run.status !== 'ok' || run.itemCount <= 0) continue
+    for (const [project, count] of Object.entries(run.projectCounts)) {
+      if (count > 0) covered.add(project)
+    }
+  }
+  return covered
+}
+
+function orderedReviewTargets(targets: ReviewTarget[]): ReviewTarget[] {
+  const preferred = ['Hacker News', 'Lobste.rs', 'dev.to', 'Medium', 'Substack', 'LinkedIn', 'X/Twitter']
+  return [...targets].sort((left, right) => {
+    const sourceDelta = preferredReviewSourceIndex(left.source, preferred) - preferredReviewSourceIndex(right.source, preferred)
+    return sourceDelta || left.label.localeCompare(right.label)
+  })
 }
 
 function coverageGapSummary(projects: string[]): string {

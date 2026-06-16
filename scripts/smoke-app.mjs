@@ -33,6 +33,14 @@ try {
   await page.locator('.ontology').getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
   await page.locator('.source-health').getByText(/projects covered by live\/manual source matches/).waitFor()
   await page.locator('.source-health').getByText('Coverage gaps').waitFor()
+  const gapChecklistLink = page.locator('.source-gaps').getByRole('link', { name: 'Gap checklist' })
+  await gapChecklistLink.waitFor()
+  const gapChecklistHref = await gapChecklistLink.getAttribute('href')
+  if (!gapChecklistHref?.startsWith('data:text/markdown')) throw new Error('source gap checklist download link is missing')
+  const gapChecklistMarkdown = decodeURIComponent(gapChecklistHref.split(',')[1] ?? '')
+  if (!gapChecklistMarkdown.includes('# Source Gap Review') || !gapChecklistMarkdown.includes('## BAML')) {
+    throw new Error('source gap checklist did not include the expected review markdown')
+  }
   const firstCoverageGap = page.locator('.source-gaps li').first()
   await firstCoverageGap.waitFor()
   const coverageGapProject = (await firstCoverageGap.locator('strong').textContent())?.trim()

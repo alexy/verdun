@@ -31,6 +31,8 @@ const {
   searchText,
   sourceCount,
   sourceCoverage,
+  sourceGapReviewFilename,
+  sourceGapReviewMarkdown,
   sourceFilter,
   sourceOptions,
   unreviewedItems,
@@ -69,6 +71,8 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
         :query-plans="snapshot.queryPlans"
         :readiness="readiness"
         :source-coverage="sourceCoverage"
+        :source-gap-review-filename="sourceGapReviewFilename"
+        :source-gap-review-markdown="sourceGapReviewMarkdown"
         :source-runs="snapshot.sourceRuns"
         @save-focus="saveFocus"
       />

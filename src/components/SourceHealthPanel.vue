@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { Activity, Plus } from '@lucide/vue'
+import { computed } from 'vue'
+import { Activity, Download, Plus } from '@lucide/vue'
 import type { ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
 
 const props = defineProps<{
   pendingSourceCount: number
   queryPlans: ProjectQueryPlan[]
   sourceCoverage: SourceCoverageSummary
+  sourceGapReviewFilename: string
+  sourceGapReviewMarkdown: string
   sourceRuns: SourceRun[]
 }>()
 
@@ -49,6 +52,8 @@ function coverageGapPlans(): ProjectQueryPlan[] {
   return props.queryPlans.filter((plan) => uncovered.has(plan.project)).slice(0, 4)
 }
 
+const sourceGapReviewHref = computed(() => `data:text/markdown;charset=utf-8,${encodeURIComponent(props.sourceGapReviewMarkdown)}`)
+
 function requestMoreCoverage(plan: ProjectQueryPlan): void {
   emit('saveFocus', `More source material on ${plan.project}: ${queryPlanSummary(plan) || plan.hackerNewsQuery}.`, 'this_week')
 }
@@ -69,6 +74,14 @@ function requestMoreCoverage(plan: ProjectQueryPlan): void {
         {{ sourceCoverage.uncoveredProjects.slice(0, 8).join(', ') }}
         <span v-if="extraGapCount(sourceCoverage.uncoveredProjects)">plus {{ extraGapCount(sourceCoverage.uncoveredProjects) }} more</span>
       </p>
+      <a
+        class="source-gaps__download"
+        :href="sourceGapReviewHref"
+        :download="sourceGapReviewFilename"
+      >
+        <Download :size="14" aria-hidden="true" />
+        Gap checklist
+      </a>
       <ul v-if="coverageGapPlans().length">
         <li v-for="plan in coverageGapPlans()" :key="plan.project">
           <div>

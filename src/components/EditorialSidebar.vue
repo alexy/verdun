@@ -13,6 +13,8 @@ defineProps<{
   queryPlans: ProjectQueryPlan[]
   readiness: NewsletterReadiness
   sourceCoverage: SourceCoverageSummary
+  sourceGapReviewFilename: string
+  sourceGapReviewMarkdown: string
   sourceRuns: SourceRun[]
 }>()
 
@@ -69,6 +71,8 @@ function submitFocus(): void {
       :pending-source-count="pendingSourceCount"
       :query-plans="queryPlans"
       :source-coverage="sourceCoverage"
+      :source-gap-review-filename="sourceGapReviewFilename"
+      :source-gap-review-markdown="sourceGapReviewMarkdown"
       :source-runs="sourceRuns"
       @save-focus="(text, scope) => emit('saveFocus', text, scope)"
     />

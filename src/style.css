@@ -350,6 +350,28 @@ textarea {
   font-weight: 850;
 }
 
+.source-gaps__download {
+  width: fit-content;
+  min-height: 28px;
+  margin-top: 8px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(15, 118, 110, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.source-gaps__download:hover {
+  border-color: rgba(15, 118, 110, 0.5);
+  background: rgba(15, 118, 110, 0.08);
+}
+
 .source-gaps ul {
   margin: 8px 0 0;
   padding: 0;

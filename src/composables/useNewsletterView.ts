@@ -1,6 +1,6 @@
 import { computed, ref, type Ref } from 'vue'
 import type { NewsletterPublishManifest, NewsletterSnapshot } from '../lib/newsletter'
-import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
+import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, buildSourceGapReviewMarkdown, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
 
 export type VoteFilter = 'all' | 'unreviewed' | 'upvoted' | 'downvoted'
 
@@ -52,6 +52,8 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const publishManifestJson = computed(() => JSON.stringify(publishManifest.value, null, 2))
   const editorialStateJson = computed(() => JSON.stringify(buildEditorialStateExport(snapshot.value), null, 2))
   const editorialStateFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-verdun-editorial-state.json`)
+  const sourceGapReviewMarkdown = computed(() => buildSourceGapReviewMarkdown(snapshot.value))
+  const sourceGapReviewFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-source-gap-review.md`)
 
   return {
     draft,
@@ -72,6 +74,8 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
     searchText,
     sourceCount,
     sourceCoverage,
+    sourceGapReviewFilename,
+    sourceGapReviewMarkdown,
     sourceFilter,
     sourceOptions,
     unreviewedItems,
