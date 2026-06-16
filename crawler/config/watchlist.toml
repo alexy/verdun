@@ -7,10 +7,40 @@ homepage = "https://github.com/pydantic/pydantic-ai"
 keywords = ["pydantic", "typed agents", "structured outputs", "validation"]
 
 [[projects]]
+name = "BAML"
+topic = "typed LLM functions"
+homepage = "https://github.com/BoundaryML/baml"
+keywords = ["baml", "typed llm", "prompt functions", "structured outputs", "schema"]
+
+[[projects]]
+name = "DSPy"
+topic = "declarative AI programs"
+homepage = "https://github.com/stanfordnlp/dspy"
+keywords = ["dspy", "declarative lm", "language model programs", "optimizers"]
+
+[[projects]]
+name = "Instructor"
+topic = "typed structured outputs"
+homepage = "https://github.com/instructor-ai/instructor"
+keywords = ["instructor", "structured outputs", "pydantic", "typed extraction", "llm"]
+
+[[projects]]
 name = "LakeSail"
 topic = "typed dataframes"
 homepage = "https://github.com/lakehq/sail"
 keywords = ["sail", "spark connect", "datafusion", "arrow", "rust"]
+
+[[projects]]
+name = "Ibis"
+topic = "functional dataframes"
+homepage = "https://github.com/ibis-project/ibis"
+keywords = ["ibis", "expression api", "dataframes", "sql compiler", "backend"]
+
+[[projects]]
+name = "Dagster"
+topic = "functional data orchestration"
+homepage = "https://github.com/dagster-io/dagster"
+keywords = ["dagster", "software-defined assets", "data orchestration", "asset graph", "python"]
 
 [[projects]]
 name = "Grust Sail"
@@ -103,6 +133,7 @@ feed_urls = [
   "https://medium.com/feed/tag/lancedb",
   "https://medium.com/feed/tag/data-engineering",
   "https://medium.com/feed/tag/knowledge-graph",
+  "https://medium.com/feed/tag/functional-programming",
   "https://medium.com/feed/tag/rust",
 ]
 

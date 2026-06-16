@@ -3,7 +3,13 @@
     "id": "typed-contracts",
     "label": "Typed contracts",
     "description": "Schemas, validators, and type systems that make AI/data boundaries explicit.",
-    "keywords": ["typed", "schema", "structured outputs", "validation", "pydantic", "type-safe"]
+    "keywords": ["typed", "schema", "structured outputs", "validation", "pydantic", "type-safe", "baml", "instructor"]
+  },
+  {
+    "id": "composable-programs",
+    "label": "Composable programs",
+    "description": "Functional, declarative, and expression-oriented APIs for building AI/data workflows as inspectable programs.",
+    "keywords": ["functional", "declarative", "composable", "expression", "dspy", "ibis", "dagster", "prompt functions", "software-defined assets"]
   },
   {
     "id": "graph-memory",

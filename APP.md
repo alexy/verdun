@@ -29,7 +29,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - External DB loader SQL can export from the cohesive public snapshot and upserts both newsletter items and `newsletter_source_runs`.
 - Source-health metadata shown in the app sidebar, including per-project coverage for each watched source.
 - Source-health coverage gaps identify watched projects without live/manual source matches, and the same gap signal is included in local Markdown drafts.
-- Live public-source ingestion for Hacker News, Lobste.rs, project-tagged dev.to queries, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, LakeSail, Grust Sail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, TypeSec, FalkorDB, LadybugDB, and CocoIndex.
+- Live public-source ingestion for Hacker News, Lobste.rs, project-tagged dev.to queries, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, BAML, DSPy, Instructor, LakeSail, Ibis, Dagster, Grust Sail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, TypeSec, FalkorDB, LadybugDB, and CocoIndex.
 - Live/manual collection defaults to a 45-day recency window via `--since-days`, so weekly drafts do not pull stale search hits.
 - `verdun-crawler verify` guards the required project list, public-source adapters, Medium/Substack feed configuration, and LinkedIn/X manual import files.
 - Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.

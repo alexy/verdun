@@ -356,7 +356,12 @@ fn verify(config: PathBuf) -> Result<()> {
 fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
     for project_name in [
         "Pydantic",
+        "BAML",
+        "DSPy",
+        "Instructor",
         "LakeSail",
+        "Ibis",
+        "Dagster",
         "Grust Sail",
         "Turso",
         "LanceDB",
