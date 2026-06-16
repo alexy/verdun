@@ -20,6 +20,10 @@ const manifestOptions = parseGhostArgs(['--dry-run', '--manifest-out', '/tmp/gho
 if (manifestOptions.manifestOut !== '/tmp/ghost.json') throw new Error('manifest-out option was not parsed')
 const manifestEqualsOptions = parseGhostArgs(['--dry-run', '--manifest-out=/tmp/ghost-equals.json', 'draft'], {})
 if (manifestEqualsOptions.manifestOut !== '/tmp/ghost-equals.json') throw new Error('manifest-out equals option was not parsed')
+const editorialStateOptions = parseGhostArgs(['--dry-run', '--editorial-state', '/tmp/editorial-state.json', 'draft'], {})
+if (editorialStateOptions.editorialStateInput !== '/tmp/editorial-state.json') throw new Error('editorial-state option was not parsed')
+const editorialStateEqualsOptions = parseGhostArgs(['--dry-run', '--editorial-state=/tmp/editorial-state-equals.json', 'draft'], {})
+if (editorialStateEqualsOptions.editorialStateInput !== '/tmp/editorial-state-equals.json') throw new Error('editorial-state equals option was not parsed')
 
 const jwt = ghostJwt(options.apiKey)
 if (jwt.split('.').length !== 3) throw new Error('Ghost JWT is malformed')
@@ -68,6 +72,9 @@ const fileOutput = JSON.parse(dryRunManifestText)
 if (fileOutput.payload.posts[0].slug !== dryRunOutput.payload.posts[0].slug) {
   throw new Error('ghost manifest file did not match dry-run output')
 }
+if (fileOutput.manifest.editorialStateInput !== dryRunOutput.manifest.editorialStateInput) {
+  throw new Error('ghost manifest file did not preserve the editorial-state input')
+}
 if (!fileOutput.manifest.selectedItems?.length || fileOutput.manifest.selectedItems.some((item) => !item.selectionReason)) {
   throw new Error('ghost manifest file did not include selected item reasons')
 }
@@ -79,6 +86,9 @@ if (!fileOutput.manifest.issue?.slug || fileOutput.manifest.issue.title !== file
 }
 if (dryRunOutput.manifest.snapshotInput !== 'public/data/newsletter-snapshot.json') {
   throw new Error('dry-run output did not include manifest snapshot input')
+}
+if (!dryRunOutput.manifest.editorialStateInput?.endsWith('editorial-state.json')) {
+  throw new Error('dry-run output did not include manifest editorial-state input')
 }
 if (!dryRunOutput.manifest.itemIds?.length || !dryRunOutput.manifest.selectedItems?.length) {
   throw new Error('dry-run output did not include manifest selected item audit data')
@@ -120,14 +130,10 @@ async function runGhostDryRun() {
       '--require-ready',
       '--manifest-out',
       manifestFile,
+      '--editorial-state',
+      stateFile,
       'draft',
-    ], {
-      env: {
-        ...process.env,
-        VERDUN_LOCAL_STATE_FILE: stateFile,
-      },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
+    ], { stdio: ['ignore', 'pipe', 'pipe'] })
     let stdout = ''
     let stderr = ''
     child.stdout.on('data', (chunk) => {

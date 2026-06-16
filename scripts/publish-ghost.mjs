@@ -8,6 +8,7 @@ const ghostStatuses = new Set(['draft', 'published', 'scheduled', 'sent'])
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const options = parseGhostArgs(process.argv.slice(2), process.env)
+  if (options.editorialStateInput) process.env.VERDUN_LOCAL_STATE_FILE = options.editorialStateInput
   const snapshot = await loadSnapshotFile(options.input)
   const draft = await buildNewsletterDraft(snapshot)
   await assertDraftReady(snapshot, draft, options)
@@ -15,6 +16,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const payload = ghostPostPayload(draft, options.status)
   const manifest = await buildPublishManifest(draft, snapshot, {
     snapshotInput: options.input,
+    editorialStateInput: options.editorialStateInput,
     requireReady: options.requireReady,
     requireUpvotes: options.requireUpvotes,
   })
@@ -56,6 +58,7 @@ export function parseGhostArgs(args, env = process.env) {
     status,
     apiUrl: env.GHOST_ADMIN_API_URL,
     apiKey: env.GHOST_ADMIN_API_KEY,
+    editorialStateInput: values.get('--editorial-state') ?? env.VERDUN_LOCAL_STATE_FILE,
     manifestOut: values.get('--manifest-out') ?? env.GHOST_MANIFEST_OUT,
   }
 }
@@ -67,15 +70,16 @@ function parseOptionArgs(args) {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index]
     if (flags.has(arg)) continue
-    if (arg.startsWith('--manifest-out=')) {
-      const value = arg.slice('--manifest-out='.length)
-      if (!value) throw new Error('--manifest-out requires a file path')
-      values.set('--manifest-out', value)
+    if (arg.startsWith('--manifest-out=') || arg.startsWith('--editorial-state=')) {
+      const optionName = arg.startsWith('--manifest-out=') ? '--manifest-out' : '--editorial-state'
+      const value = arg.slice(`${optionName}=`.length)
+      if (!value) throw new Error(`${optionName} requires a file path`)
+      values.set(optionName, value)
       continue
     }
-    if (arg === '--manifest-out') {
+    if (arg === '--manifest-out' || arg === '--editorial-state') {
       const value = args[index + 1]
-      if (!value || value.startsWith('--')) throw new Error('--manifest-out requires a file path')
+      if (!value || value.startsWith('--')) throw new Error(`${arg} requires a file path`)
       values.set(arg, value)
       index += 1
       continue
