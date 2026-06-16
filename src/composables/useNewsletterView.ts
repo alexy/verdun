@@ -2,7 +2,7 @@ import { computed, ref, type Ref } from 'vue'
 import type { NewsletterPublishManifest, NewsletterSnapshot } from '../lib/newsletter'
 import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, buildSourceGapReviewMarkdown, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
 
-export type VoteFilter = 'all' | 'unreviewed' | 'upvoted' | 'downvoted'
+export type VoteFilter = 'all' | 'draft' | 'unreviewed' | 'upvoted' | 'downvoted'
 
 export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const searchText = ref('')
@@ -17,9 +17,15 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const sortedItems = computed(() => sortedNewsItems(snapshot.value.items))
   const projectOptions = computed(() => uniqueSorted(snapshot.value.items.map((item) => item.project)))
   const sourceOptions = computed(() => uniqueSorted(snapshot.value.items.map((item) => item.source)))
+  const draft = computed(() => buildNewsletterDraft(snapshot.value))
+  const draftItemIds = computed(() => new Set(draft.value.itemIds))
+  const draftItems = computed(() => draft.value.itemIds
+    .map((itemId) => snapshot.value.items.find((item) => item.id === itemId))
+    .filter((item): item is NewsletterSnapshot['items'][number] => Boolean(item)))
   const filteredItems = computed(() => {
     const query = searchText.value.trim().toLowerCase()
     return sortedItems.value.filter((item) => {
+      if (voteFilter.value === 'draft' && !draftItemIds.value.has(item.id)) return false
       if (voteFilter.value === 'unreviewed' && item.vote !== 0) return false
       if (voteFilter.value === 'upvoted' && item.vote <= 0) return false
       if (voteFilter.value === 'downvoted' && item.vote >= 0) return false
@@ -41,7 +47,6 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   })
   const liveSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'ok' && run.itemCount > 0).length)
   const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
-  const draft = computed(() => buildNewsletterDraft(snapshot.value))
   const readiness = computed(() => evaluateNewsletterReadiness(snapshot.value))
   const sourceCoverage = computed(() => evaluateSourceCoverage(snapshot.value))
   const draftFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-strongly-typed-ai-data-notes.md`)
@@ -58,6 +63,8 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   return {
     draft,
     draftFilename,
+    draftItemIds,
+    draftItems,
     editorialStateFilename,
     editorialStateJson,
     filteredItems,

@@ -894,6 +894,10 @@ textarea {
   border-color: rgba(15, 118, 110, 0.55);
 }
 
+.news-card.in-draft {
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.14), 0 10px 30px rgba(22, 32, 29, 0.06);
+}
+
 .news-card.rejected {
   opacity: 0.68;
 }
@@ -944,6 +948,12 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 999px;
   background: #fbfaf5;
+}
+
+.item-meta .draft-chip {
+  border-color: rgba(15, 118, 110, 0.34);
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--accent-dark);
 }
 
 .news-card h3 {

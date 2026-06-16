@@ -15,6 +15,8 @@ const editorialStateImportSummary = ref('')
 const {
   draft,
   draftFilename,
+  draftItemIds,
+  draftItems,
   editorialStateFilename,
   editorialStateJson,
   filteredItems,
@@ -84,6 +86,7 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
           v-model:source-filter="sourceFilter"
           v-model:vote-filter="voteFilter"
           :downvoted-count="rejectedItems"
+          :draft-count="draftItems.length"
           :editorial-persistence="editorialPersistence"
           :error="error"
           :filtered-count="filteredItems.length"
@@ -110,7 +113,7 @@ async function handleEditorialStateImport(state: unknown): Promise<void> {
 
         <p v-if="!filteredItems.length" class="empty inbox-empty">No items match the current filters.</p>
 
-        <NewsItemCard v-for="item in filteredItems" :key="item.id" :item="item" @vote="setVote" />
+        <NewsItemCard v-for="item in filteredItems" :key="item.id" :in-draft="draftItemIds.has(item.id)" :item="item" @vote="setVote" />
       </section>
     </section>
   </main>

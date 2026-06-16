@@ -3,6 +3,7 @@ import { Search, X } from '@lucide/vue'
 
 defineProps<{
   downvotedCount: number
+  draftCount: number
   editorialPersistence: 'database' | 'local_file' | 'browser'
   error: string
   filteredCount: number
@@ -16,7 +17,7 @@ defineProps<{
 }>()
 
 const searchText = defineModel<string>('searchText', { required: true })
-const voteFilter = defineModel<'all' | 'unreviewed' | 'upvoted' | 'downvoted'>('voteFilter', { required: true })
+const voteFilter = defineModel<'all' | 'draft' | 'unreviewed' | 'upvoted' | 'downvoted'>('voteFilter', { required: true })
 const projectFilter = defineModel<string>('projectFilter', { required: true })
 const sourceFilter = defineModel<string>('sourceFilter', { required: true })
 
@@ -55,6 +56,7 @@ function persistenceLabel(value: 'database' | 'local_file' | 'browser'): string 
     </label>
     <select v-model="voteFilter" aria-label="Vote status">
       <option value="all">All votes</option>
+      <option value="draft">Draft spine ({{ draftCount }})</option>
       <option value="unreviewed">Unreviewed ({{ unreviewedCount }})</option>
       <option value="upvoted">Upvoted ({{ upvotedCount }})</option>
       <option value="downvoted">Downvoted ({{ downvotedCount }})</option>

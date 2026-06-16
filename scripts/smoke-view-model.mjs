@@ -76,6 +76,17 @@ if (view.editorialStateFilename.value !== '2026-06-15-verdun-editorial-state.jso
 if (view.publishManifestFilename.value !== '2026-06-15-strongly-typed-ai-data-notes.manifest.json') {
   throw new Error('publish manifest filename did not use snapshot date')
 }
+if (view.draftItems.value.length !== view.draft.value.itemIds.length) {
+  throw new Error('draft item list did not resolve the current draft spine')
+}
+view.voteFilter.value = 'draft'
+if (view.filteredItems.value.length !== view.draftItems.value.length) {
+  throw new Error('draft spine filter did not show the current draft items')
+}
+if (view.filteredItems.value.some((item) => !view.draftItemIds.value.has(item.id))) {
+  throw new Error('draft spine filter leaked a non-draft item')
+}
+view.voteFilter.value = 'all'
 const editorialState = JSON.parse(view.editorialStateJson.value)
 if (!editorialState.votes || Object.values(editorialState.votes).filter((vote) => vote === 1).length !== 2) {
   throw new Error('editorial state export did not include upvoted items')

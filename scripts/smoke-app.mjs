@@ -81,6 +81,7 @@ try {
   await page.locator(firstCredoHref).waitFor()
   await page.locator('.news-card').first().getByText('Evidence').waitFor()
   await page.locator('.news-card').first().getByRole('link', { name: /permalink/i }).waitFor()
+  await page.locator('.news-card.in-draft').first().getByText('Draft spine').waitFor()
   await page.getByTitle('Upvote').first().click()
   await page.locator('.news-card.included').first().waitFor()
   await page.getByTitle('Downvote').nth(1).click()
@@ -93,6 +94,15 @@ try {
   await page.getByTitle('Clear filters').click()
   await page.getByLabel('Vote status').selectOption('upvoted')
   await page.locator('.news-card.included').first().waitFor()
+  await page.getByTitle('Clear filters').click()
+  const currentManifestHref = await manifestLink.getAttribute('href')
+  const currentManifestJson = JSON.parse(decodeURIComponent(currentManifestHref.split(',')[1] ?? ''))
+  await page.getByLabel('Vote status').selectOption('draft')
+  const draftCardCount = await page.locator('.news-card').count()
+  if (draftCardCount !== currentManifestJson.itemIds.length) {
+    throw new Error(`draft spine filter showed ${draftCardCount} cards, expected ${currentManifestJson.itemIds.length}`)
+  }
+  await page.locator('.news-card').first().getByText('Draft spine').waitFor()
   await page.getByTitle('Clear filters').click()
   await page.getByPlaceholder(/Ask for more/).fill('More local-first Rust graph databases and typed query planners.')
   await page.getByRole('button', { name: /Save/ }).click()

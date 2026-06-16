@@ -4,6 +4,7 @@ import type { NewsItem, VoteValue } from '../lib/newsletter'
 import { credoBlurb, ontologyMatchesForItem } from '../lib/ontology'
 
 const props = defineProps<{
+  inDraft: boolean
   item: NewsItem
 }>()
 
@@ -38,7 +39,7 @@ function stageLabel(stage: string): string {
 </script>
 
 <template>
-  <article :id="itemAnchor(item.id)" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0 }">
+  <article :id="itemAnchor(item.id)" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0, 'in-draft': inDraft }">
     <div class="vote-rail" aria-label="Vote controls">
       <button type="button" :class="{ active: item.vote > 0 }" title="Upvote" @click="$emit('vote', item.id, nextVote(1))">
         <ArrowUp :size="18" aria-hidden="true" />
@@ -52,6 +53,7 @@ function stageLabel(stage: string): string {
       <div class="item-meta">
         <span>{{ item.project }}</span>
         <span>{{ item.sourceKind }}</span>
+        <span v-if="inDraft" class="draft-chip">Draft spine</span>
         <span>{{ sourceDomain(item.url) }}</span>
         <span>{{ formatDate(item.publishedAt) }}</span>
       </div>
