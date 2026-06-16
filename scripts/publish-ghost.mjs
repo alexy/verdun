@@ -1,6 +1,6 @@
 import { createHmac } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
-import { assertDraftReady, buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
+import { assertDraftReady, buildNewsletterDraft, buildPublishManifest, loadSnapshotFile } from './newsletter-draft.mjs'
 
 const ghostStatuses = new Set(['draft', 'published', 'scheduled', 'sent'])
 
@@ -9,10 +9,16 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const snapshot = await loadSnapshotFile(options.input)
   const draft = await buildNewsletterDraft(snapshot)
   await assertDraftReady(snapshot, draft, options)
+  assertGhostStatusAllowed(options)
   const payload = ghostPostPayload(draft, options.status)
+  const manifest = await buildPublishManifest(draft, snapshot, {
+    snapshotInput: options.input,
+    requireReady: options.requireReady,
+    requireUpvotes: options.requireUpvotes,
+  })
 
   if (options.dryRun) {
-    process.stdout.write(`${JSON.stringify({ endpoint: ghostEndpoint(options.apiUrl ?? 'https://collected.ga'), payload }, null, 2)}\n`)
+    process.stdout.write(`${JSON.stringify({ endpoint: ghostEndpoint(options.apiUrl ?? 'https://collected.ga'), payload, manifest }, null, 2)}\n`)
   } else {
     const body = await publishGhostPayload(payload, options)
     console.log(body)
@@ -21,9 +27,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
 
 export function parseGhostArgs(args, env = process.env) {
   const dryRun = args.includes('--dry-run')
+  const allowNonDraft = args.includes('--allow-non-draft') || env.GHOST_ALLOW_NON_DRAFT === 'true'
   const requireUpvotes = args.includes('--require-upvotes') || env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
   const requireReady = args.includes('--require-ready') || env.NEWSLETTER_REQUIRE_READY === 'true'
-  const positional = args.filter((arg) => arg !== '--dry-run' && arg !== '--require-upvotes' && arg !== '--require-ready')
+  const positional = args.filter((arg) => !['--dry-run', '--allow-non-draft', '--require-upvotes', '--require-ready'].includes(arg))
   const firstArg = positional[0]
   const secondArg = positional[1]
   const input = firstArg && !ghostStatuses.has(firstArg)
@@ -35,6 +42,7 @@ export function parseGhostArgs(args, env = process.env) {
   }
   return {
     dryRun,
+    allowNonDraft,
     requireUpvotes,
     requireReady,
     input,
@@ -42,6 +50,11 @@ export function parseGhostArgs(args, env = process.env) {
     apiUrl: env.GHOST_ADMIN_API_URL,
     apiKey: env.GHOST_ADMIN_API_KEY,
   }
+}
+
+export function assertGhostStatusAllowed(options) {
+  if (options.status === 'draft' || options.allowNonDraft) return
+  throw new Error('Ghost helper refuses non-draft status without --allow-non-draft or GHOST_ALLOW_NON_DRAFT=true.')
 }
 
 export function ghostPostPayload(draft, status = 'draft') {

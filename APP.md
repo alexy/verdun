@@ -53,7 +53,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
 - File-based draft exports also write a same-stem `.manifest.json` with the snapshot input, publishing gates, selected item IDs, selected item metadata, votes, focuses, readiness checks, source coverage, source runs, and query-plan count.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
-- `npm run ghost:draft -- --dry-run` validates the Ghost endpoint/payload shape, including deterministic slug and metadata fields, without credentials or network access.
+- `npm run ghost:draft -- --dry-run` validates the Ghost endpoint/payload/manifest shape, including deterministic slug and metadata fields, without credentials or network access; non-draft Ghost statuses require an explicit override.
 
 ## Next Work
 

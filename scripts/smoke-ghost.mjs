@@ -1,5 +1,8 @@
 import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
-import { ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './publish-ghost.mjs'
+import { assertGhostStatusAllowed, ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './publish-ghost.mjs'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 const options = parseGhostArgs(['--dry-run', '--require-upvotes', '--require-ready', 'draft'], {
   GHOST_ADMIN_API_URL: 'https://collected.ga',
@@ -8,6 +11,7 @@ const options = parseGhostArgs(['--dry-run', '--require-upvotes', '--require-rea
 if (!options.dryRun) throw new Error('dry-run option was not parsed')
 if (!options.requireUpvotes) throw new Error('require-upvotes option was not parsed')
 if (!options.requireReady) throw new Error('require-ready option was not parsed')
+if (options.allowNonDraft) throw new Error('allow-non-draft should default to false')
 if (options.status !== 'draft') throw new Error('draft status was not parsed')
 if (ghostEndpoint(options.apiUrl) !== 'https://collected.ga/ghost/api/admin/posts/?source=html') {
   throw new Error('Ghost endpoint is not stable')
@@ -31,9 +35,92 @@ if (!post.html.includes('<strong>Typed contracts</strong>')) throw new Error('pa
 if (post.html.includes('**Typed contracts**')) throw new Error('payload html leaked markdown emphasis')
 if (post.status !== 'draft') throw new Error('payload status does not match')
 if (!post.tags.includes('strongly-typed')) throw new Error('payload tags are missing newsletter taxonomy')
+const publishOptions = parseGhostArgs(['--dry-run', '--allow-non-draft', 'published'], {
+  GHOST_ADMIN_API_URL: 'https://collected.ga',
+  GHOST_ADMIN_API_KEY: 'a'.repeat(24) + ':' + 'b'.repeat(64),
+})
+if (publishOptions.status !== 'published' || !publishOptions.allowNonDraft) {
+  throw new Error('non-draft status override was not parsed')
+}
+assertGhostStatusAllowed(publishOptions)
+let blockedNonDraft = false
+try {
+  assertGhostStatusAllowed(parseGhostArgs(['published'], {}))
+} catch (error) {
+  blockedNonDraft = error.message.includes('refuses non-draft status')
+}
+if (!blockedNonDraft) throw new Error('Ghost helper did not block non-draft status without explicit override')
+const dryRunOutput = JSON.parse(await runGhostDryRun())
+if (dryRunOutput.endpoint !== 'https://collected.ga/ghost/api/admin/posts/?source=html') {
+  throw new Error('dry-run output did not include the Ghost endpoint')
+}
+if (dryRunOutput.payload.posts[0].slug !== post.slug) {
+  throw new Error('dry-run output did not include the Ghost payload')
+}
+if (dryRunOutput.manifest.snapshotInput !== 'public/data/newsletter-snapshot.json') {
+  throw new Error('dry-run output did not include manifest snapshot input')
+}
+if (!dryRunOutput.manifest.itemIds?.length || !dryRunOutput.manifest.selectedItems?.length) {
+  throw new Error('dry-run output did not include manifest selected item audit data')
+}
+if (dryRunOutput.manifest.gates.requireReady !== true || dryRunOutput.manifest.gates.requireUpvotes !== true) {
+  throw new Error('dry-run output did not include manifest gate settings')
+}
 if (ghostSlug('Strongly Typed AI/Data Notes: June 15, 2026') !== 'strongly-typed-ai-data-notes-june-15-2026') {
   throw new Error('Ghost slug helper did not normalize the newsletter title')
 }
 if (ghostExcerpt('x'.repeat(320)).length > 280 || !ghostExcerpt('x'.repeat(320)).endsWith('...')) {
   throw new Error('Ghost excerpt helper did not bound long descriptions')
+}
+
+async function runGhostDryRun() {
+  const { spawn } = await import('node:child_process')
+  const stateDir = await mkdtemp(join(tmpdir(), 'verdun-ghost-state-'))
+  const stateFile = join(stateDir, 'editorial-state.json')
+  await writeFile(stateFile, JSON.stringify({
+    votes: {
+      'grust-sail-3683deba292c': 1,
+      'lakesail-e5ce5d36852a': 1,
+    },
+    focuses: [
+      {
+        id: 'focus-smoke-ghost-ready',
+        text: 'More typed lakehouse execution and graph lowering evidence.',
+        scope: 'this_week',
+        created_at: new Date().toISOString(),
+      },
+    ],
+  }))
+  return await new Promise((resolve, reject) => {
+    const child = spawn('node', [
+      'scripts/publish-ghost.mjs',
+      '--dry-run',
+      '--require-upvotes',
+      '--require-ready',
+      'draft',
+    ], {
+      env: {
+        ...process.env,
+        VERDUN_LOCAL_STATE_FILE: stateFile,
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk
+    })
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk
+    })
+    child.on('error', reject)
+    child.on('close', (status) => {
+      void rm(stateDir, { recursive: true, force: true })
+      if (status === 0) {
+        resolve(stdout)
+      } else {
+        reject(new Error(`ghost dry-run exited ${status}\n${stdout}\n${stderr}`))
+      }
+    })
+  })
 }

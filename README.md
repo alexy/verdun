@@ -121,10 +121,11 @@ An optional Ghost helper remains available for direct API drafts from the same l
 npm run ghost:draft -- --dry-run
 npm run ghost:draft -- --dry-run --require-upvotes
 npm run ghost:draft -- --dry-run --require-ready
+npm run ghost:draft -- --dry-run --require-upvotes --require-ready
 
 GHOST_ADMIN_API_URL=https://collected.ga \
 GHOST_ADMIN_API_KEY='admin-key-id:admin-key-secret' \
 npm run ghost:draft
 ```
 
-`ghost:draft -- --dry-run` prints the Ghost Admin API endpoint and post payload without requiring credentials or making a network request. The payload uses the same rendered draft as the Ulysses export and includes a deterministic slug, bounded excerpt, meta title, meta description, and newsletter taxonomy tags. `ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. It does not publish a public post unless `GHOST_POST_STATUS` or the status argument is changed.
+`ghost:draft -- --dry-run` prints the Ghost Admin API endpoint, post payload, and publish manifest without requiring credentials or making a network request. The payload uses the same rendered draft as the Ulysses export and includes a deterministic slug, bounded excerpt, meta title, meta description, and newsletter taxonomy tags. `ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. Non-draft Ghost statuses such as `published`, `scheduled`, or `sent` require `--allow-non-draft` or `GHOST_ALLOW_NON_DRAFT=true`.
