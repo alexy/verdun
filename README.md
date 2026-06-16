@@ -9,6 +9,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Vercel serverless API routes reading an external Postgres database.
 - Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
 - Crawler output keeps normalized provenance inside each item's `raw_json`, including source adapter, evidence URL, matched project, and matched keywords.
+- Crawler output deduplicates live/manual items by canonical URL, preferring stronger reviewed evidence while retaining duplicate source records in `raw_json.duplicates`.
 - Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 - Public item cards surface crawler provenance as editorial evidence, including the adapter/stage that brought each item into the queue.
