@@ -54,11 +54,20 @@ try {
   if (!draft.markdown.includes('## Weekly throughline')) {
     throw new Error('draft did not include the weekly throughline section')
   }
+  if (!draft.markdown.includes('## Editorial arc')) {
+    throw new Error('draft did not include the editorial arc section')
+  }
   if (!draft.html.includes('<h2>Weekly throughline</h2>')) {
     throw new Error('draft HTML did not render the weekly throughline section')
   }
+  if (!draft.html.includes('<h2>Editorial arc</h2>')) {
+    throw new Error('draft HTML did not render the editorial arc section')
+  }
   if (!draft.markdown.includes('The selected queue clusters around')) {
     throw new Error('draft throughline did not synthesize the selected queue')
+  }
+  if (!draft.markdown.includes('Lead with')) {
+    throw new Error('draft editorial arc did not identify a lead item')
   }
   for (const roughText of ['Overview Long-form', 'Author: ', 'Stop Hand-Writing SurrealQL Strings in Rust Long-form', 'Medium surfaced this feed item']) {
     if (draft.markdown.includes(roughText)) {

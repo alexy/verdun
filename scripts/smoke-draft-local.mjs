@@ -52,6 +52,15 @@ try {
   if (!draft.markdown.includes('## Weekly throughline')) {
     throw new Error('local draft did not include the weekly throughline')
   }
+  if (!draft.markdown.includes('## Editorial arc')) {
+    throw new Error('local draft did not include the editorial arc')
+  }
+  if (!draft.markdown.includes('Lead with Grust Sail')) {
+    throw new Error('local draft editorial arc did not use the selected lead item')
+  }
+  if (draft.markdown.includes('Then let') && draft.markdown.includes('widens')) {
+    throw new Error('local draft editorial arc did not use clean support phrasing')
+  }
   if (!draft.markdown.includes('Evidence:')) {
     throw new Error('local draft did not include item provenance evidence')
   }

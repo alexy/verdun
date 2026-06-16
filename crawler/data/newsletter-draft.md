@@ -16,6 +16,14 @@ The editorial intent asks for more strongly typed graph/database work that can r
 
 - Ongoing: More strongly typed graph/database work that can run locally before cloud deployment.
 
+## Editorial arc
+
+Lead with HelixDB: it gives the issue its graph memory center of gravity.
+
+Bring in SurrealDB to widen that into graph memory, so the reader can see the stack rather than a single project.
+
+LakeSail closes the loop by asking the practical question: Does this make more strongly typed graph/database work that can run locally before cloud deployment more concrete, or merely easier to describe?
+
 ## 1. HelixDB: Show HN: HelixDB – A graph database built on object storage
 
 Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph. Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.
@@ -23,6 +31,8 @@ Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph d
 Credo fit: HelixDB matters here because it touches graph memory and local-first data in the Strongly Typed AI stack. Related ontology: Graph memory, Local-first data.
 
 Source: [Hacker News](https://github.com/HelixDB/helix-db/tree/main) · graph database · helixdb, graph database, rust graph, hacker-news
+
+Evidence: live via hacker-news.
 
 ## 2. SurrealDB: Benchmarking SurrealDB 3.x vs. Postgres, Mongo, Neo4j and Redis (With Fsync)
 
@@ -32,6 +42,8 @@ Credo fit: SurrealDB matters here because it touches graph memory in the Strongl
 
 Source: [Hacker News](https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers) · multimodel data · surrealdb, multimodel, graph, hacker-news
 
+Evidence: live via hacker-news.
+
 ## 3. SurrealDB: Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel
 
 The piece puts SurrealDB into the multimodel data conversation through "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel", a useful signal for typed contracts moving from idea to developer practice. Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.
@@ -39,6 +51,8 @@ The piece puts SurrealDB into the multimodel data conversation through "Somnia: 
 Credo fit: SurrealDB matters here because it touches typed contracts, graph memory, and local-first data in the Strongly Typed AI stack. Related ontology: Typed contracts, Graph memory, Local-first data.
 
 Source: [Medium](https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4) · multimodel data · surrealdb, multimodel, graph, medium
+
+Evidence: live via medium.
 
 ## 4. Pydantic: Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It
 
@@ -48,6 +62,8 @@ Credo fit: Pydantic matters here because it touches typed contracts in the Stron
 
 Source: [Medium](https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb) · typed AI · pydantic, typed agents, structured outputs, medium
 
+Evidence: live via medium.
+
 ## 5. Pydantic: The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts
 
 Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability. Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.
@@ -55,6 +71,8 @@ Why free-form generative text is an engineering bottleneck and how structure unl
 Credo fit: Pydantic matters here because it touches typed contracts in the Strongly Typed AI stack. Related ontology: Typed contracts.
 
 Source: [Medium](https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db) · typed AI · pydantic, typed agents, structured outputs, medium
+
+Evidence: live via medium.
 
 ## 6. LanceDB: Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline
 
@@ -64,6 +82,8 @@ Credo fit: LanceDB matters here because it touches lakehouse runtime in the Stro
 
 Source: [Medium](https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b) · vector data · lancedb, lance, vectors, medium
 
+Evidence: live via medium.
+
 ## 7. LakeSail: LakeSail discussion: typed Spark-compatible execution without giving up local Rust
 
 Several data engineers are watching LakeSail because Spark-compatible APIs, DataFusion, and Arrow make a typed local lakehouse runtime feel plausible. Manually reviewed social posts can capture practitioner interest in LakeSail without relying on unauthenticated scraping.
@@ -72,9 +92,12 @@ Credo fit: LakeSail matters here because it touches typed contracts, local-first
 
 Source: [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail) · typed dataframes · sail, spark connect, datafusion, linkedin
 
+Evidence: manual via linkedin.
+
 ## Strongly Typed AI ontology
 
 - **Typed contracts**: Schemas, validators, and type systems that make AI/data boundaries explicit.
+- **Composable programs**: Functional, declarative, and expression-oriented APIs for building AI/data workflows as inspectable programs.
 - **Graph memory**: Graph-shaped state for agents, provenance, policy, and knowledge systems.
 - **Local-first data**: Systems that run close to the developer before scaling into cloud services.
 - **Lakehouse runtime**: Arrow, DataFusion, Spark, Delta, and columnar execution as typed data substrate.
@@ -83,7 +106,7 @@ Source: [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:example-
 
 ## Editorial thread
 
-The connective tissue is graph database, multimodel data, typed AI, vector data, and typed dataframes. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. That makes "More strongly typed graph/database work that can run locally before cloud deployment." the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.
+The connective tissue is graph database, multimodel data, typed AI, vector data, and typed dataframes. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. That makes "More strongly typed graph/database work that can run locally before cloud deployment" the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.
 
 ## Sources watched
 
@@ -94,3 +117,7 @@ The connective tissue is graph database, multimodel data, typed AI, vector data,
 - Substack: ok, 0 items. configured RSS/Atom feeds.
 - LinkedIn: ok, 2 items. manual JSON import. Coverage: LakeSail 1, Pydantic 1.
 - X/Twitter: ok, 2 items. manual JSON import. Coverage: HelixDB 1, Turso 1.
+
+## Coverage gaps
+
+Ask for more source material on Apache Arrow, BAML, CocoIndex, Dagster, DataFusion, Delta Lake, DSPy, and FalkorDB, plus 9 more.

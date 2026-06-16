@@ -273,6 +273,7 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '',
     ...throughlineSection(items, brief),
     ...briefSection(brief),
+    ...editorialArcSection(items, brief),
     ...items.flatMap((item, index) => itemSection(item, index + 1)),
     '## Strongly Typed AI ontology',
     '',
@@ -422,6 +423,30 @@ function briefSection(brief: EditorialBrief): string[] {
     '',
     ...brief.weekly.map((text) => `- This week: ${text}`),
     ...brief.ongoing.map((text) => `- Ongoing: ${text}`),
+    '',
+  ]
+}
+
+function editorialArcSection(items: NewsItem[], brief: EditorialBrief): string[] {
+  if (!items.length) return []
+  const lead = items[0]
+  const support = items.find((item) => item.project !== lead.project) ?? items[1]
+  const final = items[items.length - 1]
+  const leadOntology = ontologyForItem(lead)[0]?.label.toLowerCase() ?? lead.topic
+  const supportPhrase = support
+    ? `Bring in ${support.project} to widen that into ${ontologyForItem(support)[0]?.label.toLowerCase() ?? support.topic}`
+    : `Let ${lead.project} carry the issue by itself`
+  const nextQuestion = brief.weekly[0] ?? brief.ongoing[0]
+    ? `Does this make ${stripTerminalPunctuation(brief.weekly[0] ?? brief.ongoing[0] ?? '').toLowerCase()} more concrete, or merely easier to describe?`
+    : `Which of these projects turns typed ambition into a smaller operational surface area?`
+  return [
+    '## Editorial arc',
+    '',
+    `Lead with ${lead.project}: it gives the issue its ${leadOntology} center of gravity.`,
+    '',
+    `${supportPhrase}, so the reader can see the stack rather than a single project.`,
+    '',
+    `${final.project} closes the loop by asking the practical question: ${nextQuestion}`,
     '',
   ]
 }
@@ -592,7 +617,7 @@ function editorialThread(items: NewsItem[], brief: EditorialBrief): string {
   const topics = unique(items.map((item) => item.topic))
   const intent = brief.weekly[0] ?? brief.ongoing[0]
   const intentSentence = intent
-    ? `That makes "${intent}" the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.`
+    ? `That makes "${stripTerminalPunctuation(intent)}" the test: each included item should either sharpen it, complicate it, or show where the stack is already moving.`
     : 'Each included item should either sharpen the stack, complicate it, or show where production practice is already moving.'
   return `The connective tissue is ${sentenceList(topics)}. The most interesting pieces are not merely announcing tools; they suggest a stack where typed boundaries, local execution, and database-native intelligence become the ordinary way to build AI/data products. ${intentSentence}`
 }
