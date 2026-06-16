@@ -15,6 +15,9 @@ try {
   const firstSnapshot = await module.readSnapshot()
   const item = firstSnapshot.items[0]
   if (!item) throw new Error('snapshot has no items')
+  if (!item.provenance?.stage || !item.provenance?.evidenceUrl) {
+    throw new Error('local API snapshot did not expose item provenance')
+  }
 
   await module.writeVote(item.id, 1)
   const focus = await module.writeFocus('More local graph databases with typed query planning.', 'this_week')

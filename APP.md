@@ -12,6 +12,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Vite/Vercel configured for the `/rbage/` public path.
 - Inbox filtering by search text, vote state, project, and source for faster editorial review.
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
+- News cards surface crawler provenance as editorial evidence from the API/static snapshot.
 - News cards expose stable item anchors/permalinks and source domains for sharing and review.
 - `src/lib/ontology.json` is the shared ontology source for the site and local Markdown drafts.
 - Shared publishing readiness checks in `src/lib/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, and source health before Ulysses export.

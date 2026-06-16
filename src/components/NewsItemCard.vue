@@ -30,6 +30,11 @@ function formatDate(value: string): string {
 function nextVote(target: VoteValue): VoteValue {
   return props.item.vote === target ? 0 : target
 }
+
+function stageLabel(stage: string): string {
+  if (stage === 'watchlist-seed') return 'watchlist seed'
+  return stage.replace(/[-_]+/g, ' ')
+}
 </script>
 
 <template>
@@ -58,6 +63,11 @@ function nextVote(target: VoteValue): VoteValue {
       </h3>
       <p>{{ item.summary }}</p>
       <p class="why">{{ item.whyItMatters }}</p>
+      <div v-if="item.provenance" class="item-evidence">
+        <strong>Evidence</strong>
+        <span>{{ stageLabel(item.provenance.stage) }} via {{ item.provenance.adapter }}</span>
+        <span v-if="item.provenance.matchedKeywords.length">{{ item.provenance.matchedKeywords.slice(0, 3).join(', ') }}</span>
+      </div>
       <div class="credo-fit">
         <strong>Credo fit</strong>
         <p>{{ credoBlurb(item) }}</p>

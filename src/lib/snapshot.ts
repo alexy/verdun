@@ -1,4 +1,4 @@
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type SourceRun, type SourceRunStatus, type VoteValue } from './newsletter'
+import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type SourceRun, type SourceRunStatus, type VoteValue } from './newsletter'
 
 type RawRecord = Record<string, unknown>
 
@@ -37,6 +37,31 @@ function normalizeItem(raw: unknown): NewsItem | null {
     tags: arrayValue(record.tags).map((tag) => String(tag)).filter(Boolean),
     score: numberValue(record.score, 0),
     vote: voteValue(record.vote),
+    provenance: normalizeProvenance(record.provenance ?? rawJsonProvenance(record.raw_json), record),
+  }
+}
+
+function rawJsonProvenance(rawJson: unknown): unknown {
+  if (!rawJson || typeof rawJson !== 'object' || Array.isArray(rawJson)) return null
+  return (rawJson as RawRecord).provenance ?? rawJson
+}
+
+function normalizeProvenance(raw: unknown, item: RawRecord): NewsItemProvenance | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined
+  const record = raw as RawRecord
+  const stage = stringValue(record.stage ?? record.collection_stage, '')
+  const source = stringValue(record.source, stringValue(item.source, 'Unknown'))
+  const evidenceUrl = stringValue(record.evidence_url, stringValue(item.url, ''))
+  if (!stage || !source || !evidenceUrl) return undefined
+  return {
+    stage,
+    adapter: stringValue(record.adapter, source),
+    source,
+    sourceKind: stringValue(record.source_kind, stringValue(item.sourceKind ?? item.source_kind, 'unknown')),
+    sourceUrl: stringValue(record.source_url, evidenceUrl),
+    evidenceUrl,
+    project: stringValue(record.project, stringValue(item.project, 'Unknown')),
+    matchedKeywords: arrayValue(record.matched_keywords).map((keyword) => String(keyword)).filter(Boolean),
   }
 }
 

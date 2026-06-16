@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless'
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type SourceRunStatus, type VoteValue } from '../../src/lib/newsletter'
+import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type SourceRunStatus, type VoteValue } from '../../src/lib/newsletter'
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -22,6 +22,7 @@ type NewsRow = {
   why_it_matters: string
   tags: string[]
   score: number
+  raw_json?: unknown
   vote: VoteValue | null
 }
 
@@ -54,6 +55,7 @@ type StaticNewsRow = {
   why_it_matters: string
   tags: string[]
   score: number
+  raw_json?: unknown
 }
 
 type StaticSourceRun = {
@@ -95,6 +97,7 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
       i.why_it_matters,
       i.tags,
       i.score,
+      i.raw_json,
       coalesce(v.vote, 0)::int as vote
     from newsletter_items i
     left join newsletter_votes v on v.item_id = i.id
@@ -288,6 +291,7 @@ function toNewsItem(row: NewsRow): NewsItem {
     tags: row.tags ?? [],
     score: row.score,
     vote: row.vote ?? 0,
+    provenance: normalizeProvenance(row.raw_json, row),
   }
 }
 
@@ -306,7 +310,36 @@ function toStaticNewsItem(row: StaticNewsRow): NewsItem {
     tags: row.tags ?? [],
     score: row.score,
     vote: 0,
+    provenance: normalizeProvenance(row.raw_json, row),
   }
+}
+
+function normalizeProvenance(rawJson: unknown, row: NewsRow | StaticNewsRow): NewsItemProvenance | undefined {
+  if (!rawJson || typeof rawJson !== 'object' || Array.isArray(rawJson)) return undefined
+  const record = rawJson as Record<string, unknown>
+  const provenance = record.provenance && typeof record.provenance === 'object' && !Array.isArray(record.provenance)
+    ? record.provenance as Record<string, unknown>
+    : record
+  const stage = stringValue(provenance.stage ?? provenance.collection_stage)
+  const source = stringValue(provenance.source) || row.source
+  const evidenceUrl = stringValue(provenance.evidence_url) || row.url
+  if (!stage || !source || !evidenceUrl) return undefined
+  return {
+    stage,
+    adapter: stringValue(provenance.adapter) || source,
+    source,
+    sourceKind: stringValue(provenance.source_kind) || row.source_kind,
+    sourceUrl: stringValue(provenance.source_url) || evidenceUrl,
+    evidenceUrl,
+    project: stringValue(provenance.project) || row.project,
+    matchedKeywords: Array.isArray(provenance.matched_keywords)
+      ? provenance.matched_keywords.map((keyword) => String(keyword)).filter(Boolean)
+      : [],
+  }
+}
+
+function stringValue(value: unknown): string {
+  return typeof value === 'string' ? value : ''
 }
 
 function toFocus(row: FocusRow): NewsletterFocus {

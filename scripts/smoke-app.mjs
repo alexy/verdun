@@ -22,6 +22,7 @@ try {
   const markdownHref = await markdownLink.getAttribute('href')
   if (!markdownHref?.startsWith('data:text/markdown')) throw new Error('draft Markdown download link is missing')
   await page.locator('.news-card').first().getByText('Credo fit').waitFor()
+  await page.locator('.news-card').first().getByText('Evidence').waitFor()
   await page.locator('.news-card').first().getByRole('link', { name: /permalink/i }).waitFor()
   await page.getByTitle('Upvote').first().click()
   await page.locator('.news-card.included').first().waitFor()

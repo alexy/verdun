@@ -11,6 +11,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Crawler output keeps normalized provenance inside each item's `raw_json`, including source adapter, evidence URL, matched project, and matched keywords.
 - Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
+- Public item cards surface crawler provenance as editorial evidence, including the adapter/stage that brought each item into the queue.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, and healthy watched sources before local Ulysses export.
 - Source health calls out watched projects that lack live/manual source coverage, so the editor can turn gaps into this-week collection requests.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.

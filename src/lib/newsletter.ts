@@ -14,6 +14,18 @@ export type NewsItem = {
   tags: string[]
   score: number
   vote: -1 | 0 | 1
+  provenance?: NewsItemProvenance
+}
+
+export type NewsItemProvenance = {
+  stage: string
+  adapter: string
+  source: string
+  sourceKind: string
+  sourceUrl: string
+  evidenceUrl: string
+  project: string
+  matchedKeywords: string[]
 }
 
 export type NewsletterFocus = {
