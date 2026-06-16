@@ -142,6 +142,7 @@ export type NewsletterPublishManifest = {
   subtitle: string
   markdownPath?: string
   snapshotInput?: string
+  editorialStateInput?: string
   ulyssesMode: boolean
   gates: {
     requireUpvotes: boolean
@@ -178,6 +179,7 @@ export type NewsletterPublishManifestOptions = {
   generatedAt?: string
   markdownPath?: string
   snapshotInput?: string
+  editorialStateInput?: string
   ulyssesMode?: boolean
   requireUpvotes?: boolean
   requireReady?: boolean
@@ -556,6 +558,7 @@ export function buildPublishManifest(
     subtitle: draft.subtitle,
     markdownPath: options.markdownPath,
     snapshotInput: options.snapshotInput,
+    editorialStateInput: options.editorialStateInput,
     ulyssesMode: Boolean(options.ulyssesMode),
     gates: {
       requireUpvotes: Boolean(options.requireUpvotes),

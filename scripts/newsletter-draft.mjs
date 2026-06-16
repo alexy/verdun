@@ -19,6 +19,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const requireUpvotes = cli.flags.has('--require-upvotes') || process.env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
   const requireReady = cli.flags.has('--require-ready') || process.env.NEWSLETTER_REQUIRE_READY === 'true'
   const ulyssesImportDir = cli.values.get('--ulysses-import-dir') ?? process.env.ULYSSES_IMPORT_DIR
+  const editorialStateInput = cli.values.get('--editorial-state') ?? process.env.VERDUN_LOCAL_STATE_FILE
+  if (editorialStateInput) process.env.VERDUN_LOCAL_STATE_FILE = editorialStateInput
   const positional = cli.positional
   const input = positional[0] ?? process.env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
   const snapshot = await loadSnapshotFile(input)
@@ -30,6 +32,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     const { manifestPath } = await writeDraftArtifacts(out, draft, snapshot, {
       markdownPath: out,
       snapshotInput: input,
+      editorialStateInput,
       requireReady,
       requireUpvotes,
       ulyssesMode,
@@ -54,11 +57,15 @@ function parseCliArgs(args) {
     const arg = args[index]
     if (arg === '--ulysses' || arg === '--require-upvotes' || arg === '--require-ready') {
       flags.add(arg)
-    } else if (arg === '--ulysses-import-dir') {
+    } else if (arg === '--ulysses-import-dir' || arg === '--editorial-state') {
       const value = args[index + 1]
-      if (!value || value.startsWith('--')) throw new Error('--ulysses-import-dir requires a directory path')
+      if (!value || value.startsWith('--')) throw new Error(`${arg} requires a path`)
       values.set(arg, value)
       index += 1
+    } else if (arg.startsWith('--editorial-state=')) {
+      values.set('--editorial-state', arg.slice('--editorial-state='.length))
+    } else if (arg.startsWith('--ulysses-import-dir=')) {
+      values.set('--ulysses-import-dir', arg.slice('--ulysses-import-dir='.length))
     } else {
       positional.push(arg)
     }

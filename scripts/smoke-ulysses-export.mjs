@@ -26,13 +26,12 @@ try {
     ],
   }))
 
-  const result = spawnSync('npm', ['run', 'ulysses:ready'], {
+  const result = spawnSync('npm', ['run', 'ulysses:ready', '--', '--editorial-state', stateFile], {
     encoding: 'utf8',
     env: {
       ...process.env,
       ULYSSES_DRAFT_DIR: exportDir,
       ULYSSES_IMPORT_DIR: importDir,
-      VERDUN_LOCAL_STATE_FILE: stateFile,
     },
   })
   if (result.error) throw result.error
@@ -75,6 +74,9 @@ try {
   }
   if (manifest.snapshotInput !== 'public/data/newsletter-snapshot.json') {
     throw new Error('Ulysses manifest did not record the snapshot input')
+  }
+  if (manifest.editorialStateInput !== stateFile) {
+    throw new Error('Ulysses manifest did not record the explicit editorial-state input')
   }
   if (manifest.readiness?.status !== 'ready') {
     throw new Error('Ulysses manifest did not record ready publishing status')
