@@ -62,6 +62,7 @@ server.stderr.on('data', (chunk) => process.stderr.write(chunk))
 try {
   await waitForPreview(server)
   run('npm', ['run', 'smoke:app', '--', previewUrl])
+  run('npm', ['run', 'smoke:responsive', '--', previewUrl])
 } finally {
   await stopPreview(server)
 }

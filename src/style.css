@@ -724,7 +724,7 @@ textarea {
 
 .news-card {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-columns: 92px minmax(0, 1fr);
   overflow: hidden;
 }
 
@@ -936,13 +936,27 @@ textarea {
 }
 
 .vote-rail {
-  padding: 12px 10px;
+  padding: 12px;
   display: grid;
   gap: 8px;
-  place-items: center;
+  justify-items: stretch;
   align-content: start;
   border-right: 1px solid var(--line);
   background: #faf8f0;
+}
+
+.vote-rail button {
+  width: 100%;
+  min-width: 0;
+  gap: 6px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  justify-items: center;
+}
+
+.vote-label {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .vote-rail button.active:first-child {
@@ -957,7 +971,8 @@ textarea {
   color: var(--reject);
 }
 
-.vote-rail span {
+.vote-score {
+  text-align: center;
   font-size: 13px;
   font-weight: 950;
 }
@@ -1178,9 +1193,14 @@ textarea {
   }
 
   .vote-rail {
-    grid-template-columns: 36px 36px 36px;
-    justify-content: start;
+    grid-template-columns: minmax(104px, max-content) 48px minmax(84px, max-content);
+    align-items: center;
+    justify-content: stretch;
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+
+  .vote-rail button {
+    min-height: 44px;
   }
 }

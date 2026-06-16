@@ -84,8 +84,15 @@ try {
   await page.locator('.news-card').first().getByText('Evidence').waitFor()
   await page.locator('.news-card').first().getByRole('link', { name: /permalink/i }).waitFor()
   await page.locator('.news-card.in-draft').first().getByText('Draft spine').waitFor()
-  await page.getByTitle('Upvote').first().click()
+  const firstIncludeButton = page.locator('.news-card').first().getByRole('button', { name: /Include/ })
+  const firstSkipButton = page.locator('.news-card').first().getByRole('button', { name: /Skip/ })
+  await firstIncludeButton.waitFor()
+  await firstSkipButton.waitFor()
+  await firstIncludeButton.click()
   await page.locator('.news-card.included').first().waitFor()
+  if (await firstIncludeButton.getAttribute('aria-pressed') !== 'true') {
+    throw new Error('include button did not expose pressed state after click')
+  }
   await page.getByTitle('Downvote').nth(1).click()
   await page.locator('.news-card.rejected').first().waitFor()
   await page.getByPlaceholder(/Search titles/).fill('Pydantic')

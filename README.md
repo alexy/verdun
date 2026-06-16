@@ -14,6 +14,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 - Public item cards surface crawler provenance as editorial evidence, including the adapter/stage that brought each item into the queue.
+- Item cards use labeled Include/Skip controls with pressed-state feedback so browser-local editorial votes are visibly actionable on desktop and mobile-sized layouts.
 - Inbox filters can isolate live/manual collected evidence from watchlist seed placeholders for faster publish review.
 - `GET /api/newsletter/draft` exposes the same generated draft as JSON, Markdown, HTML, or publish manifest for local automation and audit.
 - `GET /api/newsletter/health` exposes the Greathouse-style service health surface: database env state, read/write routes, guarded publishing commands, loader expectations, and active snapshot counts.

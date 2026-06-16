@@ -41,12 +41,26 @@ function stageLabel(stage: string): string {
 <template>
   <article :id="itemAnchor(item.id)" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0, 'in-draft': inDraft }">
     <div class="vote-rail" aria-label="Vote controls">
-      <button type="button" :class="{ active: item.vote > 0 }" title="Upvote" @click="$emit('vote', item.id, nextVote(1))">
+      <button
+        type="button"
+        :aria-pressed="item.vote > 0"
+        :class="{ active: item.vote > 0 }"
+        title="Upvote"
+        @click="$emit('vote', item.id, nextVote(1))"
+      >
         <ArrowUp :size="18" aria-hidden="true" />
+        <span class="vote-label">Include</span>
       </button>
-      <span>{{ item.score }}</span>
-      <button type="button" :class="{ active: item.vote < 0 }" title="Downvote" @click="$emit('vote', item.id, nextVote(-1))">
+      <span class="vote-score" aria-label="Source score">{{ item.score }}</span>
+      <button
+        type="button"
+        :aria-pressed="item.vote < 0"
+        :class="{ active: item.vote < 0 }"
+        title="Downvote"
+        @click="$emit('vote', item.id, nextVote(-1))"
+      >
         <ArrowDown :size="18" aria-hidden="true" />
+        <span class="vote-label">Skip</span>
       </button>
     </div>
     <div class="news-card__body">
