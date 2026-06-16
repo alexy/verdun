@@ -34,9 +34,11 @@
     "smoke:readiness": "node scripts/smoke-readiness.mjs",
     "smoke:recency": "node scripts/smoke-snapshot-recency.mjs",
     "smoke:snapshot": "node scripts/smoke-snapshot-composable.mjs",
+    "smoke:source-gap-review": "node scripts/smoke-source-gap-review.mjs",
     "smoke:ulysses": "node scripts/smoke-ulysses-export.mjs",
     "smoke:view": "node scripts/smoke-view-model.mjs",
     "draft": "node scripts/newsletter-draft.mjs",
+    "review:gaps": "node scripts/source-gap-review.mjs",
     "ulysses:draft": "node scripts/newsletter-draft.mjs --ulysses",
     "ulysses:ready": "node scripts/newsletter-draft.mjs --ulysses --require-upvotes --require-ready",
     "ghost:draft": "node scripts/publish-ghost.mjs"

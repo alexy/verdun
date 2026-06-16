@@ -27,6 +27,7 @@ const steps = [
   ['npm', ['run', 'smoke:readiness']],
   ['npm', ['run', 'smoke:recency']],
   ['npm', ['run', 'smoke:snapshot']],
+  ['npm', ['run', 'smoke:source-gap-review']],
   ['npm', ['run', 'smoke:ulysses']],
   ['npm', ['run', 'smoke:view']],
 ]

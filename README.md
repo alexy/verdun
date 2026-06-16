@@ -92,8 +92,9 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
 4. Run `npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, query plans, required projects, tags, URLs, and provenance JSON.
 5. Run `npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --apply` with the external Postgres URL set, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
-6. Run `npm run check:deployed -- --require-ready` to verify the deployed route/API are serving a publishing-ready reviewed snapshot.
-7. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
+6. Run `npm run review:gaps` to write `crawler/data/source-gap-review.md`, then work the uncovered-project checklist before final editorial picks.
+7. Run `npm run check:deployed -- --require-ready` to verify the deployed route/API are serving a publishing-ready reviewed snapshot.
+8. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
 
 ## Drafting for Ulysses
 
@@ -108,6 +109,14 @@ The app's draft preview also exposes Markdown download and copy controls for the
 The generated article is written to `crawler/data/newsletter-draft.md` by default and includes a weekly throughline, an editorial arc for the selected spine, item selection reasons, item evidence lines from crawler provenance, source coverage gaps with crawler query hints, plus this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The app preview and CLI both use the shared publish manifest builder from `src/lib/newsletter.ts`; file exports write a sibling `.manifest.json` file recording issue identity metadata, the paired Markdown path, snapshot input, selected item IDs, selected item metadata with selection reasons, votes, focuses, readiness checks, prose-quality checks, source coverage, source runs, and query-plan count. The CLI uses the same draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
 
 The app's draft preview also offers `Editorial state` JSON export and import. The file contains the current `{ votes, focuses }` payload in the same shape as `crawler/data/editorial-state.json`, so a browser-only review session can be audited, restored in the app, or reused by setting `VERDUN_LOCAL_STATE_FILE` before running `npm run ulysses:ready`.
+
+For projects still missing live/manual source matches, run:
+
+```sh
+npm run review:gaps
+```
+
+That writes an ignored `crawler/data/source-gap-review.md` checklist from the current snapshot, grouping uncovered projects with their Hacker News, Lobste.rs, dev.to, Medium, Substack, LinkedIn, and X/Twitter review targets. Add useful reviewed social finds to the manual JSON files, then rerun `collect --live`.
 
 When the deployed API is backed by external Postgres, importing that same editorial-state JSON in the app also persists matching item votes and non-duplicate focus notes through `POST /api/newsletter/editorial-state`. This provides the bridge from temporary browser-local review to durable editorial state once `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL` is configured in Vercel.
 
