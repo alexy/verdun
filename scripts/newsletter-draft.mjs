@@ -212,8 +212,38 @@ export function normalizeSnapshot(raw) {
       hackerNewsQuery: plan.hacker_news_query ?? plan.hackerNewsQuery ?? '',
       liveTerms: plan.live_terms ?? plan.liveTerms ?? [],
       devToTags: plan.dev_to_tags ?? plan.devToTags ?? [],
+      reviewTargets: normalizeReviewTargets(plan.review_targets ?? plan.reviewTargets),
       focusTerms: plan.focus_terms ?? plan.focusTerms ?? [],
     })),
+  }
+}
+
+function normalizeReviewTargets(raw) {
+  const targets = typeof raw === 'string' ? parseJsonArray(raw) : raw
+  if (!Array.isArray(targets)) return []
+  return targets
+    .map((target) => {
+      if (!target || typeof target !== 'object' || Array.isArray(target)) return null
+      const source = typeof target.source === 'string' ? target.source : ''
+      const label = typeof target.label === 'string' ? target.label : ''
+      const url = typeof target.url === 'string' ? target.url : ''
+      if (!source || !label || !url) return null
+      return {
+        source,
+        label,
+        url,
+        adapter: typeof target.adapter === 'string' && target.adapter ? target.adapter : source,
+      }
+    })
+    .filter(Boolean)
+}
+
+function parseJsonArray(value) {
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
   }
 }
 

@@ -7,6 +7,8 @@ const stateDir = await mkdtemp(join(tmpdir(), 'verdun-ulysses-state-'))
 const exportDir = await mkdtemp(join(tmpdir(), 'verdun-ulysses-export-'))
 const importDir = await mkdtemp(join(tmpdir(), 'verdun-ulysses-import-'))
 const stateFile = join(stateDir, 'editorial-state.json')
+const snapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
+const expectedDate = String(snapshot.generated_at ?? snapshot.generatedAt).slice(0, 10)
 
 try {
   await writeFile(stateFile, JSON.stringify({
@@ -47,7 +49,7 @@ try {
   if (manifestFiles.length !== 1) {
     throw new Error(`expected one Ulysses publish manifest, found ${manifestFiles.length}`)
   }
-  if (!markdownFiles[0].startsWith('2026-06-15-strongly-typed-ai-data-notes-')) {
+  if (!markdownFiles[0].startsWith(`${expectedDate}-strongly-typed-ai-data-notes-`)) {
     throw new Error(`unexpected Ulysses export filename: ${markdownFiles[0]}`)
   }
   if (manifestFiles[0] !== markdownFiles[0].replace(/\.md$/, '.manifest.json')) {

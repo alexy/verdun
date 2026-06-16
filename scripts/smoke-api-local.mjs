@@ -18,6 +18,10 @@ try {
   if (!item.provenance?.stage || !item.provenance?.evidenceUrl) {
     throw new Error('local API snapshot did not expose item provenance')
   }
+  const pydanticPlan = firstSnapshot.queryPlans.find((plan) => plan.project === 'Pydantic')
+  if (!pydanticPlan?.reviewTargets?.some((target) => target.source === 'LinkedIn' && target.url.startsWith('https://'))) {
+    throw new Error('local API snapshot did not expose query-plan review targets')
+  }
 
   await module.writeVote(item.id, 1)
   const focus = await module.writeFocus('More local graph databases with typed query planning.', 'this_week')

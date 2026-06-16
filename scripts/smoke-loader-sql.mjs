@@ -50,6 +50,9 @@ if (!sql.includes('on conflict (project) do update set')) {
 if (!sql.includes('focus_terms')) {
   throw new Error('SQL export is missing query-plan focus_terms column')
 }
+if (!sql.includes('review_targets')) {
+  throw new Error('SQL export is missing query-plan review_targets column')
+}
 
 for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
   if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)
@@ -67,6 +70,10 @@ for (const plan of representativeQueryPlans(queryPlans)) {
   }
   if (!sql.includes(sqlTextArray(plan.dev_to_tags ?? plan.devToTags ?? []))) {
     throw new Error(`SQL export is missing dev.to tags for ${plan.project}`)
+  }
+  const reviewTargets = plan.review_targets ?? plan.reviewTargets ?? []
+  if (!reviewTargets.length || !sql.includes(sqlString(JSON.stringify(reviewTargets)))) {
+    throw new Error(`SQL export is missing review targets for ${plan.project}`)
   }
 }
 

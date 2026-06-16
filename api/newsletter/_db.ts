@@ -81,7 +81,15 @@ type ProjectQueryPlan = {
   hackerNewsQuery: string
   liveTerms: string[]
   devToTags: string[]
+  reviewTargets: ReviewTarget[]
   focusTerms: string[]
+}
+
+type ReviewTarget = {
+  source: string
+  label: string
+  url: string
+  adapter: string
 }
 
 type NewsletterSnapshot = {
@@ -115,6 +123,7 @@ type QueryPlanRow = {
   hacker_news_query: string
   live_terms: string[]
   dev_to_tags: string[]
+  review_targets?: unknown
   focus_terms: string[]
 }
 
@@ -149,6 +158,7 @@ type StaticQueryPlan = {
   hacker_news_query: string
   live_terms: string[]
   dev_to_tags: string[]
+  review_targets?: unknown
   focus_terms?: string[]
 }
 
@@ -213,7 +223,7 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
       source
   `) as SourceRunRow[]
   const queryPlanRows = await sql.query(`
-    select project, topic, hacker_news_query, live_terms, dev_to_tags, focus_terms
+    select project, topic, hacker_news_query, live_terms, dev_to_tags, review_targets, focus_terms
     from newsletter_query_plans
     order by project
   `) as QueryPlanRow[]
@@ -483,7 +493,38 @@ function toQueryPlan(row: StaticQueryPlan | QueryPlanRow): ProjectQueryPlan {
     hackerNewsQuery: row.hacker_news_query,
     liveTerms: row.live_terms ?? [],
     devToTags: row.dev_to_tags ?? [],
+    reviewTargets: normalizeReviewTargets(row.review_targets),
     focusTerms: row.focus_terms ?? [],
+  }
+}
+
+function normalizeReviewTargets(raw: unknown): ReviewTarget[] {
+  const targets = typeof raw === 'string' ? parseJsonArray(raw) : raw
+  if (!Array.isArray(targets)) return []
+  return targets
+    .map((target) => {
+      if (!target || typeof target !== 'object' || Array.isArray(target)) return null
+      const record = target as Record<string, unknown>
+      const source = stringValue(record.source)
+      const label = stringValue(record.label)
+      const url = stringValue(record.url)
+      if (!source || !label || !url) return null
+      return {
+        source,
+        label,
+        url,
+        adapter: stringValue(record.adapter) || source,
+      }
+    })
+    .filter((target): target is ReviewTarget => Boolean(target))
+}
+
+function parseJsonArray(value: string): unknown[] {
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
   }
 }
 

@@ -33,15 +33,20 @@ try {
   await page.locator('.ontology').getByRole('heading', { name: 'Strongly Typed AI ontology' }).waitFor()
   await page.locator('.source-health').getByText(/projects covered by live\/manual source matches/).waitFor()
   await page.locator('.source-health').getByText('Coverage gaps').waitFor()
-  const apacheArrowGap = page.locator('.source-gaps li', { hasText: 'Apache Arrow' })
-  await apacheArrowGap.waitFor()
-  await apacheArrowGap.getByText(/apache arrow/).waitFor()
-  await apacheArrowGap.getByTitle('Ask for more Apache Arrow').click()
-  await page.getByText('More source material on Apache Arrow').first().waitFor()
+  const firstCoverageGap = page.locator('.source-gaps li').first()
+  await firstCoverageGap.waitFor()
+  const coverageGapProject = (await firstCoverageGap.locator('strong').textContent())?.trim()
+  if (!coverageGapProject) throw new Error('coverage gap did not expose a project name')
+  await firstCoverageGap.locator('span').waitFor()
+  await firstCoverageGap.getByTitle(`Ask for more ${coverageGapProject}`).click()
+  await page.getByText(`More source material on ${coverageGapProject}`).first().waitFor()
   await page.locator('.query-plans').getByText('Crawler query plan · 23 projects').waitFor()
   await page.locator('.query-plans summary').click()
   await page.locator('.query-plans').getByText('BAML baml').waitFor()
   await page.locator('.query-plans').getByText('#dspy').waitFor()
+  await page.locator('.query-plans .review-targets').first().getByRole('link', { name: 'Substack' }).waitFor()
+  await page.locator('.query-plans .review-targets').first().getByRole('link', { name: 'LinkedIn' }).waitFor()
+  await page.locator('.query-plans .review-targets').first().getByRole('link', { name: 'X/Twitter' }).waitFor()
   await page.getByText('CocoIndex belongs in this week').first().waitFor()
   if (await page.getByText(/Local fallback:/).count()) throw new Error('app fell back to the embedded seed instead of the static snapshot')
   await page.locator('.readiness').getByRole('heading', { name: 'Publishing readiness' }).waitFor()
@@ -90,7 +95,7 @@ try {
   if (!stateJson.focuses?.some((focus) => focus.text.includes('More local-first Rust graph databases'))) {
     throw new Error('editorial state export did not include the saved focus')
   }
-  if (!stateJson.focuses?.some((focus) => focus.text.includes('More source material on Apache Arrow'))) {
+  if (!stateJson.focuses?.some((focus) => focus.text.includes(`More source material on ${coverageGapProject}`))) {
     throw new Error('editorial state export did not include the coverage-gap focus')
   }
   const manifestHref = await manifestLink.getAttribute('href')

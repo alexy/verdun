@@ -52,7 +52,15 @@ export type ProjectQueryPlan = {
   hackerNewsQuery: string
   liveTerms: string[]
   devToTags: string[]
+  reviewTargets: ReviewTarget[]
   focusTerms: string[]
+}
+
+export type ReviewTarget = {
+  source: string
+  label: string
+  url: string
+  adapter: string
 }
 
 export type NewsletterSnapshot = {
@@ -682,8 +690,19 @@ function coverageGapHints(projects: string[], queryPlans: ProjectQueryPlan[]): s
 function queryPlanHint(plan: ProjectQueryPlan): string {
   const terms = plan.liveTerms.slice(0, 3).join(', ')
   const tags = plan.devToTags.slice(0, 2).map((tag) => `#${tag}`).join(', ')
+  const preferredSources = ['Hacker News', 'Substack', 'LinkedIn', 'X/Twitter']
+  const sources = unique(plan.reviewTargets.map((target) => target.source))
+    .sort((left, right) => preferredReviewSourceIndex(left, preferredSources) - preferredReviewSourceIndex(right, preferredSources))
+    .slice(0, 4)
+    .join(', ')
   const focus = plan.focusTerms.length ? `focus: ${plan.focusTerms.slice(0, 3).join(', ')}` : ''
-  return [terms, tags, focus].filter(Boolean).join(' · ')
+  const review = sources ? `review: ${sources}` : ''
+  return [terms, tags, review, focus].filter(Boolean).join(' · ')
+}
+
+function preferredReviewSourceIndex(source: string, preferredSources: string[]): number {
+  const index = preferredSources.indexOf(source)
+  return index === -1 ? preferredSources.length : index
 }
 
 function coverageGapSummary(projects: string[]): string {

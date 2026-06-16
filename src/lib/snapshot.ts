@@ -107,7 +107,37 @@ function normalizeQueryPlan(raw: unknown): ProjectQueryPlan | null {
     hackerNewsQuery: stringValue(record.hackerNewsQuery ?? record.hacker_news_query, ''),
     liveTerms: arrayValue(record.liveTerms ?? record.live_terms).map((term) => String(term)).filter(Boolean),
     devToTags: arrayValue(record.devToTags ?? record.dev_to_tags).map((tag) => String(tag)).filter(Boolean),
+    reviewTargets: normalizeReviewTargets(record.reviewTargets ?? record.review_targets),
     focusTerms: arrayValue(record.focusTerms ?? record.focus_terms).map((term) => String(term)).filter(Boolean),
+  }
+}
+
+function normalizeReviewTargets(raw: unknown): ProjectQueryPlan['reviewTargets'] {
+  const targets = typeof raw === 'string' ? parseJsonArray(raw) : raw
+  return arrayValue(targets)
+    .map((target) => {
+      if (!target || typeof target !== 'object' || Array.isArray(target)) return null
+      const record = target as RawRecord
+      const source = stringValue(record.source, '')
+      const label = stringValue(record.label, '')
+      const url = stringValue(record.url, '')
+      if (!source || !label || !url) return null
+      return {
+        source,
+        label,
+        url,
+        adapter: stringValue(record.adapter, source),
+      }
+    })
+    .filter((target): target is ProjectQueryPlan['reviewTargets'][number] => Boolean(target))
+}
+
+function parseJsonArray(value: string): unknown[] {
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
   }
 }
 

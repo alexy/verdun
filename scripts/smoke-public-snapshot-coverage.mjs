@@ -37,6 +37,9 @@ for (const plan of queryPlans) {
   if (!Array.isArray(plan.dev_to_tags) || !plan.dev_to_tags.length) {
     throw new Error(`${plan.project} query plan has no dev.to tags`)
   }
+  if (!Array.isArray(plan.review_targets) || !plan.review_targets.length) {
+    throw new Error(`${plan.project} query plan has no review targets`)
+  }
 }
 
 const baml = queryPlans.find((plan) => plan.project === 'BAML')
@@ -47,6 +50,13 @@ if (baml?.live_terms.includes('schema')) {
 const ibis = queryPlans.find((plan) => plan.project === 'Ibis')
 if (!ibis?.live_terms.includes('ibis')) {
   throw new Error('Ibis public snapshot query plan lost the project name')
+}
+
+const pydantic = queryPlans.find((plan) => plan.project === 'Pydantic')
+for (const source of ['Hacker News', 'Substack', 'LinkedIn', 'X/Twitter']) {
+  if (!pydantic?.review_targets?.some((target) => target.source === source && target.url?.startsWith('https://'))) {
+    throw new Error(`Pydantic public snapshot query plan is missing ${source} review target`)
+  }
 }
 
 function projectNames(toml) {

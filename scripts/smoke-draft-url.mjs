@@ -48,7 +48,7 @@ try {
   if (!draft.markdown.includes('plus ')) {
     throw new Error('draft coverage gaps did not report hidden uncovered projects')
   }
-  if (!draft.markdown.includes('Crawler query hints:') || !draft.markdown.includes('Apache Arrow: apache arrow')) {
+  if (!draft.markdown.includes('Crawler query hints:') || !draft.markdown.includes('review: Hacker News, Substack, LinkedIn, X/Twitter')) {
     throw new Error('draft coverage gaps did not include crawler query hints')
   }
   if (!draft.markdown.includes('Evidence:')) {

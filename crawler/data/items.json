@@ -1,55 +1,1277 @@
 [
   {
-    "id": "cocoindex-b8a70bfc0beb",
-    "title": "CocoIndex belongs in this week's typed AI/data systems watch",
+    "id": "hn-4340e59c1bdd",
+    "title": "Show HN: HelixDB – A graph database built on object storage",
     "source": "Hacker News",
     "source_kind": "community",
-    "url": "https://github.com/cocoindex-io/cocoindex",
-    "published_at": "2026-06-03T12:00:00Z",
-    "project": "CocoIndex",
-    "topic": "incremental indexing",
-    "summary": "CocoIndex is being tracked for incremental indexing signals around cocoindex, target state, incremental indexing, knowledge graph.",
-    "why_it_matters": "CocoIndex helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "url": "https://github.com/HelixDB/helix-db/tree/main",
+    "published_at": "2026-06-10T15:47:31Z",
+    "project": "HelixDB",
+    "topic": "graph database",
+    "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
+    "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
     "tags": [
-      "cocoindex",
-      "target state",
-      "incremental indexing",
-      "knowledge graph"
+      "helixdb",
+      "graph database",
+      "rust graph",
+      "hacker-news"
     ],
-    "score": 54,
+    "score": 110,
+    "raw_json": {
+      "author": "GeorgeCurtis",
+      "collection_stage": "live",
+      "comments": 42,
+      "object_id": "48478148",
+      "points": 157,
+      "provenance": {
+        "adapter": "hn-algolia",
+        "evidence_url": "https://github.com/HelixDB/helix-db/tree/main",
+        "matched_keywords": [
+          "helixdb",
+          "graph database",
+          "rust graph"
+        ],
+        "project": "HelixDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "live"
+      },
+      "source": "hacker-news"
+    }
+  },
+  {
+    "id": "hn-235e2eafb064",
+    "title": "Benchmarking SurrealDB 3.x vs. Postgres, Mongo, Neo4j and Redis (With Fsync)",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers",
+    "published_at": "2026-05-29T14:53:27Z",
+    "project": "SurrealDB",
+    "topic": "multimodel data",
+    "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
+    "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "surrealdb",
+      "multimodel",
+      "graph",
+      "hacker-news"
+    ],
+    "score": 110,
+    "raw_json": {
+      "author": "itsezc",
+      "collection_stage": "live",
+      "comments": 31,
+      "object_id": "48323844",
+      "points": 75,
+      "provenance": {
+        "adapter": "hn-algolia",
+        "evidence_url": "https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers",
+        "matched_keywords": [
+          "surrealdb",
+          "multimodel",
+          "graph",
+          "realtime"
+        ],
+        "project": "SurrealDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "live"
+      },
+      "source": "hacker-news"
+    }
+  },
+  {
+    "id": "pydantic-19e4620a7634",
+    "title": "Pydantic belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/pydantic/pydantic-ai",
+    "published_at": "2026-06-15T12:00:00Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "Pydantic is being tracked for typed AI signals around pydantic, typed agents, structured outputs, validation.",
+    "why_it_matters": "Pydantic helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "validation"
+    ],
+    "score": 90,
     "raw_json": {
       "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/cocoindex-io/cocoindex",
+      "homepage": "https://github.com/pydantic/pydantic-ai",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/pydantic/pydantic-ai",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
       "source_url": "https://news.ycombinator.com"
     }
   },
   {
-    "id": "dev-to-2767a56afb44",
-    "title": "Structured LLM Outputs with Pydantic v2: Stop Parsing Freeform JSON and Start Typing Your AI",
-    "source": "dev.to",
-    "source_kind": "community",
-    "url": "https://dev.to/peytongreen_dev/structured-llm-outputs-with-pydantic-v2-stop-parsing-freeform-json-and-start-typing-your-ai-5201",
-    "published_at": "2026-05-19T14:00:07Z",
+    "id": "medium-fcd377fd2671",
+    "title": "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4",
+    "published_at": "2026-06-14T15:10:18Z",
+    "project": "SurrealDB",
+    "topic": "multimodel data",
+    "summary": "Stop Hand-Writing SurrealQL Strings in Rust",
+    "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "surrealdb",
+      "multimodel",
+      "graph",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://medium.com/feed/tag/surrealdb",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4",
+        "matched_keywords": [
+          "surrealdb",
+          "multimodel",
+          "graph",
+          "realtime"
+        ],
+        "project": "SurrealDB",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-b4b689fe8baf",
+    "title": "Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb",
+    "published_at": "2026-06-14T14:48:39Z",
     "project": "Pydantic",
     "topic": "typed AI",
-    "summary": "The biggest source of subtle bugs in AI applications isn't the model — it's the gap between what you...",
-    "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
+    "summary": "Medium surfaced this feed item while tracking Pydantic signals: pydantic, typed agents, structured outputs, validation.",
+    "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
     "tags": [
       "pydantic",
       "typed agents",
-      "python",
-      "ai",
-      "pydantic",
-      "tutorial"
+      "structured outputs",
+      "medium"
     ],
-    "score": 56,
+    "score": 88,
     "raw_json": {
-      "article_id": 3394799,
-      "author": "peytongreen_dev",
       "collection_stage": "live",
-      "comments": 1,
-      "reactions": 0,
-      "source": "dev-to"
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "medium-f90192ea984c",
+          "project": "Instructor",
+          "score": 68,
+          "source": "Medium",
+          "title": "Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It",
+          "url": "https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb"
+        }
+      ],
+      "feed_url": "https://medium.com/feed/tag/pydantic",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-7ff0e55a83b1",
+    "title": "The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db",
+    "published_at": "2026-06-14T09:46:47Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability.",
+    "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "medium-4d5c6fa4bfd0",
+          "project": "Instructor",
+          "score": 68,
+          "source": "Medium",
+          "title": "The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts",
+          "url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db"
+        }
+      ],
+      "feed_url": "https://medium.com/feed/tag/pydantic",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-cb80811f33ce",
+    "title": "Z-Ordering: Multidimensional Clustering for Faster Delta Lake Queries",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/@galaheart/z-ordering-multidimensional-clustering-for-faster-delta-lake-queries-ba8d27acdf7b",
+    "published_at": "2026-06-13T15:47:26Z",
+    "project": "Delta Lake",
+    "topic": "lakehouse transactions",
+    "summary": "A deep dive into how Z-ordering reorganizes your Parquet files using space-filling curves, the mathematics behind locality-preserving data…",
+    "why_it_matters": "Long-form publication coverage can show whether Delta Lake is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "delta lake",
+      "deltalake",
+      "transaction log",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://medium.com/feed/tag/delta-lake",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/@galaheart/z-ordering-multidimensional-clustering-for-faster-delta-lake-queries-ba8d27acdf7b",
+        "matched_keywords": [
+          "delta lake",
+          "deltalake",
+          "transaction log",
+          "lakehouse table",
+          "merge into"
+        ],
+        "project": "Delta Lake",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-f822c06fca97",
+    "title": "Why Game Engines, Apache Arrow, and Even Java Are Converging on Columns",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/@random.droid/why-game-engines-apache-arrow-and-even-java-are-converging-on-columns-85ba91ce70c8",
+    "published_at": "2026-06-11T21:16:33Z",
+    "project": "Apache Arrow",
+    "topic": "typed columnar memory",
+    "summary": "ECS, columnar OLAP, and Project Valhalla are responses to the same hardware constraint",
+    "why_it_matters": "Long-form publication coverage can show whether Apache Arrow is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "apache arrow",
+      "arrow ipc",
+      "arrow flight",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "medium-f822c06fca97",
+          "project": "Apache Arrow",
+          "score": 88,
+          "source": "Medium",
+          "title": "Why Game Engines, Apache Arrow, and Even Java Are Converging on Columns",
+          "url": "https://medium.com/@random.droid/why-game-engines-apache-arrow-and-even-java-are-converging-on-columns-85ba91ce70c8"
+        }
+      ],
+      "feed_url": "https://medium.com/feed/tag/apache-arrow",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/@random.droid/why-game-engines-apache-arrow-and-even-java-are-converging-on-columns-85ba91ce70c8",
+        "matched_keywords": [
+          "apache arrow",
+          "arrow ipc",
+          "arrow flight",
+          "columnar memory",
+          "typed columnar"
+        ],
+        "project": "Apache Arrow",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-3c8fbd13a27a",
+    "title": "How Do You Enforce Schema Validation in Delta Lake? (Step‑by‑Step with PySpark Example)",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/h7w/how-do-you-enforce-schema-validation-in-delta-lake-step-by-step-with-pyspark-example-9ee25c6cc459",
+    "published_at": "2026-06-11T11:40:40Z",
+    "project": "Delta Lake",
+    "topic": "lakehouse transactions",
+    "summary": "Medium surfaced this feed item while tracking Delta Lake signals: delta lake, deltalake, transaction log, lakehouse table, merge into.",
+    "why_it_matters": "Long-form publication coverage can show whether Delta Lake is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "delta lake",
+      "deltalake",
+      "transaction log",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://medium.com/feed/tag/delta-lake",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/h7w/how-do-you-enforce-schema-validation-in-delta-lake-step-by-step-with-pyspark-example-9ee25c6cc459",
+        "matched_keywords": [
+          "delta lake",
+          "deltalake",
+          "transaction log",
+          "lakehouse table",
+          "merge into"
+        ],
+        "project": "Delta Lake",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-cc435e297f3c",
+    "title": "SurrealDB 3.x by the numbers",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb80078638a0",
+    "published_at": "2026-05-29T19:46:26Z",
+    "project": "SurrealDB",
+    "topic": "multimodel data",
+    "summary": "Author: Tobie Morgan Hitchcock",
+    "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "surrealdb",
+      "multimodel",
+      "graph",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://medium.com/feed/tag/surrealdb",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb80078638a0",
+        "matched_keywords": [
+          "surrealdb",
+          "multimodel",
+          "graph",
+          "realtime"
+        ],
+        "project": "SurrealDB",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-9a2a1c866f35",
+    "title": "Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b",
+    "published_at": "2026-05-28T16:27:14Z",
+    "project": "LanceDB",
+    "topic": "vector data",
+    "summary": "Overview",
+    "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "lancedb",
+      "lance",
+      "vectors",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://medium.com/feed/tag/lancedb",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b",
+        "matched_keywords": [
+          "lancedb",
+          "lance",
+          "vectors",
+          "multimodal",
+          "columnar"
+        ],
+        "project": "LanceDB",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "medium-72dc676925ef",
+    "title": "Single-Node Data Engineering: DuckDB, DataFusion, Polars, and LakeSail",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://alexmercedtech.medium.com/single-node-data-engineering-duckdb-datafusion-polars-and-lakesail-9581e4c9e1a5",
+    "published_at": "2026-05-27T13:01:02Z",
+    "project": "LakeSail",
+    "topic": "typed dataframes",
+    "summary": "For the past decade, data engineering was synonymous with distributed clusters.",
+    "why_it_matters": "Long-form publication coverage can show whether LakeSail is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "sail",
+      "spark connect",
+      "datafusion",
+      "medium"
+    ],
+    "score": 88,
+    "raw_json": {
+      "collection_stage": "live",
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "medium-d6412f10c32",
+          "project": "DataFusion",
+          "score": 88,
+          "source": "Medium",
+          "title": "Single-Node Data Engineering: DuckDB, DataFusion, Polars, and LakeSail",
+          "url": "https://alexmercedtech.medium.com/single-node-data-engineering-duckdb-datafusion-polars-and-lakesail-9581e4c9e1a5"
+        }
+      ],
+      "feed_url": "https://medium.com/feed/tag/apache-arrow",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://alexmercedtech.medium.com/single-node-data-engineering-duckdb-datafusion-polars-and-lakesail-9581e4c9e1a5",
+        "matched_keywords": [
+          "sail",
+          "spark connect",
+          "datafusion",
+          "arrow",
+          "rust"
+        ],
+        "project": "LakeSail",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "baml-39f6e4ec82b",
+    "title": "BAML belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/BoundaryML/baml",
+    "published_at": "2026-06-14T12:00:00Z",
+    "project": "BAML",
+    "topic": "typed LLM functions",
+    "summary": "BAML is being tracked for typed LLM functions signals around baml, typed llm, prompt functions, structured outputs, schema.",
+    "why_it_matters": "BAML helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "baml",
+      "typed llm",
+      "prompt functions",
+      "structured outputs"
+    ],
+    "score": 87,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/BoundaryML/baml",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/BoundaryML/baml",
+        "matched_keywords": [
+          "baml",
+          "typed llm",
+          "prompt functions",
+          "structured outputs",
+          "schema"
+        ],
+        "project": "BAML",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "dspy-598e33a5d5f7",
+    "title": "DSPy belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/stanfordnlp/dspy",
+    "published_at": "2026-06-13T12:00:00Z",
+    "project": "DSPy",
+    "topic": "declarative AI programs",
+    "summary": "DSPy is being tracked for declarative AI programs signals around dspy, declarative lm, language model programs, optimizers.",
+    "why_it_matters": "DSPy helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "dspy",
+      "declarative lm",
+      "language model programs",
+      "optimizers"
+    ],
+    "score": 84,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/stanfordnlp/dspy",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/stanfordnlp/dspy",
+        "matched_keywords": [
+          "dspy",
+          "declarative lm",
+          "language model programs",
+          "optimizers"
+        ],
+        "project": "DSPy",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "instructor-e3008bab94fb",
+    "title": "Instructor belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/instructor-ai/instructor",
+    "published_at": "2026-06-12T12:00:00Z",
+    "project": "Instructor",
+    "topic": "typed structured outputs",
+    "summary": "Instructor is being tracked for typed structured outputs signals around instructor, structured outputs, pydantic, typed extraction, llm.",
+    "why_it_matters": "Instructor helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "instructor",
+      "structured outputs",
+      "pydantic",
+      "typed extraction"
+    ],
+    "score": 81,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/instructor-ai/instructor",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/instructor-ai/instructor",
+        "matched_keywords": [
+          "instructor",
+          "structured outputs",
+          "pydantic",
+          "typed extraction",
+          "llm"
+        ],
+        "project": "Instructor",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "lakesail-e5ce5d36852a",
+    "title": "LakeSail belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/lakehq/sail",
+    "published_at": "2026-06-11T12:00:00Z",
+    "project": "LakeSail",
+    "topic": "typed dataframes",
+    "summary": "LakeSail is being tracked for typed dataframes signals around sail, spark connect, datafusion, arrow, rust.",
+    "why_it_matters": "LakeSail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "sail",
+      "spark connect",
+      "datafusion",
+      "arrow"
+    ],
+    "score": 78,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/lakehq/sail",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/lakehq/sail",
+        "matched_keywords": [
+          "sail",
+          "spark connect",
+          "datafusion",
+          "arrow",
+          "rust"
+        ],
+        "project": "LakeSail",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "linkedin-3ba44b6aa28a",
+    "title": "LakeSail discussion: typed Spark-compatible execution without giving up local Rust",
+    "source": "LinkedIn",
+    "source_kind": "social",
+    "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail",
+    "published_at": "2026-06-15T10:30:00Z",
+    "project": "LakeSail",
+    "topic": "typed dataframes",
+    "summary": "Several data engineers are watching LakeSail because Spark-compatible APIs, DataFusion, and Arrow make a typed local lakehouse runtime feel plausible.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in LakeSail without relying on unauthenticated scraping.",
+    "tags": [
+      "sail",
+      "spark connect",
+      "datafusion",
+      "linkedin"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "duplicates": [
+        {
+          "collection_stage": "manual",
+          "id": "linkedin-6de83bd6233",
+          "project": "DataFusion",
+          "score": 76,
+          "source": "LinkedIn",
+          "title": "LakeSail discussion: typed Spark-compatible execution without giving up local Rust",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail"
+        }
+      ],
+      "provenance": {
+        "adapter": "manual-json",
+        "evidence_url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail",
+        "matched_keywords": [
+          "sail",
+          "spark connect",
+          "datafusion",
+          "arrow",
+          "rust"
+        ],
+        "project": "LakeSail",
+        "source": "LinkedIn",
+        "source_kind": "social",
+        "source_url": "https://www.linkedin.com",
+        "stage": "manual"
+      },
+      "source": "linkedin"
+    }
+  },
+  {
+    "id": "x-twitter-829833c6230d",
+    "title": "HelixDB launch chatter",
+    "source": "X/Twitter",
+    "source_kind": "social",
+    "url": "https://x.com/example/status/1000000000000000001",
+    "published_at": "2026-06-15T09:00:00Z",
+    "project": "HelixDB",
+    "topic": "graph database",
+    "summary": "HelixDB keeps appearing in graph database threads because object-storage-backed graph systems are now part of the local-first AI/data conversation.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in HelixDB without relying on unauthenticated scraping.",
+    "tags": [
+      "helixdb",
+      "graph database",
+      "rust graph",
+      "x-twitter"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "provenance": {
+        "adapter": "manual-json",
+        "evidence_url": "https://x.com/example/status/1000000000000000001",
+        "matched_keywords": [
+          "helixdb",
+          "graph database",
+          "rust graph"
+        ],
+        "project": "HelixDB",
+        "source": "X/Twitter",
+        "source_kind": "social",
+        "source_url": "https://x.com",
+        "stage": "manual"
+      },
+      "source": "x-twitter"
+    }
+  },
+  {
+    "id": "linkedin-b597c19c144b",
+    "title": "Pydantic AI adoption note",
+    "source": "LinkedIn",
+    "source_kind": "social",
+    "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic",
+    "published_at": "2026-06-14T18:00:00Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "Teams are using Pydantic schemas to keep agent outputs typed, auditable, and easier to move into production data workflows.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Pydantic without relying on unauthenticated scraping.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "linkedin"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "duplicates": [
+        {
+          "collection_stage": "manual",
+          "id": "linkedin-47ca0adda643",
+          "project": "Instructor",
+          "score": 76,
+          "source": "LinkedIn",
+          "title": "Pydantic AI adoption note",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic"
+        }
+      ],
+      "provenance": {
+        "adapter": "manual-json",
+        "evidence_url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "LinkedIn",
+        "source_kind": "social",
+        "source_url": "https://www.linkedin.com",
+        "stage": "manual"
+      },
+      "source": "linkedin"
+    }
+  },
+  {
+    "id": "x-twitter-71c585c84d97",
+    "title": "Turso and libSQL edge data note",
+    "source": "X/Twitter",
+    "source_kind": "social",
+    "url": "https://x.com/example/status/1000000000000000002",
+    "published_at": "2026-06-13T16:45:00Z",
+    "project": "Turso",
+    "topic": "edge data",
+    "summary": "Turso and libSQL remain useful signals for teams that want embedded SQLite ergonomics with replication at the edge.",
+    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Turso without relying on unauthenticated scraping.",
+    "tags": [
+      "turso",
+      "libsql",
+      "sqlite",
+      "x-twitter"
+    ],
+    "score": 76,
+    "raw_json": {
+      "author": "manual import",
+      "collection_stage": "manual",
+      "provenance": {
+        "adapter": "manual-json",
+        "evidence_url": "https://x.com/example/status/1000000000000000002",
+        "matched_keywords": [
+          "turso",
+          "libsql",
+          "sqlite",
+          "replication",
+          "edge"
+        ],
+        "project": "Turso",
+        "source": "X/Twitter",
+        "source_kind": "social",
+        "source_url": "https://x.com",
+        "stage": "manual"
+      },
+      "source": "x-twitter"
+    }
+  },
+  {
+    "id": "apache-arrow-d81d1a84d3c6",
+    "title": "Apache Arrow belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://arrow.apache.org",
+    "published_at": "2026-06-10T12:00:00Z",
+    "project": "Apache Arrow",
+    "topic": "typed columnar memory",
+    "summary": "Apache Arrow is being tracked for typed columnar memory signals around apache arrow, arrow ipc, arrow flight, columnar memory, typed columnar.",
+    "why_it_matters": "Apache Arrow helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "apache arrow",
+      "arrow ipc",
+      "arrow flight",
+      "columnar memory"
+    ],
+    "score": 75,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://arrow.apache.org",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://arrow.apache.org",
+        "matched_keywords": [
+          "apache arrow",
+          "arrow ipc",
+          "arrow flight",
+          "columnar memory",
+          "typed columnar"
+        ],
+        "project": "Apache Arrow",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "datafusion-67e16086c66b",
+    "title": "DataFusion belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://datafusion.apache.org",
+    "published_at": "2026-06-09T12:00:00Z",
+    "project": "DataFusion",
+    "topic": "typed query engine",
+    "summary": "DataFusion is being tracked for typed query engine signals around datafusion, query engine, arrow, sql planner, rust.",
+    "why_it_matters": "DataFusion helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "datafusion",
+      "query engine",
+      "arrow",
+      "sql planner"
+    ],
+    "score": 72,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://datafusion.apache.org",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://datafusion.apache.org",
+        "matched_keywords": [
+          "datafusion",
+          "query engine",
+          "arrow",
+          "sql planner",
+          "rust"
+        ],
+        "project": "DataFusion",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "delta-lake-c9484788fa7c",
+    "title": "Delta Lake belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://delta.io",
+    "published_at": "2026-06-08T12:00:00Z",
+    "project": "Delta Lake",
+    "topic": "lakehouse transactions",
+    "summary": "Delta Lake is being tracked for lakehouse transactions signals around delta lake, deltalake, transaction log, lakehouse table, merge into.",
+    "why_it_matters": "Delta Lake helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "delta lake",
+      "deltalake",
+      "transaction log",
+      "lakehouse table"
+    ],
+    "score": 69,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://delta.io",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://delta.io",
+        "matched_keywords": [
+          "delta lake",
+          "deltalake",
+          "transaction log",
+          "lakehouse table",
+          "merge into"
+        ],
+        "project": "Delta Lake",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "medium-789f982ee2a",
+    "title": "Apache Data Lakehouse Weekly: May 28 — June 4, 2026",
+    "source": "Medium",
+    "source_kind": "publication",
+    "url": "https://alexmercedtech.medium.com/apache-data-lakehouse-weekly-may-28-june-4-2026-c35adc3e26bd",
+    "published_at": "2026-06-04T14:51:44Z",
+    "project": "LakeSail",
+    "topic": "typed dataframes",
+    "summary": "The lakehouse projects spent this week doing two things at once. They lined up a remarkable stack of releases, with DataFusion 54.0.0 in…",
+    "why_it_matters": "Long-form publication coverage can show whether LakeSail is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "sail",
+      "spark connect",
+      "datafusion",
+      "medium"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "medium-1489fc1c8df4",
+          "project": "DataFusion",
+          "score": 68,
+          "source": "Medium",
+          "title": "Apache Data Lakehouse Weekly: May 28 — June 4, 2026",
+          "url": "https://alexmercedtech.medium.com/apache-data-lakehouse-weekly-may-28-june-4-2026-c35adc3e26bd"
+        }
+      ],
+      "feed_url": "https://medium.com/feed/tag/apache-arrow",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://alexmercedtech.medium.com/apache-data-lakehouse-weekly-may-28-june-4-2026-c35adc3e26bd",
+        "matched_keywords": [
+          "sail",
+          "spark connect",
+          "datafusion",
+          "arrow",
+          "rust"
+        ],
+        "project": "LakeSail",
+        "source": "Medium",
+        "source_kind": "publication",
+        "source_url": "https://medium.com",
+        "stage": "live"
+      },
+      "source": "medium"
+    }
+  },
+  {
+    "id": "ibis-46f219cbb2b4",
+    "title": "Ibis belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/ibis-project/ibis",
+    "published_at": "2026-06-07T12:00:00Z",
+    "project": "Ibis",
+    "topic": "functional dataframes",
+    "summary": "Ibis is being tracked for functional dataframes signals around ibis, expression api, dataframes, sql compiler, backend.",
+    "why_it_matters": "Ibis helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "ibis",
+      "expression api",
+      "dataframes",
+      "sql compiler"
+    ],
+    "score": 66,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/ibis-project/ibis",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/ibis-project/ibis",
+        "matched_keywords": [
+          "ibis",
+          "expression api",
+          "dataframes",
+          "sql compiler",
+          "backend"
+        ],
+        "project": "Ibis",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "hn-7a2fd6799a20",
+    "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
+    "published_at": "2026-05-28T11:26:06Z",
+    "project": "SurrealDB",
+    "topic": "multimodel data",
+    "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
+    "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "surrealdb",
+      "multimodel",
+      "graph",
+      "hacker-news"
+    ],
+    "score": 64,
+    "raw_json": {
+      "author": "itsezc",
+      "collection_stage": "live",
+      "comments": 0,
+      "object_id": "48307443",
+      "points": 4,
+      "provenance": {
+        "adapter": "hn-algolia",
+        "evidence_url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
+        "matched_keywords": [
+          "surrealdb",
+          "multimodel",
+          "graph",
+          "realtime"
+        ],
+        "project": "SurrealDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "live"
+      },
+      "source": "hacker-news"
+    }
+  },
+  {
+    "id": "dagster-e41635731d59",
+    "title": "Dagster belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/dagster-io/dagster",
+    "published_at": "2026-06-06T12:00:00Z",
+    "project": "Dagster",
+    "topic": "functional data orchestration",
+    "summary": "Dagster is being tracked for functional data orchestration signals around dagster, software-defined assets, data orchestration, asset graph, python.",
+    "why_it_matters": "Dagster helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "dagster",
+      "software-defined assets",
+      "data orchestration",
+      "asset graph"
+    ],
+    "score": 63,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/dagster-io/dagster",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/dagster-io/dagster",
+        "matched_keywords": [
+          "dagster",
+          "software-defined assets",
+          "data orchestration",
+          "asset graph",
+          "python"
+        ],
+        "project": "Dagster",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "hn-9764ffccaa2c",
+    "title": "HTTPX2 by Pydantic",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://httpx2.pydantic.dev/",
+    "published_at": "2026-05-14T12:09:33Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
+    "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "hacker-news"
+    ],
+    "score": 61,
+    "raw_json": {
+      "author": "Einenlum",
+      "collection_stage": "live",
+      "comments": 0,
+      "object_id": "48134261",
+      "points": 1,
+      "provenance": {
+        "adapter": "hn-algolia",
+        "evidence_url": "https://httpx2.pydantic.dev/",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "live"
+      },
+      "source": "hacker-news"
+    }
+  },
+  {
+    "id": "grust-sail-3683deba292c",
+    "title": "Grust Sail belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/ChiefScientist-io/grust",
+    "published_at": "2026-06-05T12:00:00Z",
+    "project": "Grust Sail",
+    "topic": "lakehouse graph",
+    "summary": "Grust Sail is being tracked for lakehouse graph signals around grust-sail, grust sail, sail graph, spark connect graph, graph lakehouse.",
+    "why_it_matters": "Grust Sail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "grust-sail",
+      "grust sail",
+      "sail graph",
+      "spark connect graph"
+    ],
+    "score": 60,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/ChiefScientist-io/grust",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/ChiefScientist-io/grust",
+        "matched_keywords": [
+          "grust-sail",
+          "grust sail",
+          "sail graph",
+          "spark connect graph",
+          "graph lakehouse"
+        ],
+        "project": "Grust Sail",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "turso-33e02aa599d3",
+    "title": "Turso belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://turso.tech",
+    "published_at": "2026-06-04T12:00:00Z",
+    "project": "Turso",
+    "topic": "edge data",
+    "summary": "Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge.",
+    "why_it_matters": "Turso helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "turso",
+      "libsql",
+      "sqlite",
+      "replication"
+    ],
+    "score": 57,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://turso.tech",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://turso.tech",
+        "matched_keywords": [
+          "turso",
+          "libsql",
+          "sqlite",
+          "replication",
+          "edge"
+        ],
+        "project": "Turso",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
     }
   },
   {
@@ -77,259 +1299,243 @@
       "author": "uaslimcreate",
       "collection_stage": "live",
       "comments": 0,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://uguraslim.com/blog/pydantic-v2-discriminated-unions-in-fastapi-modeling-polymor/",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
       "reactions": 2,
       "source": "dev-to"
     }
   },
   {
-    "id": "falkordb-190182f5cc50",
-    "title": "FalkorDB belongs in this week's typed AI/data systems watch",
-    "source": "Hacker News",
+    "id": "dev-to-2767a56afb44",
+    "title": "Structured LLM Outputs with Pydantic v2: Stop Parsing Freeform JSON and Start Typing Your AI",
+    "source": "dev.to",
     "source_kind": "community",
-    "url": "https://www.falkordb.com",
-    "published_at": "2026-06-05T12:00:00Z",
-    "project": "FalkorDB",
-    "topic": "graph database",
-    "summary": "FalkorDB is being tracked for graph database signals around falkordb, redis graph, cypher graph, graph query.",
-    "why_it_matters": "FalkorDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-    "tags": [
-      "falkordb",
-      "redis graph",
-      "cypher graph",
-      "graph query"
-    ],
-    "score": 60,
-    "raw_json": {
-      "collection_stage": "watchlist-seed",
-      "homepage": "https://www.falkordb.com",
-      "source_url": "https://news.ycombinator.com"
-    }
-  },
-  {
-    "id": "grust-210a95e033dd",
-    "title": "Grust belongs in this week's typed AI/data systems watch",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://github.com/ChiefScientist-io/grust",
-    "published_at": "2026-06-07T12:00:00Z",
-    "project": "Grust",
-    "topic": "typed graph",
-    "summary": "Grust is being tracked for typed graph signals around grust, typed graph, rust, cypher.",
-    "why_it_matters": "Grust helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-    "tags": [
-      "grust",
-      "typed graph",
-      "rust",
-      "cypher"
-    ],
-    "score": 66,
-    "raw_json": {
-      "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/ChiefScientist-io/grust",
-      "source_url": "https://news.ycombinator.com"
-    }
-  },
-  {
-    "id": "grust-sail-3683deba292c",
-    "title": "Grust Sail belongs in this week's typed AI/data systems watch",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://github.com/ChiefScientist-io/grust",
-    "published_at": "2026-06-13T12:00:00Z",
-    "project": "Grust Sail",
-    "topic": "lakehouse graph",
-    "summary": "Grust Sail is being tracked for lakehouse graph signals around grust-sail, grust sail, sail graph, spark connect graph, graph lakehouse.",
-    "why_it_matters": "Grust Sail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-    "tags": [
-      "grust-sail",
-      "grust sail",
-      "sail graph",
-      "spark connect graph"
-    ],
-    "score": 84,
-    "raw_json": {
-      "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/ChiefScientist-io/grust",
-      "source_url": "https://news.ycombinator.com"
-    }
-  },
-  {
-    "id": "helixdb-8b14f2b883d",
-    "title": "HelixDB belongs in this week's typed AI/data systems watch",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://github.com/HelixDB/helix-db",
-    "published_at": "2026-06-10T12:00:00Z",
-    "project": "HelixDB",
-    "topic": "graph database",
-    "summary": "HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph.",
-    "why_it_matters": "HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-    "tags": [
-      "helixdb",
-      "graph database",
-      "rust graph"
-    ],
-    "score": 75,
-    "raw_json": {
-      "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/HelixDB/helix-db",
-      "source_url": "https://news.ycombinator.com"
-    }
-  },
-  {
-    "id": "hn-235e2eafb064",
-    "title": "Benchmarking SurrealDB 3.x vs. Postgres, Mongo, Neo4j and Redis (With Fsync)",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers",
-    "published_at": "2026-05-29T14:53:27Z",
-    "project": "SurrealDB",
-    "topic": "multimodel data",
-    "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
-    "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "surrealdb",
-      "multimodel",
-      "graph",
-      "hacker-news"
-    ],
-    "score": 110,
-    "raw_json": {
-      "author": "itsezc",
-      "collection_stage": "live",
-      "comments": 31,
-      "object_id": "48323844",
-      "points": 75,
-      "source": "hacker-news"
-    }
-  },
-  {
-    "id": "hn-4340e59c1bdd",
-    "title": "Show HN: HelixDB – A graph database built on object storage",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://github.com/HelixDB/helix-db/tree/main",
-    "published_at": "2026-06-10T15:47:31Z",
-    "project": "HelixDB",
-    "topic": "graph database",
-    "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
-    "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "helixdb",
-      "graph database",
-      "rust graph",
-      "hacker-news"
-    ],
-    "score": 110,
-    "raw_json": {
-      "author": "GeorgeCurtis",
-      "collection_stage": "live",
-      "comments": 42,
-      "object_id": "48478148",
-      "points": 157,
-      "source": "hacker-news"
-    }
-  },
-  {
-    "id": "hn-7a2fd6799a20",
-    "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
-    "published_at": "2026-05-28T11:26:06Z",
-    "project": "SurrealDB",
-    "topic": "multimodel data",
-    "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
-    "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "surrealdb",
-      "multimodel",
-      "graph",
-      "hacker-news"
-    ],
-    "score": 64,
-    "raw_json": {
-      "author": "itsezc",
-      "collection_stage": "live",
-      "comments": 0,
-      "object_id": "48307443",
-      "points": 4,
-      "source": "hacker-news"
-    }
-  },
-  {
-    "id": "hn-9764ffccaa2c",
-    "title": "HTTPX2 by Pydantic",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://httpx2.pydantic.dev/",
-    "published_at": "2026-05-14T12:09:33Z",
+    "url": "https://dev.to/peytongreen_dev/structured-llm-outputs-with-pydantic-v2-stop-parsing-freeform-json-and-start-typing-your-ai-5201",
+    "published_at": "2026-05-19T14:00:07Z",
     "project": "Pydantic",
     "topic": "typed AI",
-    "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
-    "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+    "summary": "The biggest source of subtle bugs in AI applications isn't the model — it's the gap between what you...",
+    "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
     "tags": [
       "pydantic",
       "typed agents",
-      "structured outputs",
-      "hacker-news"
+      "python",
+      "ai",
+      "pydantic",
+      "tutorial"
     ],
-    "score": 61,
+    "score": 56,
     "raw_json": {
-      "author": "Einenlum",
+      "article_id": 3394799,
+      "author": "peytongreen_dev",
+      "collection_stage": "live",
+      "comments": 1,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://dev.to/peytongreen_dev/structured-llm-outputs-with-pydantic-v2-stop-parsing-freeform-json-and-start-typing-your-ai-5201",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 0,
+      "source": "dev-to"
+    }
+  },
+  {
+    "id": "dev-to-150f7918316a",
+    "title": "Shift Your Paradigm: Building Self-Improving LLM Workflows with DSPy",
+    "source": "dev.to",
+    "source_kind": "community",
+    "url": "https://dev.to/aairom/shift-your-paradigm-building-self-improving-llm-workflows-with-dspy-45bl",
+    "published_at": "2026-06-13T11:27:48Z",
+    "project": "DSPy",
+    "topic": "declarative AI programs",
+    "summary": "A book review of “Building LLM Applications with DSPy”     Disclaimer: I want to be completely...",
+    "why_it_matters": "Developer essays show whether DSPy is gaining practical adoption beyond release announcements.",
+    "tags": [
+      "dspy",
+      "declarative lm",
+      "dspy",
+      "bookreview"
+    ],
+    "score": 55,
+    "raw_json": {
+      "article_id": 3891169,
+      "author": "aairom",
       "collection_stage": "live",
       "comments": 0,
-      "object_id": "48134261",
-      "points": 1,
-      "source": "hacker-news"
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://dev.to/aairom/shift-your-paradigm-building-self-improving-llm-workflows-with-dspy-45bl",
+        "matched_keywords": [
+          "dspy",
+          "declarative lm",
+          "language model programs",
+          "optimizers"
+        ],
+        "project": "DSPy",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 0,
+      "source": "dev-to"
     }
   },
   {
-    "id": "ladybugdb-b8cc94227aee",
-    "title": "LadybugDB belongs in this week's typed AI/data systems watch",
-    "source": "Hacker News",
+    "id": "dev-to-2fd94ce08390",
+    "title": "One object, three interfaces: building a natural-language Kanban board with ExoModel",
+    "source": "dev.to",
     "source_kind": "community",
-    "url": "https://github.com/ladybugdb/ladybugdb",
-    "published_at": "2026-06-04T12:00:00Z",
-    "project": "LadybugDB",
-    "topic": "embedded graph",
-    "summary": "LadybugDB is being tracked for embedded graph signals around ladybugdb, lbug, embedded graph, arrow graph.",
-    "why_it_matters": "LadybugDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "url": "https://dev.to/pessoabuilds/one-object-three-interfaces-building-a-natural-language-kanban-board-with-exomodel-bhl",
+    "published_at": "2026-06-08T15:39:26Z",
+    "project": "Instructor",
+    "topic": "typed structured outputs",
+    "summary": "Every interface you add to an AI-powered app comes with a tax: an intent router written by hand, for...",
+    "why_it_matters": "Developer essays show whether Instructor is gaining practical adoption beyond release announcements.",
     "tags": [
-      "ladybugdb",
-      "lbug",
-      "embedded graph",
-      "arrow graph"
+      "instructor",
+      "structured outputs",
+      "python",
+      "ai",
+      "machinelearning",
+      "pydantic"
     ],
-    "score": 57,
+    "score": 55,
     "raw_json": {
-      "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/ladybugdb/ladybugdb",
-      "source_url": "https://news.ycombinator.com"
+      "article_id": 3849901,
+      "author": "pessoabuilds",
+      "collection_stage": "live",
+      "comments": 0,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://dev.to/pessoabuilds/one-object-three-interfaces-building-a-natural-language-kanban-board-with-exomodel-bhl",
+        "matched_keywords": [
+          "instructor",
+          "structured outputs",
+          "pydantic",
+          "typed extraction",
+          "llm"
+        ],
+        "project": "Instructor",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 0,
+      "source": "dev-to"
     }
   },
   {
-    "id": "lakesail-e5ce5d36852a",
-    "title": "LakeSail belongs in this week's typed AI/data systems watch",
-    "source": "Hacker News",
+    "id": "dev-to-9d1c7c978fd4",
+    "title": "Structured Output: Gemini 2.5 Flash & Instructor for Validated JSON",
+    "source": "dev.to",
     "source_kind": "community",
-    "url": "https://github.com/lakehq/sail",
-    "published_at": "2026-06-14T12:00:00Z",
-    "project": "LakeSail",
-    "topic": "typed dataframes",
-    "summary": "LakeSail is being tracked for typed dataframes signals around sail, spark connect, datafusion, arrow, rust.",
-    "why_it_matters": "LakeSail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "url": "https://agents.getvda.ai/solutions/structured-output-agent-mcp-agent",
+    "published_at": "2026-06-08T06:05:30Z",
+    "project": "Instructor",
+    "topic": "typed structured outputs",
+    "summary": "Meet our 'Structured Output MCP Agent': turning prompts & schemas into validated, typed JSON using Instructor over Gemini 2.5 Flash on Vertex AI. Fast & reliabl",
+    "why_it_matters": "Developer essays show whether Instructor is gaining practical adoption beyond release announcements.",
     "tags": [
-      "sail",
-      "spark connect",
-      "datafusion",
-      "arrow"
+      "instructor",
+      "structured outputs",
+      "gemini",
+      "instructor",
+      "json",
+      "vertexai"
     ],
-    "score": 87,
+    "score": 55,
     "raw_json": {
-      "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/lakehq/sail",
-      "source_url": "https://news.ycombinator.com"
+      "article_id": 3845791,
+      "author": "mikerawsonnz",
+      "collection_stage": "live",
+      "comments": 0,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://agents.getvda.ai/solutions/structured-output-agent-mcp-agent",
+        "matched_keywords": [
+          "instructor",
+          "structured outputs",
+          "pydantic",
+          "typed extraction",
+          "llm"
+        ],
+        "project": "Instructor",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 0,
+      "source": "dev-to"
+    }
+  },
+  {
+    "id": "dev-to-67957d7766bd",
+    "title": "Day 1: I'm Done Writing Prompts by Hand — Meet DSPy",
+    "source": "dev.to",
+    "source_kind": "community",
+    "url": "https://dev.to/sumeet_lalla_6f9e32437132/day-1-im-done-writing-prompts-by-hand-meet-dspy-gha",
+    "published_at": "2026-05-23T06:39:57Z",
+    "project": "DSPy",
+    "topic": "declarative AI programs",
+    "summary": "Let me paint you a picture that probably feels familiar.  You spend 45 minutes crafting the perfect...",
+    "why_it_matters": "Developer essays show whether DSPy is gaining practical adoption beyond release announcements.",
+    "tags": [
+      "dspy",
+      "declarative lm",
+      "dspy",
+      "ai",
+      "llm",
+      "python"
+    ],
+    "score": 55,
+    "raw_json": {
+      "article_id": 3730578,
+      "author": "sumeet_lalla_6f9e32437132",
+      "collection_stage": "live",
+      "comments": 0,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://dev.to/sumeet_lalla_6f9e32437132/day-1-im-done-writing-prompts-by-hand-meet-dspy-gha",
+        "matched_keywords": [
+          "dspy",
+          "declarative lm",
+          "language model programs",
+          "optimizers"
+        ],
+        "project": "DSPy",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 0,
+      "source": "dev-to"
     }
   },
   {
@@ -338,7 +1544,7 @@
     "source": "Hacker News",
     "source_kind": "community",
     "url": "https://lancedb.com",
-    "published_at": "2026-06-11T12:00:00Z",
+    "published_at": "2026-06-03T12:00:00Z",
     "project": "LanceDB",
     "topic": "vector data",
     "summary": "LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar.",
@@ -349,226 +1555,63 @@
       "vectors",
       "multimodal"
     ],
-    "score": 78,
+    "score": 54,
     "raw_json": {
       "collection_stage": "watchlist-seed",
       "homepage": "https://lancedb.com",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://lancedb.com",
+        "matched_keywords": [
+          "lancedb",
+          "lance",
+          "vectors",
+          "multimodal",
+          "columnar"
+        ],
+        "project": "LanceDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
       "source_url": "https://news.ycombinator.com"
     }
   },
   {
-    "id": "linkedin-3ba44b6aa28a",
-    "title": "LakeSail discussion: typed Spark-compatible execution without giving up local Rust",
-    "source": "LinkedIn",
-    "source_kind": "social",
-    "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail",
-    "published_at": "2026-06-15T10:30:00Z",
-    "project": "LakeSail",
-    "topic": "typed dataframes",
-    "summary": "Several data engineers are watching LakeSail because Spark-compatible APIs, DataFusion, and Arrow make a typed local lakehouse runtime feel plausible.",
-    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in LakeSail without relying on unauthenticated scraping.",
-    "tags": [
-      "sail",
-      "spark connect",
-      "datafusion",
-      "linkedin"
-    ],
-    "score": 76,
-    "raw_json": {
-      "author": "manual import",
-      "collection_stage": "manual",
-      "source": "linkedin"
-    }
-  },
-  {
-    "id": "linkedin-b597c19c144b",
-    "title": "Pydantic AI adoption note",
-    "source": "LinkedIn",
-    "source_kind": "social",
-    "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic",
-    "published_at": "2026-06-14T18:00:00Z",
-    "project": "Pydantic",
-    "topic": "typed AI",
-    "summary": "Teams are using Pydantic schemas to keep agent outputs typed, auditable, and easier to move into production data workflows.",
-    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Pydantic without relying on unauthenticated scraping.",
-    "tags": [
-      "pydantic",
-      "typed agents",
-      "structured outputs",
-      "linkedin"
-    ],
-    "score": 76,
-    "raw_json": {
-      "author": "manual import",
-      "collection_stage": "manual",
-      "source": "linkedin"
-    }
-  },
-  {
-    "id": "medium-7ff0e55a83b1",
-    "title": "The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts",
-    "source": "Medium",
-    "source_kind": "publication",
-    "url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db",
-    "published_at": "2026-06-14T09:46:47Z",
-    "project": "Pydantic",
-    "topic": "typed AI",
-    "summary": "Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability.",
-    "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
-    "tags": [
-      "pydantic",
-      "typed agents",
-      "structured outputs",
-      "medium"
-    ],
-    "score": 88,
-    "raw_json": {
-      "collection_stage": "live",
-      "feed_url": "https://medium.com/feed/tag/pydantic",
-      "source": "medium"
-    }
-  },
-  {
-    "id": "medium-9a2a1c866f35",
-    "title": "Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline",
-    "source": "Medium",
-    "source_kind": "publication",
-    "url": "https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b",
-    "published_at": "2026-05-28T16:27:14Z",
-    "project": "LanceDB",
-    "topic": "vector data",
-    "summary": "Overview",
-    "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
-    "tags": [
-      "lancedb",
-      "lance",
-      "vectors",
-      "medium"
-    ],
-    "score": 88,
-    "raw_json": {
-      "collection_stage": "live",
-      "feed_url": "https://medium.com/feed/tag/lancedb",
-      "source": "medium"
-    }
-  },
-  {
-    "id": "medium-b4b689fe8baf",
-    "title": "Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It",
-    "source": "Medium",
-    "source_kind": "publication",
-    "url": "https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb",
-    "published_at": "2026-06-14T14:48:39Z",
-    "project": "Pydantic",
-    "topic": "typed AI",
-    "summary": "Medium surfaced this feed item while tracking Pydantic signals: pydantic, typed agents, structured outputs, validation.",
-    "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
-    "tags": [
-      "pydantic",
-      "typed agents",
-      "structured outputs",
-      "medium"
-    ],
-    "score": 88,
-    "raw_json": {
-      "collection_stage": "live",
-      "feed_url": "https://medium.com/feed/tag/pydantic",
-      "source": "medium"
-    }
-  },
-  {
-    "id": "medium-cc435e297f3c",
-    "title": "SurrealDB 3.x by the numbers",
-    "source": "Medium",
-    "source_kind": "publication",
-    "url": "https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb80078638a0",
-    "published_at": "2026-05-29T19:46:26Z",
-    "project": "SurrealDB",
-    "topic": "multimodel data",
-    "summary": "Author: Tobie Morgan Hitchcock",
-    "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
-    "tags": [
-      "surrealdb",
-      "multimodel",
-      "graph",
-      "medium"
-    ],
-    "score": 88,
-    "raw_json": {
-      "collection_stage": "live",
-      "feed_url": "https://medium.com/feed/tag/surrealdb",
-      "source": "medium"
-    }
-  },
-  {
-    "id": "medium-fcd377fd2671",
-    "title": "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel",
-    "source": "Medium",
-    "source_kind": "publication",
-    "url": "https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4",
-    "published_at": "2026-06-14T15:10:18Z",
-    "project": "SurrealDB",
-    "topic": "multimodel data",
-    "summary": "Stop Hand-Writing SurrealQL Strings in Rust",
-    "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
-    "tags": [
-      "surrealdb",
-      "multimodel",
-      "graph",
-      "medium"
-    ],
-    "score": 88,
-    "raw_json": {
-      "collection_stage": "live",
-      "feed_url": "https://medium.com/feed/tag/surrealdb",
-      "source": "medium"
-    }
-  },
-  {
-    "id": "pggraph-f1ef2151ecc4",
-    "title": "pgGraph belongs in this week's typed AI/data systems watch",
+    "id": "helixdb-8b14f2b883d",
+    "title": "HelixDB belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",
     "source_kind": "community",
-    "url": "https://github.com/apache/age",
-    "published_at": "2026-06-08T12:00:00Z",
-    "project": "pgGraph",
-    "topic": "postgres graph",
-    "summary": "pgGraph is being tracked for postgres graph signals around postgres graph, apache age, cypher, pggraph.",
-    "why_it_matters": "pgGraph helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "url": "https://github.com/HelixDB/helix-db",
+    "published_at": "2026-06-02T12:00:00Z",
+    "project": "HelixDB",
+    "topic": "graph database",
+    "summary": "HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph.",
+    "why_it_matters": "HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
     "tags": [
-      "postgres graph",
-      "apache age",
-      "cypher",
-      "pggraph"
+      "helixdb",
+      "graph database",
+      "rust graph"
     ],
-    "score": 69,
+    "score": 51,
     "raw_json": {
       "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/apache/age",
-      "source_url": "https://news.ycombinator.com"
-    }
-  },
-  {
-    "id": "pydantic-19e4620a7634",
-    "title": "Pydantic belongs in this week's typed AI/data systems watch",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://github.com/pydantic/pydantic-ai",
-    "published_at": "2026-06-15T12:00:00Z",
-    "project": "Pydantic",
-    "topic": "typed AI",
-    "summary": "Pydantic is being tracked for typed AI signals around pydantic, typed agents, structured outputs, validation.",
-    "why_it_matters": "Pydantic helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-    "tags": [
-      "pydantic",
-      "typed agents",
-      "structured outputs",
-      "validation"
-    ],
-    "score": 90,
-    "raw_json": {
-      "collection_stage": "watchlist-seed",
-      "homepage": "https://github.com/pydantic/pydantic-ai",
+      "homepage": "https://github.com/HelixDB/helix-db",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/HelixDB/helix-db",
+        "matched_keywords": [
+          "helixdb",
+          "graph database",
+          "rust graph"
+        ],
+        "project": "HelixDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
       "source_url": "https://news.ycombinator.com"
     }
   },
@@ -578,7 +1621,7 @@
     "source": "Hacker News",
     "source_kind": "community",
     "url": "https://surrealdb.com",
-    "published_at": "2026-06-09T12:00:00Z",
+    "published_at": "2026-06-01T12:00:00Z",
     "project": "SurrealDB",
     "topic": "multimodel data",
     "summary": "SurrealDB is being tracked for multimodel data signals around surrealdb, multimodel, graph, realtime.",
@@ -589,34 +1632,103 @@
       "graph",
       "realtime"
     ],
-    "score": 72,
+    "score": 48,
     "raw_json": {
       "collection_stage": "watchlist-seed",
       "homepage": "https://surrealdb.com",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://surrealdb.com",
+        "matched_keywords": [
+          "surrealdb",
+          "multimodel",
+          "graph",
+          "realtime"
+        ],
+        "project": "SurrealDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
       "source_url": "https://news.ycombinator.com"
     }
   },
   {
-    "id": "turso-33e02aa599d3",
-    "title": "Turso belongs in this week's typed AI/data systems watch",
+    "id": "pggraph-f1ef2151ecc4",
+    "title": "pgGraph belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",
     "source_kind": "community",
-    "url": "https://turso.tech",
-    "published_at": "2026-06-12T12:00:00Z",
-    "project": "Turso",
-    "topic": "edge data",
-    "summary": "Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge.",
-    "why_it_matters": "Turso helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "url": "https://github.com/apache/age",
+    "published_at": "2026-05-31T12:00:00Z",
+    "project": "pgGraph",
+    "topic": "postgres graph",
+    "summary": "pgGraph is being tracked for postgres graph signals around postgres graph, apache age, cypher, pggraph.",
+    "why_it_matters": "pgGraph helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
     "tags": [
-      "turso",
-      "libsql",
-      "sqlite",
-      "replication"
+      "postgres graph",
+      "apache age",
+      "cypher",
+      "pggraph"
     ],
-    "score": 81,
+    "score": 45,
     "raw_json": {
       "collection_stage": "watchlist-seed",
-      "homepage": "https://turso.tech",
+      "homepage": "https://github.com/apache/age",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/apache/age",
+        "matched_keywords": [
+          "postgres graph",
+          "apache age",
+          "cypher",
+          "pggraph"
+        ],
+        "project": "pgGraph",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "grust-210a95e033dd",
+    "title": "Grust belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/ChiefScientist-io/grust",
+    "published_at": "2026-05-30T12:00:00Z",
+    "project": "Grust",
+    "topic": "typed graph",
+    "summary": "Grust is being tracked for typed graph signals around grust, typed graph, rust, cypher.",
+    "why_it_matters": "Grust helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "grust",
+      "typed graph",
+      "rust",
+      "cypher"
+    ],
+    "score": 42,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/ChiefScientist-io/grust",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/ChiefScientist-io/grust",
+        "matched_keywords": [
+          "grust",
+          "typed graph",
+          "rust",
+          "cypher"
+        ],
+        "project": "Grust",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
       "source_url": "https://news.ycombinator.com"
     }
   },
@@ -626,7 +1738,7 @@
     "source": "Hacker News",
     "source_kind": "community",
     "url": "https://github.com/ChiefScientist-io/typesec",
-    "published_at": "2026-06-06T12:00:00Z",
+    "published_at": "2026-05-29T12:00:00Z",
     "project": "TypeSec",
     "topic": "typed security",
     "summary": "TypeSec is being tracked for typed security signals around typesec, capability, typed policy, security.",
@@ -637,59 +1749,223 @@
       "typed policy",
       "security"
     ],
-    "score": 63,
+    "score": 39,
     "raw_json": {
       "collection_stage": "watchlist-seed",
       "homepage": "https://github.com/ChiefScientist-io/typesec",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/ChiefScientist-io/typesec",
+        "matched_keywords": [
+          "typesec",
+          "capability",
+          "typed policy",
+          "security"
+        ],
+        "project": "TypeSec",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
       "source_url": "https://news.ycombinator.com"
     }
   },
   {
-    "id": "x-twitter-71c585c84d97",
-    "title": "Turso and libSQL edge data note",
-    "source": "X/Twitter",
-    "source_kind": "social",
-    "url": "https://x.com/example/status/1000000000000000002",
-    "published_at": "2026-06-13T16:45:00Z",
-    "project": "Turso",
-    "topic": "edge data",
-    "summary": "Turso and libSQL remain useful signals for teams that want embedded SQLite ergonomics with replication at the edge.",
-    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Turso without relying on unauthenticated scraping.",
+    "id": "garde-284864e88b4",
+    "title": "Garde belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/jprochazk/garde",
+    "published_at": "2026-05-28T12:00:00Z",
+    "project": "Garde",
+    "topic": "typed Rust validation",
+    "summary": "Garde is being tracked for typed Rust validation signals around garde, rust validation, typed validation, derive validate, schema checks.",
+    "why_it_matters": "Garde helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
     "tags": [
-      "turso",
-      "libsql",
-      "sqlite",
-      "x-twitter"
+      "garde",
+      "rust validation",
+      "typed validation",
+      "derive validate"
     ],
-    "score": 76,
+    "score": 36,
     "raw_json": {
-      "author": "manual import",
-      "collection_stage": "manual",
-      "source": "x-twitter"
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/jprochazk/garde",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/jprochazk/garde",
+        "matched_keywords": [
+          "garde",
+          "rust validation",
+          "typed validation",
+          "derive validate",
+          "schema checks"
+        ],
+        "project": "Garde",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
     }
   },
   {
-    "id": "x-twitter-829833c6230d",
-    "title": "HelixDB launch chatter",
-    "source": "X/Twitter",
-    "source_kind": "social",
-    "url": "https://x.com/example/status/1000000000000000001",
-    "published_at": "2026-06-15T09:00:00Z",
-    "project": "HelixDB",
-    "topic": "graph database",
-    "summary": "HelixDB keeps appearing in graph database threads because object-storage-backed graph systems are now part of the local-first AI/data conversation.",
-    "why_it_matters": "Manually reviewed social posts can capture practitioner interest in HelixDB without relying on unauthenticated scraping.",
+    "id": "zod-rs-e6fc31f756d0",
+    "title": "zod-rs belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/maulanasdqn/zod-rs",
+    "published_at": "2026-05-27T12:00:00Z",
+    "project": "zod-rs",
+    "topic": "Rust schema validation",
+    "summary": "zod-rs is being tracked for Rust schema validation signals around zod-rs, zod rs, rust schema validation, typed schemas, validation.",
+    "why_it_matters": "zod-rs helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
     "tags": [
-      "helixdb",
-      "graph database",
-      "rust graph",
-      "x-twitter"
+      "zod-rs",
+      "zod rs",
+      "rust schema validation",
+      "typed schemas"
     ],
-    "score": 76,
+    "score": 33,
     "raw_json": {
-      "author": "manual import",
-      "collection_stage": "manual",
-      "source": "x-twitter"
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/maulanasdqn/zod-rs",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/maulanasdqn/zod-rs",
+        "matched_keywords": [
+          "zod-rs",
+          "zod rs",
+          "rust schema validation",
+          "typed schemas",
+          "validation"
+        ],
+        "project": "zod-rs",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "falkordb-190182f5cc50",
+    "title": "FalkorDB belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://www.falkordb.com",
+    "published_at": "2026-05-26T12:00:00Z",
+    "project": "FalkorDB",
+    "topic": "graph database",
+    "summary": "FalkorDB is being tracked for graph database signals around falkordb, redis graph, cypher graph, graph query.",
+    "why_it_matters": "FalkorDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "falkordb",
+      "redis graph",
+      "cypher graph",
+      "graph query"
+    ],
+    "score": 30,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://www.falkordb.com",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://www.falkordb.com",
+        "matched_keywords": [
+          "falkordb",
+          "redis graph",
+          "cypher graph",
+          "graph query"
+        ],
+        "project": "FalkorDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "ladybugdb-b8cc94227aee",
+    "title": "LadybugDB belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/ladybugdb/ladybugdb",
+    "published_at": "2026-05-25T12:00:00Z",
+    "project": "LadybugDB",
+    "topic": "embedded graph",
+    "summary": "LadybugDB is being tracked for embedded graph signals around ladybugdb, lbug, embedded graph, arrow graph.",
+    "why_it_matters": "LadybugDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "ladybugdb",
+      "lbug",
+      "embedded graph",
+      "arrow graph"
+    ],
+    "score": 27,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/ladybugdb/ladybugdb",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/ladybugdb/ladybugdb",
+        "matched_keywords": [
+          "ladybugdb",
+          "lbug",
+          "embedded graph",
+          "arrow graph"
+        ],
+        "project": "LadybugDB",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "cocoindex-b8a70bfc0beb",
+    "title": "CocoIndex belongs in this week's typed AI/data systems watch",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/cocoindex-io/cocoindex",
+    "published_at": "2026-05-24T12:00:00Z",
+    "project": "CocoIndex",
+    "topic": "incremental indexing",
+    "summary": "CocoIndex is being tracked for incremental indexing signals around cocoindex, target state, incremental indexing, knowledge graph.",
+    "why_it_matters": "CocoIndex helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+    "tags": [
+      "cocoindex",
+      "target state",
+      "incremental indexing",
+      "knowledge graph"
+    ],
+    "score": 24,
+    "raw_json": {
+      "collection_stage": "watchlist-seed",
+      "homepage": "https://github.com/cocoindex-io/cocoindex",
+      "provenance": {
+        "adapter": "watchlist",
+        "evidence_url": "https://github.com/cocoindex-io/cocoindex",
+        "matched_keywords": [
+          "cocoindex",
+          "target state",
+          "incremental indexing",
+          "knowledge graph"
+        ],
+        "project": "CocoIndex",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "watchlist-seed"
+      },
+      "source_url": "https://news.ycombinator.com"
     }
   }
 ]

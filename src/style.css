@@ -457,6 +457,28 @@ textarea {
   color: var(--accent-dark);
 }
 
+.review-targets {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.review-targets a {
+  padding: 3px 6px;
+  border: 1px solid rgba(15, 118, 110, 0.24);
+  border-radius: 6px;
+  color: var(--accent-dark);
+  font-size: 11px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.review-targets a:hover {
+  border-color: rgba(15, 118, 110, 0.5);
+  background: rgba(15, 118, 110, 0.08);
+}
+
 .readiness {
   display: grid;
   gap: 10px;

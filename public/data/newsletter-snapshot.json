@@ -1,182 +1,46 @@
 {
-  "generated_at": "2026-06-15T23:37:46.313397Z",
+  "generated_at": "2026-06-16T07:30:54.827386Z",
   "theme": "Strongly typed and functional AI/data systems",
   "items": [
     {
-      "id": "cocoindex-b8a70bfc0beb",
-      "title": "CocoIndex belongs in this week's typed AI/data systems watch",
+      "id": "hn-4340e59c1bdd",
+      "title": "Show HN: HelixDB – A graph database built on object storage",
       "source": "Hacker News",
       "source_kind": "community",
-      "url": "https://github.com/cocoindex-io/cocoindex",
-      "published_at": "2026-06-03T12:00:00Z",
-      "project": "CocoIndex",
-      "topic": "incremental indexing",
-      "summary": "CocoIndex is being tracked for incremental indexing signals around cocoindex, target state, incremental indexing, knowledge graph.",
-      "why_it_matters": "CocoIndex helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "cocoindex",
-        "target state",
-        "incremental indexing",
-        "knowledge graph"
-      ],
-      "score": 54,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/cocoindex-io/cocoindex",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "dev-to-2767a56afb44",
-      "title": "Structured LLM Outputs with Pydantic v2: Stop Parsing Freeform JSON and Start Typing Your AI",
-      "source": "dev.to",
-      "source_kind": "community",
-      "url": "https://dev.to/peytongreen_dev/structured-llm-outputs-with-pydantic-v2-stop-parsing-freeform-json-and-start-typing-your-ai-5201",
-      "published_at": "2026-05-19T14:00:07Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "The biggest source of subtle bugs in AI applications isn't the model — it's the gap between what you...",
-      "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "python",
-        "ai",
-        "pydantic",
-        "tutorial"
-      ],
-      "score": 56,
-      "raw_json": {
-        "article_id": 3394799,
-        "author": "peytongreen_dev",
-        "collection_stage": "live",
-        "comments": 1,
-        "reactions": 0,
-        "source": "dev-to"
-      }
-    },
-    {
-      "id": "dev-to-eb2d25589cb3",
-      "title": "Pydantic V2 Discriminated Unions in FastAPI: Modeling Polymorphic AI Feature Configs Without Schema Sprawl",
-      "source": "dev.to",
-      "source_kind": "community",
-      "url": "https://uguraslim.com/blog/pydantic-v2-discriminated-unions-in-fastapi-modeling-polymor/",
-      "published_at": "2026-06-03T08:00:03Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "Use Pydantic V2's discriminated unions to represent different AI feature types (summarization, classification, generation) with type-safe routing in FastAPI, eliminating conditional logic and catching schema mismatches at validation time instead of runtime.",
-      "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "fastapi",
-        "pydantic",
-        "python",
-        "apidesign"
-      ],
-      "score": 57,
-      "raw_json": {
-        "article_id": 3808896,
-        "author": "uaslimcreate",
-        "collection_stage": "live",
-        "comments": 0,
-        "reactions": 2,
-        "source": "dev-to"
-      }
-    },
-    {
-      "id": "falkordb-190182f5cc50",
-      "title": "FalkorDB belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://www.falkordb.com",
-      "published_at": "2026-06-05T12:00:00Z",
-      "project": "FalkorDB",
-      "topic": "graph database",
-      "summary": "FalkorDB is being tracked for graph database signals around falkordb, redis graph, cypher graph, graph query.",
-      "why_it_matters": "FalkorDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "falkordb",
-        "redis graph",
-        "cypher graph",
-        "graph query"
-      ],
-      "score": 60,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://www.falkordb.com",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "grust-210a95e033dd",
-      "title": "Grust belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/ChiefScientist-io/grust",
-      "published_at": "2026-06-07T12:00:00Z",
-      "project": "Grust",
-      "topic": "typed graph",
-      "summary": "Grust is being tracked for typed graph signals around grust, typed graph, rust, cypher.",
-      "why_it_matters": "Grust helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "grust",
-        "typed graph",
-        "rust",
-        "cypher"
-      ],
-      "score": 66,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/ChiefScientist-io/grust",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "grust-sail-3683deba292c",
-      "title": "Grust Sail belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/ChiefScientist-io/grust",
-      "published_at": "2026-06-13T12:00:00Z",
-      "project": "Grust Sail",
-      "topic": "lakehouse graph",
-      "summary": "Grust Sail is being tracked for lakehouse graph signals around grust-sail, grust sail, sail graph, spark connect graph, graph lakehouse.",
-      "why_it_matters": "Grust Sail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "grust-sail",
-        "grust sail",
-        "sail graph",
-        "spark connect graph"
-      ],
-      "score": 84,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/ChiefScientist-io/grust",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "helixdb-8b14f2b883d",
-      "title": "HelixDB belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/HelixDB/helix-db",
-      "published_at": "2026-06-10T12:00:00Z",
+      "url": "https://github.com/HelixDB/helix-db/tree/main",
+      "published_at": "2026-06-10T15:47:31Z",
       "project": "HelixDB",
       "topic": "graph database",
-      "summary": "HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph.",
-      "why_it_matters": "HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
+      "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
       "tags": [
         "helixdb",
         "graph database",
-        "rust graph"
+        "rust graph",
+        "hacker-news"
       ],
-      "score": 75,
+      "score": 110,
       "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/HelixDB/helix-db",
-        "source_url": "https://news.ycombinator.com"
+        "author": "GeorgeCurtis",
+        "collection_stage": "live",
+        "comments": 42,
+        "object_id": "48478148",
+        "points": 157,
+        "provenance": {
+          "adapter": "hn-algolia",
+          "evidence_url": "https://github.com/HelixDB/helix-db/tree/main",
+          "matched_keywords": [
+            "helixdb",
+            "graph database",
+            "rust graph"
+          ],
+          "project": "HelixDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "live"
+        },
+        "source": "hacker-news"
       }
     },
     {
@@ -203,255 +67,99 @@
         "comments": 31,
         "object_id": "48323844",
         "points": 75,
+        "provenance": {
+          "adapter": "hn-algolia",
+          "evidence_url": "https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers",
+          "matched_keywords": [
+            "surrealdb",
+            "multimodel",
+            "graph",
+            "realtime"
+          ],
+          "project": "SurrealDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "live"
+        },
         "source": "hacker-news"
       }
     },
     {
-      "id": "hn-4340e59c1bdd",
-      "title": "Show HN: HelixDB – A graph database built on object storage",
+      "id": "pydantic-19e4620a7634",
+      "title": "Pydantic belongs in this week's typed AI/data systems watch",
       "source": "Hacker News",
       "source_kind": "community",
-      "url": "https://github.com/HelixDB/helix-db/tree/main",
-      "published_at": "2026-06-10T15:47:31Z",
-      "project": "HelixDB",
-      "topic": "graph database",
-      "summary": "Hacker News surfaced this item while tracking HelixDB keywords: helixdb, graph database, rust graph.",
-      "why_it_matters": "Community discussion can reveal whether HelixDB is becoming practical infrastructure or only an interesting release note.",
+      "url": "https://github.com/pydantic/pydantic-ai",
+      "published_at": "2026-06-15T12:00:00Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Pydantic is being tracked for typed AI signals around pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Pydantic helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
       "tags": [
-        "helixdb",
-        "graph database",
-        "rust graph",
-        "hacker-news"
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "validation"
       ],
-      "score": 110,
+      "score": 90,
       "raw_json": {
-        "author": "GeorgeCurtis",
-        "collection_stage": "live",
-        "comments": 42,
-        "object_id": "48478148",
-        "points": 157,
-        "source": "hacker-news"
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/pydantic/pydantic-ai",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/pydantic/pydantic-ai",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
       }
     },
     {
-      "id": "hn-7a2fd6799a20",
-      "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
-      "published_at": "2026-05-28T11:26:06Z",
+      "id": "medium-fcd377fd2671",
+      "title": "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4",
+      "published_at": "2026-06-14T15:10:18Z",
       "project": "SurrealDB",
       "topic": "multimodel data",
-      "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
-      "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
+      "summary": "Stop Hand-Writing SurrealQL Strings in Rust",
+      "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
       "tags": [
         "surrealdb",
         "multimodel",
         "graph",
-        "hacker-news"
-      ],
-      "score": 64,
-      "raw_json": {
-        "author": "itsezc",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "48307443",
-        "points": 4,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "hn-9764ffccaa2c",
-      "title": "HTTPX2 by Pydantic",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://httpx2.pydantic.dev/",
-      "published_at": "2026-05-14T12:09:33Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
-      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "structured outputs",
-        "hacker-news"
-      ],
-      "score": 61,
-      "raw_json": {
-        "author": "Einenlum",
-        "collection_stage": "live",
-        "comments": 0,
-        "object_id": "48134261",
-        "points": 1,
-        "source": "hacker-news"
-      }
-    },
-    {
-      "id": "ladybugdb-b8cc94227aee",
-      "title": "LadybugDB belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/ladybugdb/ladybugdb",
-      "published_at": "2026-06-04T12:00:00Z",
-      "project": "LadybugDB",
-      "topic": "embedded graph",
-      "summary": "LadybugDB is being tracked for embedded graph signals around ladybugdb, lbug, embedded graph, arrow graph.",
-      "why_it_matters": "LadybugDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "ladybugdb",
-        "lbug",
-        "embedded graph",
-        "arrow graph"
-      ],
-      "score": 57,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/ladybugdb/ladybugdb",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "lakesail-e5ce5d36852a",
-      "title": "LakeSail belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/lakehq/sail",
-      "published_at": "2026-06-14T12:00:00Z",
-      "project": "LakeSail",
-      "topic": "typed dataframes",
-      "summary": "LakeSail is being tracked for typed dataframes signals around sail, spark connect, datafusion, arrow, rust.",
-      "why_it_matters": "LakeSail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "sail",
-        "spark connect",
-        "datafusion",
-        "arrow"
-      ],
-      "score": 87,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/lakehq/sail",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "lancedb-76fb73c47cb",
-      "title": "LanceDB belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://lancedb.com",
-      "published_at": "2026-06-11T12:00:00Z",
-      "project": "LanceDB",
-      "topic": "vector data",
-      "summary": "LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar.",
-      "why_it_matters": "LanceDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "lancedb",
-        "lance",
-        "vectors",
-        "multimodal"
-      ],
-      "score": 78,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://lancedb.com",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "linkedin-3ba44b6aa28a",
-      "title": "LakeSail discussion: typed Spark-compatible execution without giving up local Rust",
-      "source": "LinkedIn",
-      "source_kind": "social",
-      "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail",
-      "published_at": "2026-06-15T10:30:00Z",
-      "project": "LakeSail",
-      "topic": "typed dataframes",
-      "summary": "Several data engineers are watching LakeSail because Spark-compatible APIs, DataFusion, and Arrow make a typed local lakehouse runtime feel plausible.",
-      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in LakeSail without relying on unauthenticated scraping.",
-      "tags": [
-        "sail",
-        "spark connect",
-        "datafusion",
-        "linkedin"
-      ],
-      "score": 76,
-      "raw_json": {
-        "author": "manual import",
-        "collection_stage": "manual",
-        "source": "linkedin"
-      }
-    },
-    {
-      "id": "linkedin-b597c19c144b",
-      "title": "Pydantic AI adoption note",
-      "source": "LinkedIn",
-      "source_kind": "social",
-      "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic",
-      "published_at": "2026-06-14T18:00:00Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "Teams are using Pydantic schemas to keep agent outputs typed, auditable, and easier to move into production data workflows.",
-      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Pydantic without relying on unauthenticated scraping.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "structured outputs",
-        "linkedin"
-      ],
-      "score": 76,
-      "raw_json": {
-        "author": "manual import",
-        "collection_stage": "manual",
-        "source": "linkedin"
-      }
-    },
-    {
-      "id": "medium-7ff0e55a83b1",
-      "title": "The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts",
-      "source": "Medium",
-      "source_kind": "publication",
-      "url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db",
-      "published_at": "2026-06-14T09:46:47Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability.",
-      "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "structured outputs",
         "medium"
       ],
       "score": 88,
       "raw_json": {
         "collection_stage": "live",
-        "feed_url": "https://medium.com/feed/tag/pydantic",
-        "source": "medium"
-      }
-    },
-    {
-      "id": "medium-9a2a1c866f35",
-      "title": "Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline",
-      "source": "Medium",
-      "source_kind": "publication",
-      "url": "https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b",
-      "published_at": "2026-05-28T16:27:14Z",
-      "project": "LanceDB",
-      "topic": "vector data",
-      "summary": "Overview",
-      "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
-      "tags": [
-        "lancedb",
-        "lance",
-        "vectors",
-        "medium"
-      ],
-      "score": 88,
-      "raw_json": {
-        "collection_stage": "live",
-        "feed_url": "https://medium.com/feed/tag/lancedb",
+        "feed_url": "https://medium.com/feed/tag/surrealdb",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4",
+          "matched_keywords": [
+            "surrealdb",
+            "multimodel",
+            "graph",
+            "realtime"
+          ],
+          "project": "SurrealDB",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
         "source": "medium"
       }
     },
@@ -475,7 +183,214 @@
       "score": 88,
       "raw_json": {
         "collection_stage": "live",
+        "duplicates": [
+          {
+            "collection_stage": "live",
+            "id": "medium-f90192ea984c",
+            "project": "Instructor",
+            "score": 68,
+            "source": "Medium",
+            "title": "Why Your AI Agent’s Memory Is Broken and How Pydantic Schemas Fix It",
+            "url": "https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb"
+          }
+        ],
         "feed_url": "https://medium.com/feed/tag/pydantic",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/open-intelligence/why-your-ai-agents-memory-is-broken-and-how-pydantic-schemas-fix-it-86b1a80d74eb",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-7ff0e55a83b1",
+      "title": "The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db",
+      "published_at": "2026-06-14T09:46:47Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Why free-form generative text is an engineering bottleneck and how structure unlocks production reliability.",
+      "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "duplicates": [
+          {
+            "collection_stage": "live",
+            "id": "medium-4d5c6fa4bfd0",
+            "project": "Instructor",
+            "score": 68,
+            "source": "Medium",
+            "title": "The Predictability Crisis: How to Secure Brittle LLM Outputs with Pydantic Data Contracts",
+            "url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db"
+          }
+        ],
+        "feed_url": "https://medium.com/feed/tag/pydantic",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/@SuriNaren/the-predictability-crisis-how-to-secure-brittle-llm-outputs-with-pydantic-data-contracts-a96abe7a16db",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-cb80811f33ce",
+      "title": "Z-Ordering: Multidimensional Clustering for Faster Delta Lake Queries",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@galaheart/z-ordering-multidimensional-clustering-for-faster-delta-lake-queries-ba8d27acdf7b",
+      "published_at": "2026-06-13T15:47:26Z",
+      "project": "Delta Lake",
+      "topic": "lakehouse transactions",
+      "summary": "A deep dive into how Z-ordering reorganizes your Parquet files using space-filling curves, the mathematics behind locality-preserving data…",
+      "why_it_matters": "Long-form publication coverage can show whether Delta Lake is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "delta lake",
+        "deltalake",
+        "transaction log",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/delta-lake",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/@galaheart/z-ordering-multidimensional-clustering-for-faster-delta-lake-queries-ba8d27acdf7b",
+          "matched_keywords": [
+            "delta lake",
+            "deltalake",
+            "transaction log",
+            "lakehouse table",
+            "merge into"
+          ],
+          "project": "Delta Lake",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-f822c06fca97",
+      "title": "Why Game Engines, Apache Arrow, and Even Java Are Converging on Columns",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/@random.droid/why-game-engines-apache-arrow-and-even-java-are-converging-on-columns-85ba91ce70c8",
+      "published_at": "2026-06-11T21:16:33Z",
+      "project": "Apache Arrow",
+      "topic": "typed columnar memory",
+      "summary": "ECS, columnar OLAP, and Project Valhalla are responses to the same hardware constraint",
+      "why_it_matters": "Long-form publication coverage can show whether Apache Arrow is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "apache arrow",
+        "arrow ipc",
+        "arrow flight",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "duplicates": [
+          {
+            "collection_stage": "live",
+            "id": "medium-f822c06fca97",
+            "project": "Apache Arrow",
+            "score": 88,
+            "source": "Medium",
+            "title": "Why Game Engines, Apache Arrow, and Even Java Are Converging on Columns",
+            "url": "https://medium.com/@random.droid/why-game-engines-apache-arrow-and-even-java-are-converging-on-columns-85ba91ce70c8"
+          }
+        ],
+        "feed_url": "https://medium.com/feed/tag/apache-arrow",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/@random.droid/why-game-engines-apache-arrow-and-even-java-are-converging-on-columns-85ba91ce70c8",
+          "matched_keywords": [
+            "apache arrow",
+            "arrow ipc",
+            "arrow flight",
+            "columnar memory",
+            "typed columnar"
+          ],
+          "project": "Apache Arrow",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
+        "source": "medium"
+      }
+    },
+    {
+      "id": "medium-3c8fbd13a27a",
+      "title": "How Do You Enforce Schema Validation in Delta Lake? (Step‑by‑Step with PySpark Example)",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://medium.com/h7w/how-do-you-enforce-schema-validation-in-delta-lake-step-by-step-with-pyspark-example-9ee25c6cc459",
+      "published_at": "2026-06-11T11:40:40Z",
+      "project": "Delta Lake",
+      "topic": "lakehouse transactions",
+      "summary": "Medium surfaced this feed item while tracking Delta Lake signals: delta lake, deltalake, transaction log, lakehouse table, merge into.",
+      "why_it_matters": "Long-form publication coverage can show whether Delta Lake is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "delta lake",
+        "deltalake",
+        "transaction log",
+        "medium"
+      ],
+      "score": 88,
+      "raw_json": {
+        "collection_stage": "live",
+        "feed_url": "https://medium.com/feed/tag/delta-lake",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/h7w/how-do-you-enforce-schema-validation-in-delta-lake-step-by-step-with-pyspark-example-9ee25c6cc459",
+          "matched_keywords": [
+            "delta lake",
+            "deltalake",
+            "transaction log",
+            "lakehouse table",
+            "merge into"
+          ],
+          "project": "Delta Lake",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
         "source": "medium"
       }
     },
@@ -500,199 +415,113 @@
       "raw_json": {
         "collection_stage": "live",
         "feed_url": "https://medium.com/feed/tag/surrealdb",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/surrealdb/surrealdb-3-x-by-the-numbers-eb80078638a0",
+          "matched_keywords": [
+            "surrealdb",
+            "multimodel",
+            "graph",
+            "realtime"
+          ],
+          "project": "SurrealDB",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
         "source": "medium"
       }
     },
     {
-      "id": "medium-fcd377fd2671",
-      "title": "Somnia: A Type-Safe ORM for SurrealDB That Feels Like Diesel",
+      "id": "medium-9a2a1c866f35",
+      "title": "Building a LanceDB-Powered RAG Chatbot with Streamlit and a Custom Embedding Pipeline",
       "source": "Medium",
       "source_kind": "publication",
-      "url": "https://medium.com/@vbasky/somnia-a-type-safe-orm-for-surrealdb-that-feels-like-diesel-7341d49bd5c4",
-      "published_at": "2026-06-14T15:10:18Z",
-      "project": "SurrealDB",
-      "topic": "multimodel data",
-      "summary": "Stop Hand-Writing SurrealQL Strings in Rust",
-      "why_it_matters": "Long-form publication coverage can show whether SurrealDB is being adopted, compared, or explained beyond release traffic.",
+      "url": "https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b",
+      "published_at": "2026-05-28T16:27:14Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "Overview",
+      "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
       "tags": [
-        "surrealdb",
-        "multimodel",
-        "graph",
+        "lancedb",
+        "lance",
+        "vectors",
         "medium"
       ],
       "score": 88,
       "raw_json": {
         "collection_stage": "live",
-        "feed_url": "https://medium.com/feed/tag/surrealdb",
+        "feed_url": "https://medium.com/feed/tag/lancedb",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://medium.com/@v2k.sweet/building-a-lancedb-powered-rag-chatbot-with-streamlit-and-a-custom-embedding-pipeline-ca4244ecab2b",
+          "matched_keywords": [
+            "lancedb",
+            "lance",
+            "vectors",
+            "multimodal",
+            "columnar"
+          ],
+          "project": "LanceDB",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
         "source": "medium"
       }
     },
     {
-      "id": "pggraph-f1ef2151ecc4",
-      "title": "pgGraph belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/apache/age",
-      "published_at": "2026-06-08T12:00:00Z",
-      "project": "pgGraph",
-      "topic": "postgres graph",
-      "summary": "pgGraph is being tracked for postgres graph signals around postgres graph, apache age, cypher, pggraph.",
-      "why_it_matters": "pgGraph helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "id": "medium-72dc676925ef",
+      "title": "Single-Node Data Engineering: DuckDB, DataFusion, Polars, and LakeSail",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://alexmercedtech.medium.com/single-node-data-engineering-duckdb-datafusion-polars-and-lakesail-9581e4c9e1a5",
+      "published_at": "2026-05-27T13:01:02Z",
+      "project": "LakeSail",
+      "topic": "typed dataframes",
+      "summary": "For the past decade, data engineering was synonymous with distributed clusters.",
+      "why_it_matters": "Long-form publication coverage can show whether LakeSail is being adopted, compared, or explained beyond release traffic.",
       "tags": [
-        "postgres graph",
-        "apache age",
-        "cypher",
-        "pggraph"
+        "sail",
+        "spark connect",
+        "datafusion",
+        "medium"
       ],
-      "score": 69,
+      "score": 88,
       "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/apache/age",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "pydantic-19e4620a7634",
-      "title": "Pydantic belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/pydantic/pydantic-ai",
-      "published_at": "2026-06-15T12:00:00Z",
-      "project": "Pydantic",
-      "topic": "typed AI",
-      "summary": "Pydantic is being tracked for typed AI signals around pydantic, typed agents, structured outputs, validation.",
-      "why_it_matters": "Pydantic helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "pydantic",
-        "typed agents",
-        "structured outputs",
-        "validation"
-      ],
-      "score": 90,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/pydantic/pydantic-ai",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "surrealdb-fbad9a0fbf33",
-      "title": "SurrealDB belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://surrealdb.com",
-      "published_at": "2026-06-09T12:00:00Z",
-      "project": "SurrealDB",
-      "topic": "multimodel data",
-      "summary": "SurrealDB is being tracked for multimodel data signals around surrealdb, multimodel, graph, realtime.",
-      "why_it_matters": "SurrealDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "surrealdb",
-        "multimodel",
-        "graph",
-        "realtime"
-      ],
-      "score": 72,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://surrealdb.com",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "turso-33e02aa599d3",
-      "title": "Turso belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://turso.tech",
-      "published_at": "2026-06-12T12:00:00Z",
-      "project": "Turso",
-      "topic": "edge data",
-      "summary": "Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge.",
-      "why_it_matters": "Turso helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "turso",
-        "libsql",
-        "sqlite",
-        "replication"
-      ],
-      "score": 81,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://turso.tech",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "typesec-26fcee3223ad",
-      "title": "TypeSec belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/ChiefScientist-io/typesec",
-      "published_at": "2026-06-06T12:00:00Z",
-      "project": "TypeSec",
-      "topic": "typed security",
-      "summary": "TypeSec is being tracked for typed security signals around typesec, capability, typed policy, security.",
-      "why_it_matters": "TypeSec helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "typesec",
-        "capability",
-        "typed policy",
-        "security"
-      ],
-      "score": 63,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/ChiefScientist-io/typesec",
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "x-twitter-71c585c84d97",
-      "title": "Turso and libSQL edge data note",
-      "source": "X/Twitter",
-      "source_kind": "social",
-      "url": "https://x.com/example/status/1000000000000000002",
-      "published_at": "2026-06-13T16:45:00Z",
-      "project": "Turso",
-      "topic": "edge data",
-      "summary": "Turso and libSQL remain useful signals for teams that want embedded SQLite ergonomics with replication at the edge.",
-      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Turso without relying on unauthenticated scraping.",
-      "tags": [
-        "turso",
-        "libsql",
-        "sqlite",
-        "x-twitter"
-      ],
-      "score": 76,
-      "raw_json": {
-        "author": "manual import",
-        "collection_stage": "manual",
-        "source": "x-twitter"
-      }
-    },
-    {
-      "id": "x-twitter-829833c6230d",
-      "title": "HelixDB launch chatter",
-      "source": "X/Twitter",
-      "source_kind": "social",
-      "url": "https://x.com/example/status/1000000000000000001",
-      "published_at": "2026-06-15T09:00:00Z",
-      "project": "HelixDB",
-      "topic": "graph database",
-      "summary": "HelixDB keeps appearing in graph database threads because object-storage-backed graph systems are now part of the local-first AI/data conversation.",
-      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in HelixDB without relying on unauthenticated scraping.",
-      "tags": [
-        "helixdb",
-        "graph database",
-        "rust graph",
-        "x-twitter"
-      ],
-      "score": 76,
-      "raw_json": {
-        "author": "manual import",
-        "collection_stage": "manual",
-        "source": "x-twitter"
+        "collection_stage": "live",
+        "duplicates": [
+          {
+            "collection_stage": "live",
+            "id": "medium-d6412f10c32",
+            "project": "DataFusion",
+            "score": 88,
+            "source": "Medium",
+            "title": "Single-Node Data Engineering: DuckDB, DataFusion, Polars, and LakeSail",
+            "url": "https://alexmercedtech.medium.com/single-node-data-engineering-duckdb-datafusion-polars-and-lakesail-9581e4c9e1a5"
+          }
+        ],
+        "feed_url": "https://medium.com/feed/tag/apache-arrow",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://alexmercedtech.medium.com/single-node-data-engineering-duckdb-datafusion-polars-and-lakesail-9581e4c9e1a5",
+          "matched_keywords": [
+            "sail",
+            "spark connect",
+            "datafusion",
+            "arrow",
+            "rust"
+          ],
+          "project": "LakeSail",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
+        "source": "medium"
       }
     },
     {
@@ -727,46 +556,6 @@
             "schema"
           ],
           "project": "BAML",
-          "source": "Hacker News",
-          "source_kind": "community",
-          "source_url": "https://news.ycombinator.com",
-          "stage": "watchlist-seed"
-        },
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
-      "id": "dagster-e41635731d59",
-      "title": "Dagster belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/dagster-io/dagster",
-      "published_at": "2026-06-09T12:00:00Z",
-      "project": "Dagster",
-      "topic": "functional data orchestration",
-      "summary": "Dagster is being tracked for functional data orchestration signals around dagster, software-defined assets, data orchestration, asset graph, python.",
-      "why_it_matters": "Dagster helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "dagster",
-        "software-defined assets",
-        "data orchestration",
-        "asset graph"
-      ],
-      "score": 72,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/dagster-io/dagster",
-        "provenance": {
-          "adapter": "watchlist",
-          "evidence_url": "https://github.com/dagster-io/dagster",
-          "matched_keywords": [
-            "dagster",
-            "software-defined assets",
-            "data orchestration",
-            "asset graph",
-            "python"
-          ],
-          "project": "Dagster",
           "source": "Hacker News",
           "source_kind": "community",
           "source_url": "https://news.ycombinator.com",
@@ -815,46 +604,6 @@
       }
     },
     {
-      "id": "ibis-46f219cbb2b4",
-      "title": "Ibis belongs in this week's typed AI/data systems watch",
-      "source": "Hacker News",
-      "source_kind": "community",
-      "url": "https://github.com/ibis-project/ibis",
-      "published_at": "2026-06-10T12:00:00Z",
-      "project": "Ibis",
-      "topic": "functional dataframes",
-      "summary": "Ibis is being tracked for functional dataframes signals around ibis, expression api, dataframes, sql compiler, backend.",
-      "why_it_matters": "Ibis helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-      "tags": [
-        "ibis",
-        "expression api",
-        "dataframes",
-        "sql compiler"
-      ],
-      "score": 75,
-      "raw_json": {
-        "collection_stage": "watchlist-seed",
-        "homepage": "https://github.com/ibis-project/ibis",
-        "provenance": {
-          "adapter": "watchlist",
-          "evidence_url": "https://github.com/ibis-project/ibis",
-          "matched_keywords": [
-            "ibis",
-            "expression api",
-            "dataframes",
-            "sql compiler",
-            "backend"
-          ],
-          "project": "Ibis",
-          "source": "Hacker News",
-          "source_kind": "community",
-          "source_url": "https://news.ycombinator.com",
-          "stage": "watchlist-seed"
-        },
-        "source_url": "https://news.ycombinator.com"
-      }
-    },
-    {
       "id": "instructor-e3008bab94fb",
       "title": "Instructor belongs in this week's typed AI/data systems watch",
       "source": "Hacker News",
@@ -892,6 +641,225 @@
           "stage": "watchlist-seed"
         },
         "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "lakesail-e5ce5d36852a",
+      "title": "LakeSail belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/lakehq/sail",
+      "published_at": "2026-06-11T12:00:00Z",
+      "project": "LakeSail",
+      "topic": "typed dataframes",
+      "summary": "LakeSail is being tracked for typed dataframes signals around sail, spark connect, datafusion, arrow, rust.",
+      "why_it_matters": "LakeSail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "sail",
+        "spark connect",
+        "datafusion",
+        "arrow"
+      ],
+      "score": 78,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/lakehq/sail",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/lakehq/sail",
+          "matched_keywords": [
+            "sail",
+            "spark connect",
+            "datafusion",
+            "arrow",
+            "rust"
+          ],
+          "project": "LakeSail",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "linkedin-3ba44b6aa28a",
+      "title": "LakeSail discussion: typed Spark-compatible execution without giving up local Rust",
+      "source": "LinkedIn",
+      "source_kind": "social",
+      "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail",
+      "published_at": "2026-06-15T10:30:00Z",
+      "project": "LakeSail",
+      "topic": "typed dataframes",
+      "summary": "Several data engineers are watching LakeSail because Spark-compatible APIs, DataFusion, and Arrow make a typed local lakehouse runtime feel plausible.",
+      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in LakeSail without relying on unauthenticated scraping.",
+      "tags": [
+        "sail",
+        "spark connect",
+        "datafusion",
+        "linkedin"
+      ],
+      "score": 76,
+      "raw_json": {
+        "author": "manual import",
+        "collection_stage": "manual",
+        "duplicates": [
+          {
+            "collection_stage": "manual",
+            "id": "linkedin-6de83bd6233",
+            "project": "DataFusion",
+            "score": 76,
+            "source": "LinkedIn",
+            "title": "LakeSail discussion: typed Spark-compatible execution without giving up local Rust",
+            "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail"
+          }
+        ],
+        "provenance": {
+          "adapter": "manual-json",
+          "evidence_url": "https://www.linkedin.com/feed/update/urn:li:activity:example-lakesail",
+          "matched_keywords": [
+            "sail",
+            "spark connect",
+            "datafusion",
+            "arrow",
+            "rust"
+          ],
+          "project": "LakeSail",
+          "source": "LinkedIn",
+          "source_kind": "social",
+          "source_url": "https://www.linkedin.com",
+          "stage": "manual"
+        },
+        "source": "linkedin"
+      }
+    },
+    {
+      "id": "x-twitter-829833c6230d",
+      "title": "HelixDB launch chatter",
+      "source": "X/Twitter",
+      "source_kind": "social",
+      "url": "https://x.com/example/status/1000000000000000001",
+      "published_at": "2026-06-15T09:00:00Z",
+      "project": "HelixDB",
+      "topic": "graph database",
+      "summary": "HelixDB keeps appearing in graph database threads because object-storage-backed graph systems are now part of the local-first AI/data conversation.",
+      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in HelixDB without relying on unauthenticated scraping.",
+      "tags": [
+        "helixdb",
+        "graph database",
+        "rust graph",
+        "x-twitter"
+      ],
+      "score": 76,
+      "raw_json": {
+        "author": "manual import",
+        "collection_stage": "manual",
+        "provenance": {
+          "adapter": "manual-json",
+          "evidence_url": "https://x.com/example/status/1000000000000000001",
+          "matched_keywords": [
+            "helixdb",
+            "graph database",
+            "rust graph"
+          ],
+          "project": "HelixDB",
+          "source": "X/Twitter",
+          "source_kind": "social",
+          "source_url": "https://x.com",
+          "stage": "manual"
+        },
+        "source": "x-twitter"
+      }
+    },
+    {
+      "id": "linkedin-b597c19c144b",
+      "title": "Pydantic AI adoption note",
+      "source": "LinkedIn",
+      "source_kind": "social",
+      "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic",
+      "published_at": "2026-06-14T18:00:00Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Teams are using Pydantic schemas to keep agent outputs typed, auditable, and easier to move into production data workflows.",
+      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Pydantic without relying on unauthenticated scraping.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "linkedin"
+      ],
+      "score": 76,
+      "raw_json": {
+        "author": "manual import",
+        "collection_stage": "manual",
+        "duplicates": [
+          {
+            "collection_stage": "manual",
+            "id": "linkedin-47ca0adda643",
+            "project": "Instructor",
+            "score": 76,
+            "source": "LinkedIn",
+            "title": "Pydantic AI adoption note",
+            "url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic"
+          }
+        ],
+        "provenance": {
+          "adapter": "manual-json",
+          "evidence_url": "https://www.linkedin.com/feed/update/urn:li:activity:example-pydantic",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "LinkedIn",
+          "source_kind": "social",
+          "source_url": "https://www.linkedin.com",
+          "stage": "manual"
+        },
+        "source": "linkedin"
+      }
+    },
+    {
+      "id": "x-twitter-71c585c84d97",
+      "title": "Turso and libSQL edge data note",
+      "source": "X/Twitter",
+      "source_kind": "social",
+      "url": "https://x.com/example/status/1000000000000000002",
+      "published_at": "2026-06-13T16:45:00Z",
+      "project": "Turso",
+      "topic": "edge data",
+      "summary": "Turso and libSQL remain useful signals for teams that want embedded SQLite ergonomics with replication at the edge.",
+      "why_it_matters": "Manually reviewed social posts can capture practitioner interest in Turso without relying on unauthenticated scraping.",
+      "tags": [
+        "turso",
+        "libsql",
+        "sqlite",
+        "x-twitter"
+      ],
+      "score": 76,
+      "raw_json": {
+        "author": "manual import",
+        "collection_stage": "manual",
+        "provenance": {
+          "adapter": "manual-json",
+          "evidence_url": "https://x.com/example/status/1000000000000000002",
+          "matched_keywords": [
+            "turso",
+            "libsql",
+            "sqlite",
+            "replication",
+            "edge"
+          ],
+          "project": "Turso",
+          "source": "X/Twitter",
+          "source_kind": "social",
+          "source_url": "https://x.com",
+          "stage": "manual"
+        },
+        "source": "x-twitter"
       }
     },
     {
@@ -1015,6 +983,798 @@
       }
     },
     {
+      "id": "medium-789f982ee2a",
+      "title": "Apache Data Lakehouse Weekly: May 28 — June 4, 2026",
+      "source": "Medium",
+      "source_kind": "publication",
+      "url": "https://alexmercedtech.medium.com/apache-data-lakehouse-weekly-may-28-june-4-2026-c35adc3e26bd",
+      "published_at": "2026-06-04T14:51:44Z",
+      "project": "LakeSail",
+      "topic": "typed dataframes",
+      "summary": "The lakehouse projects spent this week doing two things at once. They lined up a remarkable stack of releases, with DataFusion 54.0.0 in…",
+      "why_it_matters": "Long-form publication coverage can show whether LakeSail is being adopted, compared, or explained beyond release traffic.",
+      "tags": [
+        "sail",
+        "spark connect",
+        "datafusion",
+        "medium"
+      ],
+      "score": 68,
+      "raw_json": {
+        "collection_stage": "live",
+        "duplicates": [
+          {
+            "collection_stage": "live",
+            "id": "medium-1489fc1c8df4",
+            "project": "DataFusion",
+            "score": 68,
+            "source": "Medium",
+            "title": "Apache Data Lakehouse Weekly: May 28 — June 4, 2026",
+            "url": "https://alexmercedtech.medium.com/apache-data-lakehouse-weekly-may-28-june-4-2026-c35adc3e26bd"
+          }
+        ],
+        "feed_url": "https://medium.com/feed/tag/apache-arrow",
+        "provenance": {
+          "adapter": "rss-atom-feed",
+          "evidence_url": "https://alexmercedtech.medium.com/apache-data-lakehouse-weekly-may-28-june-4-2026-c35adc3e26bd",
+          "matched_keywords": [
+            "sail",
+            "spark connect",
+            "datafusion",
+            "arrow",
+            "rust"
+          ],
+          "project": "LakeSail",
+          "source": "Medium",
+          "source_kind": "publication",
+          "source_url": "https://medium.com",
+          "stage": "live"
+        },
+        "source": "medium"
+      }
+    },
+    {
+      "id": "ibis-46f219cbb2b4",
+      "title": "Ibis belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ibis-project/ibis",
+      "published_at": "2026-06-07T12:00:00Z",
+      "project": "Ibis",
+      "topic": "functional dataframes",
+      "summary": "Ibis is being tracked for functional dataframes signals around ibis, expression api, dataframes, sql compiler, backend.",
+      "why_it_matters": "Ibis helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "ibis",
+        "expression api",
+        "dataframes",
+        "sql compiler"
+      ],
+      "score": 66,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ibis-project/ibis",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/ibis-project/ibis",
+          "matched_keywords": [
+            "ibis",
+            "expression api",
+            "dataframes",
+            "sql compiler",
+            "backend"
+          ],
+          "project": "Ibis",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "hn-7a2fd6799a20",
+      "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
+      "published_at": "2026-05-28T11:26:06Z",
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
+      "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "surrealdb",
+        "multimodel",
+        "graph",
+        "hacker-news"
+      ],
+      "score": 64,
+      "raw_json": {
+        "author": "itsezc",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "48307443",
+        "points": 4,
+        "provenance": {
+          "adapter": "hn-algolia",
+          "evidence_url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
+          "matched_keywords": [
+            "surrealdb",
+            "multimodel",
+            "graph",
+            "realtime"
+          ],
+          "project": "SurrealDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "live"
+        },
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "dagster-e41635731d59",
+      "title": "Dagster belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/dagster-io/dagster",
+      "published_at": "2026-06-06T12:00:00Z",
+      "project": "Dagster",
+      "topic": "functional data orchestration",
+      "summary": "Dagster is being tracked for functional data orchestration signals around dagster, software-defined assets, data orchestration, asset graph, python.",
+      "why_it_matters": "Dagster helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "dagster",
+        "software-defined assets",
+        "data orchestration",
+        "asset graph"
+      ],
+      "score": 63,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/dagster-io/dagster",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/dagster-io/dagster",
+          "matched_keywords": [
+            "dagster",
+            "software-defined assets",
+            "data orchestration",
+            "asset graph",
+            "python"
+          ],
+          "project": "Dagster",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "hn-9764ffccaa2c",
+      "title": "HTTPX2 by Pydantic",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://httpx2.pydantic.dev/",
+      "published_at": "2026-05-14T12:09:33Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
+      "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "structured outputs",
+        "hacker-news"
+      ],
+      "score": 61,
+      "raw_json": {
+        "author": "Einenlum",
+        "collection_stage": "live",
+        "comments": 0,
+        "object_id": "48134261",
+        "points": 1,
+        "provenance": {
+          "adapter": "hn-algolia",
+          "evidence_url": "https://httpx2.pydantic.dev/",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "live"
+        },
+        "source": "hacker-news"
+      }
+    },
+    {
+      "id": "grust-sail-3683deba292c",
+      "title": "Grust Sail belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ChiefScientist-io/grust",
+      "published_at": "2026-06-05T12:00:00Z",
+      "project": "Grust Sail",
+      "topic": "lakehouse graph",
+      "summary": "Grust Sail is being tracked for lakehouse graph signals around grust-sail, grust sail, sail graph, spark connect graph, graph lakehouse.",
+      "why_it_matters": "Grust Sail helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "grust-sail",
+        "grust sail",
+        "sail graph",
+        "spark connect graph"
+      ],
+      "score": 60,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ChiefScientist-io/grust",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/ChiefScientist-io/grust",
+          "matched_keywords": [
+            "grust-sail",
+            "grust sail",
+            "sail graph",
+            "spark connect graph",
+            "graph lakehouse"
+          ],
+          "project": "Grust Sail",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "turso-33e02aa599d3",
+      "title": "Turso belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://turso.tech",
+      "published_at": "2026-06-04T12:00:00Z",
+      "project": "Turso",
+      "topic": "edge data",
+      "summary": "Turso is being tracked for edge data signals around turso, libsql, sqlite, replication, edge.",
+      "why_it_matters": "Turso helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "turso",
+        "libsql",
+        "sqlite",
+        "replication"
+      ],
+      "score": 57,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://turso.tech",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://turso.tech",
+          "matched_keywords": [
+            "turso",
+            "libsql",
+            "sqlite",
+            "replication",
+            "edge"
+          ],
+          "project": "Turso",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "dev-to-eb2d25589cb3",
+      "title": "Pydantic V2 Discriminated Unions in FastAPI: Modeling Polymorphic AI Feature Configs Without Schema Sprawl",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://uguraslim.com/blog/pydantic-v2-discriminated-unions-in-fastapi-modeling-polymor/",
+      "published_at": "2026-06-03T08:00:03Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "Use Pydantic V2's discriminated unions to represent different AI feature types (summarization, classification, generation) with type-safe routing in FastAPI, eliminating conditional logic and catching schema mismatches at validation time instead of runtime.",
+      "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "fastapi",
+        "pydantic",
+        "python",
+        "apidesign"
+      ],
+      "score": 57,
+      "raw_json": {
+        "article_id": 3808896,
+        "author": "uaslimcreate",
+        "collection_stage": "live",
+        "comments": 0,
+        "provenance": {
+          "adapter": "dev-to-articles",
+          "evidence_url": "https://uguraslim.com/blog/pydantic-v2-discriminated-unions-in-fastapi-modeling-polymor/",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "dev.to",
+          "source_kind": "community",
+          "source_url": "https://dev.to",
+          "stage": "live"
+        },
+        "reactions": 2,
+        "source": "dev-to"
+      }
+    },
+    {
+      "id": "dev-to-2767a56afb44",
+      "title": "Structured LLM Outputs with Pydantic v2: Stop Parsing Freeform JSON and Start Typing Your AI",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://dev.to/peytongreen_dev/structured-llm-outputs-with-pydantic-v2-stop-parsing-freeform-json-and-start-typing-your-ai-5201",
+      "published_at": "2026-05-19T14:00:07Z",
+      "project": "Pydantic",
+      "topic": "typed AI",
+      "summary": "The biggest source of subtle bugs in AI applications isn't the model — it's the gap between what you...",
+      "why_it_matters": "Developer essays show whether Pydantic is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "pydantic",
+        "typed agents",
+        "python",
+        "ai",
+        "pydantic",
+        "tutorial"
+      ],
+      "score": 56,
+      "raw_json": {
+        "article_id": 3394799,
+        "author": "peytongreen_dev",
+        "collection_stage": "live",
+        "comments": 1,
+        "provenance": {
+          "adapter": "dev-to-articles",
+          "evidence_url": "https://dev.to/peytongreen_dev/structured-llm-outputs-with-pydantic-v2-stop-parsing-freeform-json-and-start-typing-your-ai-5201",
+          "matched_keywords": [
+            "pydantic",
+            "typed agents",
+            "structured outputs",
+            "validation"
+          ],
+          "project": "Pydantic",
+          "source": "dev.to",
+          "source_kind": "community",
+          "source_url": "https://dev.to",
+          "stage": "live"
+        },
+        "reactions": 0,
+        "source": "dev-to"
+      }
+    },
+    {
+      "id": "dev-to-150f7918316a",
+      "title": "Shift Your Paradigm: Building Self-Improving LLM Workflows with DSPy",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://dev.to/aairom/shift-your-paradigm-building-self-improving-llm-workflows-with-dspy-45bl",
+      "published_at": "2026-06-13T11:27:48Z",
+      "project": "DSPy",
+      "topic": "declarative AI programs",
+      "summary": "A book review of “Building LLM Applications with DSPy”     Disclaimer: I want to be completely...",
+      "why_it_matters": "Developer essays show whether DSPy is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "dspy",
+        "declarative lm",
+        "dspy",
+        "bookreview"
+      ],
+      "score": 55,
+      "raw_json": {
+        "article_id": 3891169,
+        "author": "aairom",
+        "collection_stage": "live",
+        "comments": 0,
+        "provenance": {
+          "adapter": "dev-to-articles",
+          "evidence_url": "https://dev.to/aairom/shift-your-paradigm-building-self-improving-llm-workflows-with-dspy-45bl",
+          "matched_keywords": [
+            "dspy",
+            "declarative lm",
+            "language model programs",
+            "optimizers"
+          ],
+          "project": "DSPy",
+          "source": "dev.to",
+          "source_kind": "community",
+          "source_url": "https://dev.to",
+          "stage": "live"
+        },
+        "reactions": 0,
+        "source": "dev-to"
+      }
+    },
+    {
+      "id": "dev-to-2fd94ce08390",
+      "title": "One object, three interfaces: building a natural-language Kanban board with ExoModel",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://dev.to/pessoabuilds/one-object-three-interfaces-building-a-natural-language-kanban-board-with-exomodel-bhl",
+      "published_at": "2026-06-08T15:39:26Z",
+      "project": "Instructor",
+      "topic": "typed structured outputs",
+      "summary": "Every interface you add to an AI-powered app comes with a tax: an intent router written by hand, for...",
+      "why_it_matters": "Developer essays show whether Instructor is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "instructor",
+        "structured outputs",
+        "python",
+        "ai",
+        "machinelearning",
+        "pydantic"
+      ],
+      "score": 55,
+      "raw_json": {
+        "article_id": 3849901,
+        "author": "pessoabuilds",
+        "collection_stage": "live",
+        "comments": 0,
+        "provenance": {
+          "adapter": "dev-to-articles",
+          "evidence_url": "https://dev.to/pessoabuilds/one-object-three-interfaces-building-a-natural-language-kanban-board-with-exomodel-bhl",
+          "matched_keywords": [
+            "instructor",
+            "structured outputs",
+            "pydantic",
+            "typed extraction",
+            "llm"
+          ],
+          "project": "Instructor",
+          "source": "dev.to",
+          "source_kind": "community",
+          "source_url": "https://dev.to",
+          "stage": "live"
+        },
+        "reactions": 0,
+        "source": "dev-to"
+      }
+    },
+    {
+      "id": "dev-to-9d1c7c978fd4",
+      "title": "Structured Output: Gemini 2.5 Flash & Instructor for Validated JSON",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://agents.getvda.ai/solutions/structured-output-agent-mcp-agent",
+      "published_at": "2026-06-08T06:05:30Z",
+      "project": "Instructor",
+      "topic": "typed structured outputs",
+      "summary": "Meet our 'Structured Output MCP Agent': turning prompts & schemas into validated, typed JSON using Instructor over Gemini 2.5 Flash on Vertex AI. Fast & reliabl",
+      "why_it_matters": "Developer essays show whether Instructor is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "instructor",
+        "structured outputs",
+        "gemini",
+        "instructor",
+        "json",
+        "vertexai"
+      ],
+      "score": 55,
+      "raw_json": {
+        "article_id": 3845791,
+        "author": "mikerawsonnz",
+        "collection_stage": "live",
+        "comments": 0,
+        "provenance": {
+          "adapter": "dev-to-articles",
+          "evidence_url": "https://agents.getvda.ai/solutions/structured-output-agent-mcp-agent",
+          "matched_keywords": [
+            "instructor",
+            "structured outputs",
+            "pydantic",
+            "typed extraction",
+            "llm"
+          ],
+          "project": "Instructor",
+          "source": "dev.to",
+          "source_kind": "community",
+          "source_url": "https://dev.to",
+          "stage": "live"
+        },
+        "reactions": 0,
+        "source": "dev-to"
+      }
+    },
+    {
+      "id": "dev-to-67957d7766bd",
+      "title": "Day 1: I'm Done Writing Prompts by Hand — Meet DSPy",
+      "source": "dev.to",
+      "source_kind": "community",
+      "url": "https://dev.to/sumeet_lalla_6f9e32437132/day-1-im-done-writing-prompts-by-hand-meet-dspy-gha",
+      "published_at": "2026-05-23T06:39:57Z",
+      "project": "DSPy",
+      "topic": "declarative AI programs",
+      "summary": "Let me paint you a picture that probably feels familiar.  You spend 45 minutes crafting the perfect...",
+      "why_it_matters": "Developer essays show whether DSPy is gaining practical adoption beyond release announcements.",
+      "tags": [
+        "dspy",
+        "declarative lm",
+        "dspy",
+        "ai",
+        "llm",
+        "python"
+      ],
+      "score": 55,
+      "raw_json": {
+        "article_id": 3730578,
+        "author": "sumeet_lalla_6f9e32437132",
+        "collection_stage": "live",
+        "comments": 0,
+        "provenance": {
+          "adapter": "dev-to-articles",
+          "evidence_url": "https://dev.to/sumeet_lalla_6f9e32437132/day-1-im-done-writing-prompts-by-hand-meet-dspy-gha",
+          "matched_keywords": [
+            "dspy",
+            "declarative lm",
+            "language model programs",
+            "optimizers"
+          ],
+          "project": "DSPy",
+          "source": "dev.to",
+          "source_kind": "community",
+          "source_url": "https://dev.to",
+          "stage": "live"
+        },
+        "reactions": 0,
+        "source": "dev-to"
+      }
+    },
+    {
+      "id": "lancedb-76fb73c47cb",
+      "title": "LanceDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://lancedb.com",
+      "published_at": "2026-06-03T12:00:00Z",
+      "project": "LanceDB",
+      "topic": "vector data",
+      "summary": "LanceDB is being tracked for vector data signals around lancedb, lance, vectors, multimodal, columnar.",
+      "why_it_matters": "LanceDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "lancedb",
+        "lance",
+        "vectors",
+        "multimodal"
+      ],
+      "score": 54,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://lancedb.com",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://lancedb.com",
+          "matched_keywords": [
+            "lancedb",
+            "lance",
+            "vectors",
+            "multimodal",
+            "columnar"
+          ],
+          "project": "LanceDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "helixdb-8b14f2b883d",
+      "title": "HelixDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/HelixDB/helix-db",
+      "published_at": "2026-06-02T12:00:00Z",
+      "project": "HelixDB",
+      "topic": "graph database",
+      "summary": "HelixDB is being tracked for graph database signals around helixdb, graph database, rust graph.",
+      "why_it_matters": "HelixDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "helixdb",
+        "graph database",
+        "rust graph"
+      ],
+      "score": 51,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/HelixDB/helix-db",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/HelixDB/helix-db",
+          "matched_keywords": [
+            "helixdb",
+            "graph database",
+            "rust graph"
+          ],
+          "project": "HelixDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "surrealdb-fbad9a0fbf33",
+      "title": "SurrealDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://surrealdb.com",
+      "published_at": "2026-06-01T12:00:00Z",
+      "project": "SurrealDB",
+      "topic": "multimodel data",
+      "summary": "SurrealDB is being tracked for multimodel data signals around surrealdb, multimodel, graph, realtime.",
+      "why_it_matters": "SurrealDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "surrealdb",
+        "multimodel",
+        "graph",
+        "realtime"
+      ],
+      "score": 48,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://surrealdb.com",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://surrealdb.com",
+          "matched_keywords": [
+            "surrealdb",
+            "multimodel",
+            "graph",
+            "realtime"
+          ],
+          "project": "SurrealDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "pggraph-f1ef2151ecc4",
+      "title": "pgGraph belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/apache/age",
+      "published_at": "2026-05-31T12:00:00Z",
+      "project": "pgGraph",
+      "topic": "postgres graph",
+      "summary": "pgGraph is being tracked for postgres graph signals around postgres graph, apache age, cypher, pggraph.",
+      "why_it_matters": "pgGraph helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "postgres graph",
+        "apache age",
+        "cypher",
+        "pggraph"
+      ],
+      "score": 45,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/apache/age",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/apache/age",
+          "matched_keywords": [
+            "postgres graph",
+            "apache age",
+            "cypher",
+            "pggraph"
+          ],
+          "project": "pgGraph",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "grust-210a95e033dd",
+      "title": "Grust belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ChiefScientist-io/grust",
+      "published_at": "2026-05-30T12:00:00Z",
+      "project": "Grust",
+      "topic": "typed graph",
+      "summary": "Grust is being tracked for typed graph signals around grust, typed graph, rust, cypher.",
+      "why_it_matters": "Grust helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "grust",
+        "typed graph",
+        "rust",
+        "cypher"
+      ],
+      "score": 42,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ChiefScientist-io/grust",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/ChiefScientist-io/grust",
+          "matched_keywords": [
+            "grust",
+            "typed graph",
+            "rust",
+            "cypher"
+          ],
+          "project": "Grust",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "typesec-26fcee3223ad",
+      "title": "TypeSec belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ChiefScientist-io/typesec",
+      "published_at": "2026-05-29T12:00:00Z",
+      "project": "TypeSec",
+      "topic": "typed security",
+      "summary": "TypeSec is being tracked for typed security signals around typesec, capability, typed policy, security.",
+      "why_it_matters": "TypeSec helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "typesec",
+        "capability",
+        "typed policy",
+        "security"
+      ],
+      "score": 39,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ChiefScientist-io/typesec",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/ChiefScientist-io/typesec",
+          "matched_keywords": [
+            "typesec",
+            "capability",
+            "typed policy",
+            "security"
+          ],
+          "project": "TypeSec",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
       "id": "garde-284864e88b4",
       "title": "Garde belongs in this week's typed AI/data systems watch",
       "source": "Hacker News",
@@ -1093,6 +1853,123 @@
         },
         "source_url": "https://news.ycombinator.com"
       }
+    },
+    {
+      "id": "falkordb-190182f5cc50",
+      "title": "FalkorDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://www.falkordb.com",
+      "published_at": "2026-05-26T12:00:00Z",
+      "project": "FalkorDB",
+      "topic": "graph database",
+      "summary": "FalkorDB is being tracked for graph database signals around falkordb, redis graph, cypher graph, graph query.",
+      "why_it_matters": "FalkorDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "falkordb",
+        "redis graph",
+        "cypher graph",
+        "graph query"
+      ],
+      "score": 30,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://www.falkordb.com",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://www.falkordb.com",
+          "matched_keywords": [
+            "falkordb",
+            "redis graph",
+            "cypher graph",
+            "graph query"
+          ],
+          "project": "FalkorDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "ladybugdb-b8cc94227aee",
+      "title": "LadybugDB belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/ladybugdb/ladybugdb",
+      "published_at": "2026-05-25T12:00:00Z",
+      "project": "LadybugDB",
+      "topic": "embedded graph",
+      "summary": "LadybugDB is being tracked for embedded graph signals around ladybugdb, lbug, embedded graph, arrow graph.",
+      "why_it_matters": "LadybugDB helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "ladybugdb",
+        "lbug",
+        "embedded graph",
+        "arrow graph"
+      ],
+      "score": 27,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/ladybugdb/ladybugdb",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/ladybugdb/ladybugdb",
+          "matched_keywords": [
+            "ladybugdb",
+            "lbug",
+            "embedded graph",
+            "arrow graph"
+          ],
+          "project": "LadybugDB",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
+    },
+    {
+      "id": "cocoindex-b8a70bfc0beb",
+      "title": "CocoIndex belongs in this week's typed AI/data systems watch",
+      "source": "Hacker News",
+      "source_kind": "community",
+      "url": "https://github.com/cocoindex-io/cocoindex",
+      "published_at": "2026-05-24T12:00:00Z",
+      "project": "CocoIndex",
+      "topic": "incremental indexing",
+      "summary": "CocoIndex is being tracked for incremental indexing signals around cocoindex, target state, incremental indexing, knowledge graph.",
+      "why_it_matters": "CocoIndex helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+      "tags": [
+        "cocoindex",
+        "target state",
+        "incremental indexing",
+        "knowledge graph"
+      ],
+      "score": 24,
+      "raw_json": {
+        "collection_stage": "watchlist-seed",
+        "homepage": "https://github.com/cocoindex-io/cocoindex",
+        "provenance": {
+          "adapter": "watchlist",
+          "evidence_url": "https://github.com/cocoindex-io/cocoindex",
+          "matched_keywords": [
+            "cocoindex",
+            "target state",
+            "incremental indexing",
+            "knowledge graph"
+          ],
+          "project": "CocoIndex",
+          "source": "Hacker News",
+          "source_kind": "community",
+          "source_url": "https://news.ycombinator.com",
+          "stage": "watchlist-seed"
+        },
+        "source_url": "https://news.ycombinator.com"
+      }
     }
   ],
   "source_runs": [
@@ -1120,9 +1997,11 @@
       "source": "dev.to",
       "kind": "community",
       "status": "ok",
-      "item_count": 2,
+      "item_count": 6,
       "message": "dev.to articles API",
       "project_counts": {
+        "DSPy": 2,
+        "Instructor": 2,
         "Pydantic": 2
       }
     },
@@ -1130,9 +2009,14 @@
       "source": "Medium",
       "kind": "publication",
       "status": "ok",
-      "item_count": 5,
+      "item_count": 15,
       "message": "configured RSS/Atom feeds",
       "project_counts": {
+        "Apache Arrow": 2,
+        "DataFusion": 2,
+        "Delta Lake": 2,
+        "Instructor": 2,
+        "LakeSail": 2,
         "LanceDB": 1,
         "Pydantic": 2,
         "SurrealDB": 2
@@ -1150,9 +2034,11 @@
       "source": "LinkedIn",
       "kind": "social",
       "status": "ok",
-      "item_count": 2,
-      "message": "manual JSON import",
+      "item_count": 4,
+      "message": "manual JSON import; 2 reviewed posts",
       "project_counts": {
+        "DataFusion": 1,
+        "Instructor": 1,
         "LakeSail": 1,
         "Pydantic": 1
       }
@@ -1162,7 +2048,7 @@
       "kind": "social",
       "status": "ok",
       "item_count": 2,
-      "message": "manual JSON import",
+      "message": "manual JSON import; 2 reviewed posts",
       "project_counts": {
         "HelixDB": 1,
         "Turso": 1
@@ -1179,6 +2065,50 @@
       ],
       "dev_to_tags": [
         "pydantic"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Pydantic pydantic",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Pydantic+pydantic&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Pydantic pydantic",
+          "url": "https://lobste.rs/search?q=Pydantic+pydantic&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #pydantic",
+          "url": "https://dev.to/t/pydantic/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: pydantic",
+          "url": "https://medium.com/search?q=pydantic",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: pydantic",
+          "url": "https://substack.com/search?q=pydantic",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Pydantic pydantic",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Pydantic+pydantic",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Pydantic pydantic",
+          "url": "https://x.com/search?q=Pydantic+pydantic&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1190,6 +2120,50 @@
       ],
       "dev_to_tags": [
         "baml"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: BAML baml",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=BAML+baml&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: BAML baml",
+          "url": "https://lobste.rs/search?q=BAML+baml&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #baml",
+          "url": "https://dev.to/t/baml/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: baml",
+          "url": "https://medium.com/search?q=baml",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: baml",
+          "url": "https://substack.com/search?q=baml",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: BAML baml",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=BAML+baml",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: BAML baml",
+          "url": "https://x.com/search?q=BAML+baml&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1201,6 +2175,50 @@
       ],
       "dev_to_tags": [
         "dspy"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: DSPy dspy",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=DSPy+dspy&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: DSPy dspy",
+          "url": "https://lobste.rs/search?q=DSPy+dspy&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #dspy",
+          "url": "https://dev.to/t/dspy/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: dspy",
+          "url": "https://medium.com/search?q=dspy",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: dspy",
+          "url": "https://substack.com/search?q=dspy",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: DSPy dspy",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=DSPy+dspy",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: DSPy dspy",
+          "url": "https://x.com/search?q=DSPy+dspy&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1214,6 +2232,68 @@
       "dev_to_tags": [
         "instructor",
         "pydantic"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Instructor instructor pydantic",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Instructor+instructor+pydantic&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Instructor instructor pydantic",
+          "url": "https://lobste.rs/search?q=Instructor+instructor+pydantic&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #instructor",
+          "url": "https://dev.to/t/instructor/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #pydantic",
+          "url": "https://dev.to/t/pydantic/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: instructor",
+          "url": "https://medium.com/search?q=instructor",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: pydantic",
+          "url": "https://medium.com/search?q=pydantic",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: instructor",
+          "url": "https://substack.com/search?q=instructor",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: pydantic",
+          "url": "https://substack.com/search?q=pydantic",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Instructor instructor pydantic",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Instructor+instructor+pydantic",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Instructor instructor pydantic",
+          "url": "https://x.com/search?q=Instructor+instructor+pydantic&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1228,6 +2308,68 @@
         "datafusion",
         "lakesail",
         "sail"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: LakeSail sail datafusion",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=LakeSail+sail+datafusion&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: LakeSail sail datafusion",
+          "url": "https://lobste.rs/search?q=LakeSail+sail+datafusion&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #datafusion",
+          "url": "https://dev.to/t/datafusion/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #lakesail",
+          "url": "https://dev.to/t/lakesail/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: sail",
+          "url": "https://medium.com/search?q=sail",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: datafusion",
+          "url": "https://medium.com/search?q=datafusion",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: sail",
+          "url": "https://substack.com/search?q=sail",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: datafusion",
+          "url": "https://substack.com/search?q=datafusion",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: LakeSail sail datafusion",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=LakeSail+sail+datafusion",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: LakeSail sail datafusion",
+          "url": "https://x.com/search?q=LakeSail+sail+datafusion&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1247,6 +2389,68 @@
         "arrowipc",
         "columnarmemory",
         "typedcolumnar"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Apache Arrow apache arrow arrow ipc",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Apache+Arrow+apache+arrow+arrow+ipc&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Apache Arrow apache arrow arrow ipc",
+          "url": "https://lobste.rs/search?q=Apache+Arrow+apache+arrow+arrow+ipc&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #apachearrow",
+          "url": "https://dev.to/t/apachearrow/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #arrowflight",
+          "url": "https://dev.to/t/arrowflight/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: apache arrow",
+          "url": "https://medium.com/search?q=apache+arrow",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: arrow ipc",
+          "url": "https://medium.com/search?q=arrow+ipc",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: apache arrow",
+          "url": "https://substack.com/search?q=apache+arrow",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: arrow ipc",
+          "url": "https://substack.com/search?q=arrow+ipc",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Apache Arrow apache arrow arrow ipc",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Apache+Arrow+apache+arrow+arrow+ipc",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Apache Arrow apache arrow arrow ipc",
+          "url": "https://x.com/search?q=Apache+Arrow+apache+arrow+arrow+ipc&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1262,6 +2466,68 @@
         "datafusion",
         "queryengine",
         "sqlplanner"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: DataFusion datafusion query engine",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=DataFusion+datafusion+query+engine&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: DataFusion datafusion query engine",
+          "url": "https://lobste.rs/search?q=DataFusion+datafusion+query+engine&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #datafusion",
+          "url": "https://dev.to/t/datafusion/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #queryengine",
+          "url": "https://dev.to/t/queryengine/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: datafusion",
+          "url": "https://medium.com/search?q=datafusion",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: query engine",
+          "url": "https://medium.com/search?q=query+engine",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: datafusion",
+          "url": "https://substack.com/search?q=datafusion",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: query engine",
+          "url": "https://substack.com/search?q=query+engine",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: DataFusion datafusion query engine",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=DataFusion+datafusion+query+engine",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: DataFusion datafusion query engine",
+          "url": "https://x.com/search?q=DataFusion+datafusion+query+engine&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1280,6 +2546,68 @@
         "lakehousetable",
         "mergeinto",
         "transactionlog"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Delta Lake delta lake deltalake",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Delta+Lake+delta+lake+deltalake&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Delta Lake delta lake deltalake",
+          "url": "https://lobste.rs/search?q=Delta+Lake+delta+lake+deltalake&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #deltalake",
+          "url": "https://dev.to/t/deltalake/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #lakehousetable",
+          "url": "https://dev.to/t/lakehousetable/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: delta lake",
+          "url": "https://medium.com/search?q=delta+lake",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: deltalake",
+          "url": "https://medium.com/search?q=deltalake",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: delta lake",
+          "url": "https://substack.com/search?q=delta+lake",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: deltalake",
+          "url": "https://substack.com/search?q=deltalake",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Delta Lake delta lake deltalake",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Delta+Lake+delta+lake+deltalake",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Delta Lake delta lake deltalake",
+          "url": "https://x.com/search?q=Delta+Lake+delta+lake+deltalake&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1291,6 +2619,50 @@
       ],
       "dev_to_tags": [
         "ibis"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Ibis ibis",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Ibis+ibis&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Ibis ibis",
+          "url": "https://lobste.rs/search?q=Ibis+ibis&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #ibis",
+          "url": "https://dev.to/t/ibis/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: ibis",
+          "url": "https://medium.com/search?q=ibis",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: ibis",
+          "url": "https://substack.com/search?q=ibis",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Ibis ibis",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Ibis+ibis",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Ibis ibis",
+          "url": "https://x.com/search?q=Ibis+ibis&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1304,6 +2676,68 @@
       "dev_to_tags": [
         "assetgraph",
         "dagster"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Dagster dagster asset graph",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Dagster+dagster+asset+graph&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Dagster dagster asset graph",
+          "url": "https://lobste.rs/search?q=Dagster+dagster+asset+graph&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #assetgraph",
+          "url": "https://dev.to/t/assetgraph/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #dagster",
+          "url": "https://dev.to/t/dagster/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: dagster",
+          "url": "https://medium.com/search?q=dagster",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: asset graph",
+          "url": "https://medium.com/search?q=asset+graph",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: dagster",
+          "url": "https://substack.com/search?q=dagster",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: asset graph",
+          "url": "https://substack.com/search?q=asset+graph",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Dagster dagster asset graph",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Dagster+dagster+asset+graph",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Dagster dagster asset graph",
+          "url": "https://x.com/search?q=Dagster+dagster+asset+graph&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1322,6 +2756,68 @@
         "grustsail",
         "sailgraph",
         "sparkconnectgraph"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Grust Sail grust-sail grust sail",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Grust+Sail+grust-sail+grust+sail&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Grust Sail grust-sail grust sail",
+          "url": "https://lobste.rs/search?q=Grust+Sail+grust-sail+grust+sail&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #graphlakehouse",
+          "url": "https://dev.to/t/graphlakehouse/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #grustsail",
+          "url": "https://dev.to/t/grustsail/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: grust-sail",
+          "url": "https://medium.com/search?q=grust-sail",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: grust sail",
+          "url": "https://medium.com/search?q=grust+sail",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: grust-sail",
+          "url": "https://substack.com/search?q=grust-sail",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: grust sail",
+          "url": "https://substack.com/search?q=grust+sail",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Grust Sail grust-sail grust sail",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Grust+Sail+grust-sail+grust+sail",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Grust Sail grust-sail grust sail",
+          "url": "https://x.com/search?q=Grust+Sail+grust-sail+grust+sail&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1335,6 +2831,68 @@
       "dev_to_tags": [
         "libsql",
         "turso"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Turso turso libsql",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Turso+turso+libsql&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Turso turso libsql",
+          "url": "https://lobste.rs/search?q=Turso+turso+libsql&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #libsql",
+          "url": "https://dev.to/t/libsql/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #turso",
+          "url": "https://dev.to/t/turso/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: turso",
+          "url": "https://medium.com/search?q=turso",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: libsql",
+          "url": "https://medium.com/search?q=libsql",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: turso",
+          "url": "https://substack.com/search?q=turso",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: libsql",
+          "url": "https://substack.com/search?q=libsql",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Turso turso libsql",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Turso+turso+libsql",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Turso turso libsql",
+          "url": "https://x.com/search?q=Turso+turso+libsql&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1346,6 +2904,50 @@
       ],
       "dev_to_tags": [
         "lancedb"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: LanceDB lancedb",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=LanceDB+lancedb&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: LanceDB lancedb",
+          "url": "https://lobste.rs/search?q=LanceDB+lancedb&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #lancedb",
+          "url": "https://dev.to/t/lancedb/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: lancedb",
+          "url": "https://medium.com/search?q=lancedb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: lancedb",
+          "url": "https://substack.com/search?q=lancedb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: LanceDB lancedb",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=LanceDB+lancedb",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: LanceDB lancedb",
+          "url": "https://x.com/search?q=LanceDB+lancedb&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1357,6 +2959,50 @@
       ],
       "dev_to_tags": [
         "helixdb"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: HelixDB helixdb",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=HelixDB+helixdb&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: HelixDB helixdb",
+          "url": "https://lobste.rs/search?q=HelixDB+helixdb&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #helixdb",
+          "url": "https://dev.to/t/helixdb/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: helixdb",
+          "url": "https://medium.com/search?q=helixdb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: helixdb",
+          "url": "https://substack.com/search?q=helixdb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: HelixDB helixdb",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=HelixDB+helixdb",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: HelixDB helixdb",
+          "url": "https://x.com/search?q=HelixDB+helixdb&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1368,6 +3014,50 @@
       ],
       "dev_to_tags": [
         "surrealdb"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: SurrealDB surrealdb",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=SurrealDB+surrealdb&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: SurrealDB surrealdb",
+          "url": "https://lobste.rs/search?q=SurrealDB+surrealdb&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #surrealdb",
+          "url": "https://dev.to/t/surrealdb/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: surrealdb",
+          "url": "https://medium.com/search?q=surrealdb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: surrealdb",
+          "url": "https://substack.com/search?q=surrealdb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: SurrealDB surrealdb",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=SurrealDB+surrealdb",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: SurrealDB surrealdb",
+          "url": "https://x.com/search?q=SurrealDB+surrealdb&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1383,6 +3073,68 @@
         "apacheage",
         "pggraph",
         "postgresgraph"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: pgGraph postgres graph apache age",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=pgGraph+postgres+graph+apache+age&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: pgGraph postgres graph apache age",
+          "url": "https://lobste.rs/search?q=pgGraph+postgres+graph+apache+age&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #apacheage",
+          "url": "https://dev.to/t/apacheage/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #pggraph",
+          "url": "https://dev.to/t/pggraph/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: postgres graph",
+          "url": "https://medium.com/search?q=postgres+graph",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: apache age",
+          "url": "https://medium.com/search?q=apache+age",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: postgres graph",
+          "url": "https://substack.com/search?q=postgres+graph",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: apache age",
+          "url": "https://substack.com/search?q=apache+age",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: pgGraph postgres graph apache age",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=pgGraph+postgres+graph+apache+age",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: pgGraph postgres graph apache age",
+          "url": "https://x.com/search?q=pgGraph+postgres+graph+apache+age&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1394,6 +3146,50 @@
       ],
       "dev_to_tags": [
         "grust"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Grust grust",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Grust+grust&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Grust grust",
+          "url": "https://lobste.rs/search?q=Grust+grust&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #grust",
+          "url": "https://dev.to/t/grust/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: grust",
+          "url": "https://medium.com/search?q=grust",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: grust",
+          "url": "https://substack.com/search?q=grust",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Grust grust",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Grust+grust",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Grust grust",
+          "url": "https://x.com/search?q=Grust+grust&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1405,6 +3201,50 @@
       ],
       "dev_to_tags": [
         "typesec"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: TypeSec typesec",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=TypeSec+typesec&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: TypeSec typesec",
+          "url": "https://lobste.rs/search?q=TypeSec+typesec&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #typesec",
+          "url": "https://dev.to/t/typesec/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: typesec",
+          "url": "https://medium.com/search?q=typesec",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: typesec",
+          "url": "https://substack.com/search?q=typesec",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: TypeSec typesec",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=TypeSec+typesec",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: TypeSec typesec",
+          "url": "https://x.com/search?q=TypeSec+typesec&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1424,6 +3264,68 @@
         "rustvalidation",
         "schemachecks",
         "typedvalidation"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: Garde garde rust validation",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=Garde+garde+rust+validation&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: Garde garde rust validation",
+          "url": "https://lobste.rs/search?q=Garde+garde+rust+validation&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #derivevalidate",
+          "url": "https://dev.to/t/derivevalidate/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #garde",
+          "url": "https://dev.to/t/garde/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: garde",
+          "url": "https://medium.com/search?q=garde",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: rust validation",
+          "url": "https://medium.com/search?q=rust+validation",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: garde",
+          "url": "https://substack.com/search?q=garde",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: rust validation",
+          "url": "https://substack.com/search?q=rust+validation",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: Garde garde rust validation",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=Garde+garde+rust+validation",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: Garde garde rust validation",
+          "url": "https://x.com/search?q=Garde+garde+rust+validation&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1440,6 +3342,68 @@
         "rustschemavalidation",
         "typedschemas",
         "zodrs"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: zod-rs zod-rs zod rs",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=zod-rs+zod-rs+zod+rs&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: zod-rs zod-rs zod rs",
+          "url": "https://lobste.rs/search?q=zod-rs+zod-rs+zod+rs&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #rustschemavalidation",
+          "url": "https://dev.to/t/rustschemavalidation/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #typedschemas",
+          "url": "https://dev.to/t/typedschemas/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: zod-rs",
+          "url": "https://medium.com/search?q=zod-rs",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: zod rs",
+          "url": "https://medium.com/search?q=zod+rs",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: zod-rs",
+          "url": "https://substack.com/search?q=zod-rs",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: zod rs",
+          "url": "https://substack.com/search?q=zod+rs",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: zod-rs zod-rs zod rs",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=zod-rs+zod-rs+zod+rs",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: zod-rs zod-rs zod rs",
+          "url": "https://x.com/search?q=zod-rs+zod-rs+zod+rs&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1455,6 +3419,68 @@
         "cyphergraph",
         "falkordb",
         "redisgraph"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: FalkorDB falkordb redis graph",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=FalkorDB+falkordb+redis+graph&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: FalkorDB falkordb redis graph",
+          "url": "https://lobste.rs/search?q=FalkorDB+falkordb+redis+graph&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #cyphergraph",
+          "url": "https://dev.to/t/cyphergraph/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #falkordb",
+          "url": "https://dev.to/t/falkordb/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: falkordb",
+          "url": "https://medium.com/search?q=falkordb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: redis graph",
+          "url": "https://medium.com/search?q=redis+graph",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: falkordb",
+          "url": "https://substack.com/search?q=falkordb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: redis graph",
+          "url": "https://substack.com/search?q=redis+graph",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: FalkorDB falkordb redis graph",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=FalkorDB+falkordb+redis+graph",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: FalkorDB falkordb redis graph",
+          "url": "https://x.com/search?q=FalkorDB+falkordb+redis+graph&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1470,6 +3496,68 @@
         "arrowgraph",
         "ladybugdb",
         "lbug"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: LadybugDB ladybugdb lbug",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=LadybugDB+ladybugdb+lbug&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: LadybugDB ladybugdb lbug",
+          "url": "https://lobste.rs/search?q=LadybugDB+ladybugdb+lbug&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #arrowgraph",
+          "url": "https://dev.to/t/arrowgraph/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #ladybugdb",
+          "url": "https://dev.to/t/ladybugdb/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: ladybugdb",
+          "url": "https://medium.com/search?q=ladybugdb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: lbug",
+          "url": "https://medium.com/search?q=lbug",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: ladybugdb",
+          "url": "https://substack.com/search?q=ladybugdb",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: lbug",
+          "url": "https://substack.com/search?q=lbug",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: LadybugDB ladybugdb lbug",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=LadybugDB+ladybugdb+lbug",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: LadybugDB ladybugdb lbug",
+          "url": "https://x.com/search?q=LadybugDB+ladybugdb+lbug&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     },
     {
@@ -1485,6 +3573,68 @@
         "cocoindex",
         "incrementalindexing",
         "targetstate"
+      ],
+      "review_targets": [
+        {
+          "source": "Hacker News",
+          "label": "HN: CocoIndex cocoindex target state",
+          "url": "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=CocoIndex+cocoindex+target+state&sort=byDate&type=story",
+          "adapter": "hn-algolia"
+        },
+        {
+          "source": "Lobste.rs",
+          "label": "Lobste.rs: CocoIndex cocoindex target state",
+          "url": "https://lobste.rs/search?q=CocoIndex+cocoindex+target+state&what=stories&order=newest",
+          "adapter": "lobsters-search"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #cocoindex",
+          "url": "https://dev.to/t/cocoindex/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "dev.to",
+          "label": "dev.to #incrementalindexing",
+          "url": "https://dev.to/t/incrementalindexing/latest",
+          "adapter": "dev-to-tag"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: cocoindex",
+          "url": "https://medium.com/search?q=cocoindex",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Medium",
+          "label": "Medium: target state",
+          "url": "https://medium.com/search?q=target+state",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: cocoindex",
+          "url": "https://substack.com/search?q=cocoindex",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "Substack",
+          "label": "Substack: target state",
+          "url": "https://substack.com/search?q=target+state",
+          "adapter": "publication-search"
+        },
+        {
+          "source": "LinkedIn",
+          "label": "LinkedIn posts: CocoIndex cocoindex target state",
+          "url": "https://www.linkedin.com/search/results/content/?keywords=CocoIndex+cocoindex+target+state",
+          "adapter": "manual-review"
+        },
+        {
+          "source": "X/Twitter",
+          "label": "X latest: CocoIndex cocoindex target state",
+          "url": "https://x.com/search?q=CocoIndex+cocoindex+target+state&src=typed_query&f=live",
+          "adapter": "manual-review"
+        }
       ]
     }
   ]

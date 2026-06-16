@@ -57,6 +57,15 @@ if (!byProject.get('Garde')?.live_terms.includes('garde')) {
 if (!byProject.get('zod-rs')?.live_terms.includes('zod-rs')) {
   throw new Error('zod-rs live terms lost the crate name')
 }
+const pydanticTargets = byProject.get('Pydantic')?.review_targets ?? []
+for (const source of ['Hacker News', 'Substack', 'LinkedIn', 'X/Twitter']) {
+  if (!pydanticTargets.some((target) => target.source === source && /^https:\/\//.test(target.url))) {
+    throw new Error(`Pydantic query plan is missing ${source} review target`)
+  }
+}
+if (!pydanticTargets.some((target) => target.source === 'LinkedIn' && target.adapter === 'manual-review')) {
+  throw new Error('LinkedIn review target should be marked for manual review')
+}
 
 const stateDir = await mkdtemp(join(tmpdir(), 'verdun-query-focus-'))
 try {

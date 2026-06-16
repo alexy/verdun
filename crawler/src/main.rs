@@ -182,7 +182,17 @@ struct ProjectQueryPlan {
     live_terms: Vec<String>,
     dev_to_tags: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    review_targets: Vec<ReviewTarget>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     focus_terms: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ReviewTarget {
+    source: String,
+    label: String,
+    url: String,
+    adapter: String,
 }
 
 fn collect(
@@ -314,7 +324,7 @@ fn export_sql(
     }
     for plan in &query_plans {
         sql.push_str("insert into newsletter_query_plans (\n");
-        sql.push_str("  project, topic, hacker_news_query, live_terms, dev_to_tags, focus_terms, updated_at\n");
+        sql.push_str("  project, topic, hacker_news_query, live_terms, dev_to_tags, review_targets, focus_terms, updated_at\n");
         sql.push_str(") values (");
         sql.push_str(&sql_string(&plan.project));
         sql.push_str(", ");
@@ -326,6 +336,8 @@ fn export_sql(
         sql.push_str(", ");
         sql.push_str(&sql_text_array(&plan.dev_to_tags));
         sql.push_str(", ");
+        sql.push_str(&sql_string(&serde_json::to_string(&plan.review_targets)?));
+        sql.push_str("::jsonb, ");
         sql.push_str(&sql_text_array(&plan.focus_terms));
         sql.push_str(", now())\n");
         sql.push_str("on conflict (project) do update set\n");
@@ -333,6 +345,7 @@ fn export_sql(
         sql.push_str("  hacker_news_query = excluded.hacker_news_query,\n");
         sql.push_str("  live_terms = excluded.live_terms,\n");
         sql.push_str("  dev_to_tags = excluded.dev_to_tags,\n");
+        sql.push_str("  review_targets = excluded.review_targets,\n");
         sql.push_str("  focus_terms = excluded.focus_terms,\n");
         sql.push_str("  updated_at = excluded.updated_at;\n\n");
     }
@@ -432,9 +445,68 @@ fn query_plans(
             hacker_news_query: project_query(project),
             live_terms: project_live_terms(project),
             dev_to_tags: dev_to_tags(project),
+            review_targets: review_targets(watchlist, project),
             focus_terms: project_focus_terms(project, editorial_focuses),
         })
         .collect::<Vec<_>>()
+}
+
+fn review_targets(watchlist: &Watchlist, project: &Project) -> Vec<ReviewTarget> {
+    let query = project_query(project);
+    let query_param = url_query(&query);
+    let mut targets = Vec::new();
+    for source in &watchlist.sources {
+        match source.name.as_str() {
+            "Hacker News" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("HN: {query}"),
+                url: format!(
+                    "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query={query_param}&sort=byDate&type=story"
+                ),
+                adapter: "hn-algolia".to_string(),
+            }),
+            "Lobste.rs" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("Lobste.rs: {query}"),
+                url: format!("https://lobste.rs/search?q={query_param}&what=stories&order=newest"),
+                adapter: "lobsters-search".to_string(),
+            }),
+            "dev.to" => {
+                for tag in dev_to_tags(project).into_iter().take(2) {
+                    targets.push(ReviewTarget {
+                        source: source.name.clone(),
+                        label: format!("dev.to #{tag}"),
+                        url: format!("https://dev.to/t/{tag}/latest"),
+                        adapter: "dev-to-tag".to_string(),
+                    });
+                }
+            }
+            "Medium" | "Substack" => {
+                for term in project_live_terms(project).into_iter().take(2) {
+                    targets.push(ReviewTarget {
+                        source: source.name.clone(),
+                        label: format!("{}: {term}", source.name),
+                        url: format!("{}/search?q={}", source.url.trim_end_matches('/'), url_query(&term)),
+                        adapter: "publication-search".to_string(),
+                    });
+                }
+            }
+            "LinkedIn" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("LinkedIn posts: {query}"),
+                url: format!("https://www.linkedin.com/search/results/content/?keywords={query_param}"),
+                adapter: "manual-review".to_string(),
+            }),
+            "X/Twitter" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("X latest: {query}"),
+                url: format!("https://x.com/search?q={query_param}&src=typed_query&f=live"),
+                adapter: "manual-review".to_string(),
+            }),
+            _ => {}
+        }
+    }
+    targets
 }
 
 #[derive(Debug, Deserialize)]
@@ -1841,6 +1913,20 @@ fn slug(value: &str) -> String {
         .filter(|part| !part.is_empty())
         .collect::<Vec<_>>()
         .join("-")
+}
+
+fn url_query(value: &str) -> String {
+    let mut encoded = String::new();
+    for byte in value.as_bytes() {
+        match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                encoded.push(char::from(*byte));
+            }
+            b' ' => encoded.push('+'),
+            _ => encoded.push_str(&format!("%{byte:02X}")),
+        }
+    }
+    encoded
 }
 
 fn sql_string(value: &str) -> String {

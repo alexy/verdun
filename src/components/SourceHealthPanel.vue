@@ -32,6 +32,18 @@ function queryPlanSummary(plan: ProjectQueryPlan): string {
   return [terms, tags, focus].filter(Boolean).join(' · ')
 }
 
+function visibleReviewTargets(plan: ProjectQueryPlan) {
+  const preferred = ['Hacker News', 'Substack', 'LinkedIn', 'X/Twitter']
+  return [...plan.reviewTargets]
+    .sort((left, right) => preferredIndex(left.source, preferred) - preferredIndex(right.source, preferred))
+    .slice(0, 4)
+}
+
+function preferredIndex(source: string, preferred: string[]): number {
+  const index = preferred.indexOf(source)
+  return index === -1 ? preferred.length : index
+}
+
 function coverageGapPlans(): ProjectQueryPlan[] {
   const uncovered = new Set(props.sourceCoverage.uncoveredProjects)
   return props.queryPlans.filter((plan) => uncovered.has(plan.project)).slice(0, 4)
@@ -84,6 +96,17 @@ function requestMoreCoverage(plan: ProjectQueryPlan): void {
         <strong>{{ plan.project }}</strong>
         <p>{{ plan.hackerNewsQuery }}</p>
         <span>{{ queryPlanSummary(plan) }}</span>
+        <div v-if="visibleReviewTargets(plan).length" class="review-targets">
+          <a
+            v-for="target in visibleReviewTargets(plan)"
+            :key="`${plan.project}-${target.source}-${target.url}`"
+            :href="target.url"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {{ target.source }}
+          </a>
+        </div>
       </div>
     </details>
   </div>

@@ -26,6 +26,23 @@ const baseSnapshot = {
   ],
   focuses: [],
   source_runs: [],
+  query_plans: [
+    {
+      project: 'Pydantic',
+      topic: 'typed AI',
+      hacker_news_query: 'Pydantic pydantic',
+      live_terms: ['pydantic'],
+      dev_to_tags: ['pydantic'],
+      review_targets: [
+        {
+          source: 'LinkedIn',
+          label: 'LinkedIn posts: Pydantic pydantic',
+          url: 'https://www.linkedin.com/search/results/content/?keywords=Pydantic+pydantic',
+          adapter: 'manual-review',
+        },
+      ],
+    },
+  ],
 }
 
 await smokeApiBackedSnapshot()
@@ -47,6 +64,9 @@ async function smokeApiBackedSnapshot() {
   if (state.loading.value) throw new Error('loading should be false after API snapshot load')
   if (state.error.value) throw new Error(`API snapshot load should not set error: ${state.error.value}`)
   if (state.snapshot.value.items[0]?.id !== 'smoke-item') throw new Error('API snapshot was not normalized into state')
+  if (state.snapshot.value.queryPlans[0]?.reviewTargets[0]?.source !== 'LinkedIn') {
+    throw new Error('API snapshot query-plan review targets were not normalized')
+  }
 
   await state.setVote('smoke-item', 1)
   if (state.snapshot.value.items[0]?.vote !== 1) throw new Error('API vote was not applied optimistically')

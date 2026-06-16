@@ -23,9 +23,11 @@
     "source": "dev.to",
     "kind": "community",
     "status": "ok",
-    "item_count": 2,
+    "item_count": 6,
     "message": "dev.to articles API",
     "project_counts": {
+      "DSPy": 2,
+      "Instructor": 2,
       "Pydantic": 2
     }
   },
@@ -33,9 +35,14 @@
     "source": "Medium",
     "kind": "publication",
     "status": "ok",
-    "item_count": 5,
+    "item_count": 15,
     "message": "configured RSS/Atom feeds",
     "project_counts": {
+      "Apache Arrow": 2,
+      "DataFusion": 2,
+      "Delta Lake": 2,
+      "Instructor": 2,
+      "LakeSail": 2,
       "LanceDB": 1,
       "Pydantic": 2,
       "SurrealDB": 2
@@ -53,9 +60,11 @@
     "source": "LinkedIn",
     "kind": "social",
     "status": "ok",
-    "item_count": 2,
-    "message": "manual JSON import",
+    "item_count": 4,
+    "message": "manual JSON import; 2 reviewed posts",
     "project_counts": {
+      "DataFusion": 1,
+      "Instructor": 1,
       "LakeSail": 1,
       "Pydantic": 1
     }
@@ -65,7 +74,7 @@
     "kind": "social",
     "status": "ok",
     "item_count": 2,
-    "message": "manual JSON import",
+    "message": "manual JSON import; 2 reviewed posts",
     "project_counts": {
       "HelixDB": 1,
       "Turso": 1
