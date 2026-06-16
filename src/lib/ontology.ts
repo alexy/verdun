@@ -1,5 +1,5 @@
-import ontologyNodesJson from './ontology.json'
-import type { NewsItem } from './newsletter'
+import ontologyNodesJson from './ontology.json' with { type: 'json' }
+import type { NewsItem } from './newsletter.js'
 
 export type OntologyNode = {
   id: string

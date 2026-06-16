@@ -22,6 +22,7 @@
     "smoke:crawler-dedupe": "node scripts/smoke-crawler-dedupe.mjs",
     "smoke:crawler-provenance": "node scripts/smoke-crawler-provenance.mjs",
     "smoke:db-apply": "node scripts/smoke-db-apply.mjs",
+    "smoke:draft-api": "node scripts/smoke-draft-api.mjs",
     "smoke:draft": "node scripts/smoke-draft-local.mjs",
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:feed-content": "node scripts/smoke-feed-content.mjs",

@@ -23,6 +23,8 @@ const stateInput = ref<HTMLInputElement | null>(null)
 const draftDownloadHref = computed(() => `data:text/markdown;charset=utf-8,${encodeURIComponent(props.draft.markdown)}`)
 const editorialStateDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.editorialStateJson)}`)
 const publishManifestDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.publishManifestJson)}`)
+const serverMarkdownHref = '/api/newsletter/draft?format=markdown'
+const serverManifestHref = '/api/newsletter/draft?format=manifest'
 
 async function copyDraftMarkdown(): Promise<void> {
   copyStatus.value = 'idle'
@@ -73,6 +75,14 @@ async function importStateFile(event: Event): Promise<void> {
         <a :href="publishManifestDownloadHref" :download="publishManifestFilename">
           <FileJson :size="16" aria-hidden="true" />
           Manifest
+        </a>
+        <a :href="serverMarkdownHref" download="server-newsletter-draft.md">
+          <FileText :size="16" aria-hidden="true" />
+          Server Markdown
+        </a>
+        <a :href="serverManifestHref" download="server-newsletter-draft.manifest.json">
+          <FileJson :size="16" aria-hidden="true" />
+          Server Manifest
         </a>
         <button type="button" @click="openStateImport">
           <Upload :size="16" aria-hidden="true" />

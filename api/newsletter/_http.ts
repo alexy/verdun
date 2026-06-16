@@ -28,11 +28,18 @@ export function sendJson(res: ApiResponse, body: unknown): void {
   res.status(200).json(body)
 }
 
+export function sendText(res: ApiResponse, body: string, contentType = 'text/plain; charset=utf-8'): void {
+  res.setHeader('cache-control', 's-maxage=15, stale-while-revalidate=60')
+  res.setHeader('content-type', contentType)
+  res.status(200).end(body)
+}
+
 export function sendApiError(res: ApiResponse, error: unknown): void {
-  console.error(error)
   const record = error && typeof error === 'object' ? error as Record<string, unknown> : {}
   const statusCode = Number(record.statusCode)
-  res.status(Number.isInteger(statusCode) && statusCode >= 400 && statusCode <= 599 ? statusCode : 500).json({
+  const responseStatus = Number.isInteger(statusCode) && statusCode >= 400 && statusCode <= 599 ? statusCode : 500
+  if (responseStatus >= 500) console.error(error)
+  res.status(responseStatus).json({
     error: typeof record.code === 'string' ? record.code : 'newsletter_api_error',
     message: error instanceof Error ? error.message : 'Newsletter API request failed.',
   })

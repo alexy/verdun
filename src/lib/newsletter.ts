@@ -1,4 +1,4 @@
-import { credoBlurb, ontologyForItem, ontologyNodes } from './ontology'
+import { credoBlurb, ontologyForItem, ontologyNodes } from './ontology.js'
 
 export type NewsItem = {
   id: string

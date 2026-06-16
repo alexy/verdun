@@ -18,6 +18,7 @@ const steps = [
   ['npm', ['run', 'smoke:crawler-dedupe']],
   ['npm', ['run', 'smoke:feed-content']],
   ['npm', ['run', 'smoke:crawler-provenance']],
+  ['npm', ['run', 'smoke:draft-api']],
   ['npm', ['run', 'smoke:draft']],
   ['npm', ['run', 'smoke:draft-url']],
   ['npm', ['run', 'smoke:ghost']],
