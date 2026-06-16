@@ -1,6 +1,6 @@
 import { computed, ref, type Ref } from 'vue'
 import type { NewsletterSnapshot } from '../lib/newsletter'
-import { buildNewsletterDraft, evaluateNewsletterReadiness, sortedNewsItems } from '../lib/newsletter'
+import { buildNewsletterDraft, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
 
 export type VoteFilter = 'all' | 'unreviewed' | 'upvoted' | 'downvoted'
 
@@ -43,6 +43,7 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
   const pendingSourceCount = computed(() => snapshot.value.sourceRuns.filter((run) => run.status === 'pending').length)
   const draft = computed(() => buildNewsletterDraft(snapshot.value))
   const readiness = computed(() => evaluateNewsletterReadiness(snapshot.value))
+  const sourceCoverage = computed(() => evaluateSourceCoverage(snapshot.value))
   const draftFilename = computed(() => `${isoDate(snapshot.value.generatedAt)}-strongly-typed-ai-data-notes.md`)
 
   return {
@@ -58,6 +59,7 @@ export function useNewsletterView(snapshot: Ref<NewsletterSnapshot>) {
     rejectedItems,
     searchText,
     sourceCount,
+    sourceCoverage,
     sourceFilter,
     sourceOptions,
     unreviewedItems,

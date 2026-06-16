@@ -11,6 +11,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
 - Public item cards show HN-style voting plus Strongly Typed AI credo blurbs linked to the maintained ontology panel.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, and healthy watched sources before local Ulysses export.
+- Source health calls out watched projects that lack live/manual source coverage, so the editor can turn gaps into this-week collection requests.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
 - Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, while filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`.
@@ -73,7 +74,7 @@ npm run draft
 
 The app's draft preview also exposes Markdown download and copy controls for the same shared draft builder output.
 
-The generated article is written to `crawler/data/newsletter-draft.md` by default and includes a weekly throughline plus this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The CLI uses the same `src/lib/newsletter.ts` draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
+The generated article is written to `crawler/data/newsletter-draft.md` by default and includes a weekly throughline, source coverage gaps, plus this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The CLI uses the same `src/lib/newsletter.ts` draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
 
 When no items are explicitly upvoted, the draft builder prefers live/manual collected items over watchlist seed placeholders and caps the fallback spine at two items per project before filling any remaining slots.
 

@@ -317,6 +317,26 @@ textarea {
   color: var(--accent-dark);
 }
 
+.source-gaps {
+  padding: 9px 10px;
+  border: 1px solid rgba(180, 83, 9, 0.28);
+  border-radius: 8px;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.source-gaps strong {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.source-gaps p {
+  margin-top: 3px;
+  color: #7c2d12;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .source-dot {
   width: 10px;
   height: 10px;

@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { Activity } from '@lucide/vue'
-import type { SourceRun } from '../lib/newsletter'
+import type { SourceCoverageSummary, SourceRun } from '../lib/newsletter'
 
-const props = defineProps<{
+defineProps<{
   pendingSourceCount: number
+  sourceCoverage: SourceCoverageSummary
   sourceRuns: SourceRun[]
 }>()
-
-const coveredProjectCount = computed(() => new Set(
-  props.sourceRuns.flatMap((run) => Object.keys(run.projectCounts)),
-).size)
 
 function projectSummary(run: SourceRun): string {
   const projects = Object.entries(run.projectCounts)
@@ -27,7 +23,13 @@ function projectSummary(run: SourceRun): string {
       <Activity :size="18" aria-hidden="true" />
       <h2>Source health</h2>
     </div>
-    <p class="source-health__coverage">{{ coveredProjectCount }} projects covered by live/manual source matches.</p>
+    <p class="source-health__coverage">
+      {{ sourceCoverage.coveredProjects.length }} of {{ sourceCoverage.watchedProjects.length }} watched projects covered by live/manual source matches.
+    </p>
+    <div v-if="sourceCoverage.uncoveredProjects.length" class="source-gaps">
+      <strong>Coverage gaps</strong>
+      <p>{{ sourceCoverage.uncoveredProjects.slice(0, 8).join(', ') }}</p>
+    </div>
     <div class="source-row" v-for="run in sourceRuns" :key="run.source">
       <span class="source-dot" :class="run.status" aria-hidden="true"></span>
       <div>

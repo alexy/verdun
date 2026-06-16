@@ -24,6 +24,7 @@ const {
   rejectedItems,
   searchText,
   sourceCount,
+  sourceCoverage,
   sourceFilter,
   sourceOptions,
   unreviewedItems,
@@ -55,6 +56,7 @@ onMounted(() => {
         :ontology-nodes="ontologyNodes"
         :pending-source-count="pendingSourceCount"
         :readiness="readiness"
+        :source-coverage="sourceCoverage"
         :source-runs="snapshot.sourceRuns"
         @save-focus="saveFocus"
       />

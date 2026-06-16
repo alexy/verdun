@@ -69,6 +69,12 @@ export type NewsletterReadiness = {
   checks: NewsletterReadinessCheck[]
 }
 
+export type SourceCoverageSummary = {
+  watchedProjects: string[]
+  coveredProjects: string[]
+  uncoveredProjects: string[]
+}
+
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
   theme: 'Strongly typed and functional AI/data systems',
@@ -247,6 +253,7 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     '## Sources watched',
     '',
     ...snapshot.sourceRuns.map(sourceRunLine),
+    ...coverageGapSection(snapshot),
     '',
   ]
   const markdown = sections.join('\n')
@@ -256,6 +263,24 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
     markdown,
     html: markdownToHtml(markdown),
     itemIds: items.map((item) => item.id),
+  }
+}
+
+export function evaluateSourceCoverage(snapshot: NewsletterSnapshot): SourceCoverageSummary {
+  const watchedProjects = unique(snapshot.items.map((item) => item.project))
+    .sort((left, right) => left.localeCompare(right))
+  const coveredProjects = unique(
+    snapshot.sourceRuns
+      .filter((run) => run.status === 'ok' && run.itemCount > 0)
+      .flatMap((run) => Object.entries(run.projectCounts)
+        .filter(([, count]) => count > 0)
+        .map(([project]) => project)),
+  ).sort((left, right) => left.localeCompare(right))
+  const covered = new Set(coveredProjects)
+  return {
+    watchedProjects,
+    coveredProjects,
+    uncoveredProjects: watchedProjects.filter((project) => !covered.has(project)),
   }
 }
 
@@ -385,6 +410,17 @@ function sourceRunLine(run: SourceRun): string {
     .map(([project, count]) => `${project} ${count}`)
   const coverage = projects.length ? ` Coverage: ${projects.join(', ')}.` : ''
   return `- ${run.source}: ${run.status}, ${run.itemCount} items. ${run.message}.${coverage}`
+}
+
+function coverageGapSection(snapshot: NewsletterSnapshot): string[] {
+  const coverage = evaluateSourceCoverage(snapshot)
+  if (!coverage.uncoveredProjects.length) return []
+  return [
+    '',
+    '## Coverage gaps',
+    '',
+    `Ask for more source material on ${sentenceList(coverage.uncoveredProjects.slice(0, 8))}.`,
+  ]
 }
 
 function diverseSelection(items: NewsItem[], limit: number): NewsItem[] {
