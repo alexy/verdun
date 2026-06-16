@@ -17,7 +17,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Inbox filters can isolate live/manual collected evidence from watchlist seed placeholders for faster publish review.
 - `GET /api/newsletter/draft` exposes the same generated draft as JSON, Markdown, HTML, or publish manifest for local automation and audit.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, and healthy watched sources before local Ulysses export.
-- Source health calls out watched projects that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.
+- Source health calls out watched projects from the crawler query plan that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
 - Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, while filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`.

@@ -138,6 +138,32 @@ if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
 if (!view.sourceCoverage.value.uncoveredProjects.includes('Turso')) {
   throw new Error('source coverage gaps did not include uncovered watched projects')
 }
+snapshot.value = {
+  ...snapshot.value,
+  items: snapshot.value.items.filter((item) => item.project !== 'CocoIndex'),
+  queryPlans: [
+    ...snapshot.value.queryPlans,
+    {
+      project: 'QueryPlanOnly',
+      topic: 'query-plan only project',
+      hackerNewsQuery: 'QueryPlanOnly query-plan-only',
+      liveTerms: ['query-plan-only'],
+      devToTags: ['queryplanonly'],
+      reviewTargets: [],
+      focusTerms: [],
+    },
+  ],
+}
+if (!view.sourceCoverage.value.watchedProjects.includes('QueryPlanOnly')) {
+  throw new Error('source coverage did not treat query plans as the watched-project authority')
+}
+if (!view.sourceCoverage.value.uncoveredProjects.includes('QueryPlanOnly')) {
+  throw new Error('query-plan-only watched project was not reported as uncovered')
+}
+snapshot.value = {
+  ...snapshot.value,
+  queryPlans: snapshot.value.queryPlans.filter((plan) => plan.project !== 'QueryPlanOnly'),
+}
 if (view.sourceCoverage.value.uncoveredProjects.length <= 8 && view.draft.value.markdown.includes('plus ')) {
   throw new Error('source coverage should only mention hidden gaps when more than eight are hidden')
 }

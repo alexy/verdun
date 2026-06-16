@@ -396,7 +396,11 @@ export function buildNewsletterDraft(snapshot: NewsletterSnapshot): NewsletterDr
 }
 
 export function evaluateSourceCoverage(snapshot: NewsletterSnapshot): SourceCoverageSummary {
-  const watchedProjects = unique(snapshot.items.map((item) => item.project))
+  const watchedProjects = unique(
+    snapshot.queryPlans.length
+      ? snapshot.queryPlans.map((plan) => plan.project)
+      : snapshot.items.map((item) => item.project),
+  )
     .sort((left, right) => left.localeCompare(right))
   const coveredProjects = unique(
     snapshot.sourceRuns
