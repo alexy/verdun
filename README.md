@@ -65,7 +65,7 @@ cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/dat
 npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json
 ```
 
-Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through project-tagged public article queries, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks. `queries` prints the non-network query plan for each watched project, including HN query text, distinctive live terms, and dev.to tags. Each item carries normalized provenance in `raw_json.provenance` so downstream loaders and editorial tools can audit which adapter produced the evidence. The watchlist covers the initial AI/data projects plus functional/composable AI/data tools such as BAML, DSPy, Instructor, Ibis, and Dagster; Grust-adjacent graph, Sail/lakehouse, Arrow/DataFusion/Delta substrate, validation crates such as Garde and zod-rs, and indexing systems including Grust Sail, FalkorDB, LadybugDB, and CocoIndex. The verifier checks that the required projects, public-source adapters, publication feeds, and manual social import files are all configured before a weekly pass.
+Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through project-tagged public article queries, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks. Manual social imports report how many reviewed posts were considered and mark the source run as stale when the newest reviewed post is outside the active `--since-days` window, which feeds the same source-health readiness gate used by Ulysses export. `queries` prints the non-network query plan for each watched project, including HN query text, distinctive live terms, and dev.to tags. Each item carries normalized provenance in `raw_json.provenance` so downstream loaders and editorial tools can audit which adapter produced the evidence. The watchlist covers the initial AI/data projects plus functional/composable AI/data tools such as BAML, DSPy, Instructor, Ibis, and Dagster; Grust-adjacent graph, Sail/lakehouse, Arrow/DataFusion/Delta substrate, validation crates such as Garde and zod-rs, and indexing systems including Grust Sail, FalkorDB, LadybugDB, and CocoIndex. The verifier checks that the required projects, public-source adapters, publication feeds, and manual social import files are all configured before a weekly pass.
 
 `collect --live` defaults to `--since-days 45` for live/manual source items so stale search hits do not enter the weekly queue. Use a different positive value when preparing a broader catch-up issue.
 
@@ -74,7 +74,7 @@ Manual social imports live at:
 - `crawler/data/manual/linkedin.json`
 - `crawler/data/manual/x-twitter.json`
 
-Use those files for exported, saved, or explicitly reviewed posts rather than unauthenticated scraping. Future authenticated adapters can reuse the same normalized post shape.
+Use those files for exported, saved, or explicitly reviewed posts rather than unauthenticated scraping. Keep their `published_at` values current for the issue being prepared; stale manual files show up as source-health errors during `collect --live`. Future authenticated adapters can reuse the same normalized post shape.
 
 ## Weekly Operating Sequence
 

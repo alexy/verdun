@@ -624,9 +624,16 @@ fn live_items(
             .find(|source| source.name == source_name)
         {
             match collect_manual_source(watchlist, source, max_per_project) {
-                Ok(mut source_items) => {
+                Ok(manual_source) => {
+                    let mut source_items = manual_source.items;
                     retain_recent(&mut source_items, since);
-                    source_runs.push(ok_source_run(source, &source_items, "manual JSON import"));
+                    source_runs.push(manual_source_run(
+                        source,
+                        &source_items,
+                        manual_source.post_count,
+                        manual_source.latest_published_at,
+                        since,
+                    ));
                     items.append(&mut source_items);
                 }
                 Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
@@ -794,18 +801,20 @@ fn collect_manual_source(
     watchlist: &Watchlist,
     source: &Source,
     max_per_project: usize,
-) -> Result<Vec<NewsItem>> {
+) -> Result<ManualSourceCollect> {
     let path = source
         .manual_path
         .as_ref()
         .with_context(|| format!("{} has no manual_path configured", source.name))?;
     if !path.exists() {
-        return Ok(Vec::new());
+        return Ok(ManualSourceCollect::default());
     }
     let posts: Vec<ManualPost> = serde_json::from_slice(
         &fs::read(path).with_context(|| format!("reading {}", path.display()))?,
     )
     .with_context(|| format!("parsing {}", path.display()))?;
+    let post_count = posts.len();
+    let latest_published_at = posts.iter().map(|post| post.published_at).max();
     let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
     let mut items = Vec::new();
     for post in posts {
@@ -818,7 +827,18 @@ fn collect_manual_source(
             counts.insert(project.name.as_str(), count + 1);
         }
     }
-    Ok(items)
+    Ok(ManualSourceCollect {
+        items,
+        post_count,
+        latest_published_at,
+    })
+}
+
+#[derive(Debug, Default)]
+struct ManualSourceCollect {
+    items: Vec<NewsItem>,
+    post_count: usize,
+    latest_published_at: Option<DateTime<Utc>>,
 }
 
 fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
@@ -882,6 +902,40 @@ fn error_source_run(source: &Source, message: &str) -> SourceRun {
         message: message.to_string(),
         project_counts: BTreeMap::new(),
     }
+}
+
+fn manual_source_run(
+    source: &Source,
+    items: &[NewsItem],
+    post_count: usize,
+    latest_published_at: Option<DateTime<Utc>>,
+    since: DateTime<Utc>,
+) -> SourceRun {
+    if post_count == 0 {
+        return error_source_run(source, "manual JSON import contains no reviewed posts");
+    }
+    if latest_published_at.is_some_and(|published_at| published_at < since) {
+        return SourceRun {
+            source: source.name.clone(),
+            kind: source.kind.clone(),
+            status: SourceRunStatus::Error,
+            item_count: items.len(),
+            message: format!(
+                "manual JSON import is stale; latest reviewed post is older than {}",
+                since.to_rfc3339()
+            ),
+            project_counts: project_counts(items),
+        };
+    }
+    ok_source_run(
+        source,
+        items,
+        &format!(
+            "manual JSON import; {} reviewed post{}",
+            post_count,
+            if post_count == 1 { "" } else { "s" }
+        ),
+    )
 }
 
 fn project_counts(items: &[NewsItem]) -> BTreeMap<String, usize> {
