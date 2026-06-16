@@ -8,6 +8,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 
 - Vue/Vite app with a newsroom triage interface.
 - Greathouse-style dashboard components extracted under `src/components/`, including `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`, so shared shell/editorial/inbox/draft/hero/source-health/item-card UI can be generalized later.
+- Frontend snapshot loading plus optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, leaving `App.vue` as state derivation and component composition.
 - Vite/Vercel configured for the `/rbage/` public path.
 - Inbox filtering by search text, vote state, project, and source for faster editorial review.
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.

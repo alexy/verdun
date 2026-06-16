@@ -13,6 +13,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, and healthy watched sources before local Ulysses export.
 - The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
+- Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, keeping the app shell separate from data transport.
 - Backend route mechanics live in `api/newsletter/_http.ts`, while data access and local fallback state stay in `api/newsletter/_db.ts`, matching the Greathouse-style reusable backend boundary.
 
 ## Local app
