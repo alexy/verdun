@@ -45,11 +45,15 @@ create table if not exists newsletter_query_plans (
   hacker_news_query text not null,
   live_terms text[] not null default '{}',
   dev_to_tags text[] not null default '{}',
+  focus_terms text[] not null default '{}',
   updated_at timestamptz not null default now()
 );
 
 alter table newsletter_source_runs
   add column if not exists project_counts jsonb not null default '{}'::jsonb;
+
+alter table newsletter_query_plans
+  add column if not exists focus_terms text[] not null default '{}';
 
 create index if not exists newsletter_items_rank_idx on newsletter_items (published_at desc, score desc);
 create index if not exists newsletter_items_project_idx on newsletter_items (project);

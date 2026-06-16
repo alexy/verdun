@@ -168,6 +168,7 @@ export function normalizeSnapshot(raw) {
       hackerNewsQuery: plan.hacker_news_query ?? plan.hackerNewsQuery ?? '',
       liveTerms: plan.live_terms ?? plan.liveTerms ?? [],
       devToTags: plan.dev_to_tags ?? plan.devToTags ?? [],
+      focusTerms: plan.focus_terms ?? plan.focusTerms ?? [],
     })),
   }
 }

@@ -48,6 +48,7 @@ type QueryPlanRow = {
   hacker_news_query: string
   live_terms: string[]
   dev_to_tags: string[]
+  focus_terms: string[]
 }
 
 type StaticNewsRow = {
@@ -81,6 +82,7 @@ type StaticQueryPlan = {
   hacker_news_query: string
   live_terms: string[]
   dev_to_tags: string[]
+  focus_terms?: string[]
 }
 
 type StaticSnapshot = {
@@ -135,7 +137,7 @@ export async function readSnapshot(): Promise<NewsletterSnapshot> {
       source
   `) as SourceRunRow[]
   const queryPlanRows = await sql.query(`
-    select project, topic, hacker_news_query, live_terms, dev_to_tags
+    select project, topic, hacker_news_query, live_terms, dev_to_tags, focus_terms
     from newsletter_query_plans
     order by project
   `) as QueryPlanRow[]
@@ -394,6 +396,7 @@ function toQueryPlan(row: StaticQueryPlan | QueryPlanRow): ProjectQueryPlan {
     hackerNewsQuery: row.hacker_news_query,
     liveTerms: row.live_terms ?? [],
     devToTags: row.dev_to_tags ?? [],
+    focusTerms: row.focus_terms ?? [],
   }
 }
 

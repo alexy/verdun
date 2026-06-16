@@ -28,7 +28,8 @@ function extraGapCount(projects: string[]): number {
 function queryPlanSummary(plan: ProjectQueryPlan): string {
   const terms = plan.liveTerms.slice(0, 3).join(', ')
   const tags = plan.devToTags.slice(0, 2).map((tag) => `#${tag}`).join(', ')
-  return [terms, tags].filter(Boolean).join(' · ')
+  const focus = plan.focusTerms.length ? `focus: ${plan.focusTerms.slice(0, 3).join(', ')}` : ''
+  return [terms, tags, focus].filter(Boolean).join(' · ')
 }
 
 function coverageGapPlans(): ProjectQueryPlan[] {

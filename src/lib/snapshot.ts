@@ -107,6 +107,7 @@ function normalizeQueryPlan(raw: unknown): ProjectQueryPlan | null {
     hackerNewsQuery: stringValue(record.hackerNewsQuery ?? record.hacker_news_query, ''),
     liveTerms: arrayValue(record.liveTerms ?? record.live_terms).map((term) => String(term)).filter(Boolean),
     devToTags: arrayValue(record.devToTags ?? record.dev_to_tags).map((tag) => String(tag)).filter(Boolean),
+    focusTerms: arrayValue(record.focusTerms ?? record.focus_terms).map((term) => String(term)).filter(Boolean),
   }
 }
 

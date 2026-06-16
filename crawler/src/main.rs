@@ -31,6 +31,8 @@ enum CommandKind {
         max_live_per_project: usize,
         #[arg(long, default_value_t = 45)]
         since_days: i64,
+        #[arg(long, default_value = "crawler/data/editorial-state.json")]
+        editorial_state: PathBuf,
     },
     ExportSql {
         #[arg(long)]
@@ -49,6 +51,8 @@ enum CommandKind {
     Queries {
         #[arg(long, default_value = "crawler/config/watchlist.toml")]
         config: PathBuf,
+        #[arg(long, default_value = "crawler/data/editorial-state.json")]
+        editorial_state: PathBuf,
     },
 }
 
@@ -145,6 +149,7 @@ fn main() -> Result<()> {
             live,
             max_live_per_project,
             since_days,
+            editorial_state,
         } => collect(
             config,
             out,
@@ -153,6 +158,7 @@ fn main() -> Result<()> {
             live,
             max_live_per_project,
             since_days,
+            editorial_state,
         ),
         CommandKind::ExportSql {
             input,
@@ -161,7 +167,10 @@ fn main() -> Result<()> {
             snapshot,
         } => export_sql(snapshot, input, source_runs, out),
         CommandKind::Verify { config } => verify(config),
-        CommandKind::Queries { config } => queries(config),
+        CommandKind::Queries {
+            config,
+            editorial_state,
+        } => queries(config, editorial_state),
     }
 }
 
@@ -172,6 +181,8 @@ struct ProjectQueryPlan {
     hacker_news_query: String,
     live_terms: Vec<String>,
     dev_to_tags: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    focus_terms: Vec<String>,
 }
 
 fn collect(
@@ -182,8 +193,10 @@ fn collect(
     live: bool,
     max_live_per_project: usize,
     since_days: i64,
+    editorial_state: PathBuf,
 ) -> Result<()> {
     let watchlist = read_watchlist(&config)?;
+    let editorial_focuses = read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
     let mut items = seed_items(&watchlist);
     let mut source_runs = seed_source_runs(&watchlist, live);
@@ -215,7 +228,7 @@ fn collect(
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let query_plans = query_plans(&watchlist);
+    let query_plans = query_plans(&watchlist, &editorial_focuses);
     let public_snapshot = PublicSnapshot {
         generated_at: Utc::now(),
         theme: watchlist.theme,
@@ -301,7 +314,7 @@ fn export_sql(
     }
     for plan in &query_plans {
         sql.push_str("insert into newsletter_query_plans (\n");
-        sql.push_str("  project, topic, hacker_news_query, live_terms, dev_to_tags, updated_at\n");
+        sql.push_str("  project, topic, hacker_news_query, live_terms, dev_to_tags, focus_terms, updated_at\n");
         sql.push_str(") values (");
         sql.push_str(&sql_string(&plan.project));
         sql.push_str(", ");
@@ -312,12 +325,15 @@ fn export_sql(
         sql.push_str(&sql_text_array(&plan.live_terms));
         sql.push_str(", ");
         sql.push_str(&sql_text_array(&plan.dev_to_tags));
+        sql.push_str(", ");
+        sql.push_str(&sql_text_array(&plan.focus_terms));
         sql.push_str(", now())\n");
         sql.push_str("on conflict (project) do update set\n");
         sql.push_str("  topic = excluded.topic,\n");
         sql.push_str("  hacker_news_query = excluded.hacker_news_query,\n");
         sql.push_str("  live_terms = excluded.live_terms,\n");
         sql.push_str("  dev_to_tags = excluded.dev_to_tags,\n");
+        sql.push_str("  focus_terms = excluded.focus_terms,\n");
         sql.push_str("  updated_at = excluded.updated_at;\n\n");
     }
     sql.push_str("commit;\n");
@@ -393,16 +409,20 @@ fn verify(config: PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn queries(config: PathBuf) -> Result<()> {
+fn queries(config: PathBuf, editorial_state: PathBuf) -> Result<()> {
     let watchlist = read_watchlist(&config)?;
+    let editorial_focuses = read_editorial_focuses(&editorial_state)?;
     println!(
         "{}",
-        serde_json::to_string_pretty(&query_plans(&watchlist))?
+        serde_json::to_string_pretty(&query_plans(&watchlist, &editorial_focuses))?
     );
     Ok(())
 }
 
-fn query_plans(watchlist: &Watchlist) -> Vec<ProjectQueryPlan> {
+fn query_plans(
+    watchlist: &Watchlist,
+    editorial_focuses: &[EditorialFocus],
+) -> Vec<ProjectQueryPlan> {
     watchlist
         .projects
         .iter()
@@ -412,8 +432,37 @@ fn query_plans(watchlist: &Watchlist) -> Vec<ProjectQueryPlan> {
             hacker_news_query: project_query(project),
             live_terms: project_live_terms(project),
             dev_to_tags: dev_to_tags(project),
+            focus_terms: project_focus_terms(project, editorial_focuses),
         })
         .collect::<Vec<_>>()
+}
+
+#[derive(Debug, Deserialize)]
+struct EditorialState {
+    #[serde(default)]
+    focuses: Vec<EditorialFocus>,
+}
+
+#[derive(Debug, Deserialize)]
+struct EditorialFocus {
+    text: String,
+    #[serde(default)]
+    scope: String,
+}
+
+fn read_editorial_focuses(path: &PathBuf) -> Result<Vec<EditorialFocus>> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let state: EditorialState = serde_json::from_slice(
+        &fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )
+    .with_context(|| format!("parsing {}", path.display()))?;
+    Ok(state
+        .focuses
+        .into_iter()
+        .filter(|focus| focus.scope != "archived" && !focus.text.trim().is_empty())
+        .collect())
 }
 
 fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
@@ -1604,6 +1653,47 @@ fn project_live_terms(project: &Project) -> Vec<String> {
         .map(|keyword| keyword.to_lowercase())
         .filter(|keyword| keyword.len() >= 4 && !generic_terms.contains(&keyword.as_str()))
         .collect()
+}
+
+fn project_focus_terms(project: &Project, editorial_focuses: &[EditorialFocus]) -> Vec<String> {
+    let project_name = project.name.to_lowercase();
+    let live_terms = project_live_terms(project);
+    let mut terms = Vec::new();
+    for focus in editorial_focuses {
+        let text = normalize_whitespace(&focus.text).to_lowercase();
+        if text.contains(&project_name) || live_terms.iter().any(|term| text.contains(term)) {
+            terms.extend(
+                focus
+                    .text
+                    .split(|character: char| {
+                        !character.is_alphanumeric() && character != '-' && character != '+'
+                    })
+                    .map(|term| term.trim().to_lowercase())
+                    .filter(|term| term.len() >= 4 && !is_generic_focus_term(term))
+                    .take(8),
+            );
+        }
+    }
+    terms.sort();
+    terms.dedup();
+    terms.truncate(8);
+    terms
+}
+
+fn is_generic_focus_term(value: &str) -> bool {
+    [
+        "about",
+        "evidence",
+        "focus",
+        "material",
+        "more",
+        "request",
+        "source",
+        "sources",
+        "this-week",
+        "week",
+    ]
+    .contains(&value)
 }
 
 fn dev_to_tags(project: &Project) -> Vec<String> {

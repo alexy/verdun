@@ -47,6 +47,9 @@ if (!sql.includes('on conflict (source) do update set')) {
 if (!sql.includes('on conflict (project) do update set')) {
   throw new Error('SQL export is missing query-plan upsert clause')
 }
+if (!sql.includes('focus_terms')) {
+  throw new Error('SQL export is missing query-plan focus_terms column')
+}
 
 for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
   if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)

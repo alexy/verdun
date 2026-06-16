@@ -1,4 +1,7 @@
 import { spawnSync } from 'node:child_process'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 const result = spawnSync('cargo', [
   'run',
@@ -53,4 +56,69 @@ if (!byProject.get('Garde')?.live_terms.includes('garde')) {
 }
 if (!byProject.get('zod-rs')?.live_terms.includes('zod-rs')) {
   throw new Error('zod-rs live terms lost the crate name')
+}
+
+const stateDir = await mkdtemp(join(tmpdir(), 'verdun-query-focus-'))
+try {
+  const stateFile = join(stateDir, 'editorial-state.json')
+  await writeFile(stateFile, JSON.stringify({
+    focuses: [
+      {
+        id: 'focus-query-smoke',
+        text: 'More source material on Apache Arrow: arrow flight and typed columnar memory.',
+        scope: 'this_week',
+        created_at: new Date().toISOString(),
+      },
+    ],
+  }))
+  const focusedResult = spawnSync('cargo', [
+    'run',
+    '--manifest-path',
+    'crawler/Cargo.toml',
+    '--',
+    'queries',
+    '--editorial-state',
+    stateFile,
+  ], { encoding: 'utf8' })
+  if (focusedResult.error) throw focusedResult.error
+  if (focusedResult.status !== 0) {
+    throw new Error(`focused crawler queries failed\n${focusedResult.stdout}\n${focusedResult.stderr}`)
+  }
+  const focusedJsonStart = focusedResult.stdout.indexOf('[')
+  const focusedPlans = JSON.parse(focusedResult.stdout.slice(focusedJsonStart))
+  const apacheArrow = focusedPlans.find((plan) => plan.project === 'Apache Arrow')
+  if (!apacheArrow?.focus_terms?.includes('flight') || !apacheArrow.focus_terms.includes('columnar')) {
+    throw new Error('focused crawler queries did not attach editorial focus terms to Apache Arrow')
+  }
+  const pydantic = focusedPlans.find((plan) => plan.project === 'Pydantic')
+  if (pydantic?.focus_terms?.length) {
+    throw new Error('focused crawler queries leaked Apache Arrow focus terms into Pydantic')
+  }
+  const snapshotPath = join(stateDir, 'snapshot.json')
+  const collectResult = spawnSync('cargo', [
+    'run',
+    '--manifest-path',
+    'crawler/Cargo.toml',
+    '--',
+    'collect',
+    '--editorial-state',
+    stateFile,
+    '--out',
+    join(stateDir, 'items.json'),
+    '--source-runs-out',
+    join(stateDir, 'source-runs.json'),
+    '--public-out',
+    snapshotPath,
+  ], { encoding: 'utf8' })
+  if (collectResult.error) throw collectResult.error
+  if (collectResult.status !== 0) {
+    throw new Error(`focused crawler collect failed\n${collectResult.stdout}\n${collectResult.stderr}`)
+  }
+  const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8'))
+  const snapshotApacheArrow = snapshot.query_plans.find((plan) => plan.project === 'Apache Arrow')
+  if (!snapshotApacheArrow?.focus_terms?.includes('flight')) {
+    throw new Error('focused crawler collect did not write editorial focus terms into the public snapshot')
+  }
+} finally {
+  await rm(stateDir, { recursive: true, force: true })
 }

@@ -52,6 +52,7 @@ export type ProjectQueryPlan = {
   hackerNewsQuery: string
   liveTerms: string[]
   devToTags: string[]
+  focusTerms: string[]
 }
 
 export type NewsletterSnapshot = {
@@ -679,7 +680,8 @@ function coverageGapHints(projects: string[], queryPlans: ProjectQueryPlan[]): s
 function queryPlanHint(plan: ProjectQueryPlan): string {
   const terms = plan.liveTerms.slice(0, 3).join(', ')
   const tags = plan.devToTags.slice(0, 2).map((tag) => `#${tag}`).join(', ')
-  return [terms, tags].filter(Boolean).join(' · ')
+  const focus = plan.focusTerms.length ? `focus: ${plan.focusTerms.slice(0, 3).join(', ')}` : ''
+  return [terms, tags, focus].filter(Boolean).join(' · ')
 }
 
 function coverageGapSummary(projects: string[]): string {
