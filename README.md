@@ -156,17 +156,14 @@ The snapshot input can be a local JSON file or an `http(s)` URL such as the depl
 An optional Ghost helper remains available for direct API drafts from the same local snapshot, but the editorial publishing sequence is local Markdown into Ulysses:
 
 ```sh
-npm run ghost:draft -- --dry-run
-npm run ghost:draft -- --dry-run --require-upvotes
-npm run ghost:draft -- --dry-run --require-ready
-npm run ghost:draft -- --dry-run --require-upvotes --require-ready
-npm run ghost:draft -- --dry-run --require-upvotes --require-ready --editorial-state /path/to/downloaded-verdun-editorial-state.json
-npm run ghost:draft -- --dry-run --manifest-out /path/to/ghost-publish.manifest.json
+npm run ghost:dry-run
+npm run ghost:dry-run -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
+npm run ghost:dry-run -- --manifest-out /path/to/ghost-publish.manifest.json
 
 GHOST_ADMIN_API_URL=https://collected.ga \
 GHOST_ADMIN_API_KEY='admin-key-id:admin-key-secret' \
 GHOST_MANIFEST_OUT=/path/to/ghost-publish.manifest.json \
-npm run ghost:draft
+npm run ghost:ready -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
 ```
 
-`ghost:draft -- --dry-run` prints the Ghost Admin API endpoint, post payload, and publish manifest without requiring credentials or making a network request. Pass `--editorial-state /path/to/exported-state.json` to apply the same browser-exported votes and focus notes used by `npm run ulysses:ready`; the paired manifest records that path as `editorialStateInput`. Pass `--manifest-out /path/to/file.json` or set `GHOST_MANIFEST_OUT` to write the same audit bundle to disk for dry-run or real publishing. The payload uses the same rendered draft as the Ulysses export and includes a deterministic slug, bounded excerpt, meta title, meta description, and newsletter taxonomy tags. `ghost:draft` uses the Ghost Admin API key format directly and posts with `status=draft`. Non-draft Ghost statuses such as `published`, `scheduled`, or `sent` require `--allow-non-draft` or `GHOST_ALLOW_NON_DRAFT=true`.
+`ghost:dry-run` prints the Ghost Admin API endpoint, post payload, and publish manifest without requiring credentials or making a network request. Pass `--editorial-state /path/to/exported-state.json` to apply the same browser-exported votes and focus notes used by `npm run ulysses:ready`; the paired manifest records that path as `editorialStateInput`. Pass `--manifest-out /path/to/file.json` or set `GHOST_MANIFEST_OUT` to write the same audit bundle to disk for dry-run or real publishing. The payload uses the same rendered draft as the Ulysses export and includes a deterministic slug, bounded excerpt, meta title, meta description, and newsletter taxonomy tags. `ghost:ready` uses the Ghost Admin API key format directly, applies the upvote/readiness gates, and posts with `status=draft`. Real Ghost API writes refuse ungated drafts unless `--allow-ungated-publish` or `GHOST_ALLOW_UNGATED_PUBLISH=true` is set. Non-draft Ghost statuses such as `published`, `scheduled`, or `sent` require `--allow-non-draft` or `GHOST_ALLOW_NON_DRAFT=true`.

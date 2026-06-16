@@ -74,7 +74,8 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - File-based draft exports also write a same-stem `.manifest.json` with issue identity metadata, the snapshot input, publishing gates, selected item IDs, selected item metadata, votes, focuses, readiness checks, source coverage, source runs, and query-plan count.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
 - `npm run ghost:draft -- --editorial-state /path/to/exported-state.json` applies the same browser-exported votes and focus notes as `npm run ulysses:ready` and records the file in the Ghost audit manifest.
-- `npm run ghost:draft -- --dry-run` validates the Ghost endpoint/payload/manifest shape, including deterministic slug and metadata fields, without credentials or network access; `--manifest-out` / `GHOST_MANIFEST_OUT` writes the same audit bundle to disk, and non-draft Ghost statuses require an explicit override.
+- `npm run ghost:dry-run -- --editorial-state /path/to/exported-state.json` validates the Ghost endpoint/payload/manifest shape, including deterministic slug and metadata fields, without credentials or network access; `--manifest-out` / `GHOST_MANIFEST_OUT` writes the same audit bundle to disk.
+- Real Ghost API writes require `--require-upvotes` and `--require-ready` by default; `npm run ghost:ready` is the guarded command, while non-draft Ghost statuses and ungated writes require explicit override flags.
 
 ## Next Work
 

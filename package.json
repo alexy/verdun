@@ -45,7 +45,9 @@
     "audit:grust": "node scripts/grust-watchlist-audit.mjs",
     "ulysses:draft": "node scripts/newsletter-draft.mjs --ulysses",
     "ulysses:ready": "node scripts/newsletter-draft.mjs --ulysses --require-upvotes --require-ready",
-    "ghost:draft": "node scripts/publish-ghost.mjs"
+    "ghost:draft": "node scripts/publish-ghost.mjs",
+    "ghost:dry-run": "node scripts/publish-ghost.mjs --dry-run --require-upvotes --require-ready",
+    "ghost:ready": "node scripts/publish-ghost.mjs --require-upvotes --require-ready"
   },
   "dependencies": {
     "@lucide/vue": "^1.17.0",

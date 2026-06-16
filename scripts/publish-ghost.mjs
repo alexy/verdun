@@ -13,6 +13,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const draft = await buildNewsletterDraft(snapshot)
   await assertDraftReady(snapshot, draft, options)
   assertGhostStatusAllowed(options)
+  assertGhostPublishGates(options)
   const payload = ghostPostPayload(draft, options.status)
   const manifest = await buildPublishManifest(draft, snapshot, {
     snapshotInput: options.input,
@@ -37,6 +38,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
 export function parseGhostArgs(args, env = process.env) {
   const dryRun = args.includes('--dry-run')
   const allowNonDraft = args.includes('--allow-non-draft') || env.GHOST_ALLOW_NON_DRAFT === 'true'
+  const allowUngatedPublish = args.includes('--allow-ungated-publish') || env.GHOST_ALLOW_UNGATED_PUBLISH === 'true'
   const requireUpvotes = args.includes('--require-upvotes') || env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
   const requireReady = args.includes('--require-ready') || env.NEWSLETTER_REQUIRE_READY === 'true'
   const { positional, values } = parseOptionArgs(args)
@@ -52,6 +54,7 @@ export function parseGhostArgs(args, env = process.env) {
   return {
     dryRun,
     allowNonDraft,
+    allowUngatedPublish,
     requireUpvotes,
     requireReady,
     input,
@@ -66,7 +69,7 @@ export function parseGhostArgs(args, env = process.env) {
 function parseOptionArgs(args) {
   const positional = []
   const values = new Map()
-  const flags = new Set(['--dry-run', '--allow-non-draft', '--require-upvotes', '--require-ready'])
+  const flags = new Set(['--dry-run', '--allow-non-draft', '--allow-ungated-publish', '--require-upvotes', '--require-ready'])
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index]
     if (flags.has(arg)) continue
@@ -92,6 +95,12 @@ function parseOptionArgs(args) {
 export function assertGhostStatusAllowed(options) {
   if (options.status === 'draft' || options.allowNonDraft) return
   throw new Error('Ghost helper refuses non-draft status without --allow-non-draft or GHOST_ALLOW_NON_DRAFT=true.')
+}
+
+export function assertGhostPublishGates(options) {
+  if (options.dryRun || options.allowUngatedPublish) return
+  if (options.requireUpvotes && options.requireReady) return
+  throw new Error('Ghost helper refuses real API writes without --require-upvotes and --require-ready. Use --dry-run for previews or --allow-ungated-publish for an explicit override.')
 }
 
 export function ghostPostPayload(draft, status = 'draft') {

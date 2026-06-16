@@ -1,5 +1,5 @@
 import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
-import { assertGhostStatusAllowed, ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './publish-ghost.mjs'
+import { assertGhostPublishGates, assertGhostStatusAllowed, ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './publish-ghost.mjs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -12,6 +12,7 @@ if (!options.dryRun) throw new Error('dry-run option was not parsed')
 if (!options.requireUpvotes) throw new Error('require-upvotes option was not parsed')
 if (!options.requireReady) throw new Error('require-ready option was not parsed')
 if (options.allowNonDraft) throw new Error('allow-non-draft should default to false')
+if (options.allowUngatedPublish) throw new Error('allow-ungated-publish should default to false')
 if (options.status !== 'draft') throw new Error('draft status was not parsed')
 if (ghostEndpoint(options.apiUrl) !== 'https://collected.ga/ghost/api/admin/posts/?source=html') {
   throw new Error('Ghost endpoint is not stable')
@@ -24,6 +25,8 @@ const editorialStateOptions = parseGhostArgs(['--dry-run', '--editorial-state', 
 if (editorialStateOptions.editorialStateInput !== '/tmp/editorial-state.json') throw new Error('editorial-state option was not parsed')
 const editorialStateEqualsOptions = parseGhostArgs(['--dry-run', '--editorial-state=/tmp/editorial-state-equals.json', 'draft'], {})
 if (editorialStateEqualsOptions.editorialStateInput !== '/tmp/editorial-state-equals.json') throw new Error('editorial-state equals option was not parsed')
+const unsafeOverrideOptions = parseGhostArgs(['--allow-ungated-publish', 'draft'], {})
+if (!unsafeOverrideOptions.allowUngatedPublish) throw new Error('allow-ungated-publish option was not parsed')
 
 const jwt = ghostJwt(options.apiKey)
 if (jwt.split('.').length !== 3) throw new Error('Ghost JWT is malformed')
@@ -60,6 +63,16 @@ try {
   blockedNonDraft = error.message.includes('refuses non-draft status')
 }
 if (!blockedNonDraft) throw new Error('Ghost helper did not block non-draft status without explicit override')
+let blockedUngatedPublish = false
+try {
+  assertGhostPublishGates(parseGhostArgs(['draft'], {}))
+} catch (error) {
+  blockedUngatedPublish = error.message.includes('refuses real API writes')
+}
+if (!blockedUngatedPublish) throw new Error('Ghost helper did not block real ungated API writes')
+assertGhostPublishGates(parseGhostArgs(['--dry-run', 'draft'], {}))
+assertGhostPublishGates(parseGhostArgs(['--allow-ungated-publish', 'draft'], {}))
+assertGhostPublishGates(parseGhostArgs(['--require-upvotes', '--require-ready', 'draft'], {}))
 const { stdout: dryRunStdout, manifestText: dryRunManifestText } = await runGhostDryRun()
 const dryRunOutput = JSON.parse(dryRunStdout)
 if (dryRunOutput.endpoint !== 'https://collected.ga/ghost/api/admin/posts/?source=html') {
