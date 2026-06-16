@@ -40,8 +40,8 @@ onMounted(() => {
   void loadSnapshot()
 })
 
-function handleEditorialStateImport(state: unknown): void {
-  const result = importEditorialState(state)
+async function handleEditorialStateImport(state: unknown): Promise<void> {
+  const result = await importEditorialState(state)
   editorialStateImportSummary.value = `Imported ${result.importedVotes} vote${result.importedVotes === 1 ? '' : 's'} and ${result.importedFocuses} focus note${result.importedFocuses === 1 ? '' : 's'}.`
 }
 

@@ -176,6 +176,11 @@ type LocalEditorialState = {
   focuses: FocusRow[]
 }
 
+export type EditorialStateImportResult = {
+  importedFocuses: number
+  importedVotes: number
+}
+
 const seedFocuses: NewsletterFocus[] = [
   {
     id: 'focus-local-first-graphs',
@@ -334,6 +339,53 @@ export async function writeFocus(text: string, scope: 'this_week' | 'ongoing'): 
   return rows[0] ? toFocus(rows[0]) : null
 }
 
+export async function writeEditorialState(rawState: unknown): Promise<EditorialStateImportResult> {
+  const state = normalizeEditorialState(rawState)
+  const databaseUrl = newsletterDatabaseUrl()
+  if (!databaseUrl) {
+    assertLocalEditorialWritesAvailable()
+    const localState = readLocalEditorialState()
+    const mergedFocuses = mergeFocusRows(state.focuses, localState.focuses)
+    writeLocalEditorialState({
+      votes: { ...localState.votes, ...state.votes },
+      focuses: mergedFocuses,
+    })
+    return {
+      importedVotes: Object.keys(state.votes).length,
+      importedFocuses: mergedFocuses.length - localState.focuses.length,
+    }
+  }
+  const sql = neon(databaseUrl)
+  let importedVotes = 0
+  for (const [itemId, vote] of Object.entries(state.votes)) {
+    const rows = await sql.query(`
+      insert into newsletter_votes (item_id, vote, updated_at)
+      select id, $2, now()
+      from newsletter_items
+      where id = $1
+      on conflict (item_id)
+      do update set vote = excluded.vote, updated_at = excluded.updated_at
+      returning item_id
+    `, [itemId, vote]) as Array<{ item_id: string }>
+    importedVotes += rows.length
+  }
+
+  let importedFocuses = 0
+  for (const focus of state.focuses) {
+    const rows = await sql.query(`
+      insert into newsletter_focuses (text, scope, created_at)
+      select $1, $2, $3::timestamptz
+      where not exists (
+        select 1 from newsletter_focuses
+        where text = $1 and scope = $2
+      )
+      returning id
+    `, [focus.text, focus.scope, focus.created_at]) as Array<{ id: string }>
+    importedFocuses += rows.length
+  }
+  return { importedVotes, importedFocuses }
+}
+
 function newsletterDatabaseUrl(): string | undefined {
   return process.env.POSTGRES_URL ?? process.env.DATABASE_URL ?? process.env.NEON_DATABASE_URL
 }
@@ -398,11 +450,34 @@ function normalizeVotes(votes: unknown): Record<string, VoteValue> {
   return normalized
 }
 
+function normalizeEditorialState(rawState: unknown): LocalEditorialState {
+  if (!rawState || typeof rawState !== 'object' || Array.isArray(rawState)) return emptyLocalEditorialState()
+  const raw = rawState as Partial<LocalEditorialState>
+  return {
+    votes: normalizeVotes(raw.votes),
+    focuses: normalizeFocusRows(raw.focuses),
+  }
+}
+
 function normalizeFocusRows(focuses: unknown): FocusRow[] {
   if (!Array.isArray(focuses)) return []
   return focuses
     .map((focus) => normalizeFocusRow(focus))
     .filter((focus): focus is FocusRow => Boolean(focus))
+    .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))
+    .slice(0, 25)
+}
+
+function mergeFocusRows(imported: FocusRow[], existing: FocusRow[]): FocusRow[] {
+  const seen = new Set(existing.map((focus) => `${focus.scope}\n${focus.text}`))
+  const next = [...existing]
+  for (const focus of imported) {
+    const key = `${focus.scope}\n${focus.text}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    next.push(focus)
+  }
+  return next
     .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))
     .slice(0, 25)
 }

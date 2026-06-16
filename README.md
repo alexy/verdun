@@ -19,6 +19,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
 - Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, while filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`.
 - Backend route mechanics live in `api/newsletter/_http.ts`, while data access and local fallback state stay in `api/newsletter/_db.ts`, matching the Greathouse-style reusable backend boundary.
+- The app's editorial-state import posts `{ votes, focuses }` to `POST /api/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.
 
 ## Local app
 
@@ -105,6 +106,8 @@ The app's draft preview also exposes Markdown download and copy controls for the
 The generated article is written to `crawler/data/newsletter-draft.md` by default and includes a weekly throughline, an editorial arc for the selected spine, item selection reasons, item evidence lines from crawler provenance, source coverage gaps with crawler query hints, plus this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The app preview and CLI both use the shared publish manifest builder from `src/lib/newsletter.ts`; file exports write a sibling `.manifest.json` file recording the paired Markdown path, snapshot input, selected item IDs, selected item metadata with selection reasons, votes, focuses, readiness checks, prose-quality checks, source coverage, source runs, and query-plan count. The CLI uses the same draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
 
 The app's draft preview also offers `Editorial state` JSON export and import. The file contains the current `{ votes, focuses }` payload in the same shape as `crawler/data/editorial-state.json`, so a browser-only review session can be audited, restored in the app, or reused by setting `VERDUN_LOCAL_STATE_FILE` before running `npm run ulysses:ready`.
+
+When the deployed API is backed by external Postgres, importing that same editorial-state JSON in the app also persists matching item votes and non-duplicate focus notes through `POST /api/newsletter/editorial-state`. This provides the bridge from temporary browser-local review to durable editorial state once `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL` is configured in Vercel.
 
 When no items are explicitly upvoted, the draft builder prefers live/manual collected items over watchlist seed placeholders and caps the fallback spine at two items per project before filling any remaining slots.
 

@@ -91,10 +91,23 @@ export function useNewsletterSnapshot() {
     }
   }
 
-  function importEditorialState(raw: unknown): EditorialStateImportResult {
+  async function importEditorialState(raw: unknown): Promise<EditorialStateImportResult> {
     const result = applyEditorialStateExport(snapshot.value, raw)
     snapshot.value = result.snapshot
-    if (!apiWritable.value) saveBrowserEditorialState(snapshot.value)
+    if (!apiWritable.value) {
+      saveBrowserEditorialState(snapshot.value)
+      return result
+    }
+    try {
+      const response = await fetch('/api/newsletter/editorial-state', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(raw),
+      })
+      if (!response.ok) throw new Error(`editorial state API returned ${response.status}`)
+    } catch (importError) {
+      error.value = importError instanceof Error ? importError.message : String(importError)
+    }
     return result
   }
 

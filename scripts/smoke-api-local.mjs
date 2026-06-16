@@ -29,18 +29,41 @@ try {
   await module.writeVote(item.id, 1)
   const focus = await module.writeFocus('More local graph databases with typed query planning.', 'this_week')
   if (!focus?.id) throw new Error('local focus was not returned')
+  const importResult = await module.writeEditorialState({
+    votes: {
+      [item.id]: -1,
+      'missing-smoke-item': 1,
+    },
+    focuses: [
+      {
+        id: 'focus-bulk-import',
+        text: 'Bulk imported local editorial state.',
+        scope: 'ongoing',
+        created_at: '2026-06-15T13:00:00Z',
+      },
+    ],
+  })
+  if (importResult.importedVotes !== 2 || importResult.importedFocuses !== 1) {
+    throw new Error(`unexpected local editorial state import counts: ${JSON.stringify(importResult)}`)
+  }
 
   const secondSnapshot = await module.readSnapshot()
   const updatedItem = secondSnapshot.items.find((candidate) => candidate.id === item.id)
-  if (updatedItem?.vote !== 1) throw new Error('local vote did not persist')
+  if (updatedItem?.vote !== -1) throw new Error('local imported vote did not persist')
   if (!secondSnapshot.focuses.some((candidate) => candidate.id === focus.id)) {
     throw new Error('local focus did not persist')
   }
+  if (!secondSnapshot.focuses.some((candidate) => candidate.text === 'Bulk imported local editorial state.')) {
+    throw new Error('local imported focus did not persist')
+  }
 
   const state = JSON.parse(await readFile(stateFile, 'utf8'))
-  if (state.votes[item.id] !== 1) throw new Error('state file did not record vote')
+  if (state.votes[item.id] !== -1) throw new Error('state file did not record imported vote')
   if (!state.focuses.some((candidate) => candidate.id === focus.id)) {
     throw new Error('state file did not record focus')
+  }
+  if (!state.focuses.some((candidate) => candidate.text === 'Bulk imported local editorial state.')) {
+    throw new Error('state file did not record imported focus')
   }
 
   process.env.VERCEL = '1'
