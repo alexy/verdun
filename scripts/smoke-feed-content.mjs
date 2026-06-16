@@ -19,6 +19,12 @@ const feed = `<?xml version="1.0" encoding="UTF-8"?>
         <p>The useful bit is how Dagster asset graph metadata can make typed orchestration inspectable.</p>
       ]]></content:encoded>
     </item>
+    <item>
+      <title>Lineage catalogs for operational analytics</title>
+      <link>https://example.com/lineage-catalogs</link>
+      <pubDate>${publishedAt}</pubDate>
+      <description>How catalogs make weekly data operations more inspectable.</description>
+    </item>
   </channel>
 </rss>`
 
@@ -41,6 +47,7 @@ try {
   const itemsPath = join(root, 'items.json')
   const sourceRunsPath = join(root, 'source-runs.json')
   const snapshotPath = join(root, 'snapshot.json')
+  const editorialStatePath = join(root, 'editorial-state.json')
   await writeFile(configPath, `
 theme = "Smoke typed data systems"
 
@@ -56,6 +63,16 @@ kind = "publication"
 url = "https://substack.com"
 feed_urls = ["http://127.0.0.1:${address.port}/feed"]
 `)
+  await writeFile(editorialStatePath, JSON.stringify({
+    focuses: [
+      {
+        id: 'focus-feed-content',
+        text: 'More Dagster material on lineage catalogs for operational analytics.',
+        scope: 'this_week',
+        created_at: new Date().toISOString(),
+      },
+    ],
+  }))
 
   const result = await runCommand('cargo', [
     'run',
@@ -66,6 +83,8 @@ feed_urls = ["http://127.0.0.1:${address.port}/feed"]
     '--config',
     configPath,
     '--live',
+    '--editorial-state',
+    editorialStatePath,
     '--max-live-per-project',
     '2',
     '--out',
@@ -81,11 +100,19 @@ feed_urls = ["http://127.0.0.1:${address.port}/feed"]
 
   const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8'))
   const substackRun = snapshot.source_runs.find((run) => run.source === 'Substack')
-  if (substackRun?.item_count !== 1 || substackRun.project_counts?.Dagster !== 1) {
+  if (substackRun?.item_count !== 2 || substackRun.project_counts?.Dagster !== 2) {
     throw new Error(`Substack content:encoded match was not counted in the source run: ${JSON.stringify({ substackRun, items: snapshot.items }, null, 2)}`)
   }
   if (!snapshot.items.some((item) => item.source === 'Substack' && item.project === 'Dagster')) {
     throw new Error('Substack content:encoded match did not produce a Dagster item')
+  }
+  const focusMatched = snapshot.items.find((item) => item.url === 'https://example.com/lineage-catalogs')
+  if (!focusMatched) {
+    throw new Error('Substack focus-term match did not produce a Dagster item')
+  }
+  const matchedKeywords = focusMatched.raw_json?.provenance?.matched_keywords ?? []
+  if (!matchedKeywords.includes('focus:catalogs')) {
+    throw new Error(`focus-term provenance did not preserve the editorial match: ${JSON.stringify(matchedKeywords)}`)
   }
 } finally {
   await new Promise((resolve, reject) => {

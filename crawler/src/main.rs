@@ -212,7 +212,7 @@ fn collect(
     let mut source_runs = seed_source_runs(&watchlist, live);
     if live {
         let since = Utc::now() - Duration::days(since_days);
-        match live_items(&watchlist, max_live_per_project, since) {
+        match live_items(&watchlist, max_live_per_project, since, &editorial_focuses) {
             Ok((live_items, live_source_runs)) => {
                 items.extend(live_items);
                 source_runs.extend(live_source_runs);
@@ -644,6 +644,7 @@ fn live_items(
     watchlist: &Watchlist,
     max_per_project: usize,
     since: DateTime<Utc>,
+    editorial_focuses: &[EditorialFocus],
 ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
     let client = Client::builder()
         .timeout(StdDuration::from_secs(12))
@@ -657,7 +658,13 @@ fn live_items(
         .iter()
         .find(|source| source.name == "Hacker News")
     {
-        match fetch_hacker_news(&client, watchlist, source, max_per_project) {
+        match fetch_hacker_news(
+            &client,
+            watchlist,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
@@ -675,7 +682,13 @@ fn live_items(
         .iter()
         .find(|source| source.name == "Lobste.rs")
     {
-        match fetch_lobsters(&client, watchlist, source, max_per_project) {
+        match fetch_lobsters(
+            &client,
+            watchlist,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(source, &source_items, "Lobste.rs search"));
@@ -689,7 +702,13 @@ fn live_items(
         .iter()
         .find(|source| source.name == "dev.to")
     {
-        match fetch_dev_to(&client, watchlist, source, max_per_project) {
+        match fetch_dev_to(
+            &client,
+            watchlist,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(source, &source_items, "dev.to articles API"));
@@ -703,7 +722,13 @@ fn live_items(
         .iter()
         .find(|source| source.name == "Medium")
     {
-        match fetch_feed_source(&client, watchlist, source, max_per_project) {
+        match fetch_feed_source(
+            &client,
+            watchlist,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
@@ -721,7 +746,13 @@ fn live_items(
         .iter()
         .find(|source| source.name == "Substack")
     {
-        match fetch_feed_source(&client, watchlist, source, max_per_project) {
+        match fetch_feed_source(
+            &client,
+            watchlist,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
@@ -740,7 +771,7 @@ fn live_items(
             .iter()
             .find(|source| source.name == source_name)
         {
-            match collect_manual_source(watchlist, source, max_per_project) {
+            match collect_manual_source(watchlist, source, max_per_project, editorial_focuses) {
                 Ok(manual_source) => {
                     let mut source_items = manual_source.items;
                     retain_recent(&mut source_items, since);
@@ -769,10 +800,12 @@ fn fetch_hacker_news(
     watchlist: &Watchlist,
     source: &Source,
     max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
     let mut items = Vec::new();
     for project in &watchlist.projects {
-        let query = project_query(project);
+        let focus_terms = project_focus_terms(project, editorial_focuses);
+        let query = project_query_for_collection(project, &focus_terms);
         let response = client
             .get("https://hn.algolia.com/api/v1/search_by_date")
             .query(&[
@@ -792,10 +825,10 @@ fn fetch_hacker_news(
         for hit in response
             .hits
             .into_iter()
-            .filter(|hit| hn_hit_matches_project(hit, project))
+            .filter(|hit| hn_hit_matches_project(hit, project, &focus_terms))
             .take(max_per_project)
         {
-            items.push(hn_item(project, source, hit));
+            items.push(hn_item(project, source, hit, &focus_terms));
         }
     }
     Ok(items)
@@ -806,6 +839,7 @@ fn fetch_lobsters(
     watchlist: &Watchlist,
     source: &Source,
     max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
     if max_per_project == 0 {
         return Ok(Vec::new());
@@ -815,7 +849,8 @@ fn fetch_lobsters(
     let mut items = Vec::new();
     for project in &watchlist.projects {
         let mut project_count = 0;
-        let query = project_query(project);
+        let focus_terms = project_focus_terms(project, editorial_focuses);
+        let query = project_query_for_collection(project, &focus_terms);
         let html = client
             .get("https://lobste.rs/search")
             .query(&[
@@ -835,13 +870,13 @@ fn fetch_lobsters(
             .with_context(|| format!("decoding Lobste.rs search for {}", project.name))?;
         for story in parse_lobsters_search_stories(&html)
             .into_iter()
-            .filter(|story| lobsters_story_matches_project(story, project))
+            .filter(|story| lobsters_story_matches_project(story, project, &focus_terms))
         {
             let story_key = story.short_id.clone().unwrap_or_else(|| story.url.clone());
             if seen_stories.contains_key(&story_key) {
                 continue;
             }
-            items.push(lobsters_item(project, source, &story));
+            items.push(lobsters_item(project, source, &story, &focus_terms));
             seen_stories.insert(story_key, true);
             project_count += 1;
             if project_count >= max_per_project {
@@ -961,11 +996,13 @@ fn fetch_dev_to(
     watchlist: &Watchlist,
     source: &Source,
     max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
     let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
     let mut seen_articles = BTreeMap::new();
     let mut items = Vec::new();
     for project in &watchlist.projects {
+        let focus_terms = project_focus_terms(project, editorial_focuses);
         for tag in dev_to_tags(project).into_iter().take(2) {
             let response = client
                 .get("https://dev.to/api/articles")
@@ -988,10 +1025,10 @@ fn fetch_dev_to(
                 if count >= max_per_project {
                     break;
                 }
-                if !dev_to_article_matches_project(&article, project) {
+                if !dev_to_article_matches_project(&article, project, &focus_terms) {
                     continue;
                 }
-                items.push(dev_to_item(project, source, &article));
+                items.push(dev_to_item(project, source, &article, &focus_terms));
                 counts.insert(project.name.as_str(), count + 1);
             }
             let count = *counts.get(project.name.as_str()).unwrap_or(&0);
@@ -1008,6 +1045,7 @@ fn fetch_feed_source(
     watchlist: &Watchlist,
     source: &Source,
     max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
     let feed_urls = source
         .feed_urls
@@ -1028,11 +1066,14 @@ fn fetch_feed_source(
         let entries = parse_feed_entries(&text, feed_url);
         for entry in entries {
             for project in &watchlist.projects {
+                let focus_terms = project_focus_terms(project, editorial_focuses);
                 let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-                if count >= max_per_project || !feed_entry_matches_project(&entry, project) {
+                if count >= max_per_project
+                    || !feed_entry_matches_project(&entry, project, &focus_terms)
+                {
                     continue;
                 }
-                items.push(feed_item(project, source, &entry));
+                items.push(feed_item(project, source, &entry, &focus_terms));
                 counts.insert(project.name.as_str(), count + 1);
             }
         }
@@ -1044,6 +1085,7 @@ fn collect_manual_source(
     watchlist: &Watchlist,
     source: &Source,
     max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
 ) -> Result<ManualSourceCollect> {
     let path = source
         .manual_path
@@ -1062,11 +1104,14 @@ fn collect_manual_source(
     let mut items = Vec::new();
     for post in posts {
         for project in &watchlist.projects {
+            let focus_terms = project_focus_terms(project, editorial_focuses);
             let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-            if count >= max_per_project || !manual_post_matches_project(&post, project) {
+            if count >= max_per_project
+                || !manual_post_matches_project(&post, project, &focus_terms)
+            {
                 continue;
             }
-            items.push(manual_post_item(project, source, &post));
+            items.push(manual_post_item(project, source, &post, &focus_terms));
             counts.insert(project.name.as_str(), count + 1);
         }
     }
@@ -1352,7 +1397,7 @@ fn project_item(project: &Project, source: &Source, index: usize) -> NewsItem {
             "homepage": project.homepage,
             "source_url": source.url,
             "collection_stage": "watchlist-seed",
-            "provenance": provenance("watchlist-seed", "watchlist", source, project, &project.homepage)
+            "provenance": provenance("watchlist-seed", "watchlist", source, project, &project.homepage, &[])
         }),
     }
 }
@@ -1431,7 +1476,12 @@ struct FeedEntry {
     feed_url: String,
 }
 
-fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
+fn hn_item(
+    project: &Project,
+    source: &Source,
+    hit: HackerNewsHit,
+    focus_terms: &[String],
+) -> NewsItem {
     let title = hit
         .title
         .unwrap_or_else(|| format!("{} discussion on Hacker News", project.name));
@@ -1475,12 +1525,13 @@ fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
             .iter()
             .take(3)
             .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
             .chain(["hacker-news".to_string()])
             .collect(),
         score: 60 + points.min(30) + comments.min(20),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "hn-algolia", source, project, &url),
+            "provenance": provenance("live", "hn-algolia", source, project, &url, focus_terms),
             "source": "hacker-news",
             "object_id": hit.object_id,
             "points": points,
@@ -1490,7 +1541,12 @@ fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
     }
 }
 
-fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> NewsItem {
+fn lobsters_item(
+    project: &Project,
+    source: &Source,
+    story: &LobstersStory,
+    focus_terms: &[String],
+) -> NewsItem {
     let score = story.score.unwrap_or_default();
     let comments = story.comment_count.unwrap_or_default();
     let url = story
@@ -1527,12 +1583,13 @@ fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> N
             .iter()
             .take(2)
             .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
             .chain(story.tags.iter().take(3).cloned())
             .collect(),
         score: 62 + score.min(25) + comments.min(15),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "lobsters-search", source, project, &url),
+            "provenance": provenance("live", "lobsters-search", source, project, &url, focus_terms),
             "source": "lobsters",
             "short_id": story.short_id,
             "score": score,
@@ -1542,7 +1599,12 @@ fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> N
     }
 }
 
-fn dev_to_item(project: &Project, source: &Source, article: &DevToArticle) -> NewsItem {
+fn dev_to_item(
+    project: &Project,
+    source: &Source,
+    article: &DevToArticle,
+    focus_terms: &[String],
+) -> NewsItem {
     let reactions = article.positive_reactions_count.unwrap_or_default();
     let comments = article.comments_count.unwrap_or_default();
     let url = article
@@ -1574,12 +1636,13 @@ fn dev_to_item(project: &Project, source: &Source, article: &DevToArticle) -> Ne
             .iter()
             .take(2)
             .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
             .chain(article.tag_list.iter().take(4).cloned())
             .collect(),
         score: 55 + reactions.min(30) + comments.min(15),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "dev-to-articles", source, project, &url),
+            "provenance": provenance("live", "dev-to-articles", source, project, &url, focus_terms),
             "source": "dev-to",
             "article_id": article.id,
             "reactions": reactions,
@@ -1589,7 +1652,12 @@ fn dev_to_item(project: &Project, source: &Source, article: &DevToArticle) -> Ne
     }
 }
 
-fn feed_item(project: &Project, source: &Source, entry: &FeedEntry) -> NewsItem {
+fn feed_item(
+    project: &Project,
+    source: &Source,
+    entry: &FeedEntry,
+    focus_terms: &[String],
+) -> NewsItem {
     NewsItem {
         id: stable_id(
             &slug(&source.name),
@@ -1621,19 +1689,25 @@ fn feed_item(project: &Project, source: &Source, entry: &FeedEntry) -> NewsItem 
             .iter()
             .take(3)
             .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
             .chain([slug(&source.name)])
             .collect(),
         score: feed_score(project, entry),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "rss-atom-feed", source, project, &entry.link),
+            "provenance": provenance("live", "rss-atom-feed", source, project, &entry.link, focus_terms),
             "source": slug(&source.name),
             "feed_url": entry.feed_url
         }),
     }
 }
 
-fn manual_post_item(project: &Project, source: &Source, post: &ManualPost) -> NewsItem {
+fn manual_post_item(
+    project: &Project,
+    source: &Source,
+    post: &ManualPost,
+    focus_terms: &[String],
+) -> NewsItem {
     NewsItem {
         id: stable_id(
             &slug(&source.name),
@@ -1656,12 +1730,13 @@ fn manual_post_item(project: &Project, source: &Source, post: &ManualPost) -> Ne
             .iter()
             .take(3)
             .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
             .chain([slug(&source.name)])
             .collect(),
         score: 76,
         raw_json: serde_json::json!({
             "collection_stage": "manual",
-            "provenance": provenance("manual", "manual-json", source, project, &post.url),
+            "provenance": provenance("manual", "manual-json", source, project, &post.url, focus_terms),
             "source": slug(&source.name),
             "author": post.author
         }),
@@ -1674,6 +1749,7 @@ fn provenance(
     source: &Source,
     project: &Project,
     evidence_url: &str,
+    focus_terms: &[String],
 ) -> serde_json::Value {
     serde_json::json!({
         "stage": stage,
@@ -1683,7 +1759,7 @@ fn provenance(
         "source_url": source.url,
         "evidence_url": evidence_url,
         "project": project.name,
-        "matched_keywords": project.keywords.iter().take(5).cloned().collect::<Vec<_>>()
+        "matched_keywords": matched_keywords(project, focus_terms)
     })
 }
 
@@ -1693,7 +1769,16 @@ fn project_query(project: &Project) -> String {
     parts.join(" ")
 }
 
-fn hn_hit_matches_project(hit: &HackerNewsHit, project: &Project) -> bool {
+fn project_query_for_collection(project: &Project, focus_terms: &[String]) -> String {
+    let mut parts = vec![project.name.clone()];
+    parts.extend(project_live_terms(project).into_iter().take(2));
+    parts.extend(focus_terms.iter().take(2).cloned());
+    parts.sort();
+    parts.dedup();
+    parts.join(" ")
+}
+
+fn hn_hit_matches_project(hit: &HackerNewsHit, project: &Project, focus_terms: &[String]) -> bool {
     let text = format!(
         "{} {}",
         hit.title.as_deref().unwrap_or_default(),
@@ -1702,15 +1787,23 @@ fn hn_hit_matches_project(hit: &HackerNewsHit, project: &Project) -> bool {
             .or(hit.story_url.as_deref())
             .unwrap_or_default()
     );
-    text_matches_project(&text, project)
+    text_matches_project(&text, project, focus_terms)
 }
 
-fn lobsters_story_matches_project(story: &LobstersStory, project: &Project) -> bool {
+fn lobsters_story_matches_project(
+    story: &LobstersStory,
+    project: &Project,
+    focus_terms: &[String],
+) -> bool {
     let text = format!("{} {} {}", story.title, story.url, story.tags.join(" "));
-    text_matches_project(&text, project)
+    text_matches_project(&text, project, focus_terms)
 }
 
-fn dev_to_article_matches_project(article: &DevToArticle, project: &Project) -> bool {
+fn dev_to_article_matches_project(
+    article: &DevToArticle,
+    project: &Project,
+    focus_terms: &[String],
+) -> bool {
     let text = format!(
         "{} {} {} {}",
         article.title,
@@ -1718,21 +1811,29 @@ fn dev_to_article_matches_project(article: &DevToArticle, project: &Project) -> 
         article.url,
         article.tag_list.join(" ")
     );
-    text_matches_project(&text, project)
+    text_matches_project(&text, project, focus_terms)
 }
 
-fn feed_entry_matches_project(entry: &FeedEntry, project: &Project) -> bool {
+fn feed_entry_matches_project(
+    entry: &FeedEntry,
+    project: &Project,
+    focus_terms: &[String],
+) -> bool {
     let link_without_query = entry.link.split('?').next().unwrap_or(&entry.link);
     let text = format!(
         "{} {} {} {}",
         entry.title, link_without_query, entry.summary, entry.match_text
     );
-    text_matches_project(&text, project)
+    text_matches_project(&text, project, focus_terms)
 }
 
-fn manual_post_matches_project(post: &ManualPost, project: &Project) -> bool {
+fn manual_post_matches_project(
+    post: &ManualPost,
+    project: &Project,
+    focus_terms: &[String],
+) -> bool {
     let text = format!("{} {} {}", post.title, post.url, post.text);
-    text_matches_project(&text, project)
+    text_matches_project(&text, project, focus_terms)
 }
 
 fn feed_score(project: &Project, entry: &FeedEntry) -> i32 {
@@ -1895,7 +1996,7 @@ fn truncate_text(value: &str, max_chars: usize) -> String {
     text
 }
 
-fn text_matches_project(text: &str, project: &Project) -> bool {
+fn text_matches_project(text: &str, project: &Project, focus_terms: &[String]) -> bool {
     let text = text.to_lowercase();
     let project_name = project.name.to_lowercase();
     if project.name == "LanceDB" {
@@ -1908,7 +2009,26 @@ fn text_matches_project(text: &str, project: &Project) -> bool {
     }
     project_live_terms(project)
         .iter()
+        .chain(focus_terms.iter())
         .any(|keyword| contains_distinct_term(&text, keyword))
+}
+
+fn matched_keywords(project: &Project, focus_terms: &[String]) -> Vec<String> {
+    let mut keywords = project
+        .keywords
+        .iter()
+        .take(5)
+        .cloned()
+        .chain(
+            focus_terms
+                .iter()
+                .take(5)
+                .map(|term| format!("focus:{term}")),
+        )
+        .collect::<Vec<_>>();
+    keywords.sort();
+    keywords.dedup();
+    keywords
 }
 
 fn contains_distinct_term(text: &str, term: &str) -> bool {
@@ -2015,10 +2135,14 @@ fn is_generic_focus_term(value: &str) -> bool {
         "focus",
         "material",
         "more",
+        "platform",
+        "platforms",
         "request",
         "source",
         "sources",
+        "systems",
         "this-week",
+        "typed",
         "week",
     ]
     .contains(&value)
