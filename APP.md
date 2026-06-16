@@ -68,4 +68,5 @@ Current local checks:
 - `npm run smoke:ghost`
 - `npm run smoke:readiness`
 - `npm run smoke:recency`
+- `npm run smoke:view`
 - `npm run smoke:app -- http://127.0.0.1:5174`

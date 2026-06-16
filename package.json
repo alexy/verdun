@@ -19,6 +19,7 @@
     "smoke:loader": "node scripts/smoke-loader-sql.mjs",
     "smoke:readiness": "node scripts/smoke-readiness.mjs",
     "smoke:recency": "node scripts/smoke-snapshot-recency.mjs",
+    "smoke:view": "node scripts/smoke-view-model.mjs",
     "draft": "node scripts/newsletter-draft.mjs",
     "ulysses:draft": "node scripts/newsletter-draft.mjs --ulysses",
     "ghost:draft": "node scripts/publish-ghost.mjs"
