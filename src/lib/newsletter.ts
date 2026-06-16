@@ -100,6 +100,19 @@ export type NewsletterReadiness = {
   checks: NewsletterReadinessCheck[]
 }
 
+export type NewsletterProseQualityCheck = {
+  id: string
+  label: string
+  passed: boolean
+  detail: string
+}
+
+export type NewsletterProseQuality = {
+  status: 'ready' | 'needs_review'
+  summary: string
+  checks: NewsletterProseQualityCheck[]
+}
+
 export type EditorialStateExport = {
   votes: Record<string, VoteValue>
   focuses: Array<{
@@ -155,6 +168,7 @@ export type NewsletterPublishManifest = {
     createdAt: string
   }>
   readiness: NewsletterReadiness
+  proseQuality: NewsletterProseQuality
   sourceCoverage: SourceCoverageSummary
   sourceRuns: SourceRun[]
   queryPlanCount: number
@@ -445,6 +459,74 @@ export function evaluateNewsletterReadiness(snapshot: NewsletterSnapshot): Newsl
   }
 }
 
+export function evaluateNewsletterProseQuality(draft: NewsletterDraft): NewsletterProseQuality {
+  const markdown = draft.markdown
+  const lowerMarkdown = markdown.toLowerCase()
+  const roughPhrases = [
+    'hacker news surfaced this item while tracking',
+    'lobste.rs matched this story against',
+    'dev.to surfaced this item while tracking',
+    'medium surfaced this feed item',
+    'substack surfaced this feed item',
+    'the weekly data engineering newsletter',
+    'author:',
+    'continue reading',
+    'a quiet day',
+  ]
+  const leakedPhrase = roughPhrases.find((phrase) => lowerMarkdown.includes(phrase))
+  const checks: NewsletterProseQualityCheck[] = [
+    {
+      id: 'throughline',
+      label: 'Weekly throughline',
+      passed: markdown.includes('## Weekly throughline') && markdown.includes('## Editorial arc'),
+      detail: markdown.includes('## Weekly throughline') && markdown.includes('## Editorial arc')
+        ? 'Draft includes a synthesized throughline and editorial arc.'
+        : 'Add both a weekly throughline and an editorial arc before publishing.',
+    },
+    {
+      id: 'crawler-boilerplate',
+      label: 'Crawler boilerplate',
+      passed: !leakedPhrase,
+      detail: leakedPhrase
+        ? `Draft still contains crawler/feed boilerplate: ${leakedPhrase}.`
+        : 'Crawler and feed boilerplate has been rewritten into prose.',
+    },
+    {
+      id: 'evidence-lines',
+      label: 'Source evidence',
+      passed: !draft.itemIds.length || markdown.includes('Evidence:'),
+      detail: !draft.itemIds.length || markdown.includes('Evidence:')
+        ? 'Selected items include source evidence where available.'
+        : 'Selected items need source evidence lines for editorial audit.',
+    },
+    {
+      id: 'credo-fit',
+      label: 'Credo fit',
+      passed: !draft.itemIds.length || markdown.includes('Credo fit:') && markdown.includes('Related ontology:'),
+      detail: !draft.itemIds.length || markdown.includes('Credo fit:') && markdown.includes('Related ontology:')
+        ? 'Selected items are tied back to the Strongly Typed AI ontology.'
+        : 'Tie selected items back to the Strongly Typed AI ontology.',
+    },
+    {
+      id: 'selection-audit',
+      label: 'Selection audit',
+      passed: !draft.itemIds.length || markdown.includes('Selection:'),
+      detail: !draft.itemIds.length || markdown.includes('Selection:')
+        ? 'Selected items include a visible selection reason.'
+        : 'Add selection reasons for selected items.',
+    },
+  ]
+  const passedCount = checks.filter((check) => check.passed).length
+  const status = checks.every((check) => check.passed) ? 'ready' : 'needs_review'
+  return {
+    status,
+    summary: status === 'ready'
+      ? 'Draft prose is ready for Ulysses review.'
+      : `${passedCount}/${checks.length} prose quality checks pass.`,
+    checks,
+  }
+}
+
 export function buildEditorialStateExport(snapshot: NewsletterSnapshot): EditorialStateExport {
   return {
     votes: Object.fromEntries(
@@ -503,6 +585,7 @@ export function buildPublishManifest(
       createdAt: focus.createdAt,
     })),
     readiness: evaluateNewsletterReadiness(snapshot),
+    proseQuality: evaluateNewsletterProseQuality(draft),
     sourceCoverage: evaluateSourceCoverage(snapshot),
     sourceRuns: snapshot.sourceRuns,
     queryPlanCount: snapshot.queryPlans.length,

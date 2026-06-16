@@ -105,6 +105,12 @@ if (!Array.isArray(publishManifest.sourceCoverage.uncoveredProjects)) {
 if (publishManifest.readiness.status !== view.readiness.value.status) {
   throw new Error('publish manifest readiness did not match view readiness')
 }
+if (!publishManifest.proseQuality?.checks?.length) {
+  throw new Error('publish manifest did not record prose quality checks')
+}
+if (!publishManifest.proseQuality.checks.some((check) => check.id === 'evidence-lines' && !check.passed)) {
+  throw new Error('seed publish manifest should flag missing source evidence')
+}
 const imported = newsletterModule.applyEditorialStateExport(snapshot.value, {
   votes: {
     'lakesail-rust-spark': 1,

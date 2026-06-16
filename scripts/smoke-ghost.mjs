@@ -69,6 +69,9 @@ if (fileOutput.payload.posts[0].slug !== dryRunOutput.payload.posts[0].slug) {
 if (!fileOutput.manifest.selectedItems?.length || fileOutput.manifest.selectedItems.some((item) => !item.selectionReason)) {
   throw new Error('ghost manifest file did not include selected item reasons')
 }
+if (fileOutput.manifest.proseQuality?.status !== 'ready') {
+  throw new Error('ghost manifest file did not include ready prose quality')
+}
 if (dryRunOutput.manifest.snapshotInput !== 'public/data/newsletter-snapshot.json') {
   throw new Error('dry-run output did not include manifest snapshot input')
 }

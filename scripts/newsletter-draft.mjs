@@ -90,6 +90,14 @@ export async function evaluateSourceCoverage(snapshot) {
   return module.evaluateSourceCoverage(snapshot)
 }
 
+export async function evaluateNewsletterProseQuality(draft) {
+  const { module } = await runnerImport('./src/lib/newsletter.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
+  return module.evaluateNewsletterProseQuality(draft)
+}
+
 export async function sharedBuildPublishManifest(draft, snapshot, options = {}) {
   const { module } = await runnerImport('./src/lib/newsletter.ts', {
     logLevel: 'error',
@@ -122,12 +130,20 @@ export async function assertDraftReady(snapshot, draft, options = {}) {
 
   if (options.requireReady) {
     const readiness = await evaluateNewsletterReadiness(snapshot)
+    const proseQuality = await evaluateNewsletterProseQuality(draft)
     if (readiness.status !== 'ready') {
       const failedChecks = readiness.checks
         .filter((check) => !check.passed)
         .map((check) => `${check.label}: ${check.detail}`)
       const details = failedChecks.length ? failedChecks.join(' ') : readiness.summary
       throw new Error(`Draft is not publishing-ready. ${details}`)
+    }
+    if (proseQuality.status !== 'ready') {
+      const failedChecks = proseQuality.checks
+        .filter((check) => !check.passed)
+        .map((check) => `${check.label}: ${check.detail}`)
+      const details = failedChecks.length ? failedChecks.join(' ') : proseQuality.summary
+      throw new Error(`Draft prose is not publishing-ready. ${details}`)
     }
   }
 }

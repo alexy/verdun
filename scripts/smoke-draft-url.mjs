@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
-import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
+import { buildNewsletterDraft, evaluateNewsletterProseQuality, loadSnapshotFile } from './newsletter-draft.mjs'
 
 process.env.NEWSLETTER_APPLY_LOCAL_STATE = 'false'
 
@@ -28,6 +28,10 @@ try {
     throw new Error('URL snapshot did not load expected items')
   }
   const draft = await buildNewsletterDraft(snapshot)
+  const proseQuality = await evaluateNewsletterProseQuality(draft)
+  if (proseQuality.status !== 'ready') {
+    throw new Error(`draft prose quality should be ready: ${proseQuality.summary}`)
+  }
   if (!draft.html.includes('<h1>Strongly Typed AI/Data Notes:')) {
     throw new Error('URL snapshot did not build a draft')
   }
@@ -89,6 +93,14 @@ try {
     if (draft.markdown.includes(roughText)) {
       throw new Error(`draft leaked rough feed text: ${roughText}`)
     }
+  }
+  const roughDraft = {
+    ...draft,
+    markdown: `${draft.markdown}\n\nHacker News surfaced this item while tracking a smoke keyword.`,
+  }
+  const roughQuality = await evaluateNewsletterProseQuality(roughDraft)
+  if (roughQuality.status !== 'needs_review' || !roughQuality.checks.some((check) => check.id === 'crawler-boilerplate' && !check.passed)) {
+    throw new Error('prose quality gate did not catch crawler boilerplate')
   }
 } finally {
   await new Promise((resolve, reject) => {

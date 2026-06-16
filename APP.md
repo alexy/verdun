@@ -47,6 +47,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Draft generation now opens with a weekly throughline that synthesizes selected projects by ontology, source evidence, topic, and saved editorial intent before the item list.
 - Draft item sections and publish manifests include selection reasons so upvotes, live/manual evidence, and fallback ranking are auditable.
 - Draft item sections include provenance evidence lines when crawler/API evidence is available.
+- Publish manifests include deterministic prose-quality checks for weekly throughline/arc, crawler/feed boilerplate leaks, source evidence, credo fit, and selection audit; `--require-ready` now blocks Ulysses/Ghost-ready exports when those prose checks fail.
 - Fallback draft selection prefers live/manual collected items over watchlist seed placeholders and keeps project diversity unless the editor explicitly upvotes different items.
 - Draft rendering normalizes thin feed snippets, generic feed captions, and crawler boilerplate into fuller source-aware/project-aware prose before Markdown/Ghost output.
 - Local draft generation overlays ignored `crawler/data/editorial-state.json` so no-database app upvotes/focus notes drive the Ulysses and Ghost draft paths; `NEWSLETTER_APPLY_LOCAL_STATE=false` renders the raw snapshot.

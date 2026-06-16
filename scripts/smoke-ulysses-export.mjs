@@ -79,6 +79,9 @@ try {
   if (manifest.readiness?.status !== 'ready') {
     throw new Error('Ulysses manifest did not record ready publishing status')
   }
+  if (manifest.proseQuality?.status !== 'ready') {
+    throw new Error('Ulysses manifest did not record ready prose quality')
+  }
   if (manifest.gates?.requireUpvotes !== true || manifest.gates?.requireReady !== true) {
     throw new Error('Ulysses manifest did not record active publishing gates')
   }
