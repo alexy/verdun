@@ -62,6 +62,7 @@ cargo run --manifest-path crawler/Cargo.toml -- verify
 cargo run --manifest-path crawler/Cargo.toml -- queries
 cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql
+npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json
 ```
 
 Live collection currently supports Hacker News through the Algolia API, Lobste.rs through `newest.json`, dev.to through project-tagged public article queries, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks. `queries` prints the non-network query plan for each watched project, including HN query text, distinctive live terms, and dev.to tags. Each item carries normalized provenance in `raw_json.provenance` so downstream loaders and editorial tools can audit which adapter produced the evidence. The watchlist covers the initial AI/data projects plus functional/composable AI/data tools such as BAML, DSPy, Instructor, Ibis, and Dagster, Grust-adjacent graph, Sail/lakehouse, and indexing systems including Grust Sail, FalkorDB, LadybugDB, and CocoIndex. The verifier checks that the required projects, public-source adapters, publication feeds, and manual social import files are all configured before a weekly pass.
@@ -74,6 +75,15 @@ Manual social imports live at:
 - `crawler/data/manual/x-twitter.json`
 
 Use those files for exported, saved, or explicitly reviewed posts rather than unauthenticated scraping. Future authenticated adapters can reuse the same normalized post shape.
+
+## Weekly Operating Sequence
+
+1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify` and `cargo run --manifest-path crawler/Cargo.toml -- queries` before network collection to confirm the watchlist, source adapters, and search terms.
+2. Run `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2` to refresh `public/data/newsletter-snapshot.json`.
+3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
+4. Run `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` before applying SQL to the external database; it checks row counts, source-run metadata, required projects, tags, URLs, and provenance JSON.
+5. Apply `/tmp/verdun-newsletter-load.sql` to the external Postgres database, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
+6. Run `npm run ulysses:ready` to write the gated local Markdown export for Ulysses once readiness passes.
 
 ## Drafting for Ulysses
 
