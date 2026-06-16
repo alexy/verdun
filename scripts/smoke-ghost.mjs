@@ -1,5 +1,5 @@
 import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
-import { ghostEndpoint, ghostJwt, ghostPostPayload, parseGhostArgs } from './publish-ghost.mjs'
+import { ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './publish-ghost.mjs'
 
 const options = parseGhostArgs(['--dry-run', '--require-upvotes', '--require-ready', 'draft'], {
   GHOST_ADMIN_API_URL: 'https://collected.ga',
@@ -22,8 +22,18 @@ const payload = ghostPostPayload(draft, options.status)
 const post = payload.posts[0]
 if (post.title !== draft.title) throw new Error('payload title does not match draft')
 if (post.custom_excerpt !== draft.subtitle) throw new Error('payload excerpt does not match draft')
+if (post.slug !== ghostSlug(draft.title)) throw new Error('payload slug is not deterministic')
+if (post.meta_title !== draft.title) throw new Error('payload meta title does not match draft')
+if (post.meta_description !== post.custom_excerpt) throw new Error('payload meta description does not match excerpt')
 if (!post.html.includes('<h1>')) throw new Error('payload html is missing rendered headings')
+if (!post.html.includes('<h2>Editorial arc</h2>')) throw new Error('payload html is missing the editorial arc')
 if (!post.html.includes('<strong>Typed contracts</strong>')) throw new Error('payload html is missing rendered strong text')
 if (post.html.includes('**Typed contracts**')) throw new Error('payload html leaked markdown emphasis')
 if (post.status !== 'draft') throw new Error('payload status does not match')
 if (!post.tags.includes('strongly-typed')) throw new Error('payload tags are missing newsletter taxonomy')
+if (ghostSlug('Strongly Typed AI/Data Notes: June 15, 2026') !== 'strongly-typed-ai-data-notes-june-15-2026') {
+  throw new Error('Ghost slug helper did not normalize the newsletter title')
+}
+if (ghostExcerpt('x'.repeat(320)).length > 280 || !ghostExcerpt('x'.repeat(320)).endsWith('...')) {
+  throw new Error('Ghost excerpt helper did not bound long descriptions')
+}

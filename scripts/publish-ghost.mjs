@@ -45,17 +45,36 @@ export function parseGhostArgs(args, env = process.env) {
 }
 
 export function ghostPostPayload(draft, status = 'draft') {
+  const excerpt = ghostExcerpt(draft.subtitle)
   return {
     posts: [
       {
         title: draft.title,
-        custom_excerpt: draft.subtitle,
+        slug: ghostSlug(draft.title),
+        custom_excerpt: excerpt,
+        meta_title: draft.title,
+        meta_description: excerpt,
         html: draft.html,
         status,
         tags: ['verdun', 'strongly-typed', 'ai-data'],
       },
     ],
   }
+}
+
+export function ghostSlug(value) {
+  return value
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 96)
+}
+
+export function ghostExcerpt(value) {
+  const normalized = value.replace(/\s+/g, ' ').trim()
+  if (normalized.length <= 280) return normalized
+  return `${normalized.slice(0, 277).replace(/\s+\S*$/, '')}...`
 }
 
 export async function publishGhostPayload(payload, options) {
