@@ -30,6 +30,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Source-health metadata shown in the app sidebar, including per-project coverage for each watched source.
 - Source-health coverage gaps identify watched projects without live/manual source matches, and the same gap signal is included in local Markdown drafts.
 - Live public-source ingestion for Hacker News, Lobste.rs, project-tagged dev.to queries, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, BAML, DSPy, Instructor, LakeSail, Ibis, Dagster, Grust Sail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, TypeSec, FalkorDB, LadybugDB, and CocoIndex.
+- `verdun-crawler queries` prints the non-network query plan for watched projects before a live collection run.
 - Live/manual collection defaults to a 45-day recency window via `--since-days`, so weekly drafts do not pull stale search hits.
 - `verdun-crawler verify` guards the required project list, public-source adapters, Medium/Substack feed configuration, and LinkedIn/X manual import files.
 - Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
@@ -63,5 +64,6 @@ Current local checks:
 - `npm run smoke:ulysses`
 - `npm run prod:build`
 - `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2`
+- `cargo run --manifest-path crawler/Cargo.toml -- queries`
 - `npm run draft`
 - `npm run smoke:app -- http://127.0.0.1:5174/rbage/`

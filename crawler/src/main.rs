@@ -46,6 +46,10 @@ enum CommandKind {
         #[arg(long, default_value = "crawler/config/watchlist.toml")]
         config: PathBuf,
     },
+    Queries {
+        #[arg(long, default_value = "crawler/config/watchlist.toml")]
+        config: PathBuf,
+    },
 }
 
 #[derive(Debug, Deserialize)]
@@ -155,7 +159,17 @@ fn main() -> Result<()> {
             snapshot,
         } => export_sql(snapshot, input, source_runs, out),
         CommandKind::Verify { config } => verify(config),
+        CommandKind::Queries { config } => queries(config),
     }
+}
+
+#[derive(Debug, Serialize)]
+struct ProjectQueryPlan {
+    project: String,
+    topic: String,
+    hacker_news_query: String,
+    live_terms: Vec<String>,
+    dev_to_tags: Vec<String>,
 }
 
 fn collect(
@@ -350,6 +364,23 @@ fn verify(config: PathBuf) -> Result<()> {
         watchlist.sources.len(),
         watchlist.theme
     );
+    Ok(())
+}
+
+fn queries(config: PathBuf) -> Result<()> {
+    let watchlist = read_watchlist(&config)?;
+    let plans = watchlist
+        .projects
+        .iter()
+        .map(|project| ProjectQueryPlan {
+            project: project.name.clone(),
+            topic: project.topic.clone(),
+            hacker_news_query: project_query(project),
+            live_terms: project_live_terms(project),
+            dev_to_tags: dev_to_tags(project),
+        })
+        .collect::<Vec<_>>();
+    println!("{}", serde_json::to_string_pretty(&plans)?);
     Ok(())
 }
 
