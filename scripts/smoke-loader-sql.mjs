@@ -26,7 +26,7 @@ if (sourceRunInserts !== sourceRunCount) {
 if (queryPlanInserts !== queryPlans.length) {
   throw new Error(`expected ${queryPlans.length} newsletter_query_plans inserts, found ${queryPlanInserts}`)
 }
-for (const source of ['Hacker News', 'Medium', 'LinkedIn', 'X/Twitter']) {
+for (const source of ['Hacker News', 'Medium', 'Substack', 'LinkedIn', 'X/Twitter']) {
   if (!sql.includes(sqlString(source))) throw new Error(`SQL export is missing source run for ${source}`)
 }
 for (const run of sourceRuns) {

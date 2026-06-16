@@ -1305,6 +1305,7 @@ struct FeedEntry {
     link: String,
     published_at: DateTime<Utc>,
     summary: String,
+    match_text: String,
     feed_url: String,
 }
 
@@ -1600,7 +1601,10 @@ fn dev_to_article_matches_project(article: &DevToArticle, project: &Project) -> 
 
 fn feed_entry_matches_project(entry: &FeedEntry, project: &Project) -> bool {
     let link_without_query = entry.link.split('?').next().unwrap_or(&entry.link);
-    let text = format!("{} {} {}", entry.title, link_without_query, entry.summary);
+    let text = format!(
+        "{} {} {} {}",
+        entry.title, link_without_query, entry.summary, entry.match_text
+    );
     text_matches_project(&text, project)
 }
 
@@ -1634,11 +1638,20 @@ fn parse_feed_entries(text: &str, feed_url: &str) -> Vec<FeedEntry> {
 fn feed_entry_from_block(block: &str, feed_url: &str) -> Option<FeedEntry> {
     let title = clean_feed_text(&xml_text(block, "title")?);
     let link = clean_feed_url(&feed_link(block)?);
-    let summary = xml_text(block, "description")
-        .or_else(|| xml_text(block, "summary"))
-        .or_else(|| xml_text(block, "content"))
-        .map(|value| clean_feed_text(&value))
+    let description = xml_text(block, "description").map(|value| clean_feed_text(&value));
+    let summary_text = xml_text(block, "summary").map(|value| clean_feed_text(&value));
+    let content = xml_text(block, "content").map(|value| clean_feed_text(&value));
+    let summary = description
+        .clone()
+        .or_else(|| summary_text.clone())
+        .or_else(|| content.clone())
         .unwrap_or_default();
+    let match_text = [Some(title.clone()), description, summary_text, content]
+        .into_iter()
+        .flatten()
+        .filter(|value| !value.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ");
     let published_at = xml_text(block, "pubDate")
         .or_else(|| xml_text(block, "published"))
         .or_else(|| xml_text(block, "updated"))
@@ -1649,6 +1662,7 @@ fn feed_entry_from_block(block: &str, feed_url: &str) -> Option<FeedEntry> {
         link,
         published_at,
         summary,
+        match_text,
         feed_url: feed_url.to_string(),
     })
 }
@@ -1663,7 +1677,7 @@ fn xml_blocks(text: &str, tag: &str) -> Vec<String> {
 }
 
 fn xml_text(text: &str, tag: &str) -> Option<String> {
-    let pattern = format!(r"(?is)<(?:\w+:)?{tag}\b[^>]*>(.*?)</(?:\w+:)?{tag}>");
+    let pattern = format!(r"(?is)<(?:\w+:)?{tag}(?::\w+)?\b[^>]*>(.*?)</(?:\w+:)?{tag}(?::\w+)?>");
     Regex::new(&pattern)
         .ok()?
         .captures(text)
@@ -1767,12 +1781,31 @@ fn text_matches_project(text: &str, project: &Project) -> bool {
             || text.contains("lance-format")
             || text.contains("lancedb.com");
     }
-    if text.contains(&project_name) {
+    if contains_distinct_term(&text, &project_name) {
         return true;
     }
     project_live_terms(project)
         .iter()
-        .any(|keyword| text.contains(keyword))
+        .any(|keyword| contains_distinct_term(&text, keyword))
+}
+
+fn contains_distinct_term(text: &str, term: &str) -> bool {
+    if term.is_empty() {
+        return false;
+    }
+    let mut start = 0;
+    while let Some(offset) = text[start..].find(term) {
+        let index = start + offset;
+        let before = text[..index].chars().next_back();
+        let after = text[index + term.len()..].chars().next();
+        let before_boundary = before.is_none_or(|character| !character.is_ascii_alphanumeric());
+        let after_boundary = after.is_none_or(|character| !character.is_ascii_alphanumeric());
+        if before_boundary && after_boundary {
+            return true;
+        }
+        start = index + term.len();
+    }
+    false
 }
 
 fn project_live_terms(project: &Project) -> Vec<String> {

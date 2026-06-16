@@ -24,6 +24,7 @@
     "smoke:db-apply": "node scripts/smoke-db-apply.mjs",
     "smoke:draft": "node scripts/smoke-draft-local.mjs",
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
+    "smoke:feed-content": "node scripts/smoke-feed-content.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",
     "smoke:loader": "node scripts/smoke-loader-sql.mjs",
     "smoke:manual-source": "node scripts/smoke-manual-source-freshness.mjs",

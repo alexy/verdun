@@ -62,6 +62,17 @@
       "author": "itsezc",
       "collection_stage": "live",
       "comments": 31,
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "dev-to-f769b6c16afb",
+          "project": "SurrealDB",
+          "score": 71,
+          "source": "dev.to",
+          "title": "SurrealDB 3.x by the numbers",
+          "url": "https://surrealdb.com/blog/surrealdb-3-x-by-the-numbers"
+        }
+      ],
       "object_id": "48323844",
       "points": 75,
       "provenance": {
@@ -860,6 +871,61 @@
     }
   },
   {
+    "id": "dev-to-2aef2efba376",
+    "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
+    "source": "dev.to",
+    "source_kind": "community",
+    "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
+    "published_at": "2026-05-28T08:43:39Z",
+    "project": "SurrealDB",
+    "topic": "multimodel data",
+    "summary": "Author: Tobie Morgan Hitchcock  Three months after 3.0 went GA, we're excited to announce that...",
+    "why_it_matters": "Developer essays show whether SurrealDB is gaining practical adoption beyond release announcements.",
+    "tags": [
+      "surrealdb",
+      "multimodel",
+      "surrealdb",
+      "database",
+      "news",
+      "graphql"
+    ],
+    "score": 76,
+    "raw_json": {
+      "article_id": 3695343,
+      "author": "mgyles",
+      "collection_stage": "live",
+      "comments": 0,
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "hn-7a2fd6799a20",
+          "project": "SurrealDB",
+          "score": 64,
+          "source": "Hacker News",
+          "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
+          "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process"
+        }
+      ],
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
+        "matched_keywords": [
+          "surrealdb",
+          "multimodel",
+          "graph",
+          "realtime"
+        ],
+        "project": "SurrealDB",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 21,
+      "source": "dev-to"
+    }
+  },
+  {
     "id": "apache-arrow-d81d1a84d3c6",
     "title": "Apache Arrow belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",
@@ -980,6 +1046,46 @@
     }
   },
   {
+    "id": "substack-c33385b95e22",
+    "title": "[AINews] not much happened today",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://www.latent.space/p/ainews-not-much-happened-today-7a8",
+    "published_at": "2026-06-05T06:44:49Z",
+    "project": "Instructor",
+    "topic": "typed structured outputs",
+    "summary": "a quiet day",
+    "why_it_matters": "Long-form publication coverage can show whether Instructor is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "instructor",
+      "structured outputs",
+      "pydantic",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://www.latent.space/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://www.latent.space/p/ainews-not-much-happened-today-7a8",
+        "matched_keywords": [
+          "instructor",
+          "structured outputs",
+          "pydantic",
+          "typed extraction",
+          "llm"
+        ],
+        "project": "Instructor",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
     "id": "medium-789f982ee2a",
     "title": "Apache Data Lakehouse Weekly: May 28 — June 4, 2026",
     "source": "Medium",
@@ -1031,6 +1137,305 @@
     }
   },
   {
+    "id": "substack-ad77c14b8a42",
+    "title": "[AINews] Reve 2 and Ideogram 4: Layouts in Imagegen",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://www.latent.space/p/ainews-reve-2-and-ideogram-4-layouts",
+    "published_at": "2026-06-04T03:24:07Z",
+    "project": "DSPy",
+    "topic": "declarative AI programs",
+    "summary": "a quiet day.",
+    "why_it_matters": "Long-form publication coverage can show whether DSPy is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "dspy",
+      "declarative lm",
+      "language model programs",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://www.latent.space/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://www.latent.space/p/ainews-reve-2-and-ideogram-4-layouts",
+        "matched_keywords": [
+          "dspy",
+          "declarative lm",
+          "language model programs",
+          "optimizers"
+        ],
+        "project": "DSPy",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
+    "id": "substack-93b549e1aa9b",
+    "title": "[AINews] Microsoft Build: MAI-Thinking-1 and MAI Family models",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://www.latent.space/p/ainews-microsoft-build-mai-thinking",
+    "published_at": "2026-06-03T05:49:02Z",
+    "project": "DSPy",
+    "topic": "declarative AI programs",
+    "summary": "Microsoft Build recap, and new MAI model technical details",
+    "why_it_matters": "Long-form publication coverage can show whether DSPy is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "dspy",
+      "declarative lm",
+      "language model programs",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://www.latent.space/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://www.latent.space/p/ainews-microsoft-build-mai-thinking",
+        "matched_keywords": [
+          "dspy",
+          "declarative lm",
+          "language model programs",
+          "optimizers"
+        ],
+        "project": "DSPy",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
+    "id": "substack-819002bfab6f",
+    "title": "The Age of Async Agents — Cognition's Walden Yan & OpenInspect's Cole Murray",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://www.latent.space/p/cognition",
+    "published_at": "2026-05-28T18:41:24Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "80% Devin Commits, Spec-to-PR Workflows, Full VMs, Agent Memory, and PMs Shipping Code",
+    "why_it_matters": "Long-form publication coverage can show whether Pydantic is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "substack-62b8d6884564",
+          "project": "Instructor",
+          "score": 68,
+          "source": "Substack",
+          "title": "The Age of Async Agents — Cognition's Walden Yan & OpenInspect's Cole Murray",
+          "url": "https://www.latent.space/p/cognition"
+        }
+      ],
+      "feed_url": "https://www.latent.space/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://www.latent.space/p/cognition",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
+    "id": "substack-52a30ea41f44",
+    "title": "Data Engineering Weekly #271",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://www.dataengineeringweekly.com/p/data-engineering-weekly-271",
+    "published_at": "2026-05-25T16:05:00Z",
+    "project": "Dagster",
+    "topic": "functional data orchestration",
+    "summary": "The Weekly Data Engineering Newsletter",
+    "why_it_matters": "Long-form publication coverage can show whether Dagster is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "dagster",
+      "software-defined assets",
+      "data orchestration",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://dataengineeringweekly.substack.com/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://www.dataengineeringweekly.com/p/data-engineering-weekly-271",
+        "matched_keywords": [
+          "dagster",
+          "software-defined assets",
+          "data orchestration",
+          "asset graph",
+          "python"
+        ],
+        "project": "Dagster",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
+    "id": "substack-67d5a93794d",
+    "title": "Data Engineering Weekly #270",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://www.dataengineeringweekly.com/p/data-engineering-weekly-270",
+    "published_at": "2026-05-18T01:54:53Z",
+    "project": "Delta Lake",
+    "topic": "lakehouse transactions",
+    "summary": "The Weekly Data Engineering Newsletter",
+    "why_it_matters": "Long-form publication coverage can show whether Delta Lake is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "delta lake",
+      "deltalake",
+      "transaction log",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "duplicates": [
+        {
+          "collection_stage": "live",
+          "id": "substack-e4e4d72564c0",
+          "project": "Dagster",
+          "score": 68,
+          "source": "Substack",
+          "title": "Data Engineering Weekly #270",
+          "url": "https://www.dataengineeringweekly.com/p/data-engineering-weekly-270"
+        }
+      ],
+      "feed_url": "https://dataengineeringweekly.substack.com/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://www.dataengineeringweekly.com/p/data-engineering-weekly-270",
+        "matched_keywords": [
+          "delta lake",
+          "deltalake",
+          "transaction log",
+          "lakehouse table",
+          "merge into"
+        ],
+        "project": "Delta Lake",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
+    "id": "substack-3e05d60888ef",
+    "title": "What data agent benchmarks do and don't tell us",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://roundup.getdbt.com/p/what-data-agent-benchmarks-do-and",
+    "published_at": "2026-05-17T13:40:19Z",
+    "project": "LanceDB",
+    "topic": "vector data",
+    "summary": "And more from AI Council",
+    "why_it_matters": "Long-form publication coverage can show whether LanceDB is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "lancedb",
+      "lance",
+      "vectors",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://roundup.getdbt.com/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://roundup.getdbt.com/p/what-data-agent-benchmarks-do-and",
+        "matched_keywords": [
+          "lancedb",
+          "lance",
+          "vectors",
+          "multimodal",
+          "columnar"
+        ],
+        "project": "LanceDB",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
+    "id": "substack-39f3bfcba0f5",
+    "title": "BI’s Second Unbundling",
+    "source": "Substack",
+    "source_kind": "publication",
+    "url": "https://roundup.getdbt.com/p/bis-second-unbundling",
+    "published_at": "2026-05-03T11:03:06Z",
+    "project": "Apache Arrow",
+    "topic": "typed columnar memory",
+    "summary": "Software engineering started eating data a decade+ ago; it just took a little while to get to the presentation layer.",
+    "why_it_matters": "Long-form publication coverage can show whether Apache Arrow is being adopted, compared, or explained beyond release traffic.",
+    "tags": [
+      "apache arrow",
+      "arrow ipc",
+      "arrow flight",
+      "substack"
+    ],
+    "score": 68,
+    "raw_json": {
+      "collection_stage": "live",
+      "feed_url": "https://roundup.getdbt.com/feed",
+      "provenance": {
+        "adapter": "rss-atom-feed",
+        "evidence_url": "https://roundup.getdbt.com/p/bis-second-unbundling",
+        "matched_keywords": [
+          "apache arrow",
+          "arrow ipc",
+          "arrow flight",
+          "columnar memory",
+          "typed columnar"
+        ],
+        "project": "Apache Arrow",
+        "source": "Substack",
+        "source_kind": "publication",
+        "source_url": "https://substack.com",
+        "stage": "live"
+      },
+      "source": "substack"
+    }
+  },
+  {
     "id": "ibis-46f219cbb2b4",
     "title": "Ibis belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",
@@ -1071,48 +1476,6 @@
     }
   },
   {
-    "id": "hn-7a2fd6799a20",
-    "title": "SurrealDB 3.1: stability, DiskANN, and a new release process",
-    "source": "Hacker News",
-    "source_kind": "community",
-    "url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
-    "published_at": "2026-05-28T11:26:06Z",
-    "project": "SurrealDB",
-    "topic": "multimodel data",
-    "summary": "Hacker News surfaced this item while tracking SurrealDB keywords: surrealdb, multimodel, graph, realtime.",
-    "why_it_matters": "Community discussion can reveal whether SurrealDB is becoming practical infrastructure or only an interesting release note.",
-    "tags": [
-      "surrealdb",
-      "multimodel",
-      "graph",
-      "hacker-news"
-    ],
-    "score": 64,
-    "raw_json": {
-      "author": "itsezc",
-      "collection_stage": "live",
-      "comments": 0,
-      "object_id": "48307443",
-      "points": 4,
-      "provenance": {
-        "adapter": "hn-algolia",
-        "evidence_url": "https://surrealdb.com/blog/surrealdb-3-1-stability-diskann-and-a-new-release-process",
-        "matched_keywords": [
-          "surrealdb",
-          "multimodel",
-          "graph",
-          "realtime"
-        ],
-        "project": "SurrealDB",
-        "source": "Hacker News",
-        "source_kind": "community",
-        "source_url": "https://news.ycombinator.com",
-        "stage": "live"
-      },
-      "source": "hacker-news"
-    }
-  },
-  {
     "id": "dagster-e41635731d59",
     "title": "Dagster belongs in this week's typed AI/data systems watch",
     "source": "Hacker News",
@@ -1150,6 +1513,48 @@
         "stage": "watchlist-seed"
       },
       "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "hn-55c1bac2d2bf",
+    "title": "Show HN: Auto-triage customer emails to Linear with Claude and pydantic-AI",
+    "source": "Hacker News",
+    "source_kind": "community",
+    "url": "https://github.com/Reactance0083/pydantic-ai-email-linear-auto-triage",
+    "published_at": "2026-06-16T13:02:00Z",
+    "project": "Pydantic",
+    "topic": "typed AI",
+    "summary": "Hacker News surfaced this item while tracking Pydantic keywords: pydantic, typed agents, structured outputs, validation.",
+    "why_it_matters": "Community discussion can reveal whether Pydantic is becoming practical infrastructure or only an interesting release note.",
+    "tags": [
+      "pydantic",
+      "typed agents",
+      "structured outputs",
+      "hacker-news"
+    ],
+    "score": 61,
+    "raw_json": {
+      "author": "reactance0083",
+      "collection_stage": "live",
+      "comments": 0,
+      "object_id": "48554622",
+      "points": 1,
+      "provenance": {
+        "adapter": "hn-algolia",
+        "evidence_url": "https://github.com/Reactance0083/pydantic-ai-email-linear-auto-triage",
+        "matched_keywords": [
+          "pydantic",
+          "typed agents",
+          "structured outputs",
+          "validation"
+        ],
+        "project": "Pydantic",
+        "source": "Hacker News",
+        "source_kind": "community",
+        "source_url": "https://news.ycombinator.com",
+        "stage": "live"
+      },
+      "source": "hacker-news"
     }
   },
   {
@@ -1232,6 +1637,51 @@
         "stage": "watchlist-seed"
       },
       "source_url": "https://news.ycombinator.com"
+    }
+  },
+  {
+    "id": "dev-to-375e0726e25c",
+    "title": "How I built a three-tier content quality ladder for programmatic directory ETL",
+    "source": "dev.to",
+    "source_kind": "community",
+    "url": "https://dev.to/morinaga/how-i-built-a-three-tier-content-quality-ladder-for-programmatic-directory-etl-okc",
+    "published_at": "2026-06-06T22:10:47Z",
+    "project": "Turso",
+    "topic": "edge data",
+    "summary": "The model_used column, upgrade query pattern, and fallback chain I use to progressively enrich three Turso-backed Astro directories with Claude Haiku.",
+    "why_it_matters": "Developer essays show whether Turso is gaining practical adoption beyond release announcements.",
+    "tags": [
+      "turso",
+      "libsql",
+      "claude",
+      "typescript",
+      "turso",
+      "webdev"
+    ],
+    "score": 57,
+    "raw_json": {
+      "article_id": 3837232,
+      "author": "morinaga",
+      "collection_stage": "live",
+      "comments": 1,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://dev.to/morinaga/how-i-built-a-three-tier-content-quality-ladder-for-programmatic-directory-etl-okc",
+        "matched_keywords": [
+          "turso",
+          "libsql",
+          "sqlite",
+          "replication",
+          "edge"
+        ],
+        "project": "Turso",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 1,
+      "source": "dev-to"
     }
   },
   {
@@ -1405,6 +1855,51 @@
     }
   },
   {
+    "id": "dev-to-8dc479050933",
+    "title": "Ditch Electron: Spawning a Rust-Powered Python Sidecar from Bun",
+    "source": "dev.to",
+    "source_kind": "community",
+    "url": "https://dev.to/_553af38aefbe6c8b9dbc9/ditch-electron-spawning-a-rust-powered-python-sidecar-from-bun-1bj3",
+    "published_at": "2026-06-12T15:51:24Z",
+    "project": "Turso",
+    "topic": "edge data",
+    "summary": "Part 1 of the ERTH Architecture Series: Launching local backends on Port 0, dynamic port...",
+    "why_it_matters": "Developer essays show whether Turso is gaining practical adoption beyond release announcements.",
+    "tags": [
+      "turso",
+      "libsql",
+      "electrobun",
+      "robyn",
+      "turso",
+      "htmx"
+    ],
+    "score": 55,
+    "raw_json": {
+      "article_id": 3884187,
+      "author": "_553af38aefbe6c8b9dbc9",
+      "collection_stage": "live",
+      "comments": 0,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://dev.to/_553af38aefbe6c8b9dbc9/ditch-electron-spawning-a-rust-powered-python-sidecar-from-bun-1bj3",
+        "matched_keywords": [
+          "turso",
+          "libsql",
+          "sqlite",
+          "replication",
+          "edge"
+        ],
+        "project": "Turso",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 0,
+      "source": "dev-to"
+    }
+  },
+  {
     "id": "dev-to-2fd94ce08390",
     "title": "One object, three interfaces: building a natural-language Kanban board with ExoModel",
     "source": "dev.to",
@@ -1485,6 +1980,51 @@
           "llm"
         ],
         "project": "Instructor",
+        "source": "dev.to",
+        "source_kind": "community",
+        "source_url": "https://dev.to",
+        "stage": "live"
+      },
+      "reactions": 0,
+      "source": "dev-to"
+    }
+  },
+  {
+    "id": "dev-to-42851cfea7a5",
+    "title": "Why Delta, Iceberg, and Hudi Can't Write to FSx S3 Access Points — And What Works Instead",
+    "source": "dev.to",
+    "source_kind": "community",
+    "url": "https://dev.to/aws-builders/why-delta-iceberg-and-hudi-cant-write-to-fsx-s3-access-points-and-what-works-instead-5be3",
+    "published_at": "2026-05-26T17:00:49Z",
+    "project": "Delta Lake",
+    "topic": "lakehouse transactions",
+    "summary": "TL;DR   In Parts 1–6 of this series, we validated read paths across six engines. This Part 7...",
+    "why_it_matters": "Developer essays show whether Delta Lake is gaining practical adoption beyond release announcements.",
+    "tags": [
+      "delta lake",
+      "deltalake",
+      "aws",
+      "deltalake",
+      "iceberg",
+      "amazonfsxfornetappontap"
+    ],
+    "score": 55,
+    "raw_json": {
+      "article_id": 3757993,
+      "author": "yoshikifujiwara",
+      "collection_stage": "live",
+      "comments": 0,
+      "provenance": {
+        "adapter": "dev-to-articles",
+        "evidence_url": "https://dev.to/aws-builders/why-delta-iceberg-and-hudi-cant-write-to-fsx-s3-access-points-and-what-works-instead-5be3",
+        "matched_keywords": [
+          "delta lake",
+          "deltalake",
+          "transaction log",
+          "lakehouse table",
+          "merge into"
+        ],
+        "project": "Delta Lake",
         "source": "dev.to",
         "source_kind": "community",
         "source_url": "https://dev.to",

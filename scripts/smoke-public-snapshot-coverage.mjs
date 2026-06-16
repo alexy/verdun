@@ -3,7 +3,9 @@ import { readFile } from 'node:fs/promises'
 const watchlist = await readFile('crawler/config/watchlist.toml', 'utf8')
 const requiredProjects = projectNames(watchlist)
 const snapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
-const projects = new Set((snapshot.items ?? []).map((item) => item.project))
+const items = snapshot.items ?? []
+const sourceRuns = snapshot.source_runs ?? snapshot.sourceRuns ?? []
+const projects = new Set(items.map((item) => item.project))
 const missing = requiredProjects.filter((project) => !projects.has(project))
 const extra = Array.from(projects).filter((project) => !requiredProjects.includes(project)).sort()
 const queryPlans = Array.isArray(snapshot.query_plans) ? snapshot.query_plans : []
@@ -45,6 +47,14 @@ for (const plan of queryPlans) {
 const baml = queryPlans.find((plan) => plan.project === 'BAML')
 if (baml?.live_terms.includes('schema')) {
   throw new Error('BAML public snapshot query plan leaked generic schema keyword')
+}
+
+const substackRun = sourceRuns.find((run) => run.source === 'Substack')
+if (!substackRun || substackRun.status !== 'ok' || Number(substackRun.item_count ?? substackRun.itemCount) <= 0) {
+  throw new Error('public snapshot should include live Substack source coverage')
+}
+if (!items.some((item) => item.source === 'Substack')) {
+  throw new Error('public snapshot is missing Substack items')
 }
 
 const ibis = queryPlans.find((plan) => plan.project === 'Ibis')
