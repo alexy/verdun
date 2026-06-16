@@ -1,4 +1,6 @@
 import { createHmac } from 'node:crypto'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { assertDraftReady, buildNewsletterDraft, buildPublishManifest, loadSnapshotFile } from './newsletter-draft.mjs'
 
@@ -16,9 +18,14 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     requireReady: options.requireReady,
     requireUpvotes: options.requireUpvotes,
   })
+  const endpoint = ghostEndpoint(options.apiUrl ?? 'https://collected.ga')
+  const audit = ghostPublishAudit(endpoint, payload, manifest)
+  if (options.manifestOut) {
+    await writeGhostManifest(options.manifestOut, audit)
+  }
 
   if (options.dryRun) {
-    process.stdout.write(`${JSON.stringify({ endpoint: ghostEndpoint(options.apiUrl ?? 'https://collected.ga'), payload, manifest }, null, 2)}\n`)
+    process.stdout.write(`${JSON.stringify(audit, null, 2)}\n`)
   } else {
     const body = await publishGhostPayload(payload, options)
     console.log(body)
@@ -30,7 +37,7 @@ export function parseGhostArgs(args, env = process.env) {
   const allowNonDraft = args.includes('--allow-non-draft') || env.GHOST_ALLOW_NON_DRAFT === 'true'
   const requireUpvotes = args.includes('--require-upvotes') || env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
   const requireReady = args.includes('--require-ready') || env.NEWSLETTER_REQUIRE_READY === 'true'
-  const positional = args.filter((arg) => !['--dry-run', '--allow-non-draft', '--require-upvotes', '--require-ready'].includes(arg))
+  const { positional, values } = parseOptionArgs(args)
   const firstArg = positional[0]
   const secondArg = positional[1]
   const input = firstArg && !ghostStatuses.has(firstArg)
@@ -49,7 +56,33 @@ export function parseGhostArgs(args, env = process.env) {
     status,
     apiUrl: env.GHOST_ADMIN_API_URL,
     apiKey: env.GHOST_ADMIN_API_KEY,
+    manifestOut: values.get('--manifest-out') ?? env.GHOST_MANIFEST_OUT,
   }
+}
+
+function parseOptionArgs(args) {
+  const positional = []
+  const values = new Map()
+  const flags = new Set(['--dry-run', '--allow-non-draft', '--require-upvotes', '--require-ready'])
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index]
+    if (flags.has(arg)) continue
+    if (arg.startsWith('--manifest-out=')) {
+      const value = arg.slice('--manifest-out='.length)
+      if (!value) throw new Error('--manifest-out requires a file path')
+      values.set('--manifest-out', value)
+      continue
+    }
+    if (arg === '--manifest-out') {
+      const value = args[index + 1]
+      if (!value || value.startsWith('--')) throw new Error('--manifest-out requires a file path')
+      values.set(arg, value)
+      index += 1
+      continue
+    }
+    positional.push(arg)
+  }
+  return { positional, values }
 }
 
 export function assertGhostStatusAllowed(options) {
@@ -73,6 +106,19 @@ export function ghostPostPayload(draft, status = 'draft') {
       },
     ],
   }
+}
+
+export function ghostPublishAudit(endpoint, payload, manifest) {
+  return {
+    endpoint,
+    payload,
+    manifest,
+  }
+}
+
+export async function writeGhostManifest(path, audit) {
+  await mkdir(dirname(path), { recursive: true })
+  await writeFile(path, `${JSON.stringify(audit, null, 2)}\n`)
 }
 
 export function ghostSlug(value) {

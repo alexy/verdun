@@ -1,6 +1,6 @@
 import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
 import { assertGhostStatusAllowed, ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './publish-ghost.mjs'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -16,6 +16,10 @@ if (options.status !== 'draft') throw new Error('draft status was not parsed')
 if (ghostEndpoint(options.apiUrl) !== 'https://collected.ga/ghost/api/admin/posts/?source=html') {
   throw new Error('Ghost endpoint is not stable')
 }
+const manifestOptions = parseGhostArgs(['--dry-run', '--manifest-out', '/tmp/ghost.json', 'draft'], {})
+if (manifestOptions.manifestOut !== '/tmp/ghost.json') throw new Error('manifest-out option was not parsed')
+const manifestEqualsOptions = parseGhostArgs(['--dry-run', '--manifest-out=/tmp/ghost-equals.json', 'draft'], {})
+if (manifestEqualsOptions.manifestOut !== '/tmp/ghost-equals.json') throw new Error('manifest-out equals option was not parsed')
 
 const jwt = ghostJwt(options.apiKey)
 if (jwt.split('.').length !== 3) throw new Error('Ghost JWT is malformed')
@@ -50,12 +54,20 @@ try {
   blockedNonDraft = error.message.includes('refuses non-draft status')
 }
 if (!blockedNonDraft) throw new Error('Ghost helper did not block non-draft status without explicit override')
-const dryRunOutput = JSON.parse(await runGhostDryRun())
+const { stdout: dryRunStdout, manifestText: dryRunManifestText } = await runGhostDryRun()
+const dryRunOutput = JSON.parse(dryRunStdout)
 if (dryRunOutput.endpoint !== 'https://collected.ga/ghost/api/admin/posts/?source=html') {
   throw new Error('dry-run output did not include the Ghost endpoint')
 }
 if (dryRunOutput.payload.posts[0].slug !== post.slug) {
   throw new Error('dry-run output did not include the Ghost payload')
+}
+const fileOutput = JSON.parse(dryRunManifestText)
+if (fileOutput.payload.posts[0].slug !== dryRunOutput.payload.posts[0].slug) {
+  throw new Error('ghost manifest file did not match dry-run output')
+}
+if (!fileOutput.manifest.selectedItems?.length || fileOutput.manifest.selectedItems.some((item) => !item.selectionReason)) {
+  throw new Error('ghost manifest file did not include selected item reasons')
 }
 if (dryRunOutput.manifest.snapshotInput !== 'public/data/newsletter-snapshot.json') {
   throw new Error('dry-run output did not include manifest snapshot input')
@@ -77,6 +89,7 @@ async function runGhostDryRun() {
   const { spawn } = await import('node:child_process')
   const stateDir = await mkdtemp(join(tmpdir(), 'verdun-ghost-state-'))
   const stateFile = join(stateDir, 'editorial-state.json')
+  const manifestFile = join(stateDir, 'ghost.manifest.json')
   await writeFile(stateFile, JSON.stringify({
     votes: {
       'grust-sail-3683deba292c': 1,
@@ -97,6 +110,8 @@ async function runGhostDryRun() {
       '--dry-run',
       '--require-upvotes',
       '--require-ready',
+      '--manifest-out',
+      manifestFile,
       'draft',
     ], {
       env: {
@@ -114,11 +129,18 @@ async function runGhostDryRun() {
       stderr += chunk
     })
     child.on('error', reject)
-    child.on('close', (status) => {
-      void rm(stateDir, { recursive: true, force: true })
+    child.on('close', async (status) => {
       if (status === 0) {
-        resolve(stdout)
+        try {
+          const manifestText = await readFile(manifestFile, 'utf8')
+          await rm(stateDir, { recursive: true, force: true })
+          resolve({ stdout, manifestText })
+        } catch (error) {
+          await rm(stateDir, { recursive: true, force: true })
+          reject(error)
+        }
       } else {
+        void rm(stateDir, { recursive: true, force: true })
         reject(new Error(`ghost dry-run exited ${status}\n${stdout}\n${stderr}`))
       }
     })
