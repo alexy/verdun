@@ -37,9 +37,10 @@ After deployment, verify the public Collected route and data endpoints with:
 
 ```sh
 npm run check:deployed
+npm run check:deployed -- --require-ready
 ```
 
-That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the static public snapshot, and `GET /api/newsletter/items`. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring the Vercel API route.
+That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the static public snapshot, and `GET /api/newsletter/items`. Add `--require-ready` after editorial review to apply the same publishing readiness criteria used by Ulysses export to the deployed/static/API snapshots. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring the Vercel API route.
 
 ## Database
 
@@ -83,7 +84,8 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
 4. Run `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` before applying SQL to the external database; it checks row counts, source-run metadata, query plans, required projects, tags, URLs, and provenance JSON.
 5. Apply `/tmp/verdun-newsletter-load.sql` to the external Postgres database, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
-6. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
+6. Run `npm run check:deployed -- --require-ready` to verify the deployed route/API are serving a publishing-ready reviewed snapshot.
+7. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
 
 ## Drafting for Ulysses
 
