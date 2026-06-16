@@ -38,6 +38,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Live/manual crawler items are deduplicated by canonical URL while retaining duplicate source evidence in `raw_json.duplicates`.
 - External DB loader SQL can export from the cohesive public snapshot and upserts newsletter items, `newsletter_source_runs`, and `newsletter_query_plans` while preserving the snapshot collection timestamp.
 - `npm run db:apply` validates a generated SQL load against its paired snapshot, applies the database migration, and loads external Postgres only when `--apply` and a database URL are present.
+- `npm run db:deploy` regenerates or validates the SQL load, checks Vercel production database env before applying, loads external Postgres when `--apply` is present, and then runs the deployed `--require-database` gate.
 - `npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` checks that the SQL export preserves required projects, source runs, query plans, tags, URLs, provenance JSON, and snapshot collection time before applying it to external Postgres.
 - Database-backed API snapshots and status responses preserve the source collection timestamp from `newsletter_source_runs.collected_at`, so deployed draft issue dates follow the crawler/load run rather than serverless request time.
 - Source-health metadata shown in the app sidebar, including per-project coverage for each watched source.

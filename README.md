@@ -54,6 +54,15 @@ That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the st
 
 Apply `db/migrations/0001_newsletter.sql` to the external Postgres database used by Vercel.
 
+Use the guarded deployment helper when moving a crawler snapshot into the external database:
+
+```sh
+npm run db:deploy
+npm run db:deploy -- --apply
+```
+
+Without `--apply`, the helper regenerates `/tmp/verdun-newsletter-load.sql` from `public/data/newsletter-snapshot.json`, validates it against the paired snapshot, and stops before touching Postgres. With `--apply`, it also verifies Vercel production has `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL` configured, applies the migration and SQL load through `psql`, and runs `npm run check:deployed -- --require-database` to prove the public API is backed by the external database. Add `--require-ready` to require the deployed database snapshot to pass the publishing-readiness gate after editorial review. Use `--skip-vercel-env` or `--skip-deployed-check` only for local database drills.
+
 ## Crawler
 
 ```sh
@@ -78,7 +87,8 @@ cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-pr
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql
 npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json
 npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json
-npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --apply
+npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate
+npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate --apply
 ```
 
 Live collection currently supports Hacker News through the Algolia API, Lobste.rs through per-project search result parsing, dev.to through project-tagged public article queries, configured Medium/Substack RSS or Atom feeds, and manual JSON imports for LinkedIn/X posts. Matching uses conservative project-name/distinctive-keyword checks with term boundaries, and feed matching looks across descriptions, summaries, and full encoded RSS/Atom content while keeping item summaries concise. Manual social imports report how many reviewed posts were considered and mark the source run as stale when the newest reviewed post is outside the active `--since-days` window, which feeds the same source-health readiness gate used by Ulysses export. `queries` prints the non-network query plan for each watched project, including HN query text, distinctive live terms, dev.to tags, and review URLs for public search surfaces plus constrained LinkedIn/X review. Each item carries normalized provenance in `raw_json.provenance` so downstream loaders and editorial tools can audit which adapter produced the evidence. The watchlist covers the initial AI/data projects plus functional/composable AI/data tools such as BAML, DSPy, Instructor, Ibis, and Dagster; Grust-adjacent graph, Sail/lakehouse, Arrow/DataFusion/Delta substrate, validation crates such as Garde and zod-rs, and indexing systems including Grust Sail, FalkorDB, LadybugDB, and CocoIndex. The verifier checks that the required projects, public-source adapters, publication feeds, and manual social import files are all configured before a weekly pass.
@@ -97,8 +107,8 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify`, `cargo run --manifest-path crawler/Cargo.toml -- queries`, and `npm run audit:grust` before network collection to confirm the watchlist, Grust alignment, source adapters, and search terms.
 2. Run `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2` to refresh `public/data/newsletter-snapshot.json`.
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
-4. Run `npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, the preserved snapshot collection timestamp, query plans, required projects, tags, URLs, and provenance JSON.
-5. Run `npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --apply` with the external Postgres URL set, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
+4. Run `npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, the preserved snapshot collection timestamp, query plans, required projects, tags, URLs, and provenance JSON.
+5. Run `npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate --apply` with the external Postgres URL set and Vercel production env configured, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
 6. Run `npm run review:gaps` to write `crawler/data/source-gap-review.md`, then work the uncovered-project checklist before final editorial picks.
 7. Run `npm run check:deployed -- --require-ready` to verify the deployed route/API are serving a publishing-ready reviewed snapshot.
 8. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.

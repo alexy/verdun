@@ -128,7 +128,7 @@ function validateStatus(status) {
     throw new Error('status API did not report editorial persistence mode')
   }
   if (requireDatabase && status.editorialPersistence !== 'database') {
-    throw new Error(`status API is not database-backed: ${status.editorialPersistence}`)
+    throw new Error(`status API is not database-backed: ${status.editorialPersistence}. Run \`npm run db:deploy -- --apply\` after configuring POSTGRES_URL, DATABASE_URL, or NEON_DATABASE_URL in Vercel production.`)
   }
   if (requireDatabase && status.writable !== true) {
     throw new Error('status API is not writable')
