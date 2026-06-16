@@ -54,7 +54,8 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 Current local checks:
 
 - `npm run smoke:all`
+- `npm run smoke:browser`
 - `npm run prod:build`
 - `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2`
 - `npm run draft`
-- `npm run smoke:app -- http://127.0.0.1:5174`
+- `npm run smoke:app -- http://127.0.0.1:5174/rbage/`

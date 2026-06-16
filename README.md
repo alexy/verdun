@@ -28,7 +28,7 @@ Open `http://127.0.0.1:5176`.
 Without `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL`, the API uses the checked-in static crawler snapshot. In browser-only preview, the app also tries `/rbage/data/newsletter-snapshot.json` before falling back to the embedded seed snapshot.
 Local votes and focus notes are persisted to ignored `crawler/data/editorial-state.json` so the triage workflow survives refreshes before an external database is configured. Set `VERDUN_LOCAL_STATE_FILE` to use a different local state file.
 
-Run the deterministic local checks with `npm run smoke:all`. Browser coverage still runs separately against a preview server with `npm run smoke:app -- http://127.0.0.1:5174/rbage/`.
+Run the deterministic local checks with `npm run smoke:all`. Browser coverage for the production `/rbage/` path runs with `npm run smoke:browser`, which builds, starts a local preview server, runs Playwright against `http://127.0.0.1:5174/rbage/`, and then stops the server.
 
 ## Database
 
