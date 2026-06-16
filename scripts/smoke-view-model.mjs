@@ -73,12 +73,34 @@ if (view.draftFilename.value !== '2026-06-15-strongly-typed-ai-data-notes.md') {
 if (view.editorialStateFilename.value !== '2026-06-15-verdun-editorial-state.json') {
   throw new Error('editorial state filename did not use snapshot date')
 }
+if (view.publishManifestFilename.value !== '2026-06-15-strongly-typed-ai-data-notes.manifest.json') {
+  throw new Error('publish manifest filename did not use snapshot date')
+}
 const editorialState = JSON.parse(view.editorialStateJson.value)
 if (!editorialState.votes || Object.values(editorialState.votes).filter((vote) => vote === 1).length !== 2) {
   throw new Error('editorial state export did not include upvoted items')
 }
 if (!Array.isArray(editorialState.focuses)) {
   throw new Error('editorial state export did not include focuses')
+}
+const publishManifest = JSON.parse(view.publishManifestJson.value)
+if (publishManifest.markdownPath !== view.draftFilename.value) {
+  throw new Error('publish manifest did not record browser Markdown filename')
+}
+if (publishManifest.itemIds.length !== view.draft.value.itemIds.length) {
+  throw new Error('publish manifest item IDs did not match draft item IDs')
+}
+if (!publishManifest.selectedItems.some((item) => item.id === 'lakesail-rust-spark' && item.project === 'LakeSail')) {
+  throw new Error('publish manifest did not include selected item metadata')
+}
+if (publishManifest.votes['lakesail-rust-spark'] !== 1) {
+  throw new Error('publish manifest did not include vote state')
+}
+if (!Array.isArray(publishManifest.sourceCoverage.uncoveredProjects)) {
+  throw new Error('publish manifest did not include source coverage')
+}
+if (publishManifest.readiness.status !== view.readiness.value.status) {
+  throw new Error('publish manifest readiness did not match view readiness')
 }
 const imported = newsletterModule.applyEditorialStateExport(snapshot.value, {
   votes: {

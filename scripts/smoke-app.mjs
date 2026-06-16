@@ -51,6 +51,10 @@ try {
   await stateLink.waitFor()
   const initialStateHref = await stateLink.getAttribute('href')
   if (!initialStateHref?.startsWith('data:application/json')) throw new Error('editorial state download link is missing')
+  const manifestLink = page.locator('.draft-actions').getByRole('link', { name: /Manifest/ })
+  await manifestLink.waitFor()
+  const initialManifestHref = await manifestLink.getAttribute('href')
+  if (!initialManifestHref?.startsWith('data:application/json')) throw new Error('publish manifest download link is missing')
   await page.locator('.news-card').first().getByText('Credo fit').waitFor()
   await page.locator('.news-card').first().getByText('Evidence').waitFor()
   await page.locator('.news-card').first().getByRole('link', { name: /permalink/i }).waitFor()
@@ -77,6 +81,17 @@ try {
   }
   if (!stateJson.focuses?.some((focus) => focus.text.includes('More local-first Rust graph databases'))) {
     throw new Error('editorial state export did not include the saved focus')
+  }
+  const manifestHref = await manifestLink.getAttribute('href')
+  const manifestJson = JSON.parse(decodeURIComponent(manifestHref.split(',')[1] ?? ''))
+  if (!manifestJson.itemIds?.length || !manifestJson.selectedItems?.length) {
+    throw new Error('publish manifest export did not include selected item audit data')
+  }
+  if (!manifestJson.votes || !Object.values(manifestJson.votes).includes(1)) {
+    throw new Error('publish manifest export did not include current vote state')
+  }
+  if (!Array.isArray(manifestJson.sourceCoverage?.uncoveredProjects)) {
+    throw new Error('publish manifest export did not include source coverage')
   }
   await page.locator('input[type="file"]').setInputFiles(stateFile)
   await page.getByText('Imported 1 vote and 1 focus note.').waitFor()

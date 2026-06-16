@@ -9,6 +9,8 @@ const props = defineProps<{
   editorialStateJson: string
   filename: string
   importSummary: string
+  publishManifestFilename: string
+  publishManifestJson: string
 }>()
 
 const emit = defineEmits<{
@@ -20,6 +22,7 @@ const importStatus = ref('')
 const stateInput = ref<HTMLInputElement | null>(null)
 const draftDownloadHref = computed(() => `data:text/markdown;charset=utf-8,${encodeURIComponent(props.draft.markdown)}`)
 const editorialStateDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.editorialStateJson)}`)
+const publishManifestDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.publishManifestJson)}`)
 
 async function copyDraftMarkdown(): Promise<void> {
   copyStatus.value = 'idle'
@@ -66,6 +69,10 @@ async function importStateFile(event: Event): Promise<void> {
         <a :href="editorialStateDownloadHref" :download="editorialStateFilename">
           <FileJson :size="16" aria-hidden="true" />
           Editorial state
+        </a>
+        <a :href="publishManifestDownloadHref" :download="publishManifestFilename">
+          <FileJson :size="16" aria-hidden="true" />
+          Manifest
         </a>
         <button type="button" @click="openStateImport">
           <Upload :size="16" aria-hidden="true" />

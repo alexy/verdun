@@ -23,6 +23,8 @@ const {
   pendingSourceCount,
   projectFilter,
   projectOptions,
+  publishManifestFilename,
+  publishManifestJson,
   readiness,
   rejectedItems,
   searchText,
@@ -94,6 +96,8 @@ function handleEditorialStateImport(state: unknown): void {
           :editorial-state-json="editorialStateJson"
           :filename="draftFilename"
           :import-summary="editorialStateImportSummary"
+          :publish-manifest-filename="publishManifestFilename"
+          :publish-manifest-json="publishManifestJson"
           @import-editorial-state="handleEditorialStateImport"
         />
 

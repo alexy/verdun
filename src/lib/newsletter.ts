@@ -112,6 +112,52 @@ export type SourceCoverageSummary = {
   uncoveredProjects: string[]
 }
 
+export type NewsletterPublishManifest = {
+  generatedAt: string
+  snapshotGeneratedAt: string
+  title: string
+  subtitle: string
+  markdownPath?: string
+  snapshotInput?: string
+  ulyssesMode: boolean
+  gates: {
+    requireUpvotes: boolean
+    requireReady: boolean
+  }
+  itemIds: string[]
+  selectedItems: Array<{
+    id: string
+    title: string
+    project: string
+    topic: string
+    source: string
+    sourceKind: string
+    url: string
+    publishedAt: string
+    vote: VoteValue
+  }>
+  votes: Record<string, VoteValue>
+  focuses: Array<{
+    id: string
+    text: string
+    scope: 'this_week' | 'ongoing'
+    createdAt: string
+  }>
+  readiness: NewsletterReadiness
+  sourceCoverage: SourceCoverageSummary
+  sourceRuns: SourceRun[]
+  queryPlanCount: number
+}
+
+export type NewsletterPublishManifestOptions = {
+  generatedAt?: string
+  markdownPath?: string
+  snapshotInput?: string
+  ulyssesMode?: boolean
+  requireUpvotes?: boolean
+  requireReady?: boolean
+}
+
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
   theme: 'Strongly typed and functional AI/data systems',
@@ -400,6 +446,53 @@ export function buildEditorialStateExport(snapshot: NewsletterSnapshot): Editori
       scope: focus.scope,
       created_at: focus.createdAt,
     })),
+  }
+}
+
+export function buildPublishManifest(
+  draft: NewsletterDraft,
+  snapshot: NewsletterSnapshot,
+  options: NewsletterPublishManifestOptions = {},
+): NewsletterPublishManifest {
+  const itemsById = new Map(snapshot.items.map((item) => [item.id, item]))
+  return {
+    generatedAt: options.generatedAt ?? new Date().toISOString(),
+    snapshotGeneratedAt: snapshot.generatedAt,
+    title: draft.title,
+    subtitle: draft.subtitle,
+    markdownPath: options.markdownPath,
+    snapshotInput: options.snapshotInput,
+    ulyssesMode: Boolean(options.ulyssesMode),
+    gates: {
+      requireUpvotes: Boolean(options.requireUpvotes),
+      requireReady: Boolean(options.requireReady),
+    },
+    itemIds: draft.itemIds,
+    selectedItems: draft.itemIds
+      .map((itemId) => itemsById.get(itemId))
+      .filter((item): item is NewsItem => Boolean(item))
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        project: item.project,
+        topic: item.topic,
+        source: item.source,
+        sourceKind: item.sourceKind,
+        url: item.url,
+        publishedAt: item.publishedAt,
+        vote: item.vote,
+      })),
+    votes: buildEditorialStateExport(snapshot).votes,
+    focuses: snapshot.focuses.map((focus) => ({
+      id: focus.id,
+      text: focus.text,
+      scope: focus.scope,
+      createdAt: focus.createdAt,
+    })),
+    readiness: evaluateNewsletterReadiness(snapshot),
+    sourceCoverage: evaluateSourceCoverage(snapshot),
+    sourceRuns: snapshot.sourceRuns,
+    queryPlanCount: snapshot.queryPlans.length,
   }
 }
 

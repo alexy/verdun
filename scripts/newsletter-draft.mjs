@@ -26,8 +26,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
 
   if (out) {
     const { manifestPath } = await writeDraftArtifacts(out, draft, snapshot, {
-      input,
       markdownPath: out,
+      snapshotInput: input,
       requireReady,
       requireUpvotes,
       ulyssesMode,
@@ -61,6 +61,14 @@ export async function evaluateSourceCoverage(snapshot) {
     optimizeDeps: { noDiscovery: true },
   })
   return module.evaluateSourceCoverage(snapshot)
+}
+
+export async function sharedBuildPublishManifest(draft, snapshot, options = {}) {
+  const { module } = await runnerImport('./src/lib/newsletter.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
+  return module.buildPublishManifest(draft, snapshot, options)
 }
 
 export async function loadSnapshotFile(input) {
@@ -117,53 +125,7 @@ export function manifestPathForDraft(out) {
 }
 
 export async function buildPublishManifest(draft, snapshot, options = {}) {
-  const itemsById = new Map(snapshot.items.map((item) => [item.id, item]))
-  return {
-    generatedAt: new Date().toISOString(),
-    snapshotGeneratedAt: snapshot.generatedAt,
-    title: draft.title,
-    subtitle: draft.subtitle,
-    markdownPath: options.markdownPath,
-    snapshotInput: options.input,
-    ulyssesMode: Boolean(options.ulyssesMode),
-    gates: {
-      requireUpvotes: Boolean(options.requireUpvotes),
-      requireReady: Boolean(options.requireReady),
-    },
-    itemIds: draft.itemIds,
-    selectedItems: draft.itemIds
-      .map((itemId) => itemsById.get(itemId))
-      .filter(Boolean)
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        project: item.project,
-        topic: item.topic,
-        source: item.source,
-        sourceKind: item.sourceKind,
-        url: item.url,
-        publishedAt: item.publishedAt,
-        vote: item.vote,
-      })),
-    votes: Object.fromEntries(snapshot.items.filter((item) => item.vote !== 0).map((item) => [item.id, item.vote])),
-    focuses: snapshot.focuses.map((focus) => ({
-      id: focus.id,
-      text: focus.text,
-      scope: focus.scope,
-      createdAt: focus.createdAt,
-    })),
-    readiness: await evaluateNewsletterReadiness(snapshot),
-    sourceCoverage: await evaluateSourceCoverage(snapshot),
-    sourceRuns: snapshot.sourceRuns.map((run) => ({
-      source: run.source,
-      kind: run.kind,
-      status: run.status,
-      itemCount: run.itemCount,
-      message: run.message,
-      projectCounts: run.projectCounts,
-    })),
-    queryPlanCount: snapshot.queryPlans.length,
-  }
+  return sharedBuildPublishManifest(draft, snapshot, options)
 }
 
 export function normalizeSnapshot(raw) {
