@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ArrowDown, ArrowUp, ExternalLink } from '@lucide/vue'
 import type { NewsItem, VoteValue } from '../lib/newsletter'
-import { credoBlurb, ontologyForItem } from '../lib/ontology'
+import { credoBlurb, ontologyMatchesForItem } from '../lib/ontology'
 
 const props = defineProps<{
   item: NewsItem
@@ -71,8 +71,11 @@ function stageLabel(stage: string): string {
       <div class="credo-fit">
         <strong>Credo fit</strong>
         <p>{{ credoBlurb(item) }}</p>
-        <div>
-          <a v-for="node in ontologyForItem(item)" :key="node.id" :href="`#ontology-${node.id}`">{{ node.label }}</a>
+        <div class="ontology-links">
+          <a v-for="match in ontologyMatchesForItem(item)" :key="match.node.id" :href="`#ontology-${match.node.id}`">
+            <span>{{ match.node.label }}</span>
+            <small>{{ match.keywords.length ? match.keywords.join(', ') : 'fallback' }}</small>
+          </a>
         </div>
       </div>
       <div class="item-actions">
