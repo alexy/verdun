@@ -5,6 +5,7 @@ import { join } from 'node:path'
 
 const stateDir = await mkdtemp(join(tmpdir(), 'verdun-ulysses-state-'))
 const exportDir = await mkdtemp(join(tmpdir(), 'verdun-ulysses-export-'))
+const importDir = await mkdtemp(join(tmpdir(), 'verdun-ulysses-import-'))
 const stateFile = join(stateDir, 'editorial-state.json')
 
 try {
@@ -28,6 +29,7 @@ try {
     env: {
       ...process.env,
       ULYSSES_DRAFT_DIR: exportDir,
+      ULYSSES_IMPORT_DIR: importDir,
       VERDUN_LOCAL_STATE_FILE: stateFile,
     },
   })
@@ -96,7 +98,21 @@ try {
   if (manifest.queryPlanCount !== 23) {
     throw new Error(`Ulysses manifest recorded unexpected query plan count: ${manifest.queryPlanCount}`)
   }
+
+  const importFiles = await readdir(importDir)
+  if (!importFiles.includes(markdownFiles[0]) || !importFiles.includes(manifestFiles[0])) {
+    throw new Error('Ulysses import handoff did not receive the Markdown and manifest pair')
+  }
+  const copiedMarkdown = await readFile(join(importDir, markdownFiles[0]), 'utf8')
+  const copiedManifest = await readFile(join(importDir, manifestFiles[0]), 'utf8')
+  if (copiedMarkdown !== markdown) {
+    throw new Error('Ulysses import Markdown copy does not match the generated export')
+  }
+  if (copiedManifest !== JSON.stringify(manifest, null, 2) + '\n') {
+    throw new Error('Ulysses import manifest copy does not match the generated export')
+  }
 } finally {
   await rm(stateDir, { recursive: true, force: true })
   await rm(exportDir, { recursive: true, force: true })
+  await rm(importDir, { recursive: true, force: true })
 }

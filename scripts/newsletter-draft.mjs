@@ -1,6 +1,6 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { runnerImport } from 'vite'
 
@@ -14,10 +14,12 @@ const fallbackFocuses = [
 ]
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const args = process.argv.slice(2)
-  const ulyssesMode = args.includes('--ulysses')
-  const requireUpvotes = args.includes('--require-upvotes') || process.env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
-  const requireReady = args.includes('--require-ready') || process.env.NEWSLETTER_REQUIRE_READY === 'true'
-  const positional = args.filter((arg) => arg !== '--ulysses' && arg !== '--require-upvotes' && arg !== '--require-ready')
+  const cli = parseCliArgs(args)
+  const ulyssesMode = cli.flags.has('--ulysses')
+  const requireUpvotes = cli.flags.has('--require-upvotes') || process.env.NEWSLETTER_REQUIRE_UPVOTES === 'true'
+  const requireReady = cli.flags.has('--require-ready') || process.env.NEWSLETTER_REQUIRE_READY === 'true'
+  const ulyssesImportDir = cli.values.get('--ulysses-import-dir') ?? process.env.ULYSSES_IMPORT_DIR
+  const positional = cli.positional
   const input = positional[0] ?? process.env.NEWSLETTER_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
   const snapshot = await loadSnapshotFile(input)
   const draft = await buildNewsletterDraft(snapshot)
@@ -34,9 +36,34 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
     })
     console.log(`wrote newsletter draft to ${out}`)
     console.log(`wrote publish manifest to ${manifestPath}`)
+    const handoff = await copyDraftArtifacts(out, manifestPath, ulyssesImportDir)
+    if (handoff) {
+      console.log(`copied Ulysses Markdown to ${handoff.markdownPath}`)
+      console.log(`copied Ulysses manifest to ${handoff.manifestPath}`)
+    }
   } else {
     process.stdout.write(draft.markdown)
   }
+}
+
+function parseCliArgs(args) {
+  const flags = new Set()
+  const values = new Map()
+  const positional = []
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index]
+    if (arg === '--ulysses' || arg === '--require-upvotes' || arg === '--require-ready') {
+      flags.add(arg)
+    } else if (arg === '--ulysses-import-dir') {
+      const value = args[index + 1]
+      if (!value || value.startsWith('--')) throw new Error('--ulysses-import-dir requires a directory path')
+      values.set(arg, value)
+      index += 1
+    } else {
+      positional.push(arg)
+    }
+  }
+  return { flags, values, positional }
 }
 
 export async function buildNewsletterDraft(snapshot) {
@@ -118,6 +145,23 @@ export async function writeDraftArtifacts(out, draft, snapshot, options = {}) {
   const manifestPath = manifestPathForDraft(out)
   await writeFile(manifestPath, `${JSON.stringify(await buildPublishManifest(draft, snapshot, options), null, 2)}\n`)
   return { manifestPath }
+}
+
+export async function copyDraftArtifacts(markdownPath, manifestPath, importDir) {
+  if (!importDir) return null
+  await mkdir(importDir, { recursive: true })
+  const copiedMarkdownPath = join(importDir, basename(markdownPath))
+  const copiedManifestPath = join(importDir, basename(manifestPath))
+  if (resolve(markdownPath) !== resolve(copiedMarkdownPath)) {
+    await copyFile(markdownPath, copiedMarkdownPath)
+  }
+  if (resolve(manifestPath) !== resolve(copiedManifestPath)) {
+    await copyFile(manifestPath, copiedManifestPath)
+  }
+  return {
+    markdownPath: copiedMarkdownPath,
+    manifestPath: copiedManifestPath,
+  }
 }
 
 export function manifestPathForDraft(out) {

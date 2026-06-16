@@ -52,6 +52,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - The app draft preview exports the same publish manifest shape used by the CLI, so browser triage can audit selected item IDs, votes, focuses, readiness, coverage, and source/query-plan counts before local export.
 - `npm run ulysses:ready` gates local Ulysses Markdown export on explicit upvotes and publishing readiness, failing until local editorial state is ready.
 - `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
+- `ULYSSES_IMPORT_DIR` or `--ulysses-import-dir` copies the generated Markdown and paired manifest into an external Ulysses handoff folder after a successful export.
 - File-based draft exports also write a same-stem `.manifest.json` with the snapshot input, publishing gates, selected item IDs, selected item metadata, votes, focuses, readiness checks, source coverage, source runs, and query-plan count.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
 - `npm run ghost:draft -- --dry-run` validates the Ghost endpoint/payload/manifest shape, including deterministic slug and metadata fields, without credentials or network access; non-draft Ghost statuses require an explicit override.
@@ -59,7 +60,6 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 ## Next Work
 
 - Replace manual LinkedIn/X imports with authenticated or policy-aware adapters when credentials and platform policy are settled.
-- Decide whether to automate copying the local Markdown export into the user's actual Ulysses import folder.
 - Extract shared UI/API/crawler modules back into Greathouse after the Verdun shape stabilizes.
 
 ## Verification
