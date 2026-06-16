@@ -64,6 +64,9 @@ if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
 if (!view.sourceCoverage.value.uncoveredProjects.includes('Turso')) {
   throw new Error('source coverage gaps did not include uncovered watched projects')
 }
+if (view.sourceCoverage.value.uncoveredProjects.length <= 8 && view.draft.value.markdown.includes('plus ')) {
+  throw new Error('source coverage should only mention hidden gaps when more than eight are hidden')
+}
 if (view.draftFilename.value !== '2026-06-15-strongly-typed-ai-data-notes.md') {
   throw new Error('draft filename did not use snapshot date')
 }

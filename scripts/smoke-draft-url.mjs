@@ -45,6 +45,9 @@ try {
   if (!draft.markdown.includes('Coverage:')) {
     throw new Error('draft source section did not include project coverage')
   }
+  if (!draft.markdown.includes('plus ')) {
+    throw new Error('draft coverage gaps did not report hidden uncovered projects')
+  }
   if (!draft.markdown.includes('Evidence:')) {
     throw new Error('draft item sections did not include provenance evidence')
   }

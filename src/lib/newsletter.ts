@@ -431,8 +431,15 @@ function coverageGapSection(snapshot: NewsletterSnapshot): string[] {
     '',
     '## Coverage gaps',
     '',
-    `Ask for more source material on ${sentenceList(coverage.uncoveredProjects.slice(0, 8))}.`,
+    `Ask for more source material on ${coverageGapSummary(coverage.uncoveredProjects)}.`,
   ]
+}
+
+function coverageGapSummary(projects: string[]): string {
+  const visible = projects.slice(0, 8)
+  const hiddenCount = projects.length - visible.length
+  const suffix = hiddenCount > 0 ? `, plus ${hiddenCount} more` : ''
+  return `${sentenceList(visible)}${suffix}`
 }
 
 function diverseSelection(items: NewsItem[], limit: number): NewsItem[] {

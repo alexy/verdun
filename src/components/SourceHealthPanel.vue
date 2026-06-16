@@ -15,6 +15,10 @@ function projectSummary(run: SourceRun): string {
     .map(([project, count]) => `${project} ${count}`)
   return projects.length ? projects.join(', ') : 'No project matches'
 }
+
+function extraGapCount(projects: string[]): number {
+  return Math.max(0, projects.length - 8)
+}
 </script>
 
 <template>
@@ -28,7 +32,10 @@ function projectSummary(run: SourceRun): string {
     </p>
     <div v-if="sourceCoverage.uncoveredProjects.length" class="source-gaps">
       <strong>Coverage gaps</strong>
-      <p>{{ sourceCoverage.uncoveredProjects.slice(0, 8).join(', ') }}</p>
+      <p>
+        {{ sourceCoverage.uncoveredProjects.slice(0, 8).join(', ') }}
+        <span v-if="extraGapCount(sourceCoverage.uncoveredProjects)">plus {{ extraGapCount(sourceCoverage.uncoveredProjects) }} more</span>
+      </p>
     </div>
     <div class="source-row" v-for="run in sourceRuns" :key="run.source">
       <span class="source-dot" :class="run.status" aria-hidden="true"></span>
