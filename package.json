@@ -15,6 +15,7 @@
     "smoke:browser": "node scripts/smoke-browser.mjs",
     "smoke:api": "node scripts/smoke-api-local.mjs",
     "smoke:api-http": "node scripts/smoke-api-http.mjs",
+    "smoke:crawler-provenance": "node scripts/smoke-crawler-provenance.mjs",
     "smoke:draft": "node scripts/smoke-draft-local.mjs",
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",

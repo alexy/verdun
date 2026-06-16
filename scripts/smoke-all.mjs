@@ -11,6 +11,7 @@ const steps = [
   ['npm', ['run', 'smoke:loader', '--', sqlPath, snapshotPath]],
   ['npm', ['run', 'smoke:api']],
   ['npm', ['run', 'smoke:api-http']],
+  ['npm', ['run', 'smoke:crawler-provenance']],
   ['npm', ['run', 'smoke:draft']],
   ['npm', ['run', 'smoke:draft-url']],
   ['npm', ['run', 'smoke:ghost']],

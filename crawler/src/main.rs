@@ -876,7 +876,8 @@ fn project_item(project: &Project, source: &Source, index: usize) -> NewsItem {
         raw_json: serde_json::json!({
             "homepage": project.homepage,
             "source_url": source.url,
-            "collection_stage": "watchlist-seed"
+            "collection_stage": "watchlist-seed",
+            "provenance": provenance("watchlist-seed", "watchlist", source, project, &project.homepage)
         }),
     }
 }
@@ -980,7 +981,7 @@ fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
         title,
         source: source.name.clone(),
         source_kind: source.kind.clone(),
-        url,
+        url: url.clone(),
         published_at,
         project: project.name.clone(),
         topic: project.topic.clone(),
@@ -1003,6 +1004,7 @@ fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
         score: 60 + points.min(30) + comments.min(20),
         raw_json: serde_json::json!({
             "collection_stage": "live",
+            "provenance": provenance("live", "hn-algolia", source, project, &url),
             "source": "hacker-news",
             "object_id": hit.object_id,
             "points": points,
@@ -1015,6 +1017,10 @@ fn hn_item(project: &Project, source: &Source, hit: HackerNewsHit) -> NewsItem {
 fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> NewsItem {
     let score = story.score.unwrap_or_default();
     let comments = story.comment_count.unwrap_or_default();
+    let url = story
+        .short_id_url
+        .clone()
+        .unwrap_or_else(|| story.url.clone());
     NewsItem {
         id: stable_id(
             "lobsters",
@@ -1027,10 +1033,7 @@ fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> N
         title: story.title.clone(),
         source: source.name.clone(),
         source_kind: source.kind.clone(),
-        url: story
-            .short_id_url
-            .clone()
-            .unwrap_or_else(|| story.url.clone()),
+        url: url.clone(),
         published_at: story.created_at,
         project: project.name.clone(),
         topic: project.topic.clone(),
@@ -1053,6 +1056,7 @@ fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> N
         score: 62 + score.min(25) + comments.min(15),
         raw_json: serde_json::json!({
             "collection_stage": "live",
+            "provenance": provenance("live", "lobsters-newest", source, project, &url),
             "source": "lobsters",
             "short_id": story.short_id,
             "score": score,
@@ -1065,15 +1069,16 @@ fn lobsters_item(project: &Project, source: &Source, story: &LobstersStory) -> N
 fn dev_to_item(project: &Project, source: &Source, article: &DevToArticle) -> NewsItem {
     let reactions = article.positive_reactions_count.unwrap_or_default();
     let comments = article.comments_count.unwrap_or_default();
+    let url = article
+        .canonical_url
+        .clone()
+        .unwrap_or_else(|| article.url.clone());
     NewsItem {
         id: stable_id("dev-to", &format!("{}:{}", project.name, article.id)),
         title: article.title.clone(),
         source: source.name.clone(),
         source_kind: source.kind.clone(),
-        url: article
-            .canonical_url
-            .clone()
-            .unwrap_or_else(|| article.url.clone()),
+        url: url.clone(),
         published_at: article.published_at,
         project: project.name.clone(),
         topic: project.topic.clone(),
@@ -1098,6 +1103,7 @@ fn dev_to_item(project: &Project, source: &Source, article: &DevToArticle) -> Ne
         score: 55 + reactions.min(30) + comments.min(15),
         raw_json: serde_json::json!({
             "collection_stage": "live",
+            "provenance": provenance("live", "dev-to-articles", source, project, &url),
             "source": "dev-to",
             "article_id": article.id,
             "reactions": reactions,
@@ -1144,6 +1150,7 @@ fn feed_item(project: &Project, source: &Source, entry: &FeedEntry) -> NewsItem 
         score: feed_score(project, entry),
         raw_json: serde_json::json!({
             "collection_stage": "live",
+            "provenance": provenance("live", "rss-atom-feed", source, project, &entry.link),
             "source": slug(&source.name),
             "feed_url": entry.feed_url
         }),
@@ -1178,10 +1185,30 @@ fn manual_post_item(project: &Project, source: &Source, post: &ManualPost) -> Ne
         score: 76,
         raw_json: serde_json::json!({
             "collection_stage": "manual",
+            "provenance": provenance("manual", "manual-json", source, project, &post.url),
             "source": slug(&source.name),
             "author": post.author
         }),
     }
+}
+
+fn provenance(
+    stage: &str,
+    adapter: &str,
+    source: &Source,
+    project: &Project,
+    evidence_url: &str,
+) -> serde_json::Value {
+    serde_json::json!({
+        "stage": stage,
+        "adapter": adapter,
+        "source": source.name,
+        "source_kind": source.kind,
+        "source_url": source.url,
+        "evidence_url": evidence_url,
+        "project": project.name,
+        "matched_keywords": project.keywords.iter().take(5).cloned().collect::<Vec<_>>()
+    })
 }
 
 fn project_query(project: &Project) -> String {
