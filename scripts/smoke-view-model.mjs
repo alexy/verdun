@@ -9,6 +9,10 @@ const { module: viewModule } = await runnerImport('./src/composables/useNewslett
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
+const { module: workbenchViewModule } = await runnerImport('./src/composables/useWorkbenchView.ts', {
+  logLevel: 'error',
+  optimizeDeps: { noDiscovery: true },
+})
 const { module: garbageWorkbenchModule } = await runnerImport('./src/instances/garbage/workbench.ts', {
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
@@ -19,7 +23,9 @@ const snapshot = ref({
   items: newsletterModule.seedSnapshot.items.map((item) => ({ ...item })),
 })
 const view = viewModule.useNewsletterView(snapshot)
-const workbenchSnapshot = garbageWorkbenchModule.garbageSnapshotToWorkbench(snapshot.value)
+const workbenchSnapshotRef = ref(garbageWorkbenchModule.garbageSnapshotToWorkbench(snapshot.value))
+const workbenchView = workbenchViewModule.useWorkbenchView(workbenchSnapshotRef)
+const workbenchSnapshot = workbenchSnapshotRef.value
 
 if (workbenchSnapshot.instance.id !== 'garbage' || workbenchSnapshot.instance.basePath !== '/rbage/') {
   throw new Error('garbage instance config was not exposed through the workbench snapshot')
@@ -30,6 +36,22 @@ if (workbenchSnapshot.records.length !== snapshot.value.items.length) {
 if (!workbenchSnapshot.records.some((record) => record.subject === 'LakeSail' && record.review === 1)) {
   throw new Error('workbench projection did not map project/vote into subject/review')
 }
+if (workbenchView.includedRecords.value.length !== 2) {
+  throw new Error('workbench view should start with two included records')
+}
+if (!workbenchView.subjectOptions.value.includes('Pydantic') || !workbenchView.sourceOptions.value.includes('Hacker News and project feeds')) {
+  throw new Error('workbench view did not derive subject/source filters')
+}
+workbenchView.subjectFilter.value = 'LakeSail'
+if (workbenchView.filteredRecords.value.some((record) => record.subject !== 'LakeSail')) {
+  throw new Error('workbench subject filter leaked non-LakeSail records')
+}
+workbenchView.subjectFilter.value = 'all'
+workbenchView.reviewFilter.value = 'included'
+if (workbenchView.filteredRecords.value.some((record) => record.review <= 0)) {
+  throw new Error('workbench included filter leaked unreviewed records')
+}
+workbenchView.reviewFilter.value = 'all'
 
 if (view.includedItems.value.length !== 2) {
   throw new Error('seed view should start with two included items')
@@ -101,6 +123,16 @@ view.evidenceFilter.value = 'collected'
 if (view.filteredItems.value.length !== 2 || view.filteredItems.value.some((item) => item.provenance?.stage === 'watchlist-seed')) {
   throw new Error('collected evidence filter did not isolate live/manual items')
 }
+workbenchSnapshotRef.value = garbageWorkbenchModule.garbageSnapshotToWorkbench(snapshot.value)
+workbenchView.evidenceFilter.value = 'collected'
+if (workbenchView.filteredRecords.value.length !== 2 || workbenchView.filteredRecords.value.some((record) => record.provenance?.stage === 'watchlist-seed')) {
+  throw new Error('workbench collected evidence filter did not isolate live/manual records')
+}
+workbenchView.evidenceFilter.value = 'manual'
+if (workbenchView.filteredRecords.value.length !== 1 || workbenchView.filteredRecords.value[0]?.id !== 'smoke-manual-item') {
+  throw new Error('workbench manual evidence filter did not isolate manual records')
+}
+workbenchView.evidenceFilter.value = 'all'
 view.evidenceFilter.value = 'manual'
 if (view.filteredItems.value.length !== 1 || view.filteredItems.value[0]?.id !== 'smoke-manual-item') {
   throw new Error('manual evidence filter did not isolate manual items')
@@ -152,6 +184,13 @@ if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
 }
 if (!view.sourceCoverage.value.uncoveredProjects.includes('Turso')) {
   throw new Error('source coverage gaps did not include uncovered watched projects')
+}
+workbenchSnapshotRef.value = garbageWorkbenchModule.garbageSnapshotToWorkbench(snapshot.value)
+if (workbenchView.liveSourceCount.value !== 1 || workbenchView.pendingSourceCount.value !== 0) {
+  throw new Error('workbench source counters did not update when snapshot changed')
+}
+if (!workbenchView.coverage.value.uncoveredSubjects.includes('Turso')) {
+  throw new Error('workbench source coverage gaps did not include uncovered watched subjects')
 }
 snapshot.value = {
   ...snapshot.value,

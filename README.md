@@ -5,6 +5,7 @@ Verdun is being extracted into the reusable core for database-backed collection/
 The first reusable boundary is now explicit:
 
 - Generic workbench contracts live in `src/core/workbench.ts`.
+- Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
 - Garbage instance configuration lives in `src/instances/garbage/config.ts`.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
 - Generic `workbench_*` database views live in `db/migrations/0002_workbench_views.sql` over the current newsletter tables.
