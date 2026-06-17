@@ -11,6 +11,17 @@ const [crawlerMainSource, garbageInstanceSource] = await Promise.all([
 if (crawlerMainSource.includes('insert into newsletter_')) {
   throw new Error('crawler main still embeds legacy newsletter SQL table exports')
 }
+for (const marker of [
+  'default_value = "garbage"',
+  'default_value = "Garbage"',
+  'default_value = "/rbage/"',
+  'crawler/instances/garbage/config.toml',
+  'public/data/newsletter-snapshot.json',
+]) {
+  if (crawlerMainSource.includes(marker)) {
+    throw new Error(`crawler main still embeds Garbage CLI default: ${marker}`)
+  }
+}
 if (!garbageInstanceSource.includes('pub fn newsletter_export_sql') || !garbageInstanceSource.includes('insert into newsletter_items')) {
   throw new Error('Garbage crawler instance does not own the legacy newsletter SQL exporter')
 }
@@ -41,8 +52,6 @@ const verifyGreathouse = spawnSync('cargo', [
   'verify',
   '--instance',
   'greathouse',
-  '--config',
-  'crawler/instances/greathouse/config.toml',
 ], { encoding: 'utf8' })
 
 if (verifyGreathouse.error) throw verifyGreathouse.error
@@ -166,10 +175,6 @@ try {
     'generic',
     '--instance',
     'greathouse',
-    '--instance-name',
-    'Greathouse',
-    '--base-path',
-    '/greathouse/',
     '--snapshot',
     snapshotPath,
     '--out',
@@ -187,10 +192,6 @@ try {
     'export-sql',
     '--instance',
     'greathouse',
-    '--instance-name',
-    'Greathouse',
-    '--base-path',
-    '/greathouse/',
     '--snapshot',
     snapshotPath,
     '--out',

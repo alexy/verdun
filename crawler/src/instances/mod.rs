@@ -10,6 +10,10 @@ use garbage::{EditorialFocus, NewsItem, ProjectQueryPlan};
 
 pub trait CrawlerInstance {
     fn id(&self) -> &'static str;
+    fn display_name(&self) -> &'static str;
+    fn base_path(&self) -> &'static str;
+    fn default_config_path(&self) -> PathBuf;
+    fn default_public_snapshot_path(&self) -> PathBuf;
     fn verify_config(&self, config: &CrawlerConfig) -> Result<()>;
     fn read_editorial_focuses(&self, path: &PathBuf) -> Result<Vec<EditorialFocus>>;
     fn query_plans(

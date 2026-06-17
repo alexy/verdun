@@ -3,6 +3,7 @@
 ## 2026-06-17
 
 - Removed the old `api/newsletter/*` compatibility route files; Garbage newsletter APIs are now exposed through the explicit `api/garbage/newsletter/*` namespace.
+- Moved crawler CLI default config paths, public snapshot paths, instance display names, and base paths onto crawler instance metadata; shared `main.rs` no longer embeds Garbage path/base defaults.
 - Moved the legacy `newsletter_*` SQL exporter out of crawler `main.rs` and into the Garbage crawler instance module, with smoke coverage preventing the shared CLI from re-embedding newsletter table exports.
 - Changed deployed-check smoke coverage to derive local app URLs, static snapshot paths, source snapshot input, and draft API paths from deploy profiles instead of duplicating Garbage route defaults.
 - Moved the legacy newsletter SQL loader smoke under `scripts/instances/garbage/` and exposed it as `garbage:smoke:loader`; `smoke:generic-loader` remains the reusable workbench SQL validator.

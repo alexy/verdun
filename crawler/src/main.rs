@@ -17,16 +17,16 @@ struct Cli {
 #[derive(Subcommand)]
 enum CommandKind {
     Collect {
-        #[arg(long, default_value = "garbage")]
-        instance: String,
-        #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
-        config: PathBuf,
+        #[arg(long)]
+        instance: Option<String>,
+        #[arg(long)]
+        config: Option<PathBuf>,
         #[arg(long, default_value = "crawler/data/items.json")]
         out: PathBuf,
         #[arg(long, default_value = "crawler/data/source-runs.json")]
         source_runs_out: PathBuf,
-        #[arg(long, default_value = "public/data/newsletter-snapshot.json")]
-        public_out: PathBuf,
+        #[arg(long)]
+        public_out: Option<PathBuf>,
         #[arg(long)]
         live: bool,
         #[arg(long, default_value_t = 4)]
@@ -41,12 +41,12 @@ enum CommandKind {
         snapshot: Option<PathBuf>,
         #[arg(long, value_enum, default_value_t = SqlExportTarget::Generic)]
         target: SqlExportTarget,
-        #[arg(long, default_value = "garbage")]
-        instance: String,
-        #[arg(long, default_value = "Garbage")]
-        instance_name: String,
-        #[arg(long, default_value = "/rbage/")]
-        base_path: String,
+        #[arg(long)]
+        instance: Option<String>,
+        #[arg(long)]
+        instance_name: Option<String>,
+        #[arg(long)]
+        base_path: Option<String>,
         #[arg(long, default_value = "crawler/data/items.json")]
         input: PathBuf,
         #[arg(long, default_value = "crawler/data/source-runs.json")]
@@ -55,16 +55,16 @@ enum CommandKind {
         out: PathBuf,
     },
     Verify {
-        #[arg(long, default_value = "garbage")]
-        instance: String,
-        #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
-        config: PathBuf,
+        #[arg(long)]
+        instance: Option<String>,
+        #[arg(long)]
+        config: Option<PathBuf>,
     },
     Queries {
-        #[arg(long, default_value = "garbage")]
-        instance: String,
-        #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
-        config: PathBuf,
+        #[arg(long)]
+        instance: Option<String>,
+        #[arg(long)]
+        config: Option<PathBuf>,
         #[arg(long, default_value = "crawler/data/editorial-state.json")]
         editorial_state: PathBuf,
     },
@@ -109,11 +109,9 @@ fn main() -> Result<()> {
             source_runs,
             out,
             target,
-            ExportInstance {
-                id: instance,
-                name: instance_name,
-                base_path,
-            },
+            instance,
+            instance_name,
+            base_path,
         ),
         CommandKind::Verify { instance, config } => verify(instance, config),
         CommandKind::Queries {
@@ -137,17 +135,19 @@ struct ExportInstance {
 }
 
 fn collect(
-    instance: String,
-    config: PathBuf,
+    instance: Option<String>,
+    config: Option<PathBuf>,
     out: PathBuf,
     source_runs_out: PathBuf,
-    public_out: PathBuf,
+    public_out: Option<PathBuf>,
     live: bool,
     max_live_per_project: usize,
     since_days: i64,
     editorial_state: PathBuf,
 ) -> Result<()> {
-    let crawler_instance = instances::crawler_instance(&instance)?;
+    let crawler_instance = resolve_crawler_instance(instance.as_deref())?;
+    let config = config.unwrap_or_else(|| crawler_instance.default_config_path());
+    let public_out = public_out.unwrap_or_else(|| crawler_instance.default_public_snapshot_path());
     let config = read_crawler_config(&config)?;
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
@@ -212,8 +212,16 @@ fn export_sql(
     source_runs: PathBuf,
     out: PathBuf,
     target: SqlExportTarget,
-    instance: ExportInstance,
+    instance: Option<String>,
+    instance_name: Option<String>,
+    base_path: Option<String>,
 ) -> Result<()> {
+    let crawler_instance = resolve_crawler_instance(instance.as_deref())?;
+    let instance = ExportInstance {
+        id: crawler_instance.id().to_string(),
+        name: instance_name.unwrap_or_else(|| crawler_instance.display_name().to_string()),
+        base_path: base_path.unwrap_or_else(|| crawler_instance.base_path().to_string()),
+    };
     let payload = load_export_payload(snapshot, input, source_runs)?;
     let sql = match target {
         SqlExportTarget::Newsletter => garbage::newsletter_export_sql(&payload)?,
@@ -404,8 +412,9 @@ fn load_export_payload(
     })
 }
 
-fn verify(instance: String, config: PathBuf) -> Result<()> {
-    let crawler_instance = instances::crawler_instance(&instance)?;
+fn verify(instance: Option<String>, config: Option<PathBuf>) -> Result<()> {
+    let crawler_instance = resolve_crawler_instance(instance.as_deref())?;
+    let config = config.unwrap_or_else(|| crawler_instance.default_config_path());
     let config = read_crawler_config(&config)?;
     crawler_instance.verify_config(&config)?;
     println!(
@@ -418,8 +427,13 @@ fn verify(instance: String, config: PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn queries(instance: String, config: PathBuf, editorial_state: PathBuf) -> Result<()> {
-    let crawler_instance = instances::crawler_instance(&instance)?;
+fn queries(
+    instance: Option<String>,
+    config: Option<PathBuf>,
+    editorial_state: PathBuf,
+) -> Result<()> {
+    let crawler_instance = resolve_crawler_instance(instance.as_deref())?;
+    let config = config.unwrap_or_else(|| crawler_instance.default_config_path());
     let config = read_crawler_config(&config)?;
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     println!(
@@ -427,6 +441,15 @@ fn queries(instance: String, config: PathBuf, editorial_state: PathBuf) -> Resul
         serde_json::to_string_pretty(&crawler_instance.query_plans(&config, &editorial_focuses))?
     );
     Ok(())
+}
+
+fn resolve_crawler_instance(
+    instance: Option<&str>,
+) -> Result<&'static dyn instances::CrawlerInstance> {
+    match instance {
+        Some(instance) => instances::crawler_instance(instance),
+        None => Ok(instances::default_crawler_instance()),
+    }
 }
 
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {

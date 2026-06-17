@@ -20,6 +20,22 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
         "greathouse"
     }
 
+    fn display_name(&self) -> &'static str {
+        "Greathouse"
+    }
+
+    fn base_path(&self) -> &'static str {
+        "/greathouse/"
+    }
+
+    fn default_config_path(&self) -> PathBuf {
+        PathBuf::from("crawler/instances/greathouse/config.toml")
+    }
+
+    fn default_public_snapshot_path(&self) -> PathBuf {
+        PathBuf::from("public/data/greathouse-snapshot.json")
+    }
+
     fn verify_config(&self, config: &CrawlerConfig) -> Result<()> {
         verify_config(config)
     }

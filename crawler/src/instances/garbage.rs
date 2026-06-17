@@ -20,6 +20,22 @@ impl CrawlerInstance for GarbageCrawlerInstance {
         "garbage"
     }
 
+    fn display_name(&self) -> &'static str {
+        "Garbage"
+    }
+
+    fn base_path(&self) -> &'static str {
+        "/rbage/"
+    }
+
+    fn default_config_path(&self) -> PathBuf {
+        PathBuf::from("crawler/instances/garbage/config.toml")
+    }
+
+    fn default_public_snapshot_path(&self) -> PathBuf {
+        PathBuf::from("public/data/newsletter-snapshot.json")
+    }
+
     fn verify_config(&self, config: &CrawlerConfig) -> Result<()> {
         verify_config(config)
     }
