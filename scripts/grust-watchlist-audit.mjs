@@ -19,7 +19,7 @@ const signalRules = [
 
 const options = parseArgs(process.argv.slice(2))
 const grustRoot = options.get('--grust-root') ?? '/Users/alexy/src/grust'
-const watchlistPath = options.get('--watchlist') ?? 'crawler/instances/garbage/watchlist.toml'
+const watchlistPath = options.get('--watchlist') ?? 'crawler/instances/garbage/config.toml'
 const outPath = options.get('--out') ?? 'crawler/data/grust-watchlist-audit.md'
 
 const audit = await buildGrustWatchlistAudit({ grustRoot, watchlistPath })
@@ -34,7 +34,7 @@ if (outPath === '-') {
 }
 
 if (audit.missing.length) {
-  throw new Error(`Verdun watchlist is missing Grust-derived projects: ${audit.missing.join(', ')}`)
+  throw new Error(`Verdun crawler config is missing Grust-derived projects: ${audit.missing.join(', ')}`)
 }
 
 export async function buildGrustWatchlistAudit({ grustRoot, watchlistPath }) {
@@ -117,7 +117,7 @@ function renderAuditMarkdown(audit) {
     '# Grust Watchlist Audit',
     '',
     `Grust root: \`${audit.grustRoot}\``,
-    `Verdun watchlist: \`${audit.watchlistPath}\``,
+    `Verdun crawler config: \`${audit.watchlistPath}\``,
     '',
     `Coverage: ${audit.covered.length} of ${audit.signals.length} Grust-derived signals are watched by Verdun.`,
     '',

@@ -1,5 +1,30 @@
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, path::PathBuf};
+
+#[derive(Debug, Deserialize)]
+pub struct CrawlerConfig {
+    pub theme: String,
+    #[serde(rename = "projects")]
+    pub targets: Vec<CollectionTarget>,
+    pub sources: Vec<SourceConfig>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CollectionTarget {
+    pub name: String,
+    pub topic: String,
+    pub homepage: String,
+    pub keywords: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct SourceConfig {
+    pub name: String,
+    pub kind: String,
+    pub url: String,
+    pub feed_urls: Option<Vec<String>>,
+    pub manual_path: Option<PathBuf>,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

@@ -2,7 +2,9 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
 use clap::{Parser, Subcommand};
 mod core;
-use crate::core::{ReviewTarget, SourceRun, SourceRunStatus};
+use crate::core::{
+    CollectionTarget, CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus,
+};
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
 use serde::{Deserialize, Serialize};
@@ -19,7 +21,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum CommandKind {
     Collect {
-        #[arg(long, default_value = "crawler/instances/garbage/watchlist.toml")]
+        #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
         config: PathBuf,
         #[arg(long, default_value = "crawler/data/items.json")]
         out: PathBuf,
@@ -47,39 +49,15 @@ enum CommandKind {
         out: PathBuf,
     },
     Verify {
-        #[arg(long, default_value = "crawler/instances/garbage/watchlist.toml")]
+        #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
         config: PathBuf,
     },
     Queries {
-        #[arg(long, default_value = "crawler/instances/garbage/watchlist.toml")]
+        #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
         config: PathBuf,
         #[arg(long, default_value = "crawler/data/editorial-state.json")]
         editorial_state: PathBuf,
     },
-}
-
-#[derive(Debug, Deserialize)]
-struct Watchlist {
-    theme: String,
-    projects: Vec<Project>,
-    sources: Vec<Source>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Project {
-    name: String,
-    topic: String,
-    homepage: String,
-    keywords: Vec<String>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-struct Source {
-    name: String,
-    kind: String,
-    url: String,
-    feed_urls: Option<Vec<String>>,
-    manual_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -168,14 +146,14 @@ fn collect(
     since_days: i64,
     editorial_state: PathBuf,
 ) -> Result<()> {
-    let watchlist = read_watchlist(&config)?;
+    let config = read_crawler_config(&config)?;
     let editorial_focuses = read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
-    let mut items = seed_items(&watchlist);
-    let mut source_runs = seed_source_runs(&watchlist, live);
+    let mut items = seed_items(&config);
+    let mut source_runs = seed_source_runs(&config, live);
     if live {
         let since = Utc::now() - Duration::days(since_days);
-        match live_items(&watchlist, max_live_per_project, since, &editorial_focuses) {
+        match live_items(&config, max_live_per_project, since, &editorial_focuses) {
             Ok((live_items, live_source_runs)) => {
                 items.extend(live_items);
                 source_runs.extend(live_source_runs);
@@ -201,10 +179,10 @@ fn collect(
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let query_plans = query_plans(&watchlist, &editorial_focuses);
+    let query_plans = query_plans(&config, &editorial_focuses);
     let public_snapshot = PublicSnapshot {
         generated_at: Utc::now(),
-        theme: watchlist.theme,
+        theme: config.theme,
         items,
         source_runs,
         query_plans,
@@ -370,56 +348,50 @@ fn load_export_payload(
 }
 
 fn verify(config: PathBuf) -> Result<()> {
-    let watchlist = read_watchlist(&config)?;
+    let config = read_crawler_config(&config)?;
+    anyhow::ensure!(!config.targets.is_empty(), "config must include projects");
+    anyhow::ensure!(!config.sources.is_empty(), "config must include sources");
     anyhow::ensure!(
-        !watchlist.projects.is_empty(),
-        "watchlist must include projects"
-    );
-    anyhow::ensure!(
-        !watchlist.sources.is_empty(),
-        "watchlist must include sources"
-    );
-    anyhow::ensure!(
-        watchlist
-            .projects
+        config
+            .targets
             .iter()
             .any(|project| project.name == "Pydantic"),
         "Pydantic must be tracked"
     );
     anyhow::ensure!(
-        watchlist
-            .projects
+        config
+            .targets
             .iter()
             .any(|project| project.name == "LakeSail"),
         "LakeSail must be tracked"
     );
-    verify_required_projects(&watchlist)?;
-    verify_required_sources(&watchlist)?;
+    verify_required_projects(&config)?;
+    verify_required_sources(&config)?;
     println!(
         "verified {} projects and {} sources for {}",
-        watchlist.projects.len(),
-        watchlist.sources.len(),
-        watchlist.theme
+        config.targets.len(),
+        config.sources.len(),
+        config.theme
     );
     Ok(())
 }
 
 fn queries(config: PathBuf, editorial_state: PathBuf) -> Result<()> {
-    let watchlist = read_watchlist(&config)?;
+    let config = read_crawler_config(&config)?;
     let editorial_focuses = read_editorial_focuses(&editorial_state)?;
     println!(
         "{}",
-        serde_json::to_string_pretty(&query_plans(&watchlist, &editorial_focuses))?
+        serde_json::to_string_pretty(&query_plans(&config, &editorial_focuses))?
     );
     Ok(())
 }
 
 fn query_plans(
-    watchlist: &Watchlist,
+    config: &CrawlerConfig,
     editorial_focuses: &[EditorialFocus],
 ) -> Vec<ProjectQueryPlan> {
-    watchlist
-        .projects
+    config
+        .targets
         .iter()
         .map(|project| ProjectQueryPlan {
             project: project.name.clone(),
@@ -427,17 +399,17 @@ fn query_plans(
             hacker_news_query: project_query(project),
             live_terms: project_live_terms(project),
             dev_to_tags: dev_to_tags(project),
-            review_targets: review_targets(watchlist, project),
+            review_targets: review_targets(config, project),
             focus_terms: project_focus_terms(project, editorial_focuses),
         })
         .collect::<Vec<_>>()
 }
 
-fn review_targets(watchlist: &Watchlist, project: &Project) -> Vec<ReviewTarget> {
+fn review_targets(config: &CrawlerConfig, project: &CollectionTarget) -> Vec<ReviewTarget> {
     let query = project_query(project);
     let query_param = url_query(&query);
     let mut targets = Vec::new();
-    for source in &watchlist.sources {
+    for source in &config.sources {
         match source.name.as_str() {
             "Hacker News" => targets.push(ReviewTarget {
                 source: source.name.clone(),
@@ -519,7 +491,7 @@ fn read_editorial_focuses(path: &PathBuf) -> Result<Vec<EditorialFocus>> {
         .collect())
 }
 
-fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
+fn verify_required_projects(config: &CrawlerConfig) -> Result<()> {
     for project_name in [
         "Pydantic",
         "BAML",
@@ -545,8 +517,8 @@ fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
         "LadybugDB",
         "CocoIndex",
     ] {
-        let project = watchlist
-            .projects
+        let project = config
+            .targets
             .iter()
             .find(|candidate| candidate.name == project_name)
             .with_context(|| format!("{project_name} must be tracked"))?;
@@ -570,9 +542,9 @@ fn verify_required_projects(watchlist: &Watchlist) -> Result<()> {
     Ok(())
 }
 
-fn verify_required_sources(watchlist: &Watchlist) -> Result<()> {
+fn verify_required_sources(config: &CrawlerConfig) -> Result<()> {
     for source_name in ["Hacker News", "Lobste.rs", "dev.to"] {
-        let source = required_source(watchlist, source_name)?;
+        let source = required_source(config, source_name)?;
         anyhow::ensure!(
             source.feed_urls.as_ref().is_none_or(Vec::is_empty),
             "{source_name} should use its API adapter, not feed_urls"
@@ -583,7 +555,7 @@ fn verify_required_sources(watchlist: &Watchlist) -> Result<()> {
         );
     }
     for source_name in ["Medium", "Substack"] {
-        let source = required_source(watchlist, source_name)?;
+        let source = required_source(config, source_name)?;
         let feeds = source
             .feed_urls
             .as_ref()
@@ -595,7 +567,7 @@ fn verify_required_sources(watchlist: &Watchlist) -> Result<()> {
         );
     }
     for source_name in ["LinkedIn", "X/Twitter"] {
-        let source = required_source(watchlist, source_name)?;
+        let source = required_source(config, source_name)?;
         let path = source
             .manual_path
             .as_ref()
@@ -609,8 +581,8 @@ fn verify_required_sources(watchlist: &Watchlist) -> Result<()> {
     Ok(())
 }
 
-fn required_source<'a>(watchlist: &'a Watchlist, source_name: &str) -> Result<&'a Source> {
-    let source = watchlist
+fn required_source<'a>(config: &'a CrawlerConfig, source_name: &str) -> Result<&'a SourceConfig> {
+    let source = config
         .sources
         .iter()
         .find(|candidate| candidate.name == source_name)
@@ -623,7 +595,7 @@ fn required_source<'a>(watchlist: &'a Watchlist, source_name: &str) -> Result<&'
 }
 
 fn live_items(
-    watchlist: &Watchlist,
+    config: &CrawlerConfig,
     max_per_project: usize,
     since: DateTime<Utc>,
     editorial_focuses: &[EditorialFocus],
@@ -635,18 +607,12 @@ fn live_items(
         .context("building HTTP client")?;
     let mut items = Vec::new();
     let mut source_runs = Vec::new();
-    if let Some(source) = watchlist
+    if let Some(source) = config
         .sources
         .iter()
         .find(|source| source.name == "Hacker News")
     {
-        match fetch_hacker_news(
-            &client,
-            watchlist,
-            source,
-            max_per_project,
-            editorial_focuses,
-        ) {
+        match fetch_hacker_news(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
@@ -659,18 +625,12 @@ fn live_items(
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
-    if let Some(source) = watchlist
+    if let Some(source) = config
         .sources
         .iter()
         .find(|source| source.name == "Lobste.rs")
     {
-        match fetch_lobsters(
-            &client,
-            watchlist,
-            source,
-            max_per_project,
-            editorial_focuses,
-        ) {
+        match fetch_lobsters(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(source, &source_items, "Lobste.rs search"));
@@ -679,18 +639,8 @@ fn live_items(
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
-    if let Some(source) = watchlist
-        .sources
-        .iter()
-        .find(|source| source.name == "dev.to")
-    {
-        match fetch_dev_to(
-            &client,
-            watchlist,
-            source,
-            max_per_project,
-            editorial_focuses,
-        ) {
+    if let Some(source) = config.sources.iter().find(|source| source.name == "dev.to") {
+        match fetch_dev_to(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(source, &source_items, "dev.to articles API"));
@@ -699,18 +649,8 @@ fn live_items(
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
-    if let Some(source) = watchlist
-        .sources
-        .iter()
-        .find(|source| source.name == "Medium")
-    {
-        match fetch_feed_source(
-            &client,
-            watchlist,
-            source,
-            max_per_project,
-            editorial_focuses,
-        ) {
+    if let Some(source) = config.sources.iter().find(|source| source.name == "Medium") {
+        match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
@@ -723,18 +663,12 @@ fn live_items(
             Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
         }
     }
-    if let Some(source) = watchlist
+    if let Some(source) = config
         .sources
         .iter()
         .find(|source| source.name == "Substack")
     {
-        match fetch_feed_source(
-            &client,
-            watchlist,
-            source,
-            max_per_project,
-            editorial_focuses,
-        ) {
+        match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(ok_source_run(
@@ -748,12 +682,12 @@ fn live_items(
         }
     }
     for source_name in ["LinkedIn", "X/Twitter"] {
-        if let Some(source) = watchlist
+        if let Some(source) = config
             .sources
             .iter()
             .find(|source| source.name == source_name)
         {
-            match collect_manual_source(watchlist, source, max_per_project, editorial_focuses) {
+            match collect_manual_source(config, source, max_per_project, editorial_focuses) {
                 Ok(manual_source) => {
                     let mut source_items = manual_source.items;
                     retain_recent(&mut source_items, since);
@@ -779,13 +713,13 @@ fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
 
 fn fetch_hacker_news(
     client: &Client,
-    watchlist: &Watchlist,
-    source: &Source,
+    config: &CrawlerConfig,
+    source: &SourceConfig,
     max_per_project: usize,
     editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
     let mut items = Vec::new();
-    for project in &watchlist.projects {
+    for project in &config.targets {
         let focus_terms = project_focus_terms(project, editorial_focuses);
         let query = project_query_for_collection(project, &focus_terms);
         let response = client
@@ -818,8 +752,8 @@ fn fetch_hacker_news(
 
 fn fetch_lobsters(
     client: &Client,
-    watchlist: &Watchlist,
-    source: &Source,
+    config: &CrawlerConfig,
+    source: &SourceConfig,
     max_per_project: usize,
     editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
@@ -829,7 +763,7 @@ fn fetch_lobsters(
 
     let mut seen_stories: BTreeMap<String, bool> = BTreeMap::new();
     let mut items = Vec::new();
-    for project in &watchlist.projects {
+    for project in &config.targets {
         let mut project_count = 0;
         let focus_terms = project_focus_terms(project, editorial_focuses);
         let query = project_query_for_collection(project, &focus_terms);
@@ -975,15 +909,15 @@ fn html_unescape(value: &str) -> String {
 
 fn fetch_dev_to(
     client: &Client,
-    watchlist: &Watchlist,
-    source: &Source,
+    config: &CrawlerConfig,
+    source: &SourceConfig,
     max_per_project: usize,
     editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
     let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
     let mut seen_articles = BTreeMap::new();
     let mut items = Vec::new();
-    for project in &watchlist.projects {
+    for project in &config.targets {
         let focus_terms = project_focus_terms(project, editorial_focuses);
         for tag in dev_to_tags(project).into_iter().take(2) {
             let response = client
@@ -1024,8 +958,8 @@ fn fetch_dev_to(
 
 fn fetch_feed_source(
     client: &Client,
-    watchlist: &Watchlist,
-    source: &Source,
+    config: &CrawlerConfig,
+    source: &SourceConfig,
     max_per_project: usize,
     editorial_focuses: &[EditorialFocus],
 ) -> Result<Vec<NewsItem>> {
@@ -1047,7 +981,7 @@ fn fetch_feed_source(
             .with_context(|| format!("reading feed body for {feed_url}"))?;
         let entries = parse_feed_entries(&text, feed_url);
         for entry in entries {
-            for project in &watchlist.projects {
+            for project in &config.targets {
                 let focus_terms = project_focus_terms(project, editorial_focuses);
                 let count = *counts.get(project.name.as_str()).unwrap_or(&0);
                 if count >= max_per_project
@@ -1064,8 +998,8 @@ fn fetch_feed_source(
 }
 
 fn collect_manual_source(
-    watchlist: &Watchlist,
-    source: &Source,
+    config: &CrawlerConfig,
+    source: &SourceConfig,
     max_per_project: usize,
     editorial_focuses: &[EditorialFocus],
 ) -> Result<ManualSourceCollect> {
@@ -1085,7 +1019,7 @@ fn collect_manual_source(
     let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
     let mut items = Vec::new();
     for post in posts {
-        for project in &watchlist.projects {
+        for project in &config.targets {
             let focus_terms = project_focus_terms(project, editorial_focuses);
             let count = *counts.get(project.name.as_str()).unwrap_or(&0);
             if count >= max_per_project
@@ -1111,8 +1045,8 @@ struct ManualSourceCollect {
     latest_published_at: Option<DateTime<Utc>>,
 }
 
-fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
-    watchlist
+fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
+    config
         .sources
         .iter()
         .filter_map(|source| {
@@ -1152,7 +1086,7 @@ fn seed_source_runs(watchlist: &Watchlist, live: bool) -> Vec<SourceRun> {
         .collect()
 }
 
-fn ok_source_run(source: &Source, items: &[NewsItem], message: &str) -> SourceRun {
+fn ok_source_run(source: &SourceConfig, items: &[NewsItem], message: &str) -> SourceRun {
     SourceRun {
         source: source.name.clone(),
         kind: source.kind.clone(),
@@ -1163,7 +1097,7 @@ fn ok_source_run(source: &Source, items: &[NewsItem], message: &str) -> SourceRu
     }
 }
 
-fn error_source_run(source: &Source, message: &str) -> SourceRun {
+fn error_source_run(source: &SourceConfig, message: &str) -> SourceRun {
     SourceRun {
         source: source.name.clone(),
         kind: source.kind.clone(),
@@ -1175,7 +1109,7 @@ fn error_source_run(source: &Source, message: &str) -> SourceRun {
 }
 
 fn manual_source_run(
-    source: &Source,
+    source: &SourceConfig,
     items: &[NewsItem],
     post_count: usize,
     latest_published_at: Option<DateTime<Utc>>,
@@ -1216,20 +1150,20 @@ fn project_counts(items: &[NewsItem]) -> BTreeMap<String, usize> {
     counts
 }
 
-fn read_watchlist(path: &PathBuf) -> Result<Watchlist> {
+fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
 }
 
-fn seed_items(watchlist: &Watchlist) -> Vec<NewsItem> {
-    let source = watchlist
+fn seed_items(config: &CrawlerConfig) -> Vec<NewsItem> {
+    let source = config
         .sources
         .iter()
         .find(|candidate| candidate.name == "Hacker News")
         .cloned()
-        .unwrap_or_else(|| watchlist.sources[0].clone());
-    watchlist
-        .projects
+        .unwrap_or_else(|| config.sources[0].clone());
+    config
+        .targets
         .iter()
         .enumerate()
         .map(|(index, project)| project_item(project, &source, index))
@@ -1345,7 +1279,7 @@ fn canonical_url(value: &str) -> Option<String> {
     Some(normalized.replace("://www.", "://"))
 }
 
-fn project_item(project: &Project, source: &Source, index: usize) -> NewsItem {
+fn project_item(project: &CollectionTarget, source: &SourceConfig, index: usize) -> NewsItem {
     let published_at = seed_base_time() - Duration::days(index as i64);
     let title = format!(
         "{} belongs in this week's typed AI/data systems watch",
@@ -1459,8 +1393,8 @@ struct FeedEntry {
 }
 
 fn hn_item(
-    project: &Project,
-    source: &Source,
+    project: &CollectionTarget,
+    source: &SourceConfig,
     hit: HackerNewsHit,
     focus_terms: &[String],
 ) -> NewsItem {
@@ -1524,8 +1458,8 @@ fn hn_item(
 }
 
 fn lobsters_item(
-    project: &Project,
-    source: &Source,
+    project: &CollectionTarget,
+    source: &SourceConfig,
     story: &LobstersStory,
     focus_terms: &[String],
 ) -> NewsItem {
@@ -1582,8 +1516,8 @@ fn lobsters_item(
 }
 
 fn dev_to_item(
-    project: &Project,
-    source: &Source,
+    project: &CollectionTarget,
+    source: &SourceConfig,
     article: &DevToArticle,
     focus_terms: &[String],
 ) -> NewsItem {
@@ -1635,8 +1569,8 @@ fn dev_to_item(
 }
 
 fn feed_item(
-    project: &Project,
-    source: &Source,
+    project: &CollectionTarget,
+    source: &SourceConfig,
     entry: &FeedEntry,
     focus_terms: &[String],
 ) -> NewsItem {
@@ -1685,8 +1619,8 @@ fn feed_item(
 }
 
 fn manual_post_item(
-    project: &Project,
-    source: &Source,
+    project: &CollectionTarget,
+    source: &SourceConfig,
     post: &ManualPost,
     focus_terms: &[String],
 ) -> NewsItem {
@@ -1728,8 +1662,8 @@ fn manual_post_item(
 fn provenance(
     stage: &str,
     adapter: &str,
-    source: &Source,
-    project: &Project,
+    source: &SourceConfig,
+    project: &CollectionTarget,
     evidence_url: &str,
     focus_terms: &[String],
 ) -> serde_json::Value {
@@ -1745,13 +1679,13 @@ fn provenance(
     })
 }
 
-fn project_query(project: &Project) -> String {
+fn project_query(project: &CollectionTarget) -> String {
     let mut parts = vec![project.name.clone()];
     parts.extend(project_live_terms(project).into_iter().take(2));
     parts.join(" ")
 }
 
-fn project_query_for_collection(project: &Project, focus_terms: &[String]) -> String {
+fn project_query_for_collection(project: &CollectionTarget, focus_terms: &[String]) -> String {
     let mut parts = vec![project.name.clone()];
     parts.extend(project_live_terms(project).into_iter().take(2));
     parts.extend(focus_terms.iter().take(2).cloned());
@@ -1760,7 +1694,11 @@ fn project_query_for_collection(project: &Project, focus_terms: &[String]) -> St
     parts.join(" ")
 }
 
-fn hn_hit_matches_project(hit: &HackerNewsHit, project: &Project, focus_terms: &[String]) -> bool {
+fn hn_hit_matches_project(
+    hit: &HackerNewsHit,
+    project: &CollectionTarget,
+    focus_terms: &[String],
+) -> bool {
     let text = format!(
         "{} {}",
         hit.title.as_deref().unwrap_or_default(),
@@ -1774,7 +1712,7 @@ fn hn_hit_matches_project(hit: &HackerNewsHit, project: &Project, focus_terms: &
 
 fn lobsters_story_matches_project(
     story: &LobstersStory,
-    project: &Project,
+    project: &CollectionTarget,
     focus_terms: &[String],
 ) -> bool {
     let text = format!("{} {} {}", story.title, story.url, story.tags.join(" "));
@@ -1783,7 +1721,7 @@ fn lobsters_story_matches_project(
 
 fn dev_to_article_matches_project(
     article: &DevToArticle,
-    project: &Project,
+    project: &CollectionTarget,
     focus_terms: &[String],
 ) -> bool {
     let text = format!(
@@ -1798,7 +1736,7 @@ fn dev_to_article_matches_project(
 
 fn feed_entry_matches_project(
     entry: &FeedEntry,
-    project: &Project,
+    project: &CollectionTarget,
     focus_terms: &[String],
 ) -> bool {
     let link_without_query = entry.link.split('?').next().unwrap_or(&entry.link);
@@ -1811,14 +1749,14 @@ fn feed_entry_matches_project(
 
 fn manual_post_matches_project(
     post: &ManualPost,
-    project: &Project,
+    project: &CollectionTarget,
     focus_terms: &[String],
 ) -> bool {
     let text = format!("{} {} {}", post.title, post.url, post.text);
     text_matches_project(&text, project, focus_terms)
 }
 
-fn feed_score(project: &Project, entry: &FeedEntry) -> i32 {
+fn feed_score(project: &CollectionTarget, entry: &FeedEntry) -> i32 {
     let text = format!("{} {}", entry.title, entry.link).to_lowercase();
     let project_name = project.name.to_lowercase();
     let explicit_project = text.contains(&project_name)
@@ -1978,7 +1916,7 @@ fn truncate_text(value: &str, max_chars: usize) -> String {
     text
 }
 
-fn text_matches_project(text: &str, project: &Project, focus_terms: &[String]) -> bool {
+fn text_matches_project(text: &str, project: &CollectionTarget, focus_terms: &[String]) -> bool {
     let text = text.to_lowercase();
     let project_name = project.name.to_lowercase();
     if project.name == "LanceDB" {
@@ -1995,7 +1933,7 @@ fn text_matches_project(text: &str, project: &Project, focus_terms: &[String]) -
         .any(|keyword| contains_distinct_term(&text, keyword))
 }
 
-fn matched_keywords(project: &Project, focus_terms: &[String]) -> Vec<String> {
+fn matched_keywords(project: &CollectionTarget, focus_terms: &[String]) -> Vec<String> {
     let mut keywords = project
         .keywords
         .iter()
@@ -2032,7 +1970,7 @@ fn contains_distinct_term(text: &str, term: &str) -> bool {
     false
 }
 
-fn project_live_terms(project: &Project) -> Vec<String> {
+fn project_live_terms(project: &CollectionTarget) -> Vec<String> {
     let generic_terms = [
         "ai",
         "arrow",
@@ -2085,7 +2023,10 @@ fn project_live_terms(project: &Project) -> Vec<String> {
         .collect()
 }
 
-fn project_focus_terms(project: &Project, editorial_focuses: &[EditorialFocus]) -> Vec<String> {
+fn project_focus_terms(
+    project: &CollectionTarget,
+    editorial_focuses: &[EditorialFocus],
+) -> Vec<String> {
     let project_name = project.name.to_lowercase();
     let live_terms = project_live_terms(project);
     let mut terms = Vec::new();
@@ -2130,7 +2071,7 @@ fn is_generic_focus_term(value: &str) -> bool {
     .contains(&value)
 }
 
-fn dev_to_tags(project: &Project) -> Vec<String> {
+fn dev_to_tags(project: &CollectionTarget) -> Vec<String> {
     let mut tags = vec![slug(&project.name).replace('-', "")];
     tags.extend(
         project_live_terms(project)

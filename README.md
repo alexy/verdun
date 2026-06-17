@@ -78,7 +78,7 @@ Without `--apply`, the helper regenerates `/tmp/verdun-newsletter-load.sql` from
 
 ## Crawler
 
-The reusable crawler core lives under `crawler/src/`; the current Garbage crawler instance owns its watchlist and manual social review files under `crawler/instances/garbage/`.
+The reusable crawler core lives under `crawler/src/`; the current Garbage crawler instance owns its crawler config at `crawler/instances/garbage/config.toml` and manual social review files under `crawler/instances/garbage/manual/`.
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json
