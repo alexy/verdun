@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import WorkbenchHero from './workbench/WorkbenchHero.vue'
+import WorkbenchHero from '../../../components/workbench/WorkbenchHero.vue'
 
 type WorkbenchMetric = {
   label: string

@@ -30,6 +30,7 @@
 - Updated deployment readiness checks to validate generic workbench records/status/health APIs while still checking the Garbage newsletter draft API.
 - Moved the Strongly Typed AI ontology helper implementation under `src/instances/garbage/ontology.ts`; the generic `src/lib/ontology.ts` path is now only a compatibility re-export.
 - Moved Garbage newsletter/draft/readiness/export logic under `src/instances/garbage/newsletter.ts`; the generic `src/lib/newsletter.ts` path is now only a compatibility re-export.
+- Moved Garbage-specific newsletter hero and draft preview components under `src/instances/garbage/components/`, leaving the shared `WorkbenchHero` in the generic component tree.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
@@ -41,6 +42,6 @@ Known remaining extraction work:
 - The Rust crawler now has a `CrawlerInstance` dispatch trait and a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
 - Crawler instance selection supports `--instance garbage` and `--instance greathouse`.
 - Workbench API routes support explicit Garbage/Greathouse instance selection, and the browser app now reads/reviews/focuses Garbage through generic workbench routes.
-- Newsletter draft generation, readiness, Ulysses export, editorial-state import, and ontology rendering are now implemented under the Garbage instance, but the app still uses Garbage-specific newsletter UI components and compatibility API route names.
+- Newsletter draft generation, readiness, Ulysses export, editorial-state import, ontology rendering, and the first Garbage-specific UI components are now implemented under the Garbage instance, but the app still uses some Garbage-specific newsletter UI component names and compatibility API route names.
 - Greathouse crawler collection now dispatches through configured local JSON adapters, but it still does not have real network/browser property-source adapters.
 - Greathouse is still a partial consumer rather than a full app consuming Verdun core.
