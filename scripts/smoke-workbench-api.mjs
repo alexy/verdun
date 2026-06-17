@@ -48,7 +48,11 @@ try {
   if (healthSource.includes('newsletter_')) {
     throw new Error('generic workbench health route still names newsletter compatibility tables directly')
   }
-  if (instanceAdaptersSource.includes('garbageInstance') || instanceAdaptersSource.includes('newsletter_')) {
+  if (
+    instanceAdaptersSource.includes('garbageInstance') ||
+    instanceAdaptersSource.includes('newsletter_') ||
+    instanceAdaptersSource.includes('../instances/garbage/')
+  ) {
     throw new Error('generic workbench instance-adapter registry still embeds Garbage config or newsletter compatibility metadata')
   }
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {

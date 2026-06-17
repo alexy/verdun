@@ -1,4 +1,4 @@
-import { garbageLocalWorkbenchAdapter } from '../instances/garbage/workbench.js'
+import { registeredLocalWorkbenchAdapters } from '../instances/workbench-adapters.js'
 import { staticWorkbenchSnapshot } from '../../src/instances/registry'
 import type {
   ReviewValue,
@@ -29,10 +29,8 @@ export type LocalWorkbenchAdapter = {
   writeState?: (state: WorkbenchStateExport) => Promise<WorkbenchStateImportResult>
 }
 
-const localWorkbenchAdapters = [garbageLocalWorkbenchAdapter]
-
 export function localWorkbenchAdapter(instance: WorkbenchInstance): LocalWorkbenchAdapter | null {
-  const registeredAdapter = localWorkbenchAdapters.find((entry) => entry.instanceId === instance.id)?.adapter
+  const registeredAdapter = registeredLocalWorkbenchAdapters.find((entry) => entry.instanceId === instance.id)?.adapter
   if (registeredAdapter) return registeredAdapter
   const snapshot = staticWorkbenchSnapshot(instance)
   if (!snapshot) return null

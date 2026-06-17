@@ -14,6 +14,7 @@
 - Changed `smoke-db-apply` and `smoke-db-deploy` to resolve their default source snapshot through deploy profile metadata instead of embedding the Garbage newsletter snapshot path.
 - Changed `src/instances/registry.ts` to store default-instance and static-snapshot behavior in registration metadata instead of branching directly on Garbage or Greathouse instances; app resolution now falls back through the registered default.
 - Moved Garbage local workbench adapter metadata into `api/instances/garbage/workbench.ts`; the generic `api/workbench/instance-adapters.ts` now uses adapter registration entries instead of importing Garbage config or embedding newsletter compatibility tables.
+- Moved the local workbench adapter registration list into `api/instances/workbench-adapters.ts`, so the generic `api/workbench/instance-adapters.ts` no longer imports instance-specific adapter modules directly.
 
 ## 2026-06-16
 
