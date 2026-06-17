@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
-    CollectionTarget, CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord,
-    ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, slug, stable_id,
+    CollectionTarget, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
+    NormalizedRecord, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, slug, stable_id,
 };
 use crate::instances::CrawlerInstance;
 
@@ -122,13 +122,6 @@ pub struct ProjectQueryPlan {
 struct EditorialState {
     #[serde(default)]
     focuses: Vec<EditorialFocus>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct EditorialFocus {
-    pub text: String,
-    #[serde(default)]
-    pub scope: String,
 }
 
 #[derive(Debug, Deserialize)]

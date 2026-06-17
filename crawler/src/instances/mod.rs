@@ -5,8 +5,8 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use std::path::PathBuf;
 
-use crate::core::{CrawlerConfig, NormalizedCollectionPlan, SourceRun};
-use garbage::{EditorialFocus, NewsItem};
+use crate::core::{CrawlerConfig, EditorialFocus, NormalizedCollectionPlan, SourceRun};
+use garbage::NewsItem;
 
 pub trait CrawlerInstance {
     fn id(&self) -> &'static str;

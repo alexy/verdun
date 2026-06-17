@@ -32,6 +32,9 @@ if (!garbageInstanceSource.includes('pub fn newsletter_export_sql') || !garbageI
 if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.includes('Vec<NormalizedCollectionPlan>')) {
   throw new Error('crawler instance trait still exposes Garbage query-plan types instead of core collection plans')
 }
+if (instanceTraitSource.includes('EditorialFocus, NewsItem') || !instanceTraitSource.includes('use crate::core::{CrawlerConfig, EditorialFocus')) {
+  throw new Error('crawler instance trait still imports editorial focus state from Garbage instead of core')
+}
 
 const verifyGarbage = spawnSync('cargo', [
   'run',

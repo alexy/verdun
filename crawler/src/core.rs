@@ -69,6 +69,13 @@ pub struct ReviewTarget {
     pub adapter: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct EditorialFocus {
+    pub text: String,
+    #[serde(default)]
+    pub scope: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NormalizedRecord {
     pub id: String,

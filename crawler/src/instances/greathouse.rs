@@ -6,11 +6,11 @@ use std::collections::BTreeMap;
 use std::{path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
-    CrawlerConfig, NormalizedCollectionPlan, ReviewTarget, SourceConfig, SourceRun,
+    CrawlerConfig, EditorialFocus, NormalizedCollectionPlan, ReviewTarget, SourceConfig, SourceRun,
     SourceRunStatus, stable_id,
 };
 use crate::instances::CrawlerInstance;
-use crate::instances::garbage::{EditorialFocus, NewsItem};
+use crate::instances::garbage::NewsItem;
 
 pub static GREATHOUSE_CRAWLER_INSTANCE: GreathouseCrawlerInstance = GreathouseCrawlerInstance;
 
