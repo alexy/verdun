@@ -77,10 +77,10 @@
 - Moved Garbage newsletter route implementations under `api/instances/garbage/newsletter/`; the public `api/garbage/newsletter/*` files act as explicit Garbage API shims.
 - Moved Garbage publishing helper implementations under `scripts/instances/garbage/`; explicit Garbage draft, Ghost publish, and source-gap scripts now act as CLI/module wrappers.
 - Added explicit Garbage publishing package scripts (`garbage:draft`, `garbage:review:gaps`, `garbage:ulysses:*`, and `garbage:ghost:*`).
-- Moved Garbage newsletter SQL reload helper implementations under `scripts/instances/garbage/`; the public apply/deploy database scripts now act as compatibility CLI/module wrappers.
+- Moved Garbage newsletter SQL reload helper implementations under `scripts/instances/garbage/`; the old public apply/deploy database compatibility wrappers have been removed.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Changed `verdun-crawler export-sql` to default to the generic workbench SQL target; Garbage newsletter table export is now an explicit `--target newsletter` compatibility path.
-- Added generic workbench database apply/deploy scripts and made the default `db:apply`/`db:deploy` package scripts validate/load generic workbench SQL; legacy newsletter table loading remains available through `db:apply:newsletter` and `db:deploy:newsletter`.
+- Added generic workbench database apply/deploy scripts and made the default `db:apply`/`db:deploy` package scripts validate/load generic workbench SQL; legacy newsletter table loading is now available only through explicit Garbage package commands `garbage:db:apply:newsletter` and `garbage:db:deploy:newsletter`.
 - Changed `npm run smoke:all` to generate its primary SQL through the default generic `export-sql` path, then run the legacy newsletter SQL export only as an explicit compatibility check.
 - Made `scripts/check-deployed.mjs` instance-aware with configurable static snapshot paths, asset bases, count gates, and required subjects; Garbage still checks the newsletter draft API, while non-Garbage instances validate only the generic workbench deployment surface unless draft checks are explicitly enabled.
 - Made `scripts/deploy-workbench-database.mjs` carry `--instance`, `--base-path`, and `--static-snapshot` into deployed checks, with smoke coverage for a Greathouse generic workbench deployment preflight.
