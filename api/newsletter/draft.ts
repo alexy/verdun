@@ -1,4 +1,4 @@
-import { readSnapshot } from './_db.js'
+import { readSnapshot } from '../instances/garbage/newsletter-store.js'
 import { allowMethods, sendApiError, sendJson, sendText, type ApiRequest, type ApiResponse } from './_http.js'
 import {
   buildNewsletterDraft,

@@ -1,4 +1,4 @@
-import { writeFocus } from './_db.js'
+import { writeFocus } from '../instances/garbage/newsletter-store.js'
 import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from './_http.js'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {

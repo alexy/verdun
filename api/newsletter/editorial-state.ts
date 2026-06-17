@@ -1,4 +1,4 @@
-import { writeEditorialState } from './_db.js'
+import { writeEditorialState } from '../instances/garbage/newsletter-store.js'
 import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from './_http.js'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {

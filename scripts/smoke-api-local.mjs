@@ -8,7 +8,7 @@ const stateFile = join(stateDir, 'editorial-state.json')
 process.env.VERDUN_LOCAL_STATE_FILE = stateFile
 
 try {
-  const { module } = await runnerImport('./api/newsletter/_db.ts', {
+  const { module } = await runnerImport('./api/instances/garbage/newsletter-store.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })

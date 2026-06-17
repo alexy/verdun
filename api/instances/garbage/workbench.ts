@@ -1,4 +1,4 @@
-import { readSnapshot, readStatus, writeFocus, writeVote } from '../../newsletter/_db.js'
+import { readSnapshot, readStatus, writeFocus, writeVote } from './newsletter-store.js'
 import { garbageSnapshotToWorkbench } from '../../../src/instances/garbage/workbench'
 import type { ReviewValue, WorkbenchFocus, WorkbenchSnapshot } from '../../../src/core/workbench'
 
