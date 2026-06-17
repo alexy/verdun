@@ -139,37 +139,9 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
 fn greathouse_items(config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
     let mut items = Vec::new();
     for source in &config.sources {
-        items.extend(load_source_fixtures(config, source)?);
+        items.extend(adapter_for_source(source).collect(config, source)?);
     }
     Ok(items)
-}
-
-fn load_source_fixtures(config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
-    let path = source
-        .fixture_path
-        .as_ref()
-        .with_context(|| format!("{} has no fixture_path configured", source.name))?;
-    let fixtures: Vec<GreathouseFixtureRecord> = serde_json::from_slice(
-        &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
-    )
-    .with_context(|| format!("parsing {}", path.display()))?;
-    fixtures
-        .into_iter()
-        .enumerate()
-        .map(|(index, fixture)| {
-            let target = config
-                .targets
-                .iter()
-                .find(|target| target.name == fixture.subject)
-                .with_context(|| {
-                    format!(
-                        "{} fixture references unknown subject {}",
-                        source.name, fixture.subject
-                    )
-                })?;
-            Ok(greathouse_item(target, source, fixture, index))
-        })
-        .collect()
 }
 
 fn greathouse_item(
@@ -247,6 +219,60 @@ fn greathouse_item(
     }
 }
 
+trait GreathouseSourceAdapter {
+    fn adapter_name(&self, source: &SourceConfig) -> &'static str;
+    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>>;
+}
+
+struct FixtureSourceAdapter;
+
+impl GreathouseSourceAdapter for FixtureSourceAdapter {
+    fn adapter_name(&self, source: &SourceConfig) -> &'static str {
+        if source.kind == "diagnostic" {
+            "blocked-source-diagnostic-fixture"
+        } else {
+            "property-listing-fixture"
+        }
+    }
+
+    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+        let path = source
+            .fixture_path
+            .as_ref()
+            .with_context(|| format!("{} has no fixture_path configured", source.name))?;
+        let fixtures: Vec<GreathouseFixtureRecord> = serde_json::from_slice(
+            &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+        )
+        .with_context(|| format!("parsing {}", path.display()))?;
+        fixtures
+            .into_iter()
+            .enumerate()
+            .map(|(index, fixture)| {
+                let target = config
+                    .targets
+                    .iter()
+                    .find(|target| target.name == fixture.subject)
+                    .with_context(|| {
+                        format!(
+                            "{} fixture references unknown subject {}",
+                            source.name, fixture.subject
+                        )
+                    })?;
+                Ok(greathouse_item(target, source, fixture, index))
+            })
+            .collect()
+    }
+}
+
+static FIXTURE_SOURCE_ADAPTER: FixtureSourceAdapter = FixtureSourceAdapter;
+
+fn adapter_for_source(source: &SourceConfig) -> &'static dyn GreathouseSourceAdapter {
+    match source.kind.as_str() {
+        "listing" | "diagnostic" => &FIXTURE_SOURCE_ADAPTER,
+        _ => &FIXTURE_SOURCE_ADAPTER,
+    }
+}
+
 fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<SourceRun> {
     config
         .sources
@@ -291,11 +317,7 @@ fn review_targets(
                 source.url.trim_end_matches('/'),
                 url_query(&target.name)
             ),
-            adapter: if source.kind == "diagnostic" {
-                "blocked-source-diagnostic-fixture".to_string()
-            } else {
-                "property-listing-fixture".to_string()
-            },
+            adapter: adapter_for_source(source).adapter_name(source).to_string(),
         })
         .collect()
 }
