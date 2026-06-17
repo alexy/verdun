@@ -17,6 +17,9 @@ if (dryRun.status !== 0) {
 if (!dryRun.stdout.includes('dry run only')) {
   throw new Error('database apply dry run did not report that it skipped external Postgres')
 }
+if (!dryRun.stdout.includes('0001_newsletter.sql') || !dryRun.stdout.includes('0002_workbench_views.sql')) {
+  throw new Error('database apply dry run did not include the newsletter and workbench migrations')
+}
 
 const missingDatabase = spawnSync('node', [
   'scripts/apply-newsletter-sql.mjs',

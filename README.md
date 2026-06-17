@@ -7,6 +7,7 @@ The first reusable boundary is now explicit:
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Garbage instance configuration lives in `src/instances/garbage/config.ts`.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
+- Generic `workbench_*` database views live in `db/migrations/0002_workbench_views.sql` over the current newsletter tables.
 - Existing newsletter routes, scripts, and database tables still use their current names while the boundary is extracted incrementally.
 
 The first slice mirrors the useful Greathouse shape without touching Greathouse:
@@ -61,7 +62,7 @@ That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the st
 
 ## Database
 
-Apply `db/migrations/0001_newsletter.sql` to the external Postgres database used by Vercel.
+Apply the sorted migrations in `db/migrations/` to the external Postgres database used by Vercel. `0001_newsletter.sql` creates the current Garbage/newsletter tables; `0002_workbench_views.sql` exposes the same data through generic `workbench_*` views for Verdun reuse.
 
 Use the guarded deployment helper when moving a crawler snapshot into the external database:
 
