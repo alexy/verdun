@@ -1,7 +1,11 @@
 import { neon } from '@neondatabase/serverless'
 import { randomUUID } from 'crypto'
-import { readSnapshot, readStatus, writeFocus, writeVote } from '../newsletter/_db.js'
-import { garbageSnapshotToWorkbench } from '../../src/instances/garbage/workbench'
+import {
+  readGarbageWorkbenchSnapshot,
+  readGarbageWorkbenchStatus,
+  writeGarbageWorkbenchFocus,
+  writeGarbageWorkbenchReview,
+} from '../instances/garbage/workbench.js'
 import { garbageInstance } from '../../src/instances/garbage/config'
 import { defaultWorkbenchInstance, staticWorkbenchSnapshot } from '../../src/instances/registry'
 import type {
@@ -87,18 +91,17 @@ export async function readWorkbenchStatus(instance: WorkbenchInstance = defaultW
   const databaseUrl = workbenchDatabaseUrl()
   if (!databaseUrl) {
     if (instance.id === garbageInstance.id) {
-      const newsletterStatus = await readStatus()
-      const snapshot = await readWorkbenchSnapshot(instance)
+      const garbageStatus = await readGarbageWorkbenchStatus()
       return {
-        instance: snapshot.instance,
-        editorialPersistence: newsletterStatus.editorialPersistence,
-        generatedAt: newsletterStatus.generatedAt,
-        recordCount: newsletterStatus.itemCount,
-        focusCount: newsletterStatus.focusCount,
-        reviewCount: newsletterStatus.voteCount,
-        sourceRunCount: newsletterStatus.sourceRunCount,
-        collectionPlanCount: newsletterStatus.queryPlanCount,
-        writable: newsletterStatus.writable,
+        instance,
+        editorialPersistence: garbageStatus.editorialPersistence,
+        generatedAt: garbageStatus.generatedAt,
+        recordCount: garbageStatus.recordCount,
+        focusCount: garbageStatus.focusCount,
+        reviewCount: garbageStatus.reviewCount,
+        sourceRunCount: garbageStatus.sourceRunCount,
+        collectionPlanCount: garbageStatus.collectionPlanCount,
+        writable: garbageStatus.writable,
       }
     }
     const snapshot = await readStaticWorkbenchSnapshot(instance)
@@ -121,18 +124,18 @@ export async function writeReview(recordId: string, review: ReviewValue, instanc
   const databaseUrl = workbenchDatabaseUrl()
   if (databaseUrl) return writeDatabaseWorkbenchReview(neon(databaseUrl), recordId, review, instance)
   if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
-  return writeVote(recordId, review)
+  return writeGarbageWorkbenchReview(recordId, review)
 }
 
 export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['scope'], instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchFocus | null> {
   const databaseUrl = workbenchDatabaseUrl()
   if (databaseUrl) return writeDatabaseWorkbenchFocus(neon(databaseUrl), text, scope, instance)
   if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
-  return writeFocus(text, scope)
+  return writeGarbageWorkbenchFocus(text, scope)
 }
 
 async function readStaticWorkbenchSnapshot(instance: WorkbenchInstance): Promise<WorkbenchSnapshot> {
-  if (instance.id === garbageInstance.id) return garbageSnapshotToWorkbench(await readSnapshot())
+  if (instance.id === garbageInstance.id) return readGarbageWorkbenchSnapshot()
   const snapshot = staticWorkbenchSnapshot(instance)
   if (snapshot) return snapshot
   throw readOnlyInstanceError(instance)
