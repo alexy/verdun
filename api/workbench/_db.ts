@@ -8,6 +8,7 @@ import type {
   SourceRunStatus,
   WorkbenchCollectionPlan,
   WorkbenchFocus,
+  WorkbenchInstance,
   WorkbenchRecord,
   WorkbenchRecordProvenance,
   WorkbenchReviewTarget,
@@ -113,16 +114,26 @@ export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['s
   return writeFocus(text, scope)
 }
 
-export async function writeDatabaseWorkbenchReview(sql: SqlClient, recordId: string, review: ReviewValue): Promise<void> {
+export async function writeDatabaseWorkbenchReview(
+  sql: SqlClient,
+  recordId: string,
+  review: ReviewValue,
+  instance: WorkbenchInstance = garbageInstance,
+): Promise<void> {
   await sql.query(`
     insert into review_state (instance, record_id, review, updated_at)
-    values ('garbage', $1, $2, now())
+    values ($1, $2, $3, now())
     on conflict (instance, record_id)
     do update set review = excluded.review, updated_at = excluded.updated_at
-  `, [recordId, review])
+  `, [instance.id, recordId, review])
 }
 
-export async function writeDatabaseWorkbenchFocus(sql: SqlClient, text: string, scope: WorkbenchFocus['scope']): Promise<WorkbenchFocus | null> {
+export async function writeDatabaseWorkbenchFocus(
+  sql: SqlClient,
+  text: string,
+  scope: WorkbenchFocus['scope'],
+  instance: WorkbenchInstance = garbageInstance,
+): Promise<WorkbenchFocus | null> {
   const focus: WorkbenchFocus = {
     id: randomUUID(),
     text,
@@ -131,23 +142,26 @@ export async function writeDatabaseWorkbenchFocus(sql: SqlClient, text: string, 
   }
   const rows = await sql.query(`
     insert into focuses (instance, id, text, scope, created_at)
-    values ('garbage', $1, $2, $3, $4::timestamptz)
+    values ($1, $2, $3, $4, $5::timestamptz)
     returning id, text, scope, created_at::text
-  `, [focus.id, focus.text, focus.scope, focus.createdAt]) as WorkbenchFocusRow[]
+  `, [instance.id, focus.id, focus.text, focus.scope, focus.createdAt]) as WorkbenchFocusRow[]
   return rows[0] ? toWorkbenchFocus(rows[0]) : focus
 }
 
-export async function readDatabaseWorkbenchSnapshot(sql: SqlClient): Promise<WorkbenchSnapshot> {
+export async function readDatabaseWorkbenchSnapshot(
+  sql: SqlClient,
+  instance: WorkbenchInstance = garbageInstance,
+): Promise<WorkbenchSnapshot> {
   const [records, focuses, sourceRuns, collectionPlans, generatedAt] = await Promise.all([
-    readWorkbenchRecords(sql),
-    readWorkbenchFocuses(sql),
-    readWorkbenchSourceRuns(sql),
-    readWorkbenchCollectionPlans(sql),
-    readWorkbenchGeneratedAt(sql),
+    readWorkbenchRecords(sql, instance.id),
+    readWorkbenchFocuses(sql, instance.id),
+    readWorkbenchSourceRuns(sql, instance.id),
+    readWorkbenchCollectionPlans(sql, instance.id),
+    readWorkbenchGeneratedAt(sql, instance.id),
   ])
   return {
     generatedAt,
-    instance: garbageInstance,
+    instance,
     editorialPersistence: 'database',
     records,
     focuses,
@@ -156,20 +170,23 @@ export async function readDatabaseWorkbenchSnapshot(sql: SqlClient): Promise<Wor
   }
 }
 
-export async function readDatabaseWorkbenchStatus(sql: SqlClient): Promise<WorkbenchStatus> {
+export async function readDatabaseWorkbenchStatus(
+  sql: SqlClient,
+  instance: WorkbenchInstance = garbageInstance,
+): Promise<WorkbenchStatus> {
   const rows = await sql.query(`
     select
-      (select count(*)::int from workbench_records where instance = 'garbage') as record_count,
-      (select count(*)::int from workbench_focuses where instance = 'garbage') as focus_count,
-      (select count(*)::int from workbench_review_state where instance = 'garbage' and review <> 0) as review_count,
-      (select count(*)::int from workbench_source_runs where instance = 'garbage') as source_run_count,
-      (select count(*)::int from workbench_collection_plans where instance = 'garbage') as collection_plan_count,
+      (select count(*)::int from workbench_records where instance = $1) as record_count,
+      (select count(*)::int from workbench_focuses where instance = $1) as focus_count,
+      (select count(*)::int from workbench_review_state where instance = $1 and review <> 0) as review_count,
+      (select count(*)::int from workbench_source_runs where instance = $1) as source_run_count,
+      (select count(*)::int from workbench_collection_plans where instance = $1) as collection_plan_count,
       coalesce(
-        (select max(collected_at)::text from workbench_source_runs where instance = 'garbage'),
-        (select max(updated_at)::text from workbench_records where instance = 'garbage'),
+        (select max(collected_at)::text from workbench_source_runs where instance = $1),
+        (select max(updated_at)::text from workbench_records where instance = $1),
         now()::text
       ) as generated_at
-  `) as Array<{
+  `, [instance.id]) as Array<{
     record_count: number
     focus_count: number
     review_count: number
@@ -179,7 +196,7 @@ export async function readDatabaseWorkbenchStatus(sql: SqlClient): Promise<Workb
   }>
   const row = rows[0]
   return {
-    instance: garbageInstance,
+    instance,
     editorialPersistence: 'database',
     generatedAt: row?.generated_at ?? new Date().toISOString(),
     recordCount: Number(row?.record_count ?? 0),
@@ -191,7 +208,7 @@ export async function readDatabaseWorkbenchStatus(sql: SqlClient): Promise<Workb
   }
 }
 
-async function readWorkbenchRecords(sql: SqlClient): Promise<WorkbenchRecord[]> {
+async function readWorkbenchRecords(sql: SqlClient, instanceId: string): Promise<WorkbenchRecord[]> {
   const rows = await sql.query(`
     select
       id,
@@ -208,54 +225,54 @@ async function readWorkbenchRecords(sql: SqlClient): Promise<WorkbenchRecord[]> 
       review::int as review,
       provenance_json
     from workbench_records
-    where instance = 'garbage'
+    where instance = $1
     order by review desc, score desc, observed_at desc
     limit 250
-  `) as WorkbenchRecordRow[]
+  `, [instanceId]) as WorkbenchRecordRow[]
   return rows.map(toWorkbenchRecord)
 }
 
-async function readWorkbenchFocuses(sql: SqlClient): Promise<WorkbenchFocus[]> {
+async function readWorkbenchFocuses(sql: SqlClient, instanceId: string): Promise<WorkbenchFocus[]> {
   const rows = await sql.query(`
     select id, text, scope, created_at::text
     from workbench_focuses
-    where instance = 'garbage'
+    where instance = $1
     order by created_at desc
     limit 25
-  `) as WorkbenchFocusRow[]
+  `, [instanceId]) as WorkbenchFocusRow[]
   return rows.map(toWorkbenchFocus)
 }
 
-async function readWorkbenchSourceRuns(sql: SqlClient): Promise<WorkbenchSourceRun[]> {
+async function readWorkbenchSourceRuns(sql: SqlClient, instanceId: string): Promise<WorkbenchSourceRun[]> {
   const rows = await sql.query(`
     select source, kind, status, item_count, message, subject_counts
     from workbench_source_runs
-    where instance = 'garbage'
+    where instance = $1
     order by
       case status when 'ok' then 0 when 'error' then 1 when 'pending' then 2 else 3 end,
       source
-  `) as WorkbenchSourceRunRow[]
+  `, [instanceId]) as WorkbenchSourceRunRow[]
   return rows.map(toWorkbenchSourceRun)
 }
 
-async function readWorkbenchCollectionPlans(sql: SqlClient): Promise<WorkbenchCollectionPlan[]> {
+async function readWorkbenchCollectionPlans(sql: SqlClient, instanceId: string): Promise<WorkbenchCollectionPlan[]> {
   const rows = await sql.query(`
     select subject, topic, query, live_terms, tags, review_targets, focus_terms
     from workbench_collection_plans
-    where instance = 'garbage'
+    where instance = $1
     order by subject
-  `) as WorkbenchCollectionPlanRow[]
+  `, [instanceId]) as WorkbenchCollectionPlanRow[]
   return rows.map(toWorkbenchCollectionPlan)
 }
 
-async function readWorkbenchGeneratedAt(sql: SqlClient): Promise<string> {
+async function readWorkbenchGeneratedAt(sql: SqlClient, instanceId: string): Promise<string> {
   const rows = await sql.query(`
     select coalesce(
-      (select max(collected_at)::text from workbench_source_runs where instance = 'garbage'),
-      (select max(updated_at)::text from workbench_records where instance = 'garbage'),
+      (select max(collected_at)::text from workbench_source_runs where instance = $1),
+      (select max(updated_at)::text from workbench_records where instance = $1),
       now()::text
     ) as generated_at
-  `) as Array<{ generated_at: string }>
+  `, [instanceId]) as Array<{ generated_at: string }>
   return rows[0]?.generated_at ?? new Date().toISOString()
 }
 

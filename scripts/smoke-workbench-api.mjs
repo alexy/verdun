@@ -61,6 +61,10 @@ try {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
+  const { module: greathouseConfigModule } = await runnerImport('./src/instances/greathouse/config.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
 
   const snapshot = await dbModule.readWorkbenchSnapshot()
   if (snapshot.instance.id !== 'garbage' || snapshot.instance.basePath !== '/rbage/') {
@@ -106,6 +110,24 @@ try {
   }
   if (focus?.text !== 'Database focus write.' || focus?.scope !== 'this_week') {
     throw new Error(`workbench generic focus write did not return a focus: ${JSON.stringify(focus)}`)
+  }
+  const greathouseInstance = greathouseConfigModule.greathouseInstance
+  const greathouseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql('greathouse'), greathouseInstance)
+  if (greathouseSnapshot.instance.id !== 'greathouse' || greathouseSnapshot.records[0]?.subject !== 'Berkeley 2BR') {
+    throw new Error(`workbench database reader did not honor Greathouse instance parameter: ${JSON.stringify(greathouseSnapshot)}`)
+  }
+  const greathouseStatus = await dbModule.readDatabaseWorkbenchStatus(fakeWorkbenchSql('greathouse'), greathouseInstance)
+  if (greathouseStatus.instance.id !== 'greathouse' || greathouseStatus.recordCount !== 1) {
+    throw new Error(`workbench database status did not honor Greathouse instance parameter: ${JSON.stringify(greathouseStatus)}`)
+  }
+  const greathouseWriteSql = fakeWorkbenchWriteSql()
+  await dbModule.writeDatabaseWorkbenchReview(greathouseWriteSql, 'listing-redfin-berkeley-01', 1, greathouseInstance)
+  await dbModule.writeDatabaseWorkbenchFocus(greathouseWriteSql, 'Greathouse database focus.', 'ongoing', greathouseInstance)
+  if (!greathouseWriteSql.reviewWrites.some((write) => write.instance === 'greathouse' && write.recordId === 'listing-redfin-berkeley-01')) {
+    throw new Error(`workbench generic review write did not honor Greathouse instance: ${JSON.stringify(greathouseWriteSql.reviewWrites)}`)
+  }
+  if (!greathouseWriteSql.focusWrites.some((write) => write.instance === 'greathouse' && write.text === 'Greathouse database focus.')) {
+    throw new Error(`workbench generic focus write did not honor Greathouse instance: ${JSON.stringify(greathouseWriteSql.focusWrites)}`)
   }
 
   const recordsResponse = await call(recordsModule.default)
@@ -166,9 +188,12 @@ try {
   await rm(stateDir, { recursive: true, force: true })
 }
 
-function fakeWorkbenchSql() {
+function fakeWorkbenchSql(expectedInstance = 'garbage') {
   return {
-    async query(sql) {
+    async query(sql, params = []) {
+      if (params[0] && params[0] !== expectedInstance) {
+        throw new Error(`expected workbench SQL instance ${expectedInstance}, received ${params[0]}`)
+      }
       if (sql.includes('record_count')) {
         return [{
           record_count: 1,
@@ -182,6 +207,32 @@ function fakeWorkbenchSql() {
       if (sql.includes('from workbench_records')) {
         if (sql.includes('max(updated_at)')) {
           return [{ generated_at: '2026-06-16T12:00:00.000Z' }]
+        }
+        if (expectedInstance === 'greathouse') {
+          return [{
+            id: 'listing-redfin-berkeley-01',
+            title: 'Berkeley two-bedroom with transit access',
+            source: 'Redfin',
+            source_kind: 'listing',
+            url: 'https://example.com/greathouse/berkeley-two-bedroom',
+            observed_at: '2026-06-16T12:00:00.000Z',
+            subject: 'Berkeley 2BR',
+            topic: 'buyer shortlist',
+            summary: 'Generic Greathouse workbench database record.',
+            tags: ['berkeley', '2br', 'transit'],
+            score: 86,
+            review: 1,
+            provenance_json: {
+              stage: 'live',
+              adapter: 'property-listing-fixture',
+              source: 'Redfin',
+              source_kind: 'listing',
+              source_url: 'https://example.com/redfin',
+              evidence_url: 'https://example.com/greathouse/berkeley-two-bedroom',
+              subject: 'Berkeley 2BR',
+              matched_keywords: ['berkeley', '2br'],
+            },
+          }]
         }
         return [{
           id: 'db-pydantic',
@@ -217,6 +268,16 @@ function fakeWorkbenchSql() {
         }]
       }
       if (sql.includes('from workbench_source_runs')) {
+        if (expectedInstance === 'greathouse') {
+          return [{
+            source: 'Redfin',
+            kind: 'listing',
+            status: 'ok',
+            item_count: 1,
+            message: 'Greathouse source run',
+            subject_counts: { 'Berkeley 2BR': 1 },
+          }]
+        }
         return [{
           source: 'Hacker News',
           kind: 'community',
@@ -227,6 +288,22 @@ function fakeWorkbenchSql() {
         }]
       }
       if (sql.includes('from workbench_collection_plans')) {
+        if (expectedInstance === 'greathouse') {
+          return [{
+            subject: 'Berkeley 2BR',
+            topic: 'buyer shortlist',
+            query: 'Berkeley 2BR transit comparable',
+            live_terms: ['berkeley', '2br'],
+            tags: ['berkeley'],
+            review_targets: [{
+              source: 'Redfin',
+              label: 'Redfin Berkeley 2BR',
+              url: 'https://example.com/redfin/search/berkeley-2br',
+              adapter: 'property-listing-fixture',
+            }],
+            focus_terms: ['transit'],
+          }]
+        }
         return [{
           subject: 'Pydantic',
           topic: 'typed AI',
@@ -256,17 +333,19 @@ function fakeWorkbenchWriteSql() {
     async query(sql, params = []) {
       if (sql.includes('insert into review_state')) {
         reviewWrites.push({
-          recordId: params[0],
-          review: params[1],
+          instance: params[0],
+          recordId: params[1],
+          review: params[2],
         })
         return []
       }
       if (sql.includes('insert into focuses')) {
         const row = {
-          id: params[0],
-          text: params[1],
-          scope: params[2],
-          created_at: params[3],
+          instance: params[0],
+          id: params[1],
+          text: params[2],
+          scope: params[3],
+          created_at: params[4],
         }
         focusWrites.push(row)
         return [row]
