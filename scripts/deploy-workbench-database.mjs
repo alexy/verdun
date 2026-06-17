@@ -17,11 +17,20 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
   const instance = optionValue(args, '--instance') ?? env.WORKBENCH_INSTANCE
   const instanceName = optionValue(args, '--instance-name') ?? env.WORKBENCH_INSTANCE_NAME
   const basePath = optionValue(args, '--base-path') ?? env.WORKBENCH_BASE_PATH
+  const staticSnapshotPath = optionValue(args, '--static-snapshot') ?? env.WORKBENCH_STATIC_SNAPSHOT
   const databaseUrl = optionValue(args, '--database-url') ?? env.POSTGRES_URL ?? env.DATABASE_URL ?? env.NEON_DATABASE_URL
   const baseUrl = optionValue(args, '--base-url') ?? env.VERDUN_DEPLOYED_URL
   const loaderArgs = [
     ...(instance && instance !== 'garbage' ? ['--allow-custom-instance', '--expect-instance', instance] : []),
     ...(basePath ? ['--expect-base-path', basePath] : []),
+  ]
+  const deployedCheckArgs = [
+    ...(baseUrl ? [baseUrl] : []),
+    ...(instance ? ['--instance', instance] : []),
+    ...(basePath ? ['--asset-base', basePath] : []),
+    ...(staticSnapshotPath ? ['--static-snapshot', staticSnapshotPath] : []),
+    '--require-database',
+    ...(requireReady ? ['--require-ready'] : []),
   ]
 
   if (generate) {
@@ -62,12 +71,13 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
       'run',
       'check:deployed',
       '--',
-      ...(baseUrl ? [baseUrl] : []),
-      '--require-database',
-      ...(requireReady ? ['--require-ready'] : []),
+      ...deployedCheckArgs,
     ])
   }
 
+  if (skipDeployedCheck || !apply) {
+    console.log(`deployed check target: ${deployedCheckArgs.join(' ')}`)
+  }
   console.log(apply
     ? 'generic workbench database load applied and deployed database gate passed'
     : 'generic workbench database deployment preflight passed (dry run only; add --apply to load external Postgres)')

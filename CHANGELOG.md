@@ -55,6 +55,7 @@
 - Added generic workbench database apply/deploy scripts and made the default `db:apply`/`db:deploy` package scripts validate/load generic workbench SQL; legacy newsletter table loading remains available through `db:apply:newsletter` and `db:deploy:newsletter`.
 - Changed `npm run smoke:all` to generate its primary SQL through the default generic `export-sql` path, then run the legacy newsletter SQL export only as an explicit compatibility check.
 - Made `scripts/check-deployed.mjs` instance-aware with configurable static snapshot paths, asset bases, count gates, and required subjects; Garbage still checks the newsletter draft API, while non-Garbage instances validate only the generic workbench deployment surface unless draft checks are explicitly enabled.
+- Made `scripts/deploy-workbench-database.mjs` carry `--instance`, `--base-path`, and `--static-snapshot` into deployed checks, with smoke coverage for a Greathouse generic workbench deployment preflight.
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
 

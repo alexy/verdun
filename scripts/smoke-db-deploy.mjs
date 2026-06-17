@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process'
 
 const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
 const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
+const extraArgs = process.argv.slice(4)
 
 const dryRun = spawnSync('node', [
   'scripts/deploy-workbench-database.mjs',
@@ -9,6 +10,7 @@ const dryRun = spawnSync('node', [
   sqlPath,
   '--snapshot',
   snapshotPath,
+  ...extraArgs,
   '--no-generate',
   '--skip-vercel-env',
   '--skip-deployed-check',
@@ -20,6 +22,18 @@ if (dryRun.status !== 0) {
 if (!dryRun.stdout.includes('generic workbench database deployment preflight passed')) {
   throw new Error('workbench database deployment dry run did not report a preflight pass')
 }
+const instance = optionValue(extraArgs, '--instance')
+if (instance && !dryRun.stdout.includes(`--instance ${instance}`)) {
+  throw new Error(`workbench database deployment dry run did not preserve instance in deployed-check target\n${dryRun.stdout}`)
+}
+const basePath = optionValue(extraArgs, '--base-path')
+if (basePath && !dryRun.stdout.includes(`--asset-base ${basePath}`)) {
+  throw new Error(`workbench database deployment dry run did not preserve base path in deployed-check target\n${dryRun.stdout}`)
+}
+const staticSnapshot = optionValue(extraArgs, '--static-snapshot')
+if (staticSnapshot && !dryRun.stdout.includes(`--static-snapshot ${staticSnapshot}`)) {
+  throw new Error(`workbench database deployment dry run did not preserve static snapshot in deployed-check target\n${dryRun.stdout}`)
+}
 
 const missingDatabase = spawnSync('node', [
   'scripts/deploy-workbench-database.mjs',
@@ -27,6 +41,7 @@ const missingDatabase = spawnSync('node', [
   sqlPath,
   '--snapshot',
   snapshotPath,
+  ...extraArgs,
   '--no-generate',
   '--skip-vercel-env',
   '--skip-deployed-check',
@@ -43,4 +58,12 @@ const missingDatabase = spawnSync('node', [
 if (missingDatabase.error) throw missingDatabase.error
 if (missingDatabase.status === 0 || !missingDatabase.stderr.includes('external Postgres URL is required')) {
   throw new Error('workbench database deployment command did not fail safely when --apply was used without a database URL')
+}
+
+function optionValue(args, name) {
+  const index = args.indexOf(name)
+  if (index < 0) return undefined
+  const value = args[index + 1]
+  if (!value || value.startsWith('--')) throw new Error(`${name} requires a value`)
+  return value
 }
