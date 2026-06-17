@@ -1,8 +1,17 @@
 import { spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 
 const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
 const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
 const extraArgs = process.argv.slice(4)
+const deploySource = readFileSync('scripts/deploy-workbench-database.mjs', 'utf8')
+
+if (deploySource.includes('public/data/newsletter-snapshot.json')) {
+  throw new Error('generic workbench deploy script still embeds the Garbage newsletter snapshot default')
+}
+if (deploySource.includes("!== 'garbage'") || deploySource.includes('!== "garbage"')) {
+  throw new Error('generic workbench deploy script still special-cases Garbage by string literal')
+}
 
 const dryRun = spawnSync('node', [
   'scripts/deploy-workbench-database.mjs',

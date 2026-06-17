@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await runDeployWorkbenchDatabaseCli(process.argv.slice(2), process.env)
@@ -13,15 +14,16 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
   const skipDeployedCheck = args.includes('--skip-deployed-check')
   const requireReady = args.includes('--require-ready')
   const sqlPath = optionValue(args, '--sql') ?? env.WORKBENCH_SQL_FILE ?? env.VERDUN_SQL_FILE ?? '/tmp/verdun-workbench-load.sql'
-  const snapshotPath = optionValue(args, '--snapshot') ?? env.WORKBENCH_SNAPSHOT_FILE ?? env.VERDUN_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
-  const instance = optionValue(args, '--instance') ?? env.WORKBENCH_INSTANCE
+  const instance = optionValue(args, '--instance') ?? env.WORKBENCH_INSTANCE ?? env.VERDUN_INSTANCE ?? defaultDeployCheckProfileId()
+  const profile = deployCheckProfile(instance)
+  const snapshotPath = optionValue(args, '--snapshot') ?? env.WORKBENCH_SNAPSHOT_FILE ?? env.VERDUN_SNAPSHOT_FILE ?? profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
   const instanceName = optionValue(args, '--instance-name') ?? env.WORKBENCH_INSTANCE_NAME
   const basePath = optionValue(args, '--base-path') ?? env.WORKBENCH_BASE_PATH
   const staticSnapshotPath = optionValue(args, '--static-snapshot') ?? env.WORKBENCH_STATIC_SNAPSHOT
   const databaseUrl = optionValue(args, '--database-url') ?? env.POSTGRES_URL ?? env.DATABASE_URL ?? env.NEON_DATABASE_URL
   const baseUrl = optionValue(args, '--base-url') ?? env.VERDUN_DEPLOYED_URL
   const loaderArgs = [
-    ...(instance && instance !== 'garbage' ? ['--allow-custom-instance', '--expect-instance', instance] : []),
+    ...(instance !== defaultDeployCheckProfileId() ? ['--allow-custom-instance', '--expect-instance', instance] : []),
     ...(basePath ? ['--expect-base-path', basePath] : []),
   ]
   const deployedCheckArgs = [

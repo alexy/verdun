@@ -6,6 +6,7 @@
 - Updated Greathouse workbench smoke coverage to enforce that concrete app imports stay in the instance app registry, while the root shell only calls the generic app resolver.
 - Moved legacy newsletter compatibility table reporting out of the generic workbench health route and into instance-adapter metadata; Greathouse health now reports no Garbage compatibility tables.
 - Moved Garbage deployment-check defaults into `scripts/instances/garbage/deploy-checks.mjs`; the generic deployed-check script now consumes instance deploy profiles instead of embedding Garbage URL, snapshot, required-subject, and draft API assumptions.
+- Added `sourceSnapshotPath` to deploy profiles and made generic workbench database apply/deploy scripts resolve their default snapshot and default instance behavior through profile metadata instead of embedding the Garbage newsletter snapshot path or special-casing `garbage`.
 
 ## 2026-06-16
 

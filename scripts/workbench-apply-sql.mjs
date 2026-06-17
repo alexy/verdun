@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await runApplyWorkbenchSqlCli(process.argv.slice(2), process.env)
@@ -10,7 +11,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
 export async function runApplyWorkbenchSqlCli(args, env = process.env) {
   const apply = args.includes('--apply')
   const sqlPath = optionValue(args, '--sql') ?? env.WORKBENCH_SQL_FILE ?? env.VERDUN_SQL_FILE ?? '/tmp/verdun-workbench-load.sql'
-  const snapshotPath = optionValue(args, '--snapshot') ?? env.WORKBENCH_SNAPSHOT_FILE ?? env.VERDUN_SNAPSHOT_FILE ?? 'public/data/newsletter-snapshot.json'
+  const instance = optionValue(args, '--instance') ?? env.WORKBENCH_INSTANCE ?? env.VERDUN_INSTANCE ?? defaultDeployCheckProfileId()
+  const profile = deployCheckProfile(instance)
+  const snapshotPath = optionValue(args, '--snapshot') ?? env.WORKBENCH_SNAPSHOT_FILE ?? env.VERDUN_SNAPSHOT_FILE ?? profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
   const explicitMigrationPath = optionValue(args, '--migration') ?? env.WORKBENCH_MIGRATION_FILE ?? env.VERDUN_MIGRATION_FILE
   const migrationPaths = explicitMigrationPath ? [explicitMigrationPath] : defaultMigrationPaths()
   const databaseUrl = optionValue(args, '--database-url') ?? env.POSTGRES_URL ?? env.DATABASE_URL ?? env.NEON_DATABASE_URL
