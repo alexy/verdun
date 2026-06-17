@@ -3,6 +3,7 @@
 ## 2026-06-17
 
 - Removed the old `api/newsletter/*` compatibility route files; Garbage newsletter APIs are now exposed through the explicit `api/garbage/newsletter/*` namespace.
+- Changed the crawler instance trait to expose core `NormalizedCollectionPlan` values instead of the Garbage `ProjectQueryPlan` type; legacy query-plan JSON is now only produced at the public snapshot/CLI compatibility boundary.
 - Added a Zillow-shaped Greathouse listing adapter and fixture so a second production property-source format refills the same generic crawler snapshot and workbench SQL contract.
 - Changed generic SQL export to load from the core `CrawlerSnapshot` contract instead of the Garbage `ExportPayload`; the legacy newsletter target remains the explicit Garbage payload path.
 - Moved crawler CLI default config paths, public snapshot paths, instance display names, and base paths onto crawler instance metadata; shared `main.rs` no longer embeds Garbage path/base defaults.

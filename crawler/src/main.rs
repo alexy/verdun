@@ -3,8 +3,8 @@ use chrono::{Duration, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 mod core;
 mod instances;
-use crate::core::{CrawlerConfig, CrawlerSnapshot, SourceRun};
-use crate::instances::garbage::{self, ExportPayload, NewsItem, PublicSnapshot};
+use crate::core::{CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, SourceRun};
+use crate::instances::garbage::{self, ExportPayload, NewsItem, ProjectQueryPlan, PublicSnapshot};
 use std::{fs, path::PathBuf};
 
 #[derive(Parser)]
@@ -186,7 +186,8 @@ fn collect(
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let query_plans = crawler_instance.query_plans(&config, &editorial_focuses);
+    let query_plans =
+        legacy_query_plans(crawler_instance.collection_plans(&config, &editorial_focuses));
     let public_snapshot = PublicSnapshot {
         generated_at: Utc::now(),
         theme: config.theme,
@@ -480,9 +481,26 @@ fn queries(
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     println!(
         "{}",
-        serde_json::to_string_pretty(&crawler_instance.query_plans(&config, &editorial_focuses))?
+        serde_json::to_string_pretty(&legacy_query_plans(
+            crawler_instance.collection_plans(&config, &editorial_focuses),
+        ))?
     );
     Ok(())
+}
+
+fn legacy_query_plans(collection_plans: Vec<NormalizedCollectionPlan>) -> Vec<ProjectQueryPlan> {
+    collection_plans
+        .into_iter()
+        .map(|plan| ProjectQueryPlan {
+            project: plan.subject,
+            topic: plan.topic,
+            hacker_news_query: plan.query,
+            live_terms: plan.live_terms,
+            dev_to_tags: plan.tags,
+            review_targets: plan.review_targets,
+            focus_terms: plan.focus_terms,
+        })
+        .collect()
 }
 
 fn resolve_crawler_instance(

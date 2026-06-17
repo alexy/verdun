@@ -4,9 +4,10 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const [crawlerMainSource, garbageInstanceSource] = await Promise.all([
+const [crawlerMainSource, garbageInstanceSource, instanceTraitSource] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/garbage.rs', 'utf8'),
+  readFile('crawler/src/instances/mod.rs', 'utf8'),
 ])
 if (crawlerMainSource.includes('insert into newsletter_')) {
   throw new Error('crawler main still embeds legacy newsletter SQL table exports')
@@ -27,6 +28,9 @@ for (const marker of [
 }
 if (!garbageInstanceSource.includes('pub fn newsletter_export_sql') || !garbageInstanceSource.includes('insert into newsletter_items')) {
   throw new Error('Garbage crawler instance does not own the legacy newsletter SQL exporter')
+}
+if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.includes('Vec<NormalizedCollectionPlan>')) {
+  throw new Error('crawler instance trait still exposes Garbage query-plan types instead of core collection plans')
 }
 
 const verifyGarbage = spawnSync('cargo', [

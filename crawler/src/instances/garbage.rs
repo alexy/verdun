@@ -44,12 +44,15 @@ impl CrawlerInstance for GarbageCrawlerInstance {
         read_editorial_focuses(path)
     }
 
-    fn query_plans(
+    fn collection_plans(
         &self,
         config: &CrawlerConfig,
         editorial_focuses: &[EditorialFocus],
-    ) -> Vec<ProjectQueryPlan> {
+    ) -> Vec<NormalizedCollectionPlan> {
         query_plans(config, editorial_focuses)
+            .iter()
+            .map(project_query_plan_record)
+            .collect()
     }
 
     fn seed_items(&self, config: &CrawlerConfig) -> Result<Vec<NewsItem>> {

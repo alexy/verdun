@@ -6,10 +6,11 @@ use std::collections::BTreeMap;
 use std::{path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
-    CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
+    CrawlerConfig, NormalizedCollectionPlan, ReviewTarget, SourceConfig, SourceRun,
+    SourceRunStatus, stable_id,
 };
 use crate::instances::CrawlerInstance;
-use crate::instances::garbage::{EditorialFocus, NewsItem, ProjectQueryPlan};
+use crate::instances::garbage::{EditorialFocus, NewsItem};
 
 pub static GREATHOUSE_CRAWLER_INSTANCE: GreathouseCrawlerInstance = GreathouseCrawlerInstance;
 
@@ -47,22 +48,22 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
         crate::instances::garbage::read_editorial_focuses(path)
     }
 
-    fn query_plans(
+    fn collection_plans(
         &self,
         config: &CrawlerConfig,
         editorial_focuses: &[EditorialFocus],
-    ) -> Vec<ProjectQueryPlan> {
+    ) -> Vec<NormalizedCollectionPlan> {
         config
             .targets
             .iter()
             .map(|target| {
                 let focus_terms = greathouse_focus_terms(target, editorial_focuses);
-                ProjectQueryPlan {
-                    project: target.name.clone(),
+                NormalizedCollectionPlan {
+                    subject: target.name.clone(),
                     topic: target.topic.clone(),
-                    hacker_news_query: greathouse_query(target, &focus_terms),
+                    query: greathouse_query(target, &focus_terms),
                     live_terms: greathouse_live_terms(target),
-                    dev_to_tags: target.keywords.iter().take(3).cloned().collect(),
+                    tags: target.keywords.iter().take(3).cloned().collect(),
                     review_targets: review_targets(config, target),
                     focus_terms,
                 }
