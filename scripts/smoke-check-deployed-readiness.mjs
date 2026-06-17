@@ -28,10 +28,13 @@ function databaseStatusJson() {
   return JSON.stringify({
     editorialPersistence: 'database',
     generatedAt: reviewedSnapshot.generated_at,
+    recordCount: reviewedSnapshot.items.length,
     itemCount: reviewedSnapshot.items.length,
     focusCount: reviewedSnapshot.focuses.length,
+    reviewCount: 2,
     voteCount: 2,
     sourceRunCount: reviewedSnapshot.source_runs.length,
+    collectionPlanCount: reviewedSnapshot.query_plans.length,
     queryPlanCount: reviewedSnapshot.query_plans.length,
     writable: true,
   })
@@ -40,10 +43,13 @@ function browserStatusJson() {
   return JSON.stringify({
     editorialPersistence: 'browser',
     generatedAt: reviewedSnapshot.generated_at,
+    recordCount: reviewedSnapshot.items.length,
     itemCount: reviewedSnapshot.items.length,
     focusCount: reviewedSnapshot.focuses.length,
+    reviewCount: 0,
     voteCount: 0,
     sourceRunCount: reviewedSnapshot.source_runs.length,
+    collectionPlanCount: reviewedSnapshot.query_plans.length,
     queryPlanCount: reviewedSnapshot.query_plans.length,
     writable: false,
   })
@@ -54,22 +60,15 @@ function healthJson() {
   const databaseConfigured = status.editorialPersistence === 'database'
   return JSON.stringify({
     ok: true,
-    service: 'newsletter',
+    service: 'workbench',
     surface: 'health',
     state: databaseConfigured ? 'database_configured' : 'database_not_configured',
     databaseConfigured,
     editorialPersistence: status.editorialPersistence,
-    readSurfaces: ['items', 'status', 'draft', 'health'],
-    writeSurfaces: ['vote', 'focus', 'editorial-state'],
-    publishingSurfaces: ['ulysses:draft', 'ulysses:ready', 'ghost:dry-run', 'ghost:ready'],
-    weeklyUpdate: {
-      loader: 'Rust verdun-crawler export-sql plus npm run db:deploy',
-      expectedStore: 'External Postgres',
-      activeSnapshot: status,
-      currentRequirement: databaseConfigured
-        ? 'run npm run db:deploy -- --apply'
-        : 'attach POSTGRES_URL, DATABASE_URL, or NEON_DATABASE_URL',
-    },
+    readSurfaces: ['records', 'status', 'health'],
+    writeSurfaces: ['review', 'focus'],
+    collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
+    activeSnapshot: status,
   })
 }
 const draftMarkdown = `# Strongly Typed AI/Data Notes: June 16, 2026
@@ -115,17 +114,17 @@ const server = createServer((request, response) => {
     response.end('<!doctype html><div id="app"></div><script type="module" src="/rbage/assets/index.js"></script>')
     return
   }
-  if (url.pathname === '/rbage/data/newsletter-snapshot.json' || url.pathname === '/api/newsletter/items') {
+  if (url.pathname === '/rbage/data/newsletter-snapshot.json' || url.pathname === '/api/workbench/records') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(snapshotJson())
     return
   }
-  if (url.pathname === '/api/newsletter/status') {
+  if (url.pathname === '/api/workbench/status') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(statusJson)
     return
   }
-  if (url.pathname === '/api/newsletter/health') {
+  if (url.pathname === '/api/workbench/health') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(healthJson())
     return

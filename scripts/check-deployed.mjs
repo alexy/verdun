@@ -19,11 +19,11 @@ const staticSnapshot = await fetchJson(new URL('data/newsletter-snapshot.json', 
 await validateSnapshot(staticSnapshot, 'static snapshot')
 
 if (!staticOnly) {
-  const apiSnapshot = await fetchJson(new URL('/api/newsletter/items', origin), 'items API')
-  await validateSnapshot(apiSnapshot, 'items API')
-  const apiStatus = await fetchJson(new URL('/api/newsletter/status', origin), 'status API')
+  const apiSnapshot = await fetchJson(new URL('/api/workbench/records?instance=garbage', origin), 'workbench records API')
+  await validateSnapshot(apiSnapshot, 'workbench records API')
+  const apiStatus = await fetchJson(new URL('/api/workbench/status?instance=garbage', origin), 'workbench status API')
   validateStatus(apiStatus)
-  const apiHealth = await fetchJson(new URL('/api/newsletter/health', origin), 'health API')
+  const apiHealth = await fetchJson(new URL('/api/workbench/health?instance=garbage', origin), 'workbench health API')
   validateHealth(apiHealth, apiStatus)
   await validateDraftApi(origin)
 }
@@ -79,7 +79,7 @@ function networkError(label, url, error) {
 
 function responseError(label, url, status) {
   const hint = status === 401
-    ? ' If this is a Vercel Authentication-protected deployment, verify it with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/newsletter/items --deployment <deployment-url>`.'
+    ? ' If this is a Vercel Authentication-protected deployment, verify it with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl "/api/workbench/records?instance=garbage" --deployment <deployment-url>`.'
     : ''
   return `${label} returned ${status} at ${url}.${hint}`
 }
@@ -88,9 +88,9 @@ async function validateSnapshot(snapshot, label) {
   if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
     throw new Error(`${label} did not return an object snapshot`)
   }
-  const items = arrayValue(snapshot.items)
+  const items = arrayValue(snapshot.items ?? snapshot.records)
   const sourceRuns = arrayValue(snapshot.sourceRuns ?? snapshot.source_runs)
-  const queryPlans = arrayValue(snapshot.queryPlans ?? snapshot.query_plans)
+  const queryPlans = arrayValue(snapshot.queryPlans ?? snapshot.query_plans ?? snapshot.collectionPlans ?? snapshot.collection_plans)
   const editorialPersistence = snapshot.editorialPersistence ?? snapshot.editorial_persistence ?? (label === 'static snapshot' ? 'browser' : undefined)
   if (!['database', 'local_file', 'browser'].includes(editorialPersistence)) {
     throw new Error(`${label} did not report editorial persistence mode`)
@@ -99,18 +99,18 @@ async function validateSnapshot(snapshot, label) {
   if (!sourceRuns.length) throw new Error(`${label} has no source health metadata`)
   if (queryPlans.length < 23) throw new Error(`${label} has too few crawler query plans: ${queryPlans.length}`)
   for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
-    if (!items.some((item) => item?.project === project)) {
+    if (!items.some((item) => (item?.project ?? item?.subject) === project)) {
       throw new Error(`${label} is missing required project item: ${project}`)
     }
   }
   for (const project of ['BAML', 'DSPy', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Ibis', 'Dagster', 'Garde', 'zod-rs']) {
-    if (!queryPlans.some((plan) => plan?.project === project)) {
+    if (!queryPlans.some((plan) => (plan?.project ?? plan?.subject) === project)) {
       throw new Error(`${label} is missing required query plan: ${project}`)
     }
   }
   const firstItem = items.find((item) => item && typeof item === 'object')
-  const hasWhyItMatters = Boolean(firstItem?.whyItMatters ?? firstItem?.why_it_matters)
-  if (!firstItem?.title || !firstItem?.url || !hasWhyItMatters) {
+  const hasPublicationContext = Boolean(firstItem?.whyItMatters ?? firstItem?.why_it_matters ?? firstItem?.summary)
+  if (!firstItem?.title || !firstItem?.url || !hasPublicationContext) {
     throw new Error(`${label} items are missing publication fields`)
   }
   if (requireReady) {
@@ -135,17 +135,19 @@ function validateStatus(status) {
   if (requireDatabase && status.writable !== true) {
     throw new Error('status API is not writable')
   }
-  if (Number(status.itemCount) < 23) throw new Error(`status API has too few items: ${status.itemCount}`)
+  const itemCount = Number(status.itemCount ?? status.recordCount)
+  const queryPlanCount = Number(status.queryPlanCount ?? status.collectionPlanCount)
+  if (itemCount < 23) throw new Error(`status API has too few items: ${itemCount}`)
   if (Number(status.sourceRunCount) < 3) throw new Error(`status API has too few source runs: ${status.sourceRunCount}`)
-  if (Number(status.queryPlanCount) < 23) throw new Error(`status API has too few query plans: ${status.queryPlanCount}`)
+  if (queryPlanCount < 23) throw new Error(`status API has too few query plans: ${queryPlanCount}`)
 }
 
 function validateHealth(health, status) {
   if (!health || typeof health !== 'object' || Array.isArray(health)) {
     throw new Error('health API did not return an object')
   }
-  if (health.ok !== true || health.service !== 'newsletter' || health.surface !== 'health') {
-    throw new Error('health API did not identify the newsletter health surface')
+  if (health.ok !== true || health.service !== 'workbench' || health.surface !== 'health') {
+    throw new Error('health API did not identify the workbench health surface')
   }
   if (!['database_configured', 'database_not_configured'].includes(health.state)) {
     throw new Error(`health API returned unexpected state: ${health.state}`)
@@ -159,19 +161,16 @@ function validateHealth(health, status) {
   if (requireDatabase && health.state !== 'database_configured') {
     throw new Error(`health API is not database-configured: ${health.state}`)
   }
-  if (!arrayValue(health.readSurfaces).includes('draft') || !arrayValue(health.readSurfaces).includes('health')) {
+  if (!arrayValue(health.readSurfaces).includes('records') || !arrayValue(health.readSurfaces).includes('health')) {
     throw new Error('health API did not list expected read surfaces')
   }
-  if (!arrayValue(health.writeSurfaces).includes('editorial-state')) {
-    throw new Error('health API did not list editorial-state write surface')
+  if (!arrayValue(health.writeSurfaces).includes('review') || !arrayValue(health.writeSurfaces).includes('focus')) {
+    throw new Error('health API did not list generic write surfaces')
   }
-  if (!arrayValue(health.publishingSurfaces).includes('ghost:ready') || !arrayValue(health.publishingSurfaces).includes('ulysses:ready')) {
-    throw new Error('health API did not list guarded publishing surfaces')
+  if (!arrayValue(health.collectionSurfaces).includes('crawler collect') || !arrayValue(health.collectionSurfaces).includes('crawler export-sql')) {
+    throw new Error('health API did not list generic collection surfaces')
   }
-  if (!String(health.weeklyUpdate?.loader ?? '').includes('db:deploy')) {
-    throw new Error('health API did not reference the guarded database loader')
-  }
-  if (Number(health.weeklyUpdate?.activeSnapshot?.itemCount) !== Number(status.itemCount)) {
+  if (Number(health.activeSnapshot?.recordCount) !== Number(status.recordCount)) {
     throw new Error('health API active snapshot count does not match status API')
   }
 }
@@ -221,15 +220,15 @@ async function fetchTextContent(url, label, expectedContentType) {
 }
 
 function deploymentReadiness(snapshot) {
-  const items = arrayValue(snapshot.items)
+  const items = arrayValue(snapshot.items ?? snapshot.records)
   const sourceRuns = arrayValue(snapshot.sourceRuns ?? snapshot.source_runs)
   const focuses = arrayValue(snapshot.focuses)
   const selectedItems = draftSelection(items)
-  const upvotedCount = items.filter((item) => Number(item?.vote) > 0).length
+  const upvotedCount = items.filter((item) => reviewValue(item) > 0).length
   const liveSourceCount = sourceRuns.filter((run) => sourceRunStatus(run) === 'ok' && itemCount(run) > 0).length
   const liveProjectCount = new Set(sourceRuns.flatMap((run) => Object.keys(projectCounts(run)))).size
   const focusCount = focuses.filter((focus) => typeof focus?.text === 'string' && focus.text.trim()).length
-  const selectedProjectCount = new Set(selectedItems.map((item) => item?.project).filter(Boolean)).size
+  const selectedProjectCount = new Set(selectedItems.map((item) => item?.project ?? item?.subject).filter(Boolean)).size
   const sourceErrorCount = sourceRuns.filter((run) => sourceRunStatus(run) === 'error').length
   const freshness = snapshotFreshness(snapshot.generatedAt ?? snapshot.generated_at)
   const checks = [
@@ -296,14 +295,18 @@ function snapshotFreshness(generatedAt) {
 
 function draftSelection(items, limit = 7) {
   const sorted = [...items].sort((left, right) => {
-    const voteDelta = Number(right?.vote ?? 0) - Number(left?.vote ?? 0)
+    const voteDelta = reviewValue(right) - reviewValue(left)
     if (voteDelta !== 0) return voteDelta
     const scoreDelta = Number(right?.score ?? 0) - Number(left?.score ?? 0)
     if (scoreDelta !== 0) return scoreDelta
-    return Date.parse(right?.publishedAt ?? right?.published_at ?? '') - Date.parse(left?.publishedAt ?? left?.published_at ?? '')
+    return Date.parse(right?.publishedAt ?? right?.published_at ?? right?.observedAt ?? right?.observed_at ?? '') - Date.parse(left?.publishedAt ?? left?.published_at ?? left?.observedAt ?? left?.observed_at ?? '')
   })
-  const included = sorted.filter((item) => Number(item?.vote) > 0)
-  return (included.length ? included : sorted.filter((item) => Number(item?.vote ?? 0) >= 0)).slice(0, limit)
+  const included = sorted.filter((item) => reviewValue(item) > 0)
+  return (included.length ? included : sorted.filter((item) => reviewValue(item) >= 0)).slice(0, limit)
+}
+
+function reviewValue(item) {
+  return Number(item?.vote ?? item?.review ?? 0)
 }
 
 function itemCount(run) {
@@ -311,7 +314,7 @@ function itemCount(run) {
 }
 
 function projectCounts(run) {
-  const value = run?.projectCounts ?? run?.project_counts
+  const value = run?.projectCounts ?? run?.project_counts ?? run?.subjectCounts ?? run?.subject_counts
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
 }
 

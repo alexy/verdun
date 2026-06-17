@@ -44,6 +44,71 @@ const baseSnapshot = {
     },
   ],
 }
+const workbenchSnapshot = {
+  generatedAt: baseSnapshot.generated_at,
+  instance: {
+    id: 'garbage',
+    name: 'Garbage',
+    basePath: '/rbage/',
+    theme: baseSnapshot.theme,
+  },
+  editorialPersistence: 'database',
+  records: [
+    {
+      id: 'smoke-item',
+      title: 'Smoke item for typed AI',
+      source: 'Smoke',
+      sourceKind: 'community',
+      url: 'https://example.com/smoke',
+      observedAt: '2026-06-15T10:00:00Z',
+      subject: 'Pydantic',
+      topic: 'typed AI',
+      summary: 'Smoke summary',
+      tags: ['pydantic', 'typed'],
+      score: 42,
+      review: 0,
+      provenance: {
+        stage: 'live',
+        adapter: 'smoke-adapter',
+        source: 'Smoke',
+        sourceKind: 'community',
+        sourceUrl: 'https://example.com/source',
+        evidenceUrl: 'https://example.com/smoke',
+        subject: 'Pydantic',
+        matchedKeywords: ['pydantic'],
+      },
+    },
+  ],
+  focuses: [],
+  sourceRuns: [
+    {
+      source: 'Smoke',
+      kind: 'community',
+      status: 'ok',
+      itemCount: 1,
+      message: 'Smoke source run',
+      subjectCounts: { Pydantic: 1 },
+    },
+  ],
+  collectionPlans: [
+    {
+      subject: 'Pydantic',
+      topic: 'typed AI',
+      query: 'Pydantic pydantic',
+      liveTerms: ['pydantic'],
+      tags: ['pydantic'],
+      reviewTargets: [
+        {
+          source: 'LinkedIn',
+          label: 'LinkedIn posts: Pydantic pydantic',
+          url: 'https://www.linkedin.com/search/results/content/?keywords=Pydantic+pydantic',
+          adapter: 'manual-review',
+        },
+      ],
+      focusTerms: [],
+    },
+  ],
+}
 
 await smokeApiBackedSnapshot()
 await smokeBrowserPersistenceSnapshot()
@@ -54,9 +119,9 @@ async function smokeApiBackedSnapshot() {
   const calls = []
   globalThis.fetch = async (url, options) => {
     calls.push({ options, url: String(url) })
-    if (url === '/api/newsletter/items') return jsonResponse({ ...baseSnapshot, editorial_persistence: 'database' })
-    if (url === '/api/newsletter/vote') return jsonResponse({ ok: true })
-    if (url === '/api/newsletter/focus') return jsonResponse({ ok: true })
+    if (url === '/api/workbench/records?instance=garbage') return jsonResponse(workbenchSnapshot)
+    if (url === '/api/workbench/review?instance=garbage') return jsonResponse({ ok: true })
+    if (url === '/api/workbench/focus?instance=garbage') return jsonResponse({ ok: true })
     if (url === '/api/newsletter/editorial-state') return jsonResponse({ ok: true, importedVotes: 1, importedFocuses: 1 })
     return jsonResponse({ error: 'not_found' }, false, 404)
   }
@@ -67,23 +132,27 @@ async function smokeApiBackedSnapshot() {
   if (state.error.value) throw new Error(`API snapshot load should not set error: ${state.error.value}`)
   if (state.snapshot.value.items[0]?.id !== 'smoke-item') throw new Error('API snapshot was not normalized into state')
   if (state.snapshot.value.queryPlans[0]?.reviewTargets[0]?.source !== 'LinkedIn') {
-    throw new Error('API snapshot query-plan review targets were not normalized')
+    throw new Error('workbench API snapshot collection-plan review targets were not normalized')
+  }
+  if (state.snapshot.value.sourceRuns[0]?.projectCounts?.Pydantic !== 1) {
+    throw new Error('workbench API snapshot source-run subject counts were not normalized')
   }
 
   await state.setVote('smoke-item', 1)
   if (state.snapshot.value.items[0]?.vote !== 1) throw new Error('API vote was not applied optimistically')
-  const voteCall = calls.find((call) => call.url === '/api/newsletter/vote')
-  if (!voteCall || JSON.parse(String(voteCall.options?.body)).vote !== 1) {
-    throw new Error('API vote was not posted')
+  const voteCall = calls.find((call) => call.url === '/api/workbench/review?instance=garbage')
+  const voteBody = voteCall ? JSON.parse(String(voteCall.options?.body)) : {}
+  if (!voteCall || voteBody.recordId !== 'smoke-item' || voteBody.review !== 1) {
+    throw new Error('workbench API review was not posted')
   }
 
   await state.saveFocus(' More typed boundaries ', 'this_week')
   if (!state.snapshot.value.focuses.some((focus) => focus.text === 'More typed boundaries')) {
     throw new Error('API focus was not added optimistically')
   }
-  const focusCall = calls.find((call) => call.url === '/api/newsletter/focus')
+  const focusCall = calls.find((call) => call.url === '/api/workbench/focus?instance=garbage')
   if (!focusCall || JSON.parse(String(focusCall.options?.body)).text !== 'More typed boundaries') {
-    throw new Error('API focus was not posted with trimmed text')
+    throw new Error('workbench API focus was not posted with trimmed text')
   }
 
   await state.importEditorialState({
@@ -117,10 +186,10 @@ async function smokeBrowserPersistenceSnapshot() {
   }
   globalThis.fetch = async (url, options) => {
     calls.push({ options, url: String(url) })
-    if (url === '/api/newsletter/items') {
+    if (url === '/api/workbench/records?instance=garbage') {
       return jsonResponse({
-        ...baseSnapshot,
-        editorial_persistence: 'browser',
+        ...workbenchSnapshot,
+        editorialPersistence: 'browser',
       })
     }
     return jsonResponse({ error: 'unexpected_post' }, false, 500)
@@ -150,8 +219,8 @@ async function smokeBrowserPersistenceSnapshot() {
 
 async function smokeVoteRollback() {
   globalThis.fetch = async (url) => {
-    if (url === '/api/newsletter/items') return jsonResponse({ ...baseSnapshot, editorial_persistence: 'database' })
-    if (url === '/api/newsletter/vote') return jsonResponse({ error: 'failed' }, false, 500)
+    if (url === '/api/workbench/records?instance=garbage') return jsonResponse(workbenchSnapshot)
+    if (url === '/api/workbench/review?instance=garbage') return jsonResponse({ error: 'failed' }, false, 500)
     return jsonResponse({ error: 'not_found' }, false, 404)
   }
 
@@ -159,14 +228,14 @@ async function smokeVoteRollback() {
   await state.loadSnapshot()
   await state.setVote('smoke-item', 1)
   if (state.snapshot.value.items[0]?.vote !== 0) throw new Error('failed API vote did not roll back')
-  if (!state.error.value.includes('vote API returned 500')) throw new Error('failed API vote did not set an error')
+  if (!state.error.value.includes('review API returned 500')) throw new Error('failed API review did not set an error')
 }
 
 async function smokeStaticFallbackSnapshot() {
   const calls = []
   globalThis.fetch = async (url, options) => {
     calls.push({ options, url: String(url) })
-    if (url === '/api/newsletter/items') return jsonResponse({ error: 'missing' }, false, 404)
+    if (url === '/api/workbench/records?instance=garbage') return jsonResponse({ error: 'missing' }, false, 404)
     if (String(url).endsWith('/data/newsletter-snapshot.json')) return jsonResponse(baseSnapshot)
     return jsonResponse({ error: 'unexpected_post' }, false, 500)
   }

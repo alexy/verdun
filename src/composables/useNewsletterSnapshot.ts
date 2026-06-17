@@ -10,6 +10,10 @@ type SnapshotLoadResult = {
 }
 
 const browserEditorialStateKey = 'verdun:editorial-state'
+const workbenchInstance = 'garbage'
+const workbenchRecordsUrl = `/api/workbench/records?instance=${workbenchInstance}`
+const workbenchReviewUrl = `/api/workbench/review?instance=${workbenchInstance}`
+const workbenchFocusUrl = `/api/workbench/focus?instance=${workbenchInstance}`
 
 export function useNewsletterSnapshot() {
   const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
@@ -50,12 +54,12 @@ export function useNewsletterSnapshot() {
       return
     }
     try {
-      const response = await fetch('/api/newsletter/vote', {
+      const response = await fetch(workbenchReviewUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ itemId, vote }),
+        body: JSON.stringify({ recordId: itemId, review: vote }),
       })
-      if (!response.ok) throw new Error(`vote API returned ${response.status}`)
+      if (!response.ok) throw new Error(`review API returned ${response.status}`)
     } catch (voteError) {
       snapshot.value = previous
       error.value = voteError instanceof Error ? voteError.message : String(voteError)
@@ -80,7 +84,7 @@ export function useNewsletterSnapshot() {
       return
     }
     try {
-      const response = await fetch('/api/newsletter/focus', {
+      const response = await fetch(workbenchFocusUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ text, scope }),
@@ -124,7 +128,7 @@ export function useNewsletterSnapshot() {
 }
 
 async function fetchSnapshot(): Promise<SnapshotLoadResult> {
-  const apiResult = await tryFetchSnapshot('/api/newsletter/items')
+  const apiResult = await tryFetchSnapshot(workbenchRecordsUrl)
   if (apiResult) {
     const apiWritable = apiResult.editorialPersistence === 'database' || apiResult.editorialPersistence === 'local_file'
     return {
