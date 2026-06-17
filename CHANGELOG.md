@@ -41,6 +41,7 @@
 - Moved Garbage newsletter API store logic under `api/instances/garbage/newsletter-store.ts`; `api/newsletter/_db.ts` is now only a compatibility re-export.
 - Moved Garbage newsletter route implementations under `api/instances/garbage/newsletter/`; the public `api/newsletter/*` files now act as compatibility shims.
 - Moved Garbage publishing helper implementations under `scripts/instances/garbage/`; the public newsletter draft, Ghost publish, and source-gap scripts now act as compatibility CLI/module wrappers.
+- Added explicit Garbage publishing package scripts (`garbage:draft`, `garbage:review:gaps`, `garbage:ulysses:*`, and `garbage:ghost:*`) and kept the old draft/Ulysses/Ghost names as compatibility aliases.
 - Moved Garbage newsletter SQL reload helper implementations under `scripts/instances/garbage/`; the public apply/deploy database scripts now act as compatibility CLI/module wrappers.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Changed `verdun-crawler export-sql` to default to the generic workbench SQL target; Garbage newsletter table export is now an explicit `--target newsletter` compatibility path.
@@ -55,7 +56,7 @@ Known remaining extraction work:
 - The Rust crawler now has a `CrawlerInstance` dispatch trait and a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
 - Crawler instance selection supports `--instance garbage` and `--instance greathouse`.
 - Workbench API routes support explicit Garbage/Greathouse instance selection, and the browser app now reads/reviews/focuses/imports Garbage state through generic workbench routes.
-- Newsletter draft generation, readiness, Ulysses export, Ghost publishing helpers, SQL reload helpers, editorial-state import, ontology rendering, Garbage-specific UI panels, newsletter composables, and newsletter route implementations are now implemented under the Garbage instance, but public compatibility API/script names still remain.
+- Newsletter draft generation, readiness, Ulysses export, Ghost publishing helpers, SQL reload helpers, editorial-state import, ontology rendering, Garbage-specific UI panels, newsletter composables, and newsletter route implementations are now implemented under the Garbage instance, with explicit Garbage package commands; public compatibility API/script names still remain.
 - Workbench API routes no longer depend on the newsletter HTTP helper path or the legacy newsletter DB helper path for local static/local-file mode.
 - Garbage local static/local-file fallback now reuses the Garbage API instance newsletter store internally, while the legacy `api/newsletter/_db.ts` path remains as a compatibility re-export.
 - Greathouse crawler collection now dispatches through configured local JSON, HTTP JSON, and HTTP status-diagnostic adapters, but it still does not have source-specific browser/property adapters.

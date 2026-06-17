@@ -59,8 +59,10 @@ try {
     ],
   }, null, 2))
 
-  const result = spawnSync('node', [
-    'scripts/source-gap-review.mjs',
+  const result = spawnSync('npm', [
+    'run',
+    'garbage:review:gaps',
+    '--',
     '--snapshot',
     snapshotPath,
     '--out',

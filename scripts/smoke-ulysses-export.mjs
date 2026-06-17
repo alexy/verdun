@@ -26,7 +26,7 @@ try {
     ],
   }))
 
-  const result = spawnSync('npm', ['run', 'ulysses:ready', '--', '--editorial-state', stateFile], {
+  const result = spawnSync('npm', ['run', 'garbage:ulysses:ready', '--', '--editorial-state', stateFile], {
     encoding: 'utf8',
     env: {
       ...process.env,
@@ -36,7 +36,7 @@ try {
   })
   if (result.error) throw result.error
   if (result.status !== 0) {
-    throw new Error(`ulysses:ready failed\n${result.stdout}\n${result.stderr}`)
+    throw new Error(`garbage:ulysses:ready failed\n${result.stdout}\n${result.stderr}`)
   }
 
   const files = await readdir(exportDir)
