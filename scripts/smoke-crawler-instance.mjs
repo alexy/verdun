@@ -217,6 +217,11 @@ try {
       ]))
       return
     }
+    if (request.url === '/blocked') {
+      response.statusCode = 403
+      response.end(JSON.stringify({ error: 'blocked' }))
+      return
+    }
     response.statusCode = 404
     response.end(JSON.stringify({ error: 'not_found' }))
   })
@@ -251,6 +256,12 @@ name = "HTTP diagnostics"
 kind = "diagnostic"
 url = "http://127.0.0.1:${port}/diagnostics.json"
 adapter = "http-diagnostic-json"
+
+[[sources]]
+name = "HTTP blocked probe"
+kind = "diagnostic"
+url = "http://127.0.0.1:${port}/blocked"
+adapter = "http-status-diagnostic"
 `)
     const verifyHttp = await runCommand('cargo', [
       'run',
@@ -289,15 +300,30 @@ adapter = "http-diagnostic-json"
     }
     const httpSnapshot = JSON.parse(await readFile(httpSnapshotPath, 'utf8'))
     const httpAdapters = new Set(httpSnapshot.items?.map((item) => item.raw_json?.provenance?.adapter) ?? [])
-    if (!httpAdapters.has('http-listing-json') || !httpAdapters.has('http-diagnostic-json')) {
+    if (!httpAdapters.has('http-listing-json') || !httpAdapters.has('http-diagnostic-json') || !httpAdapters.has('http-status-diagnostic')) {
       throw new Error(`greathouse HTTP adapters were not preserved in provenance: ${[...httpAdapters].join(', ')}`)
     }
-    if (!httpSnapshot.items?.every((item) => item.raw_json?.provenance?.stage === 'live_http')) {
-      throw new Error('greathouse HTTP adapter records did not default to live_http provenance stage')
+    const blockedProbe = httpSnapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'http-status-diagnostic')
+    if (!blockedProbe) {
+      throw new Error('greathouse HTTP status diagnostic adapter did not emit a diagnostic record')
+    }
+    if (blockedProbe.raw_json?.provenance?.stage !== 'blocked_http') {
+      throw new Error(`HTTP status diagnostic record used wrong stage: ${blockedProbe.raw_json?.provenance?.stage}`)
+    }
+    if (blockedProbe.project !== 'Oakland blocked source') {
+      throw new Error(`HTTP status diagnostic record used wrong project: ${blockedProbe.project}`)
+    }
+    const liveHttpRecords = httpSnapshot.items?.filter((item) => item.raw_json?.provenance?.adapter !== 'http-status-diagnostic') ?? []
+    if (!liveHttpRecords.every((item) => item.raw_json?.provenance?.stage === 'live_http')) {
+      throw new Error('greathouse HTTP JSON adapter records did not default to live_http provenance stage')
     }
     const httpRunMessages = httpSnapshot.source_runs?.map((run) => run.message).join('\n') ?? ''
-    if (!httpRunMessages.includes('HTTP listing adapter') || !httpRunMessages.includes('HTTP diagnostic adapter')) {
+    if (!httpRunMessages.includes('HTTP listing adapter') || !httpRunMessages.includes('HTTP diagnostic adapter') || !httpRunMessages.includes('HTTP status diagnostic adapter')) {
       throw new Error(`greathouse HTTP source runs did not report HTTP adapters:\n${httpRunMessages}`)
+    }
+    const blockedRun = httpSnapshot.source_runs?.find((run) => run.source === 'HTTP blocked probe')
+    if (blockedRun?.project_counts?.['Oakland blocked source'] !== 1) {
+      throw new Error(`HTTP status diagnostic source run did not expose project counts: ${JSON.stringify(blockedRun)}`)
     }
   } finally {
     await new Promise((resolve) => server.close(resolve))

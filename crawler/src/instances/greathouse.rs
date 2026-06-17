@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use reqwest::blocking::Client;
 use serde::Deserialize;
+use std::collections::BTreeMap;
 use std::{path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
@@ -129,6 +130,7 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
                     | "local-diagnostic-json"
                     | "http-listing-json"
                     | "http-diagnostic-json"
+                    | "http-status-diagnostic"
             ),
             "{} uses unsupported Greathouse adapter {}",
             source.name,
@@ -254,6 +256,8 @@ struct HttpJsonSourceAdapter {
     adapter: &'static str,
 }
 
+struct HttpStatusDiagnosticAdapter;
+
 impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
     fn adapter_name(&self) -> &'static str {
         self.adapter
@@ -344,6 +348,76 @@ impl GreathouseSourceAdapter for HttpJsonSourceAdapter {
     }
 }
 
+impl GreathouseSourceAdapter for HttpStatusDiagnosticAdapter {
+    fn adapter_name(&self) -> &'static str {
+        "http-status-diagnostic"
+    }
+
+    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+        let client = Client::builder()
+            .user_agent("verdun-crawler/0.1 greathouse")
+            .timeout(StdDuration::from_secs(15))
+            .build()?;
+        let target = diagnostic_target(config).with_context(|| {
+            format!(
+                "{} status diagnostic has no configured Greathouse target",
+                source.name
+            )
+        })?;
+        let observed_at = Utc::now();
+        let record = match client.get(&source.url).send() {
+            Ok(response) => {
+                let status = response.status();
+                let stage = if status.is_success() {
+                    "live_http"
+                } else {
+                    "blocked_http"
+                };
+                GreathouseLocalRecord {
+                    subject: target.name.clone(),
+                    url: source.url.clone(),
+                    title: Some(format!("{} HTTP status {}", source.name, status.as_u16())),
+                    observed_at: Some(observed_at),
+                    summary: Some(format!(
+                        "{} returned HTTP {} during Greathouse source diagnostics.",
+                        source.url, status
+                    )),
+                    tags: vec![
+                        "http-status".to_string(),
+                        if status.is_success() {
+                            "reachable".to_string()
+                        } else {
+                            "blocked-source".to_string()
+                        },
+                    ],
+                    score: Some(if status.is_success() { 50 } else { 82 }),
+                    stage: Some(stage.to_string()),
+                }
+            }
+            Err(error) => GreathouseLocalRecord {
+                subject: target.name.clone(),
+                url: source.url.clone(),
+                title: Some(format!("{} HTTP status probe failed", source.name)),
+                observed_at: Some(observed_at),
+                summary: Some(format!(
+                    "{} could not be reached during Greathouse source diagnostics: {}.",
+                    source.url, error
+                )),
+                tags: vec!["http-status".to_string(), "blocked-source".to_string()],
+                score: Some(84),
+                stage: Some("blocked_http".to_string()),
+            },
+        };
+        Ok(vec![greathouse_item(
+            target,
+            source,
+            record,
+            self.adapter_name(),
+            0,
+        )])
+    }
+}
+
 static LOCAL_LISTING_JSON_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapter {
     adapter: "local-listing-json",
 };
@@ -356,6 +430,7 @@ static HTTP_LISTING_JSON_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapter 
 static HTTP_DIAGNOSTIC_JSON_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapter {
     adapter: "http-diagnostic-json",
 };
+static HTTP_STATUS_DIAGNOSTIC_ADAPTER: HttpStatusDiagnosticAdapter = HttpStatusDiagnosticAdapter;
 
 fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSourceAdapter> {
     match source.adapter.as_deref() {
@@ -363,6 +438,7 @@ fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSo
         Some("local-diagnostic-json") => Ok(&LOCAL_DIAGNOSTIC_JSON_ADAPTER),
         Some("http-listing-json") => Ok(&HTTP_LISTING_JSON_ADAPTER),
         Some("http-diagnostic-json") => Ok(&HTTP_DIAGNOSTIC_JSON_ADAPTER),
+        Some("http-status-diagnostic") => Ok(&HTTP_STATUS_DIAGNOSTIC_ADAPTER),
         Some(adapter) => anyhow::bail!(
             "{} uses unsupported Greathouse adapter {}",
             source.name,
@@ -391,7 +467,7 @@ fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<Sou
                 },
                 item_count,
                 message: source_run_message(source),
-                project_counts: Default::default(),
+                project_counts: project_counts_for_source(items, &source.name),
             }
         })
         .collect()
@@ -399,7 +475,9 @@ fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<Sou
 
 fn source_run_message(source: &SourceConfig) -> String {
     let adapter = source.adapter.as_deref().unwrap_or("missing-adapter");
-    if adapter.starts_with("http-") && source.kind == "diagnostic" {
+    if adapter == "http-status-diagnostic" {
+        "HTTP status diagnostic adapter retained source reachability evidence for retry".to_string()
+    } else if adapter.starts_with("http-") && source.kind == "diagnostic" {
         "HTTP diagnostic adapter retained blocked-source evidence for retry".to_string()
     } else if adapter.starts_with("http-") {
         "HTTP listing adapter loaded through the Greathouse crawler instance".to_string()
@@ -408,6 +486,22 @@ fn source_run_message(source: &SourceConfig) -> String {
     } else {
         "local listing JSON loaded through the Greathouse crawler instance".to_string()
     }
+}
+
+fn project_counts_for_source(items: &[NewsItem], source_name: &str) -> BTreeMap<String, usize> {
+    let mut counts = BTreeMap::new();
+    for item in items.iter().filter(|item| item.source == source_name) {
+        *counts.entry(item.project.clone()).or_insert(0) += 1;
+    }
+    counts
+}
+
+fn diagnostic_target(config: &CrawlerConfig) -> Option<&crate::core::CollectionTarget> {
+    config
+        .targets
+        .iter()
+        .find(|target| target.topic.contains("diagnostic"))
+        .or_else(|| config.targets.first())
 }
 
 fn review_targets(
