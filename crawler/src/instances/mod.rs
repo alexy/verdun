@@ -1,4 +1,5 @@
 pub mod garbage;
+pub mod greathouse;
 
 use anyhow::Result;
 use chrono::{DateTime, Utc};
@@ -35,6 +36,11 @@ pub fn default_crawler_instance() -> &'static dyn CrawlerInstance {
 pub fn crawler_instance(instance: &str) -> Result<&'static dyn CrawlerInstance> {
     match instance {
         "garbage" => Ok(default_crawler_instance()),
-        other => anyhow::bail!("unknown crawler instance {other:?}; supported instances: garbage"),
+        "greathouse" => Ok(&greathouse::GREATHOUSE_CRAWLER_INSTANCE),
+        other => {
+            anyhow::bail!(
+                "unknown crawler instance {other:?}; supported instances: garbage, greathouse"
+            )
+        }
     }
 }

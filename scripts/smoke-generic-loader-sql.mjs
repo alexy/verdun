@@ -48,10 +48,17 @@ if (sourceRuns.length) {
 for (const required of ['provenance_json', 'normalized_json', 'raw_json', 'dedupe_key', 'subject_counts']) {
   if (!sql.includes(required)) throw new Error(`generic SQL export is missing ${required}`)
 }
-for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
-  if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)
-  if (!sql.includes(sqlString(project))) throw new Error(`generic SQL export is missing required subject ${project}`)
-  if (!queryPlans.some((plan) => plan.project === project)) throw new Error(`snapshot is missing query plan for ${project}`)
+if (!allowsCustomInstance) {
+  for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
+    if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)
+    if (!sql.includes(sqlString(project))) throw new Error(`generic SQL export is missing required subject ${project}`)
+    if (!queryPlans.some((plan) => plan.project === project)) throw new Error(`snapshot is missing query plan for ${project}`)
+  }
+} else {
+  for (const project of new Set(items.map((item) => item.project))) {
+    if (!sql.includes(sqlString(project))) throw new Error(`generic SQL export is missing custom subject ${project}`)
+    if (!queryPlans.some((plan) => plan.project === project)) throw new Error(`snapshot is missing query plan for custom subject ${project}`)
+  }
 }
 for (const item of representativeItems(items)) {
   if (!sql.includes(sqlString(item.id))) throw new Error(`generic SQL export is missing record id ${item.id}`)

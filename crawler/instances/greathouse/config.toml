@@ -1,0 +1,23 @@
+theme = "Property intelligence and source diagnostics"
+
+[[projects]]
+name = "Berkeley 2BR"
+topic = "buyer shortlist"
+homepage = "https://example.com/greathouse/berkeley-2br"
+keywords = ["berkeley", "2br", "transit", "comparable"]
+
+[[projects]]
+name = "Oakland blocked source"
+topic = "source diagnostics"
+homepage = "https://example.com/greathouse/oakland-diagnostic"
+keywords = ["oakland", "blocked-source", "retry", "diagnostic"]
+
+[[sources]]
+name = "Redfin"
+kind = "listing"
+url = "https://example.com/redfin"
+
+[[sources]]
+name = "Redfin diagnostics"
+kind = "diagnostic"
+url = "https://example.com/redfin-diagnostics"
