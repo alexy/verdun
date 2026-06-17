@@ -1,6 +1,8 @@
 use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
 use clap::{Parser, Subcommand};
+mod core;
+use crate::core::{ReviewTarget, SourceRun, SourceRunStatus};
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
 use serde::{Deserialize, Serialize};
@@ -107,37 +109,6 @@ struct PublicSnapshot {
     query_plans: Vec<ProjectQueryPlan>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct SourceRun {
-    source: String,
-    kind: String,
-    status: SourceRunStatus,
-    item_count: usize,
-    message: String,
-    #[serde(default)]
-    project_counts: BTreeMap<String, usize>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-enum SourceRunStatus {
-    Ok,
-    Error,
-    Pending,
-    Skipped,
-}
-
-impl SourceRunStatus {
-    fn as_str(&self) -> &'static str {
-        match self {
-            Self::Ok => "ok",
-            Self::Error => "error",
-            Self::Pending => "pending",
-            Self::Skipped => "skipped",
-        }
-    }
-}
-
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
@@ -185,14 +156,6 @@ struct ProjectQueryPlan {
     review_targets: Vec<ReviewTarget>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     focus_terms: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct ReviewTarget {
-    source: String,
-    label: String,
-    url: String,
-    adapter: String,
 }
 
 fn collect(
