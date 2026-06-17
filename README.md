@@ -1,6 +1,13 @@
 # Verdun
 
-Verdun is the editorial desk for `collected.ga/rbage/`: a Vercel/Vue app plus a Rust crawler/loader for weekly strongly typed and functional AI/data news.
+Verdun is being extracted into the reusable core for database-backed collection/review workbenches. The current checked-in instance is Garbage: the editorial desk for `collected.ga/rbage/`, with a Vercel/Vue app plus a Rust crawler/loader for weekly strongly typed and functional AI/data news.
+
+The first reusable boundary is now explicit:
+
+- Generic workbench contracts live in `src/core/workbench.ts`.
+- Garbage instance configuration lives in `src/instances/garbage/config.ts`.
+- Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
+- Existing newsletter routes, scripts, and database tables still use their current names while the boundary is extracted incrementally.
 
 The first slice mirrors the useful Greathouse shape without touching Greathouse:
 
@@ -21,7 +28,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Publish manifests and the draft preview summarize selected evidence by live/manual/seed counts and source mix before Ulysses or Ghost handoff.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, healthy watched sources, and a fresh collection snapshot before local Ulysses export.
 - Source health calls out watched projects from the crawler query plan that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.
-- The maintained ontology lives in `src/lib/ontology.json` and is reused by the app and local Markdown draft generation.
+- The maintained Garbage ontology lives in `src/instances/garbage/ontology.json` and is reused by the app and local Markdown draft generation.
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
 - Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, while filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`.
 - Backend route mechanics live in `api/newsletter/_http.ts`, while data access and local fallback state stay in `api/newsletter/_db.ts`, matching the Greathouse-style reusable backend boundary.

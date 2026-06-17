@@ -6,6 +6,8 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 
 ## Current Slice
 
+- Verdun is now being extracted as the reusable core; the live newsletter app is the Garbage instance layered on top of it.
+- Generic workbench contracts live in `src/core/workbench.ts`, while Garbage instance configuration and ontology data live under `src/instances/garbage/`.
 - Vue/Vite app with a newsroom triage interface.
 - Greathouse-style dashboard components extracted under `src/components/`, including `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`, so shared shell/editorial/inbox/draft/hero/source-health/item-card UI can be generalized later.
 - Frontend snapshot loading plus optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`; filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`, leaving `App.vue` as component composition.
@@ -19,7 +21,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
 - News cards surface crawler provenance as editorial evidence from the API/static snapshot.
 - News cards expose stable item anchors/permalinks and source domains for sharing and review.
-- `src/lib/ontology.json` is the shared ontology source for the site and local Markdown drafts.
+- `src/instances/garbage/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
 - Shared publishing readiness checks in `src/lib/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
 - Vercel API routes:
   - `GET /api/newsletter/items`

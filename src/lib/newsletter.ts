@@ -1,6 +1,19 @@
 import { credoBlurb, ontologyForItem, ontologyNodes } from './ontology.js'
+import type {
+  ReviewValue,
+  WorkbenchCollectionPlan,
+  WorkbenchFocus,
+  WorkbenchRecord,
+  WorkbenchRecordProvenance,
+  WorkbenchReviewTarget,
+  WorkbenchSourceRun,
+  WorkbenchStateExport,
+} from '../core/workbench'
+import { garbageInstance, garbageSeedFocuses } from '../instances/garbage/config'
 
-export type NewsItem = {
+export type { SourceRunStatus } from '../core/workbench'
+
+export type NewsItem = Omit<WorkbenchRecord, 'observedAt' | 'subject' | 'review' | 'provenance'> & {
   id: string
   title: string
   source: string
@@ -13,55 +26,28 @@ export type NewsItem = {
   whyItMatters: string
   tags: string[]
   score: number
-  vote: -1 | 0 | 1
+  vote: VoteValue
   provenance?: NewsItemProvenance
 }
 
-export type NewsItemProvenance = {
-  stage: string
-  adapter: string
-  source: string
-  sourceKind: string
-  sourceUrl: string
-  evidenceUrl: string
+export type NewsItemProvenance = Omit<WorkbenchRecordProvenance, 'subject'> & {
   project: string
-  matchedKeywords: string[]
 }
 
-export type NewsletterFocus = {
-  id: string
-  text: string
-  scope: 'this_week' | 'ongoing'
-  createdAt: string
-}
+export type NewsletterFocus = WorkbenchFocus
 
-export type SourceRunStatus = 'ok' | 'error' | 'pending' | 'skipped'
-
-export type SourceRun = {
-  source: string
-  kind: string
-  status: SourceRunStatus
-  itemCount: number
-  message: string
+export type SourceRun = Omit<WorkbenchSourceRun, 'subjectCounts'> & {
   projectCounts: Record<string, number>
 }
 
-export type ProjectQueryPlan = {
+export type ProjectQueryPlan = Omit<WorkbenchCollectionPlan, 'subject' | 'query' | 'tags' | 'reviewTargets'> & {
   project: string
-  topic: string
   hackerNewsQuery: string
-  liveTerms: string[]
   devToTags: string[]
   reviewTargets: ReviewTarget[]
-  focusTerms: string[]
 }
 
-export type ReviewTarget = {
-  source: string
-  label: string
-  url: string
-  adapter: string
-}
+export type ReviewTarget = WorkbenchReviewTarget
 
 export type NewsletterSnapshot = {
   generatedAt: string
@@ -73,7 +59,7 @@ export type NewsletterSnapshot = {
   queryPlans: ProjectQueryPlan[]
 }
 
-export type VoteValue = -1 | 0 | 1
+export type VoteValue = ReviewValue
 
 export type NewsletterDraft = {
   title: string
@@ -113,14 +99,8 @@ export type NewsletterProseQuality = {
   checks: NewsletterProseQualityCheck[]
 }
 
-export type EditorialStateExport = {
+export type EditorialStateExport = Omit<WorkbenchStateExport, 'reviews'> & {
   votes: Record<string, VoteValue>
-  focuses: Array<{
-    id: string
-    text: string
-    scope: 'this_week' | 'ongoing'
-    created_at: string
-  }>
 }
 
 export type EditorialStateImportResult = {
@@ -217,7 +197,7 @@ export type NewsletterPublishManifestOptions = {
 
 export const seedSnapshot: NewsletterSnapshot = {
   generatedAt: new Date().toISOString(),
-  theme: 'Strongly typed and functional AI/data systems',
+  theme: garbageInstance.theme,
   editorialPersistence: 'browser',
   queryPlans: [],
   sourceRuns: [
@@ -230,14 +210,7 @@ export const seedSnapshot: NewsletterSnapshot = {
       projectCounts: {},
     },
   ],
-  focuses: [
-    {
-      id: 'focus-local-first-graphs',
-      text: 'More strongly typed graph/database work that can run locally before cloud deployment.',
-      scope: 'ongoing',
-      createdAt: new Date().toISOString(),
-    },
-  ],
+  focuses: garbageSeedFocuses,
   items: [
     {
       id: 'pydantic-ai-typed-agents',

@@ -9,12 +9,27 @@ const { module: viewModule } = await runnerImport('./src/composables/useNewslett
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
+const { module: garbageWorkbenchModule } = await runnerImport('./src/instances/garbage/workbench.ts', {
+  logLevel: 'error',
+  optimizeDeps: { noDiscovery: true },
+})
 
 const snapshot = ref({
   ...newsletterModule.seedSnapshot,
   items: newsletterModule.seedSnapshot.items.map((item) => ({ ...item })),
 })
 const view = viewModule.useNewsletterView(snapshot)
+const workbenchSnapshot = garbageWorkbenchModule.garbageSnapshotToWorkbench(snapshot.value)
+
+if (workbenchSnapshot.instance.id !== 'garbage' || workbenchSnapshot.instance.basePath !== '/rbage/') {
+  throw new Error('garbage instance config was not exposed through the workbench snapshot')
+}
+if (workbenchSnapshot.records.length !== snapshot.value.items.length) {
+  throw new Error('workbench projection did not preserve record count')
+}
+if (!workbenchSnapshot.records.some((record) => record.subject === 'LakeSail' && record.review === 1)) {
+  throw new Error('workbench projection did not map project/vote into subject/review')
+}
 
 if (view.includedItems.value.length !== 2) {
   throw new Error('seed view should start with two included items')

@@ -1,4 +1,4 @@
-import ontologyNodesJson from './ontology.json' with { type: 'json' }
+import ontologyNodesJson from '../instances/garbage/ontology.json' with { type: 'json' }
 import type { NewsItem } from './newsletter.js'
 
 export type OntologyNode = {

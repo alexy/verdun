@@ -4,6 +4,8 @@ import { neon } from '@neondatabase/serverless'
 import { randomUUID } from 'crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, join } from 'path'
+import { garbageInstance, garbageSeedFocuses } from '../../src/instances/garbage/config'
+import type { SourceRunStatus } from '../../src/core/workbench'
 
 declare const process: {
   env: Record<string, string | undefined>
@@ -65,8 +67,6 @@ type NewsItem = {
   vote: VoteValue
   provenance?: NewsItemProvenance
 }
-
-type SourceRunStatus = 'ok' | 'error' | 'pending' | 'skipped'
 
 type SourceRun = {
   source: string
@@ -199,14 +199,7 @@ type DatabaseSnapshotOptions = {
   databaseUrl?: string
 }
 
-const seedFocuses: NewsletterFocus[] = [
-  {
-    id: 'focus-local-first-graphs',
-    text: 'More strongly typed graph/database work that can run locally before cloud deployment.',
-    scope: 'ongoing',
-    createdAt: new Date().toISOString(),
-  },
-]
+const seedFocuses: NewsletterFocus[] = garbageSeedFocuses
 
 export async function readSnapshot(): Promise<NewsletterSnapshot> {
   const databaseUrl = newsletterDatabaseUrl()
@@ -260,7 +253,7 @@ export async function readDatabaseSnapshot(options: DatabaseSnapshotOptions): Pr
 
   return {
     generatedAt,
-    theme: 'Strongly typed and functional AI/data systems',
+    theme: garbageInstance.theme,
     editorialPersistence: 'database',
     items: rows.map(toNewsItem),
     focuses: focusRows.map(toFocus),
@@ -335,7 +328,7 @@ async function readDatabaseGeneratedAt(sql: SqlClient): Promise<string> {
 }
 
 function readStaticSnapshot(): NewsletterSnapshot | null {
-  const snapshotPath = join(process.cwd(), 'public', 'data', 'newsletter-snapshot.json')
+  const snapshotPath = join(process.cwd(), ...garbageInstance.staticSnapshotPath.split('/'))
   if (existsSync(snapshotPath)) {
     const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf8')) as StaticSnapshot
     return {
@@ -361,7 +354,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
   const rows = JSON.parse(readFileSync(itemsPath, 'utf8')) as StaticNewsRow[]
   return {
     generatedAt: new Date().toISOString(),
-    theme: 'Strongly typed and functional AI/data systems',
+    theme: garbageInstance.theme,
     editorialPersistence: editorialPersistenceMode(),
     items: rows.map(toStaticNewsItem),
     focuses: seedFocuses,
@@ -373,7 +366,7 @@ function readStaticSnapshot(): NewsletterSnapshot | null {
 function emptySnapshot(): NewsletterSnapshot {
   return {
     generatedAt: new Date().toISOString(),
-    theme: 'Strongly typed and functional AI/data systems',
+    theme: garbageInstance.theme,
     editorialPersistence: editorialPersistenceMode(),
     items: [],
     focuses: seedFocuses,
@@ -486,7 +479,7 @@ function editorialPersistenceMode(): NewsletterSnapshot['editorialPersistence'] 
 
 function assertLocalEditorialWritesAvailable(): void {
   if (editorialPersistenceMode() !== 'local_file') {
-    const error = new Error('This deployment is read-only until POSTGRES_URL, DATABASE_URL, or NEON_DATABASE_URL is configured. Browser-local editorial state can still be exported for Ulysses.')
+    const error = new Error(garbageInstance.readOnlyMessage)
     Object.assign(error, { statusCode: 503, code: 'editorial_persistence_unavailable' })
     throw error
   }
@@ -522,7 +515,7 @@ function writeLocalEditorialState(state: LocalEditorialState): void {
 }
 
 function localEditorialStatePath(): string {
-  return process.env.VERDUN_LOCAL_STATE_FILE ?? join(process.cwd(), 'crawler', 'data', 'editorial-state.json')
+  return process.env.VERDUN_LOCAL_STATE_FILE ?? join(process.cwd(), ...garbageInstance.localStatePath.split('/'))
 }
 
 function emptyLocalEditorialState(): LocalEditorialState {
