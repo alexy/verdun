@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runnerImport } from 'vite'
@@ -37,6 +37,10 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
+  const dbSource = await readFile('api/workbench/_db.ts', 'utf8')
+  if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
+    throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
+  }
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },

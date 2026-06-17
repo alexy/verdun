@@ -45,6 +45,7 @@
 - Added registry-backed app instance path resolution so the root Vue shell asks the instance registry which app to mount for `/rbage/` and `/greathouse/`.
 - Extracted generic API request/response helpers to `api/core/http.ts`; `api/workbench` routes now use the generic helper while `api/newsletter/_http.ts` remains a compatibility re-export.
 - Added a Garbage API workbench fallback adapter under `api/instances/garbage/workbench.ts`; `api/workbench/_db.ts` no longer imports `api/newsletter/_db.ts` directly for static/local-file mode.
+- Added `api/workbench/instance-adapters.ts` so the generic workbench DB helper resolves no-database instance reads and writes through local instance adapters instead of importing the Garbage adapter directly.
 - Moved Garbage newsletter API store logic under `api/instances/garbage/newsletter-store.ts`; `api/newsletter/_db.ts` is now only a compatibility re-export.
 - Moved Garbage newsletter route implementations under `api/instances/garbage/newsletter/`; the public `api/newsletter/*` files now act as compatibility shims.
 - Moved Garbage publishing helper implementations under `scripts/instances/garbage/`; the public newsletter draft, Ghost publish, and source-gap scripts now act as compatibility CLI/module wrappers.

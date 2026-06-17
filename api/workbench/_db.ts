@@ -1,14 +1,7 @@
 import { neon } from '@neondatabase/serverless'
 import { randomUUID } from 'crypto'
-import {
-  readGarbageWorkbenchSnapshot,
-  readGarbageWorkbenchStatus,
-  writeGarbageWorkbenchFocus,
-  writeGarbageWorkbenchReview,
-  writeGarbageWorkbenchState,
-} from '../instances/garbage/workbench.js'
-import { garbageInstance } from '../../src/instances/garbage/config'
-import { defaultWorkbenchInstance, staticWorkbenchSnapshot } from '../../src/instances/registry'
+import { defaultWorkbenchInstance } from '../../src/instances/registry'
+import { localWorkbenchAdapter } from './instance-adapters'
 import type {
   ReviewValue,
   SourceRunStatus,
@@ -93,31 +86,19 @@ export async function readWorkbenchSnapshot(instance: WorkbenchInstance = defaul
 export async function readWorkbenchStatus(instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchStatus> {
   const databaseUrl = workbenchDatabaseUrl()
   if (!databaseUrl) {
-    if (instance.id === garbageInstance.id) {
-      const garbageStatus = await readGarbageWorkbenchStatus()
-      return {
-        instance,
-        editorialPersistence: garbageStatus.editorialPersistence,
-        generatedAt: garbageStatus.generatedAt,
-        recordCount: garbageStatus.recordCount,
-        focusCount: garbageStatus.focusCount,
-        reviewCount: garbageStatus.reviewCount,
-        sourceRunCount: garbageStatus.sourceRunCount,
-        collectionPlanCount: garbageStatus.collectionPlanCount,
-        writable: garbageStatus.writable,
-      }
-    }
-    const snapshot = await readStaticWorkbenchSnapshot(instance)
+    const adapter = localWorkbenchAdapter(instance)
+    if (!adapter) throw readOnlyInstanceError(instance)
+    const status = await adapter.readStatus()
     return {
-      instance: snapshot.instance,
-      editorialPersistence: snapshot.editorialPersistence,
-      generatedAt: snapshot.generatedAt,
-      recordCount: snapshot.records.length,
-      focusCount: snapshot.focuses.length,
-      reviewCount: snapshot.records.filter((record) => record.review !== 0).length,
-      sourceRunCount: snapshot.sourceRuns.length,
-      collectionPlanCount: snapshot.collectionPlans.length,
-      writable: false,
+      instance,
+      editorialPersistence: status.editorialPersistence,
+      generatedAt: status.generatedAt,
+      recordCount: status.recordCount,
+      focusCount: status.focusCount,
+      reviewCount: status.reviewCount,
+      sourceRunCount: status.sourceRunCount,
+      collectionPlanCount: status.collectionPlanCount,
+      writable: status.writable,
     }
   }
   return readDatabaseWorkbenchStatus(neon(databaseUrl), instance)
@@ -126,29 +107,31 @@ export async function readWorkbenchStatus(instance: WorkbenchInstance = defaultW
 export async function writeReview(recordId: string, review: ReviewValue, instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<void> {
   const databaseUrl = workbenchDatabaseUrl()
   if (databaseUrl) return writeDatabaseWorkbenchReview(neon(databaseUrl), recordId, review, instance)
-  if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
-  return writeGarbageWorkbenchReview(recordId, review)
+  const adapter = localWorkbenchAdapter(instance)
+  if (!adapter?.writeReview) throw readOnlyInstanceError(instance)
+  return adapter.writeReview(recordId, review)
 }
 
 export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['scope'], instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchFocus | null> {
   const databaseUrl = workbenchDatabaseUrl()
   if (databaseUrl) return writeDatabaseWorkbenchFocus(neon(databaseUrl), text, scope, instance)
-  if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
-  return writeGarbageWorkbenchFocus(text, scope)
+  const adapter = localWorkbenchAdapter(instance)
+  if (!adapter?.writeFocus) throw readOnlyInstanceError(instance)
+  return adapter.writeFocus(text, scope)
 }
 
 export async function writeWorkbenchState(state: unknown, instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchStateImportResult> {
   const normalized = normalizeWorkbenchState(state)
   const databaseUrl = workbenchDatabaseUrl()
   if (databaseUrl) return writeDatabaseWorkbenchState(neon(databaseUrl), normalized, instance)
-  if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
-  return writeGarbageWorkbenchState(normalized)
+  const adapter = localWorkbenchAdapter(instance)
+  if (!adapter?.writeState) throw readOnlyInstanceError(instance)
+  return adapter.writeState(normalized)
 }
 
 async function readStaticWorkbenchSnapshot(instance: WorkbenchInstance): Promise<WorkbenchSnapshot> {
-  if (instance.id === garbageInstance.id) return readGarbageWorkbenchSnapshot()
-  const snapshot = staticWorkbenchSnapshot(instance)
-  if (snapshot) return snapshot
+  const adapter = localWorkbenchAdapter(instance)
+  if (adapter) return adapter.readSnapshot()
   throw readOnlyInstanceError(instance)
 }
 
@@ -207,7 +190,7 @@ export async function writeDatabaseWorkbenchReview(
   sql: SqlClient,
   recordId: string,
   review: ReviewValue,
-  instance: WorkbenchInstance = garbageInstance,
+  instance: WorkbenchInstance = defaultWorkbenchInstance(),
 ): Promise<void> {
   await sql.query(`
     insert into review_state (instance, record_id, review, updated_at)
@@ -221,7 +204,7 @@ export async function writeDatabaseWorkbenchFocus(
   sql: SqlClient,
   text: string,
   scope: WorkbenchFocus['scope'],
-  instance: WorkbenchInstance = garbageInstance,
+  instance: WorkbenchInstance = defaultWorkbenchInstance(),
 ): Promise<WorkbenchFocus | null> {
   const focus: WorkbenchFocus = {
     id: randomUUID(),
@@ -240,7 +223,7 @@ export async function writeDatabaseWorkbenchFocus(
 export async function writeDatabaseWorkbenchState(
   sql: SqlClient,
   state: WorkbenchStateExport,
-  instance: WorkbenchInstance = garbageInstance,
+  instance: WorkbenchInstance = defaultWorkbenchInstance(),
 ): Promise<WorkbenchStateImportResult> {
   let importedReviews = 0
   for (const [recordId, review] of Object.entries(state.reviews)) {
@@ -264,7 +247,7 @@ export async function writeDatabaseWorkbenchState(
 
 export async function readDatabaseWorkbenchSnapshot(
   sql: SqlClient,
-  instance: WorkbenchInstance = garbageInstance,
+  instance: WorkbenchInstance = defaultWorkbenchInstance(),
 ): Promise<WorkbenchSnapshot> {
   const [records, focuses, sourceRuns, collectionPlans, generatedAt] = await Promise.all([
     readWorkbenchRecords(sql, instance.id),
@@ -286,7 +269,7 @@ export async function readDatabaseWorkbenchSnapshot(
 
 export async function readDatabaseWorkbenchStatus(
   sql: SqlClient,
-  instance: WorkbenchInstance = garbageInstance,
+  instance: WorkbenchInstance = defaultWorkbenchInstance(),
 ): Promise<WorkbenchStatus> {
   const rows = await sql.query(`
     select
