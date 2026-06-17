@@ -122,7 +122,7 @@ async function smokeApiBackedSnapshot() {
     if (url === '/api/workbench/records?instance=garbage') return jsonResponse(workbenchSnapshot)
     if (url === '/api/workbench/review?instance=garbage') return jsonResponse({ ok: true })
     if (url === '/api/workbench/focus?instance=garbage') return jsonResponse({ ok: true })
-    if (url === '/api/newsletter/editorial-state') return jsonResponse({ ok: true, importedVotes: 1, importedFocuses: 1 })
+    if (url === '/api/workbench/state?instance=garbage') return jsonResponse({ ok: true, importedReviews: 1, importedFocuses: 1 })
     return jsonResponse({ error: 'not_found' }, false, 404)
   }
 
@@ -166,9 +166,9 @@ async function smokeApiBackedSnapshot() {
       },
     ],
   })
-  const importCall = calls.find((call) => call.url === '/api/newsletter/editorial-state')
+  const importCall = calls.find((call) => call.url === '/api/workbench/state?instance=garbage')
   if (!importCall || JSON.parse(String(importCall.options?.body)).votes['smoke-item'] !== -1) {
-    throw new Error('API editorial state import was not posted')
+    throw new Error('workbench state import was not posted')
   }
   if (state.snapshot.value.items[0]?.vote !== -1) throw new Error('API editorial state import did not update local view')
   if (!state.snapshot.value.focuses.some((focus) => focus.id === 'focus-api-import')) {

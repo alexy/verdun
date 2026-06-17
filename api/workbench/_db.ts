@@ -5,6 +5,7 @@ import {
   readGarbageWorkbenchStatus,
   writeGarbageWorkbenchFocus,
   writeGarbageWorkbenchReview,
+  writeGarbageWorkbenchState,
 } from '../instances/garbage/workbench.js'
 import { garbageInstance } from '../../src/instances/garbage/config'
 import { defaultWorkbenchInstance, staticWorkbenchSnapshot } from '../../src/instances/registry'
@@ -18,6 +19,8 @@ import type {
   WorkbenchRecordProvenance,
   WorkbenchReviewTarget,
   WorkbenchSnapshot,
+  WorkbenchStateExport,
+  WorkbenchStateImportResult,
   WorkbenchSourceRun,
 } from '../../src/core/workbench'
 
@@ -134,6 +137,14 @@ export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['s
   return writeGarbageWorkbenchFocus(text, scope)
 }
 
+export async function writeWorkbenchState(state: unknown, instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchStateImportResult> {
+  const normalized = normalizeWorkbenchState(state)
+  const databaseUrl = workbenchDatabaseUrl()
+  if (databaseUrl) return writeDatabaseWorkbenchState(neon(databaseUrl), normalized, instance)
+  if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
+  return writeGarbageWorkbenchState(normalized)
+}
+
 async function readStaticWorkbenchSnapshot(instance: WorkbenchInstance): Promise<WorkbenchSnapshot> {
   if (instance.id === garbageInstance.id) return readGarbageWorkbenchSnapshot()
   const snapshot = staticWorkbenchSnapshot(instance)
@@ -145,6 +156,51 @@ function readOnlyInstanceError(instance: WorkbenchInstance): Error {
   const error = new Error(instance.readOnlyMessage)
   Object.assign(error, { statusCode: 403, code: 'workbench_instance_read_only' })
   return error
+}
+
+function normalizeWorkbenchState(rawState: unknown): WorkbenchStateExport {
+  if (!rawState || typeof rawState !== 'object' || Array.isArray(rawState)) return { reviews: {}, focuses: [] }
+  const raw = rawState as {
+    focuses?: unknown
+    reviews?: unknown
+    votes?: unknown
+  }
+  return {
+    reviews: normalizeReviews(raw.reviews ?? raw.votes),
+    focuses: normalizeFocuses(raw.focuses),
+  }
+}
+
+function normalizeReviews(rawReviews: unknown): WorkbenchStateExport['reviews'] {
+  if (!rawReviews || typeof rawReviews !== 'object' || Array.isArray(rawReviews)) return {}
+  const reviews: WorkbenchStateExport['reviews'] = {}
+  for (const [recordId, rawReview] of Object.entries(rawReviews)) {
+    const review = Number(rawReview)
+    if (recordId && (review === -1 || review === 0 || review === 1)) reviews[recordId] = review
+  }
+  return reviews
+}
+
+function normalizeFocuses(rawFocuses: unknown): WorkbenchStateExport['focuses'] {
+  if (!Array.isArray(rawFocuses)) return []
+  return rawFocuses
+    .map((rawFocus, index) => {
+      if (!rawFocus || typeof rawFocus !== 'object' || Array.isArray(rawFocus)) return null
+      const focus = rawFocus as Record<string, unknown>
+      const text = typeof focus.text === 'string' ? focus.text.trim() : ''
+      if (!text) return null
+      return {
+        id: typeof focus.id === 'string' && focus.id ? focus.id : `imported-${index}`,
+        text: text.slice(0, 2000),
+        scope: focus.scope === 'ongoing' ? 'ongoing' : 'this_week',
+        created_at: typeof focus.created_at === 'string'
+          ? focus.created_at
+          : typeof focus.createdAt === 'string'
+            ? focus.createdAt
+            : new Date().toISOString(),
+      }
+    })
+    .filter((focus): focus is WorkbenchStateExport['focuses'][number] => Boolean(focus))
 }
 
 export async function writeDatabaseWorkbenchReview(
@@ -179,6 +235,31 @@ export async function writeDatabaseWorkbenchFocus(
     returning id, text, scope, created_at::text
   `, [instance.id, focus.id, focus.text, focus.scope, focus.createdAt]) as WorkbenchFocusRow[]
   return rows[0] ? toWorkbenchFocus(rows[0]) : focus
+}
+
+export async function writeDatabaseWorkbenchState(
+  sql: SqlClient,
+  state: WorkbenchStateExport,
+  instance: WorkbenchInstance = garbageInstance,
+): Promise<WorkbenchStateImportResult> {
+  let importedReviews = 0
+  for (const [recordId, review] of Object.entries(state.reviews)) {
+    await writeDatabaseWorkbenchReview(sql, recordId, review, instance)
+    importedReviews += 1
+  }
+
+  let importedFocuses = 0
+  for (const focus of state.focuses) {
+    const rows = await sql.query(`
+      insert into focuses (instance, id, text, scope, created_at)
+      values ($1, $2, $3, $4, $5::timestamptz)
+      on conflict (instance, id) do nothing
+      returning id
+    `, [instance.id, focus.id, focus.text, focus.scope, focus.created_at]) as Array<{ id: string }>
+    importedFocuses += rows.length
+  }
+
+  return { importedReviews, importedFocuses }
 }
 
 export async function readDatabaseWorkbenchSnapshot(

@@ -14,6 +14,7 @@ const workbenchInstance = 'garbage'
 const workbenchRecordsUrl = `/api/workbench/records?instance=${workbenchInstance}`
 const workbenchReviewUrl = `/api/workbench/review?instance=${workbenchInstance}`
 const workbenchFocusUrl = `/api/workbench/focus?instance=${workbenchInstance}`
+const workbenchStateUrl = `/api/workbench/state?instance=${workbenchInstance}`
 
 export function useNewsletterSnapshot() {
   const snapshot = ref<NewsletterSnapshot>(seedSnapshot)
@@ -103,12 +104,12 @@ export function useNewsletterSnapshot() {
       return result
     }
     try {
-      const response = await fetch('/api/newsletter/editorial-state', {
+      const response = await fetch(workbenchStateUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(raw),
       })
-      if (!response.ok) throw new Error(`editorial state API returned ${response.status}`)
+      if (!response.ok) throw new Error(`workbench state API returned ${response.status}`)
     } catch (importError) {
       error.value = importError instanceof Error ? importError.message : String(importError)
     }

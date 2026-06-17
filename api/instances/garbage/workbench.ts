@@ -1,6 +1,7 @@
-import { readSnapshot, readStatus, writeFocus, writeVote } from './newsletter-store.js'
+import { readSnapshot, readStatus, writeEditorialState, writeFocus, writeVote } from './newsletter-store.js'
 import { garbageSnapshotToWorkbench } from '../../../src/instances/garbage/workbench'
 import type { ReviewValue, WorkbenchFocus, WorkbenchSnapshot } from '../../../src/core/workbench'
+import type { WorkbenchStateExport, WorkbenchStateImportResult } from '../../../src/core/workbench'
 
 export type GarbageWorkbenchStatus = {
   editorialPersistence: WorkbenchSnapshot['editorialPersistence']
@@ -37,4 +38,15 @@ export async function writeGarbageWorkbenchReview(recordId: string, review: Revi
 
 export async function writeGarbageWorkbenchFocus(text: string, scope: WorkbenchFocus['scope']): Promise<WorkbenchFocus | null> {
   return writeFocus(text, scope)
+}
+
+export async function writeGarbageWorkbenchState(state: WorkbenchStateExport): Promise<WorkbenchStateImportResult> {
+  const result = await writeEditorialState({
+    votes: state.reviews,
+    focuses: state.focuses,
+  })
+  return {
+    importedReviews: result.importedVotes,
+    importedFocuses: result.importedFocuses,
+  }
 }

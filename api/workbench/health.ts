@@ -22,7 +22,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       })),
       editorialPersistence: activeSnapshot.editorialPersistence,
       readSurfaces: ['records', 'status', 'health'],
-      writeSurfaces: ['review', 'focus'],
+      writeSurfaces: ['review', 'focus', 'state'],
       collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
       databaseContract: {
         genericTables: ['instances', 'records', 'source_runs', 'collection_plans', 'review_state', 'focuses'],

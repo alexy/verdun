@@ -61,6 +61,10 @@ try {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
+  const { module: stateModule } = await runnerImport('./api/workbench/state.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
   const { module: greathouseConfigModule } = await runnerImport('./src/instances/greathouse/config.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
@@ -102,11 +106,29 @@ try {
   const writeSql = fakeWorkbenchWriteSql()
   await dbModule.writeDatabaseWorkbenchReview(writeSql, 'db-pydantic', 1)
   const focus = await dbModule.writeDatabaseWorkbenchFocus(writeSql, 'Database focus write.', 'this_week')
+  const stateImport = await dbModule.writeDatabaseWorkbenchState(writeSql, {
+    reviews: { 'db-pydantic': -1 },
+    focuses: [{
+      id: 'focus-state-db',
+      text: 'Database state focus.',
+      scope: 'ongoing',
+      created_at: '2026-06-16T12:30:00.000Z',
+    }],
+  })
   if (!writeSql.reviewWrites.some((write) => write.recordId === 'db-pydantic' && write.review === 1)) {
     throw new Error(`workbench generic review write did not target review_state: ${JSON.stringify(writeSql.reviewWrites)}`)
   }
+  if (!writeSql.reviewWrites.some((write) => write.recordId === 'db-pydantic' && write.review === -1)) {
+    throw new Error(`workbench generic state import did not target review_state: ${JSON.stringify(writeSql.reviewWrites)}`)
+  }
   if (!writeSql.focusWrites.some((write) => write.text === 'Database focus write.' && write.scope === 'this_week')) {
     throw new Error(`workbench generic focus write did not target focuses: ${JSON.stringify(writeSql.focusWrites)}`)
+  }
+  if (!writeSql.focusWrites.some((write) => write.id === 'focus-state-db' && write.scope === 'ongoing')) {
+    throw new Error(`workbench generic state import did not target focuses: ${JSON.stringify(writeSql.focusWrites)}`)
+  }
+  if (stateImport.importedReviews !== 1 || stateImport.importedFocuses !== 1) {
+    throw new Error(`workbench generic state import returned wrong counts: ${JSON.stringify(stateImport)}`)
   }
   if (focus?.text !== 'Database focus write.' || focus?.scope !== 'this_week') {
     throw new Error(`workbench generic focus write did not return a focus: ${JSON.stringify(focus)}`)
@@ -172,7 +194,7 @@ try {
   if (!healthResponse.body?.readSurfaces?.includes('records')) {
     throw new Error('workbench health route did not expose generic read surfaces')
   }
-  if (!healthResponse.body?.writeSurfaces?.includes('review') || !healthResponse.body?.writeSurfaces?.includes('focus')) {
+  if (!healthResponse.body?.writeSurfaces?.includes('review') || !healthResponse.body?.writeSurfaces?.includes('focus') || !healthResponse.body?.writeSurfaces?.includes('state')) {
     throw new Error('workbench health route did not expose generic write surfaces')
   }
 
@@ -192,6 +214,18 @@ try {
   if (focusResponse.code !== 200 || focusResponse.body?.focus?.text !== 'Workbench focus smoke note.') {
     throw new Error(`workbench focus route did not accept a generic focus: ${JSON.stringify(focusResponse.body)}`)
   }
+  const stateResponse = await call(stateModule.default, 'POST', {
+    reviews: { [recordId]: -1 },
+    focuses: [{
+      id: 'focus-state-route',
+      text: 'Workbench state route focus.',
+      scope: 'ongoing',
+      created_at: '2026-06-16T13:00:00.000Z',
+    }],
+  })
+  if (stateResponse.code !== 200 || stateResponse.body?.importedReviews !== 1 || stateResponse.body?.importedFocuses !== 1) {
+    throw new Error(`workbench state route did not accept generic state import: ${JSON.stringify(stateResponse.body)}`)
+  }
   const greathouseReviewResponse = await call(reviewModule.default, 'POST', {
     recordId: 'listing-redfin-berkeley-01',
     review: 1,
@@ -199,16 +233,25 @@ try {
   if (greathouseReviewResponse.code !== 403 || greathouseReviewResponse.body?.error !== 'workbench_instance_read_only') {
     throw new Error(`workbench review route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseReviewResponse.body)}`)
   }
+  const greathouseStateResponse = await call(stateModule.default, 'POST', {
+    reviews: { 'listing-redfin-berkeley-01': 1 },
+  }, { instance: 'greathouse' })
+  if (greathouseStateResponse.code !== 403 || greathouseStateResponse.body?.error !== 'workbench_instance_read_only') {
+    throw new Error(`workbench state route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseStateResponse.body)}`)
+  }
   const unknownInstanceResponse = await call(recordsModule.default, 'GET', undefined, { instance: 'unknown' })
   if (unknownInstanceResponse.code !== 400 || unknownInstanceResponse.body?.error !== 'unknown_workbench_instance') {
     throw new Error(`workbench records route did not reject unknown instances: ${JSON.stringify(unknownInstanceResponse.body)}`)
   }
   const updatedSnapshot = await dbModule.readWorkbenchSnapshot()
-  if (!updatedSnapshot.records.some((record) => record.id === recordId && record.review === 1)) {
-    throw new Error('workbench review route did not persist into projected records')
+  if (!updatedSnapshot.records.some((record) => record.id === recordId && record.review === -1)) {
+    throw new Error('workbench state route did not persist imported reviews into projected records')
   }
   if (!updatedSnapshot.focuses.some((focus) => focus.text === 'Workbench focus smoke note.')) {
     throw new Error('workbench focus route did not persist into projected focuses')
+  }
+  if (!updatedSnapshot.focuses.some((focus) => focus.text === 'Workbench state route focus.')) {
+    throw new Error('workbench state route did not persist imported focuses into projected focuses')
   }
 
   const invalidReview = await call(reviewModule.default, 'POST', { recordId, review: 4 })

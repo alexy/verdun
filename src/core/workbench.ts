@@ -92,3 +92,8 @@ export type WorkbenchStateExport = {
     created_at: string
   }>
 }
+
+export type WorkbenchStateImportResult = {
+  importedReviews: number
+  importedFocuses: number
+}
