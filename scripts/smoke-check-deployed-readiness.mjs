@@ -1,8 +1,16 @@
 import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
-const rawSnapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
+const garbageProfile = deployCheckProfile(defaultDeployCheckProfileId())
+const greathouseProfile = deployCheckProfile('greathouse')
+if (!garbageProfile?.sourceSnapshotPath || !garbageProfile?.draft || !greathouseProfile) {
+  throw new Error('deployed-check smoke requires Garbage and Greathouse deploy profiles')
+}
+const garbageBasePath = garbageProfile.basePath
+const greathouseBasePath = greathouseProfile.basePath
+const rawSnapshot = JSON.parse(await readFile(garbageProfile.sourceSnapshotPath, 'utf8'))
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
 const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
 const greathouseDeployProfileSource = await readFile('scripts/instances/greathouse/deploy-checks.mjs', 'utf8')
@@ -200,7 +208,7 @@ Typed lakehouse and graph systems are moving from experiments into practical inf
 - Hacker News: 5 items
 `
 const draftManifest = {
-  snapshotInput: 'api/garbage/newsletter/items',
+  snapshotInput: garbageProfile.draft.manifestSnapshotInput,
   issue: {
     date: '2026-06-16',
     slug: 'strongly-typed-ai-data-notes-june-16-2026',
@@ -227,17 +235,17 @@ const draftJson = JSON.stringify({
 
 const server = createServer((request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1')
-  if (url.pathname === '/rbage/' || url.pathname === '/rbage/index.html') {
+  if (url.pathname === garbageBasePath || url.pathname === `${garbageBasePath}index.html`) {
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
-    response.end('<!doctype html><div id="app"></div><script type="module" src="/rbage/assets/index.js"></script>')
+    response.end(`<!doctype html><div id="app"></div><script type="module" src="${garbageBasePath}assets/index.js"></script>`)
     return
   }
-  if (url.pathname === '/greathouse/' || url.pathname === '/greathouse/index.html') {
+  if (url.pathname === greathouseBasePath || url.pathname === `${greathouseBasePath}index.html`) {
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
-    response.end('<!doctype html><div id="app"></div><script type="module" src="/greathouse/assets/index.js"></script>')
+    response.end(`<!doctype html><div id="app"></div><script type="module" src="${greathouseBasePath}assets/index.js"></script>`)
     return
   }
-  if (url.pathname === '/greathouse/data/greathouse-snapshot.json') {
+  if (url.pathname === profileStaticPath(greathouseProfile)) {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(greathouseSnapshotJson())
     return
@@ -247,7 +255,7 @@ const server = createServer((request, response) => {
     response.end(greathouseSnapshotJson())
     return
   }
-  if (url.pathname === '/rbage/data/newsletter-snapshot.json' || url.pathname === '/api/workbench/records') {
+  if (url.pathname === profileStaticPath(garbageProfile) || url.pathname === '/api/workbench/records') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(snapshotJson())
     return
@@ -272,7 +280,7 @@ const server = createServer((request, response) => {
     response.end(healthJson())
     return
   }
-  if (url.pathname === '/api/garbage/newsletter/draft') {
+  if (url.pathname === garbageProfile.draft.apiPath) {
     const format = url.searchParams.get('format')
     if (format === 'markdown') {
       response.writeHead(200, { 'content-type': 'text/markdown; charset=utf-8' })
@@ -302,7 +310,7 @@ if (!address || typeof address === 'string') {
 try {
   const result = await runCheckDeployed([
     'scripts/check-deployed.mjs',
-    `http://127.0.0.1:${address.port}/rbage/`,
+    localProfileUrl(address.port, garbageProfile),
     '--require-ready',
   ])
   if (result.status !== 0) {
@@ -313,7 +321,7 @@ try {
   }
   const previewResult = await runCheckDeployed([
     'scripts/check-preview.mjs',
-    `http://127.0.0.1:${address.port}/rbage/`,
+    localProfileUrl(address.port, garbageProfile),
   ])
   if (previewResult.status !== 0 || !previewResult.stdout.includes('(static only)')) {
     throw new Error(`profile-backed preview check failed\n${previewResult.stdout}\n${previewResult.stderr}`)
@@ -325,7 +333,7 @@ try {
   statusJson = databaseStatusJson()
   const staleResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
-    `http://127.0.0.1:${address.port}/rbage/`,
+    localProfileUrl(address.port, garbageProfile),
     '--require-ready',
   ])
   if (staleResult.status === 0 || !staleResult.stderr.includes('Snapshot freshness')) {
@@ -338,7 +346,7 @@ try {
   statusJson = databaseStatusJson()
   const databaseResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
-    `http://127.0.0.1:${address.port}/rbage/`,
+    localProfileUrl(address.port, garbageProfile),
     '--require-database',
   ])
   if (databaseResult.status !== 0 || !databaseResult.stdout.includes('with database gate')) {
@@ -347,7 +355,7 @@ try {
   statusJson = browserStatusJson()
   const browserResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
-    `http://127.0.0.1:${address.port}/rbage/`,
+    localProfileUrl(address.port, garbageProfile),
     '--require-database',
   ])
   if (browserResult.status === 0 || !browserResult.stderr.includes('not database-backed')) {
@@ -356,7 +364,7 @@ try {
   statusJson = databaseStatusJson()
   const greathouseResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
-    `http://127.0.0.1:${address.port}/greathouse/`,
+    localProfileUrl(address.port, greathouseProfile),
     '--instance',
     'greathouse',
   ])
@@ -372,6 +380,14 @@ try {
   await new Promise((resolve, reject) => {
     server.close((error) => error ? reject(error) : resolve())
   })
+}
+
+function localProfileUrl(port, profile) {
+  return `http://127.0.0.1:${port}${profile.basePath}`
+}
+
+function profileStaticPath(profile) {
+  return new URL(profile.staticSnapshotPath, `http://127.0.0.1${profile.basePath}`).pathname
 }
 
 function runCheckDeployed(args) {
