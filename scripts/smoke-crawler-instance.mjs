@@ -104,6 +104,19 @@ try {
   if (listing.raw_json?.provenance?.adapter !== 'local-listing-json') {
     throw new Error(`listing record used wrong adapter provenance: ${listing.raw_json?.provenance?.adapter}`)
   }
+  const redfinListing = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'redfin-listing-json')
+  if (!redfinListing) {
+    throw new Error('greathouse snapshot did not contain a Redfin adapter listing record')
+  }
+  if (redfinListing.raw_json?.provenance?.stage !== 'property_source') {
+    throw new Error(`Redfin listing used wrong provenance stage: ${redfinListing.raw_json?.provenance?.stage}`)
+  }
+  if (redfinListing.raw_json?.property?.price !== 875000 || redfinListing.raw_json?.property?.beds !== 2 || redfinListing.raw_json?.property?.baths !== 1.5) {
+    throw new Error(`Redfin listing did not preserve normalized property details: ${JSON.stringify(redfinListing.raw_json?.property)}`)
+  }
+  if (!redfinListing.summary.includes('$875,000 Redfin listing') || !redfinListing.summary.includes('4 comparable signals')) {
+    throw new Error(`Redfin listing summary was not property-shaped: ${redfinListing.summary}`)
+  }
   const diagnostic = snapshot.items?.find((item) => item.source_kind === 'diagnostic' && item.project === 'Oakland blocked source')
   if (!diagnostic) {
     throw new Error('greathouse snapshot did not contain a diagnostic-shaped record')
@@ -114,7 +127,7 @@ try {
   const reviewAdapters = new Set(
     snapshot.query_plans?.flatMap((plan) => plan.review_targets?.map((target) => target.adapter) ?? []) ?? [],
   )
-  if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('local-diagnostic-json')) {
+  if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('redfin-listing-json') || !reviewAdapters.has('local-diagnostic-json')) {
     throw new Error(`greathouse review targets did not expose local JSON adapters: ${[...reviewAdapters].join(', ')}`)
   }
 

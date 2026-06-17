@@ -20,6 +20,13 @@ adapter = "local-listing-json"
 fixture_path = "crawler/instances/greathouse/fixtures/listings.json"
 
 [[sources]]
+name = "Redfin property feed"
+kind = "listing"
+url = "https://example.com/redfin/property-feed"
+adapter = "redfin-listing-json"
+fixture_path = "crawler/instances/greathouse/fixtures/redfin-listings.json"
+
+[[sources]]
 name = "Redfin diagnostics"
 kind = "diagnostic"
 url = "https://example.com/redfin-diagnostics"

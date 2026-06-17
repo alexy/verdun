@@ -131,12 +131,13 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
                     | "http-listing-json"
                     | "http-diagnostic-json"
                     | "http-status-diagnostic"
+                    | "redfin-listing-json"
             ),
             "{} uses unsupported Greathouse adapter {}",
             source.name,
             adapter
         );
-        if adapter.starts_with("local-") {
+        if adapter.starts_with("local-") || adapter == "redfin-listing-json" {
             let data_path = source.fixture_path.as_ref().with_context(|| {
                 format!(
                     "{} must configure fixture_path for {}",
@@ -228,6 +229,7 @@ fn greathouse_item(
         score: record.score.unwrap_or(70 + (index as i32 * 5).min(20)),
         raw_json: serde_json::json!({
             "collection_stage": stage,
+            "property": record.property_json,
             "provenance": {
                 "stage": stage,
                 "adapter": adapter,
@@ -257,6 +259,8 @@ struct HttpJsonSourceAdapter {
 }
 
 struct HttpStatusDiagnosticAdapter;
+
+struct RedfinListingJsonAdapter;
 
 impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
     fn adapter_name(&self) -> &'static str {
@@ -392,6 +396,7 @@ impl GreathouseSourceAdapter for HttpStatusDiagnosticAdapter {
                     ],
                     score: Some(if status.is_success() { 50 } else { 82 }),
                     stage: Some(stage.to_string()),
+                    property_json: serde_json::Value::Null,
                 }
             }
             Err(error) => GreathouseLocalRecord {
@@ -406,6 +411,7 @@ impl GreathouseSourceAdapter for HttpStatusDiagnosticAdapter {
                 tags: vec!["http-status".to_string(), "blocked-source".to_string()],
                 score: Some(84),
                 stage: Some("blocked_http".to_string()),
+                property_json: serde_json::Value::Null,
             },
         };
         Ok(vec![greathouse_item(
@@ -415,6 +421,47 @@ impl GreathouseSourceAdapter for HttpStatusDiagnosticAdapter {
             self.adapter_name(),
             0,
         )])
+    }
+}
+
+impl GreathouseSourceAdapter for RedfinListingJsonAdapter {
+    fn adapter_name(&self) -> &'static str {
+        "redfin-listing-json"
+    }
+
+    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+        let path = source
+            .fixture_path
+            .as_ref()
+            .with_context(|| format!("{} has no fixture_path configured", source.name))?;
+        let records: Vec<RedfinListingRecord> = serde_json::from_slice(
+            &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+        )
+        .with_context(|| format!("parsing Redfin listing JSON from {}", path.display()))?;
+        records
+            .into_iter()
+            .enumerate()
+            .map(|(index, record)| {
+                let subject = record.subject.clone();
+                let target = config
+                    .targets
+                    .iter()
+                    .find(|target| target.name == subject)
+                    .with_context(|| {
+                        format!(
+                            "{} Redfin adapter data references unknown subject {}",
+                            source.name, subject
+                        )
+                    })?;
+                Ok(greathouse_item(
+                    target,
+                    source,
+                    record.into_local_record(),
+                    self.adapter_name(),
+                    index,
+                ))
+            })
+            .collect()
     }
 }
 
@@ -431,6 +478,7 @@ static HTTP_DIAGNOSTIC_JSON_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapt
     adapter: "http-diagnostic-json",
 };
 static HTTP_STATUS_DIAGNOSTIC_ADAPTER: HttpStatusDiagnosticAdapter = HttpStatusDiagnosticAdapter;
+static REDFIN_LISTING_JSON_ADAPTER: RedfinListingJsonAdapter = RedfinListingJsonAdapter;
 
 fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSourceAdapter> {
     match source.adapter.as_deref() {
@@ -439,6 +487,7 @@ fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSo
         Some("http-listing-json") => Ok(&HTTP_LISTING_JSON_ADAPTER),
         Some("http-diagnostic-json") => Ok(&HTTP_DIAGNOSTIC_JSON_ADAPTER),
         Some("http-status-diagnostic") => Ok(&HTTP_STATUS_DIAGNOSTIC_ADAPTER),
+        Some("redfin-listing-json") => Ok(&REDFIN_LISTING_JSON_ADAPTER),
         Some(adapter) => anyhow::bail!(
             "{} uses unsupported Greathouse adapter {}",
             source.name,
@@ -477,6 +526,9 @@ fn source_run_message(source: &SourceConfig) -> String {
     let adapter = source.adapter.as_deref().unwrap_or("missing-adapter");
     if adapter == "http-status-diagnostic" {
         "HTTP status diagnostic adapter retained source reachability evidence for retry".to_string()
+    } else if adapter == "redfin-listing-json" {
+        "Redfin listing adapter normalized property evidence from external crawler output"
+            .to_string()
     } else if adapter.starts_with("http-") && source.kind == "diagnostic" {
         "HTTP diagnostic adapter retained blocked-source evidence for retry".to_string()
     } else if adapter.starts_with("http-") {
@@ -581,4 +633,114 @@ struct GreathouseLocalRecord {
     tags: Vec<String>,
     score: Option<i32>,
     stage: Option<String>,
+    #[serde(default)]
+    property_json: serde_json::Value,
+}
+
+#[derive(Debug, Deserialize)]
+struct RedfinListingRecord {
+    subject: String,
+    url: String,
+    address: String,
+    city: Option<String>,
+    state: Option<String>,
+    price: Option<i64>,
+    beds: Option<f32>,
+    baths: Option<f32>,
+    status: Option<String>,
+    observed_at: Option<DateTime<Utc>>,
+    days_on_market: Option<i64>,
+    comparable_count: Option<i64>,
+    source_status: Option<String>,
+    tags: Option<Vec<String>>,
+    score: Option<i32>,
+}
+
+impl RedfinListingRecord {
+    fn into_local_record(self) -> GreathouseLocalRecord {
+        let bedroom_label = self
+            .beds
+            .map(format_count)
+            .unwrap_or_else(|| "unknown".to_string());
+        let bathroom_label = self
+            .baths
+            .map(format_count)
+            .unwrap_or_else(|| "unknown".to_string());
+        let price_label = self
+            .price
+            .map(format_price)
+            .unwrap_or_else(|| "unpriced".to_string());
+        let location = [self.city.as_deref(), self.state.as_deref()]
+            .into_iter()
+            .flatten()
+            .filter(|part| !part.is_empty())
+            .collect::<Vec<_>>()
+            .join(", ");
+        let title = if location.is_empty() {
+            format!("Redfin listing: {}", self.address)
+        } else {
+            format!("Redfin listing: {} ({})", self.address, location)
+        };
+        let status = self
+            .status
+            .clone()
+            .unwrap_or_else(|| "unknown status".to_string());
+        let source_status = self
+            .source_status
+            .clone()
+            .unwrap_or_else(|| "observed".to_string());
+        let days_on_market = self
+            .days_on_market
+            .map(|days| format!("{days} days on market"))
+            .unwrap_or_else(|| "unknown market age".to_string());
+        let comparable_count = self.comparable_count.unwrap_or(0);
+        let summary = format!(
+            "{price_label} Redfin listing with {bedroom_label} beds, {bathroom_label} baths, {status}, {days_on_market}, and {comparable_count} comparable signals."
+        );
+        let mut tags = self.tags.unwrap_or_default();
+        tags.push("redfin".to_string());
+        tags.push(source_status.clone());
+        GreathouseLocalRecord {
+            subject: self.subject,
+            url: self.url,
+            title: Some(title),
+            observed_at: self.observed_at,
+            summary: Some(summary),
+            tags,
+            score: self.score,
+            stage: Some("property_source".to_string()),
+            property_json: serde_json::json!({
+                "address": self.address,
+                "city": self.city,
+                "state": self.state,
+                "price": self.price,
+                "beds": self.beds,
+                "baths": self.baths,
+                "status": self.status,
+                "days_on_market": self.days_on_market,
+                "comparable_count": comparable_count,
+                "source_status": source_status,
+            }),
+        }
+    }
+}
+
+fn format_count(value: f32) -> String {
+    if value.fract() == 0.0 {
+        format!("{}", value as i64)
+    } else {
+        format!("{value:.1}")
+    }
+}
+
+fn format_price(value: i64) -> String {
+    let digits = value.to_string();
+    let mut formatted = String::new();
+    for (index, character) in digits.chars().rev().enumerate() {
+        if index > 0 && index % 3 == 0 {
+            formatted.push(',');
+        }
+        formatted.push(character);
+    }
+    format!("${}", formatted.chars().rev().collect::<String>())
 }

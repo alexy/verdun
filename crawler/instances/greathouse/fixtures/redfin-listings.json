@@ -1,0 +1,19 @@
+[
+  {
+    "subject": "Berkeley 2BR",
+    "url": "https://example.com/redfin/berkeley-two-bedroom",
+    "address": "1849 Shattuck Ave Unit 2",
+    "city": "Berkeley",
+    "state": "CA",
+    "price": 875000,
+    "beds": 2,
+    "baths": 1.5,
+    "status": "active",
+    "observed_at": "2026-06-16T15:20:00Z",
+    "days_on_market": 6,
+    "comparable_count": 4,
+    "source_status": "fresh",
+    "tags": ["berkeley", "2br", "redfin", "comparable"],
+    "score": 91
+  }
+]
