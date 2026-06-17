@@ -1,4 +1,4 @@
-import { credoBlurb, ontologyForItem, ontologyNodes } from './ontology.js'
+import { credoBlurb, ontologyForItem, ontologyNodes } from '../instances/garbage/ontology.js'
 import type {
   ReviewValue,
   WorkbenchCollectionPlan,

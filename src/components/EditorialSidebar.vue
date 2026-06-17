@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { BookOpenText, ClipboardCheck, Database, Send, Sparkles } from '@lucide/vue'
 import type { NewsItem, NewsletterFocus, NewsletterReadiness, ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
-import type { OntologyNode } from '../lib/ontology'
+import type { OntologyNode } from '../instances/garbage/ontology'
 import type { DraftSourceSummary } from '../composables/useNewsletterView'
 import SourceHealthPanel from './SourceHealthPanel.vue'
 
