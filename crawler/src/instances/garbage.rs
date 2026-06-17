@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use crate::core::{
     CollectionTarget, CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord,
-    ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
+    ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, slug, stable_id,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -45,6 +45,74 @@ pub struct ProjectQueryPlan {
     pub review_targets: Vec<ReviewTarget>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub focus_terms: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct HackerNewsResponse {
+    pub hits: Vec<HackerNewsHit>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct HackerNewsHit {
+    #[serde(rename = "objectID")]
+    pub object_id: Option<String>,
+    pub title: Option<String>,
+    pub url: Option<String>,
+    pub story_url: Option<String>,
+    pub created_at_i: Option<i64>,
+    pub points: Option<i32>,
+    pub num_comments: Option<i32>,
+    pub author: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct LobstersStory {
+    pub short_id: Option<String>,
+    pub short_id_url: Option<String>,
+    pub title: String,
+    pub url: String,
+    pub created_at: DateTime<Utc>,
+    pub score: Option<i32>,
+    pub comment_count: Option<i32>,
+    pub tags: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct DevToArticle {
+    pub id: i64,
+    pub title: String,
+    pub description: Option<String>,
+    pub url: String,
+    pub canonical_url: Option<String>,
+    pub published_at: DateTime<Utc>,
+    pub positive_reactions_count: Option<i32>,
+    pub comments_count: Option<i32>,
+    pub tag_list: Vec<String>,
+    pub user: DevToUser,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct DevToUser {
+    pub username: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ManualPost {
+    pub title: String,
+    pub url: String,
+    pub author: Option<String>,
+    pub published_at: DateTime<Utc>,
+    pub text: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct FeedEntry {
+    pub title: String,
+    pub link: String,
+    pub published_at: DateTime<Utc>,
+    pub summary: String,
+    pub match_text: String,
+    pub feed_url: String,
 }
 
 pub struct ExportPayload {
@@ -204,6 +272,273 @@ pub fn provenance(
     })
 }
 
+pub fn hn_item(
+    project: &CollectionTarget,
+    source: &SourceConfig,
+    hit: HackerNewsHit,
+    focus_terms: &[String],
+) -> NewsItem {
+    let title = hit
+        .title
+        .unwrap_or_else(|| format!("{} discussion on Hacker News", project.name));
+    let url = hit
+        .url
+        .or(hit.story_url)
+        .unwrap_or_else(|| source.url.clone());
+    let points = hit.points.unwrap_or_default();
+    let comments = hit.num_comments.unwrap_or_default();
+    let published_at = hit
+        .created_at_i
+        .and_then(|timestamp| DateTime::from_timestamp(timestamp, 0))
+        .unwrap_or_else(Utc::now);
+    NewsItem {
+        id: stable_id(
+            "hn",
+            &format!(
+                "{}:{}",
+                project.name,
+                hit.object_id.clone().unwrap_or_else(|| url.clone())
+            ),
+        ),
+        title,
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: url.clone(),
+        published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: format!(
+            "Hacker News surfaced this item while tracking {} keywords: {}.",
+            project.name,
+            project.keywords.join(", ")
+        ),
+        why_it_matters: format!(
+            "Community discussion can reveal whether {} is becoming practical infrastructure or only an interesting release note.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(3)
+            .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
+            .chain(["hacker-news".to_string()])
+            .collect(),
+        score: 60 + points.min(30) + comments.min(20),
+        raw_json: serde_json::json!({
+            "collection_stage": "live",
+            "provenance": provenance("live", "hn-algolia", source, project, &url, focus_terms),
+            "source": "hacker-news",
+            "object_id": hit.object_id,
+            "points": points,
+            "comments": comments,
+            "author": hit.author
+        }),
+    }
+}
+
+pub fn lobsters_item(
+    project: &CollectionTarget,
+    source: &SourceConfig,
+    story: &LobstersStory,
+    focus_terms: &[String],
+) -> NewsItem {
+    let score = story.score.unwrap_or_default();
+    let comments = story.comment_count.unwrap_or_default();
+    let url = story
+        .short_id_url
+        .clone()
+        .unwrap_or_else(|| story.url.clone());
+    NewsItem {
+        id: stable_id(
+            "lobsters",
+            &format!(
+                "{}:{}",
+                project.name,
+                story.short_id.clone().unwrap_or_else(|| story.url.clone())
+            ),
+        ),
+        title: story.title.clone(),
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: url.clone(),
+        published_at: story.created_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: format!(
+            "Lobste.rs matched this story against {} signals: {}.",
+            project.name,
+            project.keywords.join(", ")
+        ),
+        why_it_matters: format!(
+            "Lobste.rs is a useful technical filter for whether {} has substance with systems-oriented readers.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(2)
+            .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
+            .chain(story.tags.iter().take(3).cloned())
+            .collect(),
+        score: 62 + score.min(25) + comments.min(15),
+        raw_json: serde_json::json!({
+            "collection_stage": "live",
+            "provenance": provenance("live", "lobsters-search", source, project, &url, focus_terms),
+            "source": "lobsters",
+            "short_id": story.short_id,
+            "score": score,
+            "comments": comments,
+            "story_url": story.url
+        }),
+    }
+}
+
+pub fn dev_to_item(
+    project: &CollectionTarget,
+    source: &SourceConfig,
+    article: &DevToArticle,
+    focus_terms: &[String],
+) -> NewsItem {
+    let reactions = article.positive_reactions_count.unwrap_or_default();
+    let comments = article.comments_count.unwrap_or_default();
+    let url = article
+        .canonical_url
+        .clone()
+        .unwrap_or_else(|| article.url.clone());
+    NewsItem {
+        id: stable_id("dev-to", &format!("{}:{}", project.name, article.id)),
+        title: article.title.clone(),
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: url.clone(),
+        published_at: article.published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: article.description.clone().unwrap_or_else(|| {
+            format!(
+                "dev.to surfaced this item while tracking {} signals: {}.",
+                project.name,
+                project.keywords.join(", ")
+            )
+        }),
+        why_it_matters: format!(
+            "Developer essays show whether {} is gaining practical adoption beyond release announcements.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(2)
+            .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
+            .chain(article.tag_list.iter().take(4).cloned())
+            .collect(),
+        score: 55 + reactions.min(30) + comments.min(15),
+        raw_json: serde_json::json!({
+            "collection_stage": "live",
+            "provenance": provenance("live", "dev-to-articles", source, project, &url, focus_terms),
+            "source": "dev-to",
+            "article_id": article.id,
+            "reactions": reactions,
+            "comments": comments,
+            "author": article.user.username
+        }),
+    }
+}
+
+pub fn feed_item(
+    project: &CollectionTarget,
+    source: &SourceConfig,
+    entry: &FeedEntry,
+    focus_terms: &[String],
+) -> NewsItem {
+    NewsItem {
+        id: stable_id(
+            &slug(&source.name),
+            &format!("{}:{}", project.name, entry.link),
+        ),
+        title: entry.title.clone(),
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: entry.link.clone(),
+        published_at: entry.published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: if entry.summary.is_empty() {
+            format!(
+                "{} surfaced this feed item while tracking {} signals: {}.",
+                source.name,
+                project.name,
+                project.keywords.join(", ")
+            )
+        } else {
+            truncate_text(&entry.summary, 260)
+        },
+        why_it_matters: format!(
+            "Long-form publication coverage can show whether {} is being adopted, compared, or explained beyond release traffic.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(3)
+            .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
+            .chain([slug(&source.name)])
+            .collect(),
+        score: feed_score(project, entry),
+        raw_json: serde_json::json!({
+            "collection_stage": "live",
+            "provenance": provenance("live", "rss-atom-feed", source, project, &entry.link, focus_terms),
+            "source": slug(&source.name),
+            "feed_url": entry.feed_url
+        }),
+    }
+}
+
+pub fn manual_post_item(
+    project: &CollectionTarget,
+    source: &SourceConfig,
+    post: &ManualPost,
+    focus_terms: &[String],
+) -> NewsItem {
+    NewsItem {
+        id: stable_id(
+            &slug(&source.name),
+            &format!("{}:{}", project.name, post.url),
+        ),
+        title: post.title.clone(),
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: post.url.clone(),
+        published_at: post.published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary: truncate_text(&post.text, 260),
+        why_it_matters: format!(
+            "Manually reviewed social posts can capture practitioner interest in {} without relying on unauthenticated scraping.",
+            project.name
+        ),
+        tags: project
+            .keywords
+            .iter()
+            .take(3)
+            .cloned()
+            .chain(focus_terms.iter().take(2).cloned())
+            .chain([slug(&source.name)])
+            .collect(),
+        score: 76,
+        raw_json: serde_json::json!({
+            "collection_stage": "manual",
+            "provenance": provenance("manual", "manual-json", source, project, &post.url, focus_terms),
+            "source": slug(&source.name),
+            "author": post.author
+        }),
+    }
+}
+
 fn project_item(project: &CollectionTarget, source: &SourceConfig, index: usize) -> NewsItem {
     let published_at = seed_base_time() - Duration::days(index as i64);
     let title = format!(
@@ -265,6 +600,24 @@ fn matched_keywords(project: &CollectionTarget, focus_terms: &[String]) -> Vec<S
     keywords.sort();
     keywords.dedup();
     keywords
+}
+
+fn feed_score(project: &CollectionTarget, entry: &FeedEntry) -> i32 {
+    let text = format!("{} {}", entry.title, entry.link).to_lowercase();
+    let project_name = project.name.to_lowercase();
+    let explicit_project = text.contains(&project_name)
+        || (project.name == "LanceDB"
+            && (text.contains("lancedb") || text.contains("lance-format")));
+    if explicit_project { 88 } else { 68 }
+}
+
+fn truncate_text(value: &str, max_chars: usize) -> String {
+    if value.chars().count() <= max_chars {
+        return value.to_string();
+    }
+    let mut text = value.chars().take(max_chars).collect::<String>();
+    text.push('…');
+    text
 }
 
 fn news_item_record(item: &NewsItem) -> NormalizedRecord {
