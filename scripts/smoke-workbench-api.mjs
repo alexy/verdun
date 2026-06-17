@@ -81,6 +81,21 @@ try {
     throw new Error(`workbench status counts did not match snapshot: ${JSON.stringify(status)}`)
   }
 
+  const databaseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql())
+  if (
+    databaseSnapshot.editorialPersistence !== 'database'
+    || databaseSnapshot.records[0]?.subject !== 'Pydantic'
+    || databaseSnapshot.records[0]?.provenance?.subject !== 'Pydantic'
+    || databaseSnapshot.sourceRuns[0]?.subjectCounts?.Pydantic !== 1
+    || databaseSnapshot.collectionPlans[0]?.query !== 'Pydantic pydantic'
+  ) {
+    throw new Error(`workbench database-view reader did not map generic rows: ${JSON.stringify(databaseSnapshot)}`)
+  }
+  const databaseStatus = await dbModule.readDatabaseWorkbenchStatus(fakeWorkbenchSql())
+  if (databaseStatus.recordCount !== 1 || databaseStatus.collectionPlanCount !== 1 || databaseStatus.editorialPersistence !== 'database') {
+    throw new Error(`workbench database-view status did not map generic counts: ${JSON.stringify(databaseStatus)}`)
+  }
+
   const recordsResponse = await call(recordsModule.default)
   if (recordsResponse.code !== 200 || recordsResponse.body?.records?.length !== snapshot.records.length) {
     throw new Error('workbench records route did not return the generic snapshot')
@@ -137,4 +152,85 @@ try {
   delete process.env.DATABASE_URL
   delete process.env.NEON_DATABASE_URL
   await rm(stateDir, { recursive: true, force: true })
+}
+
+function fakeWorkbenchSql() {
+  return {
+    async query(sql) {
+      if (sql.includes('record_count')) {
+        return [{
+          record_count: 1,
+          focus_count: 1,
+          review_count: 1,
+          source_run_count: 1,
+          collection_plan_count: 1,
+          generated_at: '2026-06-16T12:00:00.000Z',
+        }]
+      }
+      if (sql.includes('from workbench_records')) {
+        if (sql.includes('max(updated_at)')) {
+          return [{ generated_at: '2026-06-16T12:00:00.000Z' }]
+        }
+        return [{
+          id: 'db-pydantic',
+          title: 'Pydantic database record',
+          source: 'Hacker News',
+          source_kind: 'community',
+          url: 'https://example.com/pydantic',
+          observed_at: '2026-06-16T12:00:00.000Z',
+          subject: 'Pydantic',
+          topic: 'typed AI',
+          summary: 'Generic workbench database record.',
+          tags: ['pydantic', 'typed-agents'],
+          score: 91,
+          review: 1,
+          provenance_json: {
+            stage: 'live',
+            adapter: 'hn-algolia',
+            source: 'Hacker News',
+            source_kind: 'community',
+            source_url: 'https://hn.algolia.com',
+            evidence_url: 'https://example.com/pydantic',
+            project: 'Pydantic',
+            matched_keywords: ['pydantic'],
+          },
+        }]
+      }
+      if (sql.includes('from workbench_focuses')) {
+        return [{
+          id: 'focus-db',
+          text: 'Database focus',
+          scope: 'this_week',
+          created_at: '2026-06-16T12:00:00.000Z',
+        }]
+      }
+      if (sql.includes('from workbench_source_runs')) {
+        return [{
+          source: 'Hacker News',
+          kind: 'community',
+          status: 'ok',
+          item_count: 1,
+          message: 'database source run',
+          subject_counts: { Pydantic: 1 },
+        }]
+      }
+      if (sql.includes('from workbench_collection_plans')) {
+        return [{
+          subject: 'Pydantic',
+          topic: 'typed AI',
+          query: 'Pydantic pydantic',
+          live_terms: ['pydantic'],
+          tags: ['pydantic'],
+          review_targets: [{
+            source: 'Hacker News',
+            label: 'HN: Pydantic',
+            url: 'https://hn.algolia.com/?query=Pydantic',
+            adapter: 'hn-algolia',
+          }],
+          focus_terms: [],
+        }]
+      }
+      throw new Error(`unexpected fake workbench SQL query: ${sql}`)
+    },
+  }
 }
