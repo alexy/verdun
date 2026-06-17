@@ -1,11 +1,4 @@
-import {
-  readGarbageWorkbenchSnapshot,
-  readGarbageWorkbenchStatus,
-  writeGarbageWorkbenchFocus,
-  writeGarbageWorkbenchReview,
-  writeGarbageWorkbenchState,
-} from '../instances/garbage/workbench.js'
-import { garbageInstance } from '../../src/instances/garbage/config'
+import { garbageLocalWorkbenchAdapter } from '../instances/garbage/workbench.js'
 import { staticWorkbenchSnapshot } from '../../src/instances/registry'
 import type {
   ReviewValue,
@@ -36,17 +29,11 @@ export type LocalWorkbenchAdapter = {
   writeState?: (state: WorkbenchStateExport) => Promise<WorkbenchStateImportResult>
 }
 
-const garbageWorkbenchAdapter: LocalWorkbenchAdapter = {
-  compatibilityTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
-  readSnapshot: readGarbageWorkbenchSnapshot,
-  readStatus: readGarbageWorkbenchStatus,
-  writeReview: writeGarbageWorkbenchReview,
-  writeFocus: writeGarbageWorkbenchFocus,
-  writeState: writeGarbageWorkbenchState,
-}
+const localWorkbenchAdapters = [garbageLocalWorkbenchAdapter]
 
 export function localWorkbenchAdapter(instance: WorkbenchInstance): LocalWorkbenchAdapter | null {
-  if (instance.id === garbageInstance.id) return garbageWorkbenchAdapter
+  const registeredAdapter = localWorkbenchAdapters.find((entry) => entry.instanceId === instance.id)?.adapter
+  if (registeredAdapter) return registeredAdapter
   const snapshot = staticWorkbenchSnapshot(instance)
   if (!snapshot) return null
   return readOnlySnapshotAdapter(snapshot)

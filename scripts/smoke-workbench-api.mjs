@@ -37,15 +37,19 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
+    readFile('api/workbench/instance-adapters.ts', 'utf8'),
   ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
     throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
   }
   if (healthSource.includes('newsletter_')) {
     throw new Error('generic workbench health route still names newsletter compatibility tables directly')
+  }
+  if (instanceAdaptersSource.includes('garbageInstance') || instanceAdaptersSource.includes('newsletter_')) {
+    throw new Error('generic workbench instance-adapter registry still embeds Garbage config or newsletter compatibility metadata')
   }
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
     logLevel: 'error',

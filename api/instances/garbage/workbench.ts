@@ -1,5 +1,7 @@
 import { readSnapshot, readStatus, writeEditorialState, writeFocus, writeVote } from './newsletter-store.js'
 import { garbageSnapshotToWorkbench } from '../../../src/instances/garbage/workbench'
+import { garbageInstance } from '../../../src/instances/garbage/config'
+import type { LocalWorkbenchAdapter } from '../../workbench/instance-adapters'
 import type { ReviewValue, WorkbenchFocus, WorkbenchSnapshot } from '../../../src/core/workbench'
 import type { WorkbenchStateExport, WorkbenchStateImportResult } from '../../../src/core/workbench'
 
@@ -49,4 +51,16 @@ export async function writeGarbageWorkbenchState(state: WorkbenchStateExport): P
     importedReviews: result.importedVotes,
     importedFocuses: result.importedFocuses,
   }
+}
+
+export const garbageLocalWorkbenchAdapter = {
+  instanceId: garbageInstance.id,
+  adapter: {
+    compatibilityTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
+    readSnapshot: readGarbageWorkbenchSnapshot,
+    readStatus: readGarbageWorkbenchStatus,
+    writeReview: writeGarbageWorkbenchReview,
+    writeFocus: writeGarbageWorkbenchFocus,
+    writeState: writeGarbageWorkbenchState,
+  } satisfies LocalWorkbenchAdapter,
 }
