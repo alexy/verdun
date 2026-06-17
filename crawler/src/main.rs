@@ -5,11 +5,10 @@ mod core;
 mod instances;
 use crate::core::{CollectionTarget, CrawlerConfig, SourceConfig, SourceRun, SourceRunStatus};
 use crate::instances::garbage::{
-    self, DevToArticle, EditorialFocus, ExportPayload, FeedEntry, ManualPost, NewsItem,
-    PublicSnapshot,
+    self, EditorialFocus, ExportPayload, FeedEntry, ManualPost, NewsItem, PublicSnapshot,
 };
 use regex::Regex;
-use reqwest::{StatusCode, blocking::Client};
+use reqwest::blocking::Client;
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
 #[derive(Parser)]
@@ -686,7 +685,7 @@ fn live_items(
         }
     }
     if let Some(source) = config.sources.iter().find(|source| source.name == "dev.to") {
-        match fetch_dev_to(&client, config, source, max_per_project, editorial_focuses) {
+        match garbage::fetch_dev_to(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(garbage::ok_source_run(
@@ -767,60 +766,6 @@ fn live_items(
 
 fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
     items.retain(|item| item.published_at >= since);
-}
-
-fn fetch_dev_to(
-    client: &Client,
-    config: &CrawlerConfig,
-    source: &SourceConfig,
-    max_per_project: usize,
-    editorial_focuses: &[EditorialFocus],
-) -> Result<Vec<NewsItem>> {
-    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
-    let mut seen_articles = BTreeMap::new();
-    let mut items = Vec::new();
-    for project in &config.targets {
-        let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
-        for tag in garbage::dev_to_tags(project).into_iter().take(2) {
-            let response = client
-                .get("https://dev.to/api/articles")
-                .query(&[("per_page", "20"), ("top", "30"), ("tag", tag.as_str())])
-                .send()
-                .with_context(|| format!("fetching dev.to articles for {}", project.name))?;
-            if response.status() == StatusCode::TOO_MANY_REQUESTS {
-                return Ok(items);
-            }
-            let articles = response
-                .error_for_status()
-                .with_context(|| format!("dev.to returned error for {}", project.name))?
-                .json::<Vec<DevToArticle>>()
-                .with_context(|| format!("decoding dev.to articles for {}", project.name))?;
-            for article in articles {
-                if seen_articles.insert(article.id, true).is_some() {
-                    continue;
-                }
-                let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-                if count >= max_per_project {
-                    break;
-                }
-                if !dev_to_article_matches_project(&article, project, &focus_terms) {
-                    continue;
-                }
-                items.push(garbage::dev_to_item(
-                    project,
-                    source,
-                    &article,
-                    &focus_terms,
-                ));
-                counts.insert(project.name.as_str(), count + 1);
-            }
-            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-            if count >= max_per_project {
-                break;
-            }
-        }
-    }
-    Ok(items)
 }
 
 fn fetch_feed_source(
@@ -961,21 +906,6 @@ fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
-}
-
-fn dev_to_article_matches_project(
-    article: &DevToArticle,
-    project: &CollectionTarget,
-    focus_terms: &[String],
-) -> bool {
-    let text = format!(
-        "{} {} {} {}",
-        article.title,
-        article.description.as_deref().unwrap_or_default(),
-        article.url,
-        article.tag_list.join(" ")
-    );
-    text_matches_project(&text, project, focus_terms)
 }
 
 fn feed_entry_matches_project(

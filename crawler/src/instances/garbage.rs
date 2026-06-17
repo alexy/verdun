@@ -386,6 +386,55 @@ pub fn fetch_lobsters(
     Ok(items)
 }
 
+pub fn fetch_dev_to(
+    client: &Client,
+    config: &CrawlerConfig,
+    source: &SourceConfig,
+    max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
+) -> Result<Vec<NewsItem>> {
+    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut seen_articles = BTreeMap::new();
+    let mut items = Vec::new();
+    for project in &config.targets {
+        let focus_terms = project_focus_terms(project, editorial_focuses);
+        for tag in dev_to_tags(project).into_iter().take(2) {
+            let response = client
+                .get("https://dev.to/api/articles")
+                .query(&[("per_page", "20"), ("top", "30"), ("tag", tag.as_str())])
+                .send()
+                .with_context(|| format!("fetching dev.to articles for {}", project.name))?;
+            if response.status() == StatusCode::TOO_MANY_REQUESTS {
+                return Ok(items);
+            }
+            let articles = response
+                .error_for_status()
+                .with_context(|| format!("dev.to returned error for {}", project.name))?
+                .json::<Vec<DevToArticle>>()
+                .with_context(|| format!("decoding dev.to articles for {}", project.name))?;
+            for article in articles {
+                if seen_articles.insert(article.id, true).is_some() {
+                    continue;
+                }
+                let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+                if count >= max_per_project {
+                    break;
+                }
+                if !dev_to_article_matches_project(&article, project, &focus_terms) {
+                    continue;
+                }
+                items.push(dev_to_item(project, source, &article, &focus_terms));
+                counts.insert(project.name.as_str(), count + 1);
+            }
+            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+            if count >= max_per_project {
+                break;
+            }
+        }
+    }
+    Ok(items)
+}
+
 pub fn parse_lobsters_search_stories(html: &str) -> Vec<LobstersStory> {
     let short_id_re = Regex::new(r#"data-shortid="([^"]+)""#).expect("valid short id regex");
     let title_re = Regex::new(r#"(?s)<a class="u-url" href="([^"]+)"[^>]*>(.*?)</a>"#)
@@ -542,6 +591,21 @@ fn lobsters_story_matches_project(
     focus_terms: &[String],
 ) -> bool {
     let text = format!("{} {} {}", story.title, story.url, story.tags.join(" "));
+    text_matches_project(&text, project, focus_terms)
+}
+
+fn dev_to_article_matches_project(
+    article: &DevToArticle,
+    project: &CollectionTarget,
+    focus_terms: &[String],
+) -> bool {
+    let text = format!(
+        "{} {} {} {}",
+        article.title,
+        article.description.as_deref().unwrap_or_default(),
+        article.url,
+        article.tag_list.join(" ")
+    );
     text_matches_project(&text, project, focus_terms)
 }
 
