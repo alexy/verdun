@@ -5,8 +5,8 @@ mod core;
 mod instances;
 use crate::core::{CollectionTarget, CrawlerConfig, SourceConfig, SourceRun, SourceRunStatus};
 use crate::instances::garbage::{
-    self, DevToArticle, EditorialFocus, ExportPayload, FeedEntry, LobstersStory, ManualPost,
-    NewsItem, PublicSnapshot,
+    self, DevToArticle, EditorialFocus, ExportPayload, FeedEntry, ManualPost, NewsItem,
+    PublicSnapshot,
 };
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
@@ -670,7 +670,7 @@ fn live_items(
         .iter()
         .find(|source| source.name == "Lobste.rs")
     {
-        match fetch_lobsters(&client, config, source, max_per_project, editorial_focuses) {
+        match garbage::fetch_lobsters(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(garbage::ok_source_run(
@@ -767,168 +767,6 @@ fn live_items(
 
 fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
     items.retain(|item| item.published_at >= since);
-}
-
-fn fetch_lobsters(
-    client: &Client,
-    config: &CrawlerConfig,
-    source: &SourceConfig,
-    max_per_project: usize,
-    editorial_focuses: &[EditorialFocus],
-) -> Result<Vec<NewsItem>> {
-    if max_per_project == 0 {
-        return Ok(Vec::new());
-    }
-
-    let mut seen_stories: BTreeMap<String, bool> = BTreeMap::new();
-    let mut items = Vec::new();
-    for project in &config.targets {
-        let mut project_count = 0;
-        let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
-        let query = garbage::project_query_for_collection(project, &focus_terms);
-        let html = client
-            .get("https://lobste.rs/search")
-            .query(&[
-                ("q", query.as_str()),
-                ("what", "stories"),
-                ("order", "newest"),
-            ])
-            .send()
-            .with_context(|| format!("fetching Lobste.rs search for {}", project.name))?;
-        if html.status() == StatusCode::TOO_MANY_REQUESTS {
-            break;
-        }
-        let html = html
-            .error_for_status()
-            .with_context(|| format!("Lobste.rs search returned error for {}", project.name))?
-            .text()
-            .with_context(|| format!("decoding Lobste.rs search for {}", project.name))?;
-        for story in parse_lobsters_search_stories(&html)
-            .into_iter()
-            .filter(|story| lobsters_story_matches_project(story, project, &focus_terms))
-        {
-            let story_key = story.short_id.clone().unwrap_or_else(|| story.url.clone());
-            if seen_stories.contains_key(&story_key) {
-                continue;
-            }
-            items.push(garbage::lobsters_item(
-                project,
-                source,
-                &story,
-                &focus_terms,
-            ));
-            seen_stories.insert(story_key, true);
-            project_count += 1;
-            if project_count >= max_per_project {
-                break;
-            }
-        }
-    }
-    Ok(items)
-}
-
-fn parse_lobsters_search_stories(html: &str) -> Vec<LobstersStory> {
-    let short_id_re = Regex::new(r#"data-shortid="([^"]+)""#).expect("valid short id regex");
-    let title_re = Regex::new(r#"(?s)<a class="u-url" href="([^"]+)"[^>]*>(.*?)</a>"#)
-        .expect("valid Lobste.rs title regex");
-    let datetime_re = Regex::new(r#"datetime="([^"]+)""#).expect("valid Lobste.rs time regex");
-    let score_re = Regex::new(r#"(?s)<a class="upvoter"[^>]*>\s*(\d+)\s*</a>"#)
-        .expect("valid Lobste.rs score regex");
-    let comments_re = Regex::new(
-        r#"(?s)<span class="comments_label">.*?<a[^>]*href="([^"]+)"[^>]*>\s*(\d+) comments?"#,
-    )
-    .expect("valid Lobste.rs comments regex");
-    let tag_re = Regex::new(r#"(?s)<a class="tag [^"]*"[^>]*>(.*?)</a>"#).expect("valid tag regex");
-
-    lobsters_story_blocks(html)
-        .into_iter()
-        .filter_map(|block| {
-            let short_id = html_unescape(short_id_re.captures(block)?.get(1)?.as_str());
-            let title_captures = title_re.captures(block)?;
-            let story_url = html_unescape(title_captures.get(1)?.as_str());
-            let title = html_text(title_captures.get(2)?.as_str());
-            let created_at = datetime_re
-                .captures(block)
-                .and_then(|captures| parse_lobsters_datetime(captures.get(1)?.as_str()))
-                .unwrap_or_else(Utc::now);
-            let score = score_re
-                .captures(block)
-                .and_then(|captures| captures.get(1)?.as_str().parse::<i32>().ok());
-            let (short_id_url, comment_count) = comments_re
-                .captures(block)
-                .map(|captures| {
-                    let path = captures.get(1).map(|match_| match_.as_str()).unwrap_or("");
-                    let comments = captures
-                        .get(2)
-                        .and_then(|match_| match_.as_str().parse::<i32>().ok());
-                    (Some(lobsters_absolute_url(path)), comments)
-                })
-                .unwrap_or_else(|| (Some(format!("https://lobste.rs/s/{short_id}")), None));
-            let tags = tag_re
-                .captures_iter(block)
-                .filter_map(|captures| captures.get(1).map(|match_| html_text(match_.as_str())))
-                .collect();
-
-            Some(LobstersStory {
-                short_id: Some(short_id),
-                short_id_url,
-                title,
-                url: story_url,
-                created_at,
-                score,
-                comment_count,
-                tags,
-            })
-        })
-        .collect()
-}
-
-fn lobsters_story_blocks(html: &str) -> Vec<&str> {
-    let mut blocks = Vec::new();
-    let mut cursor = html;
-    while let Some(start) = cursor.find("<li id=\"story_") {
-        let story = &cursor[start..];
-        let end = story[1..]
-            .find("\n<li id=\"story_")
-            .map(|index| index + 1)
-            .or_else(|| story.find("\n</ol>"))
-            .unwrap_or(story.len());
-        blocks.push(&story[..end]);
-        cursor = &story[end..];
-    }
-    blocks
-}
-
-fn parse_lobsters_datetime(value: &str) -> Option<DateTime<Utc>> {
-    chrono::NaiveDateTime::parse_from_str(value, "%Y-%m-%d %H:%M:%S")
-        .ok()
-        .map(|datetime| datetime.and_utc())
-}
-
-fn lobsters_absolute_url(path: &str) -> String {
-    if path.starts_with("http://") || path.starts_with("https://") {
-        html_unescape(path)
-    } else {
-        format!("https://lobste.rs{}", html_unescape(path))
-    }
-}
-
-fn html_text(value: &str) -> String {
-    let tag_re = Regex::new(r"(?s)<[^>]+>").expect("valid html tag regex");
-    html_unescape(&tag_re.replace_all(value, "").replace('\n', " "))
-        .split_whitespace()
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-
-fn html_unescape(value: &str) -> String {
-    value
-        .replace("&amp;", "&")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'")
-        .replace("&#x27;", "'")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
 }
 
 fn fetch_dev_to(
@@ -1123,15 +961,6 @@ fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
-}
-
-fn lobsters_story_matches_project(
-    story: &LobstersStory,
-    project: &CollectionTarget,
-    focus_terms: &[String],
-) -> bool {
-    let text = format!("{} {} {}", story.title, story.url, story.tags.join(" "));
-    text_matches_project(&text, project, focus_terms)
 }
 
 fn dev_to_article_matches_project(
@@ -1389,7 +1218,7 @@ mod tests {
             </li>
         "#;
 
-        let stories = parse_lobsters_search_stories(html);
+        let stories = garbage::parse_lobsters_search_stories(html);
 
         assert_eq!(stories.len(), 1);
         let story = &stories[0];
@@ -1413,7 +1242,7 @@ mod tests {
 
     #[test]
     fn parses_lobsters_empty_search() {
-        let stories = parse_lobsters_search_stories("<ol class=\"stories\"></ol>");
+        let stories = garbage::parse_lobsters_search_stories("<ol class=\"stories\"></ol>");
 
         assert!(stories.is_empty());
     }
