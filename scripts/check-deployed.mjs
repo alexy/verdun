@@ -176,7 +176,7 @@ function validateHealth(health, status) {
 }
 
 async function validateDraftApi(origin) {
-  const draftUrl = new URL('/api/newsletter/draft', origin)
+  const draftUrl = new URL('/api/garbage/newsletter/draft', origin)
   const draft = await fetchJson(draftUrl, 'draft API')
   if (!draft?.draft?.markdown?.includes('## Weekly throughline')) {
     throw new Error('draft API did not return generated Markdown with a weekly throughline')
@@ -188,20 +188,20 @@ async function validateDraftApi(origin) {
     throw new Error('draft API did not return readiness and prose-quality checks')
   }
 
-  const markdownUrl = new URL('/api/newsletter/draft?format=markdown', origin)
+  const markdownUrl = new URL('/api/garbage/newsletter/draft?format=markdown', origin)
   const markdown = await fetchTextContent(markdownUrl, 'draft Markdown API', 'text/markdown')
   if (!markdown.includes('Strongly Typed AI/Data Notes') || !markdown.includes('## Sources watched')) {
     throw new Error('draft Markdown API did not return the newsletter draft body')
   }
 
-  const manifestUrl = new URL('/api/newsletter/draft?format=manifest', origin)
+  const manifestUrl = new URL('/api/garbage/newsletter/draft?format=manifest', origin)
   const manifest = await fetchJson(manifestUrl, 'draft manifest API')
-  if (manifest?.snapshotInput !== 'api/newsletter/items' || manifest?.issue?.selectedItemCount !== manifest?.itemIds?.length) {
+  if (manifest?.snapshotInput !== 'api/garbage/newsletter/items' || manifest?.issue?.selectedItemCount !== manifest?.itemIds?.length) {
     throw new Error('draft manifest API did not return a coherent publish manifest')
   }
 
   if (requireReady) {
-    const readyUrl = new URL('/api/newsletter/draft?require-ready=true', origin)
+    const readyUrl = new URL('/api/garbage/newsletter/draft?require-ready=true', origin)
     const readyDraft = await fetchJson(readyUrl, 'ready draft API')
     if (readyDraft?.manifest?.readiness?.status !== 'ready' || readyDraft?.manifest?.proseQuality?.status !== 'ready') {
       throw new Error('ready draft API did not return a ready publish manifest')

@@ -27,7 +27,7 @@ async function callDraft(query = {}) {
   return response
 }
 
-const { module } = await runnerImport('./api/newsletter/draft.ts', {
+const { module } = await runnerImport('./api/garbage/newsletter/draft.ts', {
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
@@ -57,7 +57,7 @@ if (!String(markdown.body).includes('Strongly Typed AI/Data Notes')) {
 }
 
 const manifest = await callDraft({ format: 'manifest' })
-if (manifest.code !== 200 || manifest.body?.snapshotInput !== 'api/newsletter/items') {
+if (manifest.code !== 200 || manifest.body?.snapshotInput !== 'api/garbage/newsletter/items') {
   throw new Error('draft manifest did not report the API snapshot input')
 }
 if (!manifest.body?.issue?.date || manifest.body.issue.title !== manifest.body.title) {

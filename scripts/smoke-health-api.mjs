@@ -39,7 +39,7 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const { module } = await runnerImport('./api/newsletter/health.ts', {
+  const { module } = await runnerImport('./api/garbage/newsletter/health.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
@@ -59,7 +59,7 @@ try {
   if (!local.body?.readSurfaces?.includes('draft') || !local.body?.writeSurfaces?.includes('editorial-state')) {
     throw new Error('health API did not expose read/write surfaces')
   }
-  if (!local.body?.publishingSurfaces?.includes('ghost:ready') || !local.body?.publishingSurfaces?.includes('ulysses:ready')) {
+  if (!local.body?.publishingSurfaces?.includes('garbage:ghost:ready') || !local.body?.publishingSurfaces?.includes('garbage:ulysses:ready')) {
     throw new Error('health API did not expose publishing surfaces')
   }
   if (!local.body?.weeklyUpdate?.loader?.includes('db:deploy')) {

@@ -25,7 +25,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
     const format = queryFormat(req)
     const manifest = buildPublishManifest(draft, snapshot, {
       markdownPath: 'crawler/data/newsletter-draft.md',
-      snapshotInput: 'api/newsletter/items',
+      snapshotInput: 'api/garbage/newsletter/items',
       requireReady: queryFlag(req, 'requireReady') || queryFlag(req, 'require-ready'),
       requireUpvotes: queryFlag(req, 'requireUpvotes') || queryFlag(req, 'require-upvotes'),
     })

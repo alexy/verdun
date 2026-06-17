@@ -6,7 +6,7 @@ process.env.NEWSLETTER_APPLY_LOCAL_STATE = 'false'
 
 const snapshotJson = await readFile('public/data/newsletter-snapshot.json', 'utf8')
 const server = createServer((request, response) => {
-  if (request.url !== '/api/newsletter/items') {
+  if (request.url !== '/api/garbage/newsletter/items') {
     response.writeHead(404)
     response.end('not found')
     return
@@ -23,7 +23,7 @@ if (!address || typeof address === 'string') {
 }
 
 try {
-  const snapshot = await loadSnapshotFile(`http://127.0.0.1:${address.port}/api/newsletter/items`)
+  const snapshot = await loadSnapshotFile(`http://127.0.0.1:${address.port}/api/garbage/newsletter/items`)
   if (!snapshot.items.some((item) => item.project === 'Grust Sail')) {
     throw new Error('URL snapshot did not load expected items')
   }

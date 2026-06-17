@@ -16,10 +16,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       editorialPersistence: activeSnapshot.editorialPersistence,
       readSurfaces: ['items', 'status', 'draft', 'health'],
       writeSurfaces: ['vote', 'focus', 'editorial-state'],
-      publishingSurfaces: ['ulysses:draft', 'ulysses:ready', 'ghost:dry-run', 'ghost:ready'],
+      publishingSurfaces: ['garbage:ulysses:draft', 'garbage:ulysses:ready', 'garbage:ghost:dry-run', 'garbage:ghost:ready'],
       weeklyUpdate: {
         loader: 'Rust verdun-crawler export-sql plus npm run db:deploy',
-        expectedStore: 'External Postgres with newsletter_items, newsletter_source_runs, and newsletter_query_plans',
+        expectedStore: 'External Postgres with generic workbench tables; newsletter tables remain compatibility surfaces',
         activeSnapshot,
         currentRequirement: databaseConfigured
           ? 'run npm run db:deploy -- --apply after each crawler refresh, then verify with npm run check:deployed -- --require-database'

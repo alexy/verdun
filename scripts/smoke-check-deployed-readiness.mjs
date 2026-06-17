@@ -82,7 +82,7 @@ Typed lakehouse and graph systems are moving from experiments into practical inf
 - Hacker News: 5 items
 `
 const draftManifest = {
-  snapshotInput: 'api/newsletter/items',
+  snapshotInput: 'api/garbage/newsletter/items',
   issue: {
     date: '2026-06-16',
     slug: 'strongly-typed-ai-data-notes-june-16-2026',
@@ -129,7 +129,7 @@ const server = createServer((request, response) => {
     response.end(healthJson())
     return
   }
-  if (url.pathname === '/api/newsletter/draft') {
+  if (url.pathname === '/api/garbage/newsletter/draft') {
     const format = url.searchParams.get('format')
     if (format === 'markdown') {
       response.writeHead(200, { 'content-type': 'text/markdown; charset=utf-8' })

@@ -24,8 +24,8 @@ const stateInput = ref<HTMLInputElement | null>(null)
 const draftDownloadHref = computed(() => `data:text/markdown;charset=utf-8,${encodeURIComponent(props.draft.markdown)}`)
 const editorialStateDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.editorialStateJson)}`)
 const publishManifestDownloadHref = computed(() => `data:application/json;charset=utf-8,${encodeURIComponent(props.publishManifestJson)}`)
-const serverMarkdownHref = '/api/newsletter/draft?format=markdown'
-const serverManifestHref = '/api/newsletter/draft?format=manifest'
+const serverMarkdownHref = '/api/garbage/newsletter/draft?format=markdown'
+const serverManifestHref = '/api/garbage/newsletter/draft?format=manifest'
 const failedReadinessChecks = computed(() => props.publishManifest.readiness.checks.filter((check) => !check.passed).slice(0, 2))
 const failedProseChecks = computed(() => props.publishManifest.proseQuality.checks.filter((check) => !check.passed).slice(0, 2))
 
