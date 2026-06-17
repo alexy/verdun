@@ -29,6 +29,7 @@
     "smoke:draft-url": "node scripts/smoke-draft-url.mjs",
     "smoke:feed-content": "node scripts/smoke-feed-content.mjs",
     "smoke:ghost": "node scripts/smoke-ghost.mjs",
+    "smoke:generic-loader": "node scripts/smoke-generic-loader-sql.mjs",
     "smoke:grust-watchlist": "node scripts/smoke-grust-watchlist.mjs",
     "smoke:health": "node scripts/smoke-health-api.mjs",
     "smoke:loader": "node scripts/smoke-loader-sql.mjs",

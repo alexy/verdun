@@ -9,7 +9,7 @@ The first reusable boundary is now explicit:
 - Generic reusable Vue controls live under `src/components/workbench/` and currently back the Garbage hero metrics and review rail.
 - Garbage instance configuration lives in `src/instances/garbage/config.ts`.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
-- Generic `workbench_*` database views live in `db/migrations/0002_workbench_views.sql` over the current newsletter tables.
+- Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
 - Generic Vercel workbench surfaces live under `api/workbench/` and project the current Garbage instance as records, status, health, review writes, and focus writes.
 - Existing newsletter routes, scripts, and database tables still use their current names while the boundary is extracted incrementally.
 
@@ -65,7 +65,7 @@ That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the st
 
 ## Database
 
-Apply the sorted migrations in `db/migrations/` to the external Postgres database used by Vercel. `0001_newsletter.sql` creates the current Garbage/newsletter tables; `0002_workbench_views.sql` exposes the same data through generic `workbench_*` views for Verdun reuse.
+Apply the sorted migrations in `db/migrations/` to the external Postgres database used by Vercel. `0001_newsletter.sql` creates the current Garbage/newsletter tables, `0002_workbench_views.sql` exposes generic `workbench_*` views over those tables, and `0003_generic_workbench_tables.sql` creates Verdun's reusable database contract (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) while keeping the `workbench_*` views compatible with either generic rows or the current newsletter fallback.
 
 Use the guarded deployment helper when moving a crawler snapshot into the external database:
 
@@ -87,7 +87,7 @@ npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot public/data/newsletter
 ```
 
 `collect` writes `crawler/data/items.json` for item loader work, `crawler/data/source-runs.json` for source-health loader work, and `public/data/newsletter-snapshot.json` as the app's static fallback when no external database is configured. The public snapshot includes item rows, source-health metadata, and crawler query plans with source-specific review targets for HN, Lobste.rs, dev.to, Medium, Substack, LinkedIn, and X/Twitter. `collect` and `queries` read `crawler/data/editorial-state.json` by default when it exists, so saved this-week focus requests can add `focus_terms` to matching project query plans; use `--editorial-state path/to/state.json` to point at an exported editorial state file.
-`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows, source-health rows, query-plan rows, and the snapshot `generated_at` collection timestamp from the same crawler run. The older `--input` plus `--source-runs` path remains available for debugging split files. `npm run db:apply` validates the SQL against the paired snapshot and stops as a dry run by default; pass `--apply` with `POSTGRES_URL`, `DATABASE_URL`, `NEON_DATABASE_URL`, or `--database-url` to apply `db/migrations/0001_newsletter.sql` and then the generated load through `psql`.
+`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows, source-health rows, query-plan rows, and the snapshot `generated_at` collection timestamp from the same crawler run. By default it emits the legacy Garbage/newsletter load for compatibility; add `--target generic` to emit the reusable Verdun contract load into `instances`, `records`, `source_runs`, and `collection_plans`. The older `--input` plus `--source-runs` path remains available for debugging split files. `npm run db:apply` validates the SQL against the paired snapshot and stops as a dry run by default; pass `--apply` with `POSTGRES_URL`, `DATABASE_URL`, `NEON_DATABASE_URL`, or `--database-url` to apply sorted migrations and then the generated load through `psql`.
 Database-backed API snapshots and status responses derive `generatedAt` from the newest `newsletter_source_runs.collected_at` value, falling back to item `updated_at`, so deployed draft issue dates track the crawler/load run instead of the moment a serverless route is called.
 
 `npm run audit:grust` reads the local Grust workspace, derives the backend and typed-validation projects it exposes through crates, dependencies, and docs, and writes an ignored `crawler/data/grust-watchlist-audit.md`. The command fails if Verdun stops watching a Grust-derived project such as HelixDB, SurrealDB, pgGraph, FalkorDB, LadybugDB, LanceDB, Grust Sail, CocoIndex, Garde, zod-rs, Apache Arrow, or Delta Lake. Use `-- --grust-root /path/to/grust` when auditing a different checkout.
@@ -101,6 +101,8 @@ npm run audit:grust
 cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql
 npm run smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json
+cargo run --manifest-path crawler/Cargo.toml -- export-sql --target generic --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-generic-load.sql
+npm run smoke:generic-loader -- /tmp/verdun-generic-load.sql public/data/newsletter-snapshot.json
 npm run db:apply -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json
 npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate
 npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate --apply

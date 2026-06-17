@@ -19,7 +19,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       writeSurfaces: ['review', 'focus'],
       collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
       databaseContract: {
-        currentTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
+        genericTables: ['instances', 'records', 'source_runs', 'collection_plans', 'review_state', 'focuses'],
+        compatibilityTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
         reusableViews: ['workbench_records', 'workbench_source_runs', 'workbench_collection_plans', 'workbench_review_state', 'workbench_focuses'],
       },
       activeSnapshot,

@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 
 const sqlPath = '/tmp/verdun-newsletter-load.sql'
+const genericSqlPath = '/tmp/verdun-generic-load.sql'
 const snapshotPath = 'public/data/newsletter-snapshot.json'
 
 const steps = [
@@ -10,6 +11,8 @@ const steps = [
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'verify']],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--snapshot', snapshotPath, '--out', sqlPath]],
   ['npm', ['run', 'smoke:loader', '--', sqlPath, snapshotPath]],
+  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'generic', '--snapshot', snapshotPath, '--out', genericSqlPath]],
+  ['npm', ['run', 'smoke:generic-loader', '--', genericSqlPath, snapshotPath]],
   ['npm', ['run', 'smoke:db-apply', '--', sqlPath, snapshotPath]],
   ['npm', ['run', 'smoke:db-deploy', '--', sqlPath, snapshotPath]],
   ['npm', ['run', 'smoke:manual-source']],
