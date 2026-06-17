@@ -753,14 +753,16 @@ fn live_items(
         match fetch_hacker_news(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
-                source_runs.push(ok_source_run(
+                source_runs.push(garbage::ok_source_run(
                     source,
                     &source_items,
                     "HN Algolia search_by_date",
                 ));
                 items.append(&mut source_items);
             }
-            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+            Err(error) => {
+                source_runs.push(garbage::error_source_run(source, &format!("{error:#}")))
+            }
         }
     }
     if let Some(source) = config
@@ -771,34 +773,48 @@ fn live_items(
         match fetch_lobsters(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
-                source_runs.push(ok_source_run(source, &source_items, "Lobste.rs search"));
+                source_runs.push(garbage::ok_source_run(
+                    source,
+                    &source_items,
+                    "Lobste.rs search",
+                ));
                 items.append(&mut source_items);
             }
-            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+            Err(error) => {
+                source_runs.push(garbage::error_source_run(source, &format!("{error:#}")))
+            }
         }
     }
     if let Some(source) = config.sources.iter().find(|source| source.name == "dev.to") {
         match fetch_dev_to(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
-                source_runs.push(ok_source_run(source, &source_items, "dev.to articles API"));
+                source_runs.push(garbage::ok_source_run(
+                    source,
+                    &source_items,
+                    "dev.to articles API",
+                ));
                 items.append(&mut source_items);
             }
-            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+            Err(error) => {
+                source_runs.push(garbage::error_source_run(source, &format!("{error:#}")))
+            }
         }
     }
     if let Some(source) = config.sources.iter().find(|source| source.name == "Medium") {
         match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
-                source_runs.push(ok_source_run(
+                source_runs.push(garbage::ok_source_run(
                     source,
                     &source_items,
                     "configured RSS/Atom feeds",
                 ));
                 items.append(&mut source_items);
             }
-            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+            Err(error) => {
+                source_runs.push(garbage::error_source_run(source, &format!("{error:#}")))
+            }
         }
     }
     if let Some(source) = config
@@ -809,14 +825,16 @@ fn live_items(
         match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
-                source_runs.push(ok_source_run(
+                source_runs.push(garbage::ok_source_run(
                     source,
                     &source_items,
                     "configured RSS/Atom feeds",
                 ));
                 items.append(&mut source_items);
             }
-            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+            Err(error) => {
+                source_runs.push(garbage::error_source_run(source, &format!("{error:#}")))
+            }
         }
     }
     for source_name in ["LinkedIn", "X/Twitter"] {
@@ -829,7 +847,7 @@ fn live_items(
                 Ok(manual_source) => {
                     let mut source_items = manual_source.items;
                     retain_recent(&mut source_items, since);
-                    source_runs.push(manual_source_run(
+                    source_runs.push(garbage::manual_source_run(
                         source,
                         &source_items,
                         manual_source.post_count,
@@ -838,7 +856,9 @@ fn live_items(
                     ));
                     items.append(&mut source_items);
                 }
-                Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+                Err(error) => {
+                    source_runs.push(garbage::error_source_run(source, &format!("{error:#}")))
+                }
             }
         }
     }
@@ -1222,62 +1242,6 @@ fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
             })
         })
         .collect()
-}
-
-fn ok_source_run(source: &SourceConfig, items: &[NewsItem], message: &str) -> SourceRun {
-    SourceRun {
-        source: source.name.clone(),
-        kind: source.kind.clone(),
-        status: SourceRunStatus::Ok,
-        item_count: items.len(),
-        message: message.to_string(),
-        project_counts: garbage::project_counts(items),
-    }
-}
-
-fn error_source_run(source: &SourceConfig, message: &str) -> SourceRun {
-    SourceRun {
-        source: source.name.clone(),
-        kind: source.kind.clone(),
-        status: SourceRunStatus::Error,
-        item_count: 0,
-        message: message.to_string(),
-        project_counts: BTreeMap::new(),
-    }
-}
-
-fn manual_source_run(
-    source: &SourceConfig,
-    items: &[NewsItem],
-    post_count: usize,
-    latest_published_at: Option<DateTime<Utc>>,
-    since: DateTime<Utc>,
-) -> SourceRun {
-    if post_count == 0 {
-        return error_source_run(source, "manual JSON import contains no reviewed posts");
-    }
-    if latest_published_at.is_some_and(|published_at| published_at < since) {
-        return SourceRun {
-            source: source.name.clone(),
-            kind: source.kind.clone(),
-            status: SourceRunStatus::Error,
-            item_count: items.len(),
-            message: format!(
-                "manual JSON import is stale; latest reviewed post is older than {}",
-                since.to_rfc3339()
-            ),
-            project_counts: garbage::project_counts(items),
-        };
-    }
-    ok_source_run(
-        source,
-        items,
-        &format!(
-            "manual JSON import; {} reviewed post{}",
-            post_count,
-            if post_count == 1 { "" } else { "s" }
-        ),
-    )
 }
 
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {

@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use crate::core::{
-    CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord, ReviewTarget, SourceRun,
+    CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord, ReviewTarget, SourceConfig,
+    SourceRun, SourceRunStatus,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -110,6 +111,62 @@ pub fn project_counts(items: &[NewsItem]) -> BTreeMap<String, usize> {
         *counts.entry(item.project.clone()).or_insert(0) += 1;
     }
     counts
+}
+
+pub fn ok_source_run(source: &SourceConfig, items: &[NewsItem], message: &str) -> SourceRun {
+    SourceRun {
+        source: source.name.clone(),
+        kind: source.kind.clone(),
+        status: SourceRunStatus::Ok,
+        item_count: items.len(),
+        message: message.to_string(),
+        project_counts: project_counts(items),
+    }
+}
+
+pub fn error_source_run(source: &SourceConfig, message: &str) -> SourceRun {
+    SourceRun {
+        source: source.name.clone(),
+        kind: source.kind.clone(),
+        status: SourceRunStatus::Error,
+        item_count: 0,
+        message: message.to_string(),
+        project_counts: BTreeMap::new(),
+    }
+}
+
+pub fn manual_source_run(
+    source: &SourceConfig,
+    items: &[NewsItem],
+    post_count: usize,
+    latest_published_at: Option<DateTime<Utc>>,
+    since: DateTime<Utc>,
+) -> SourceRun {
+    if post_count == 0 {
+        return error_source_run(source, "manual JSON import contains no reviewed posts");
+    }
+    if latest_published_at.is_some_and(|published_at| published_at < since) {
+        return SourceRun {
+            source: source.name.clone(),
+            kind: source.kind.clone(),
+            status: SourceRunStatus::Error,
+            item_count: items.len(),
+            message: format!(
+                "manual JSON import is stale; latest reviewed post is older than {}",
+                since.to_rfc3339()
+            ),
+            project_counts: project_counts(items),
+        };
+    }
+    ok_source_run(
+        source,
+        items,
+        &format!(
+            "manual JSON import; {} reviewed post{}",
+            post_count,
+            if post_count == 1 { "" } else { "s" }
+        ),
+    )
 }
 
 fn news_item_record(item: &NewsItem) -> NormalizedRecord {
