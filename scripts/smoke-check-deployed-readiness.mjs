@@ -4,10 +4,14 @@ import { readFile } from 'node:fs/promises'
 
 const rawSnapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
+const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
 for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json']) {
   if (checkDeployedSource.includes(marker)) {
     throw new Error(`generic deployed checker still embeds Garbage deploy marker: ${marker}`)
   }
+}
+if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs') {
+  throw new Error('check:preview should use the profile-backed preview checker')
 }
 const freshGeneratedAt = new Date().toISOString()
 let reviewedSnapshot = {
@@ -293,6 +297,13 @@ try {
   }
   if (!result.stdout.includes('with readiness gate')) {
     throw new Error('check-deployed readiness smoke did not report the readiness gate')
+  }
+  const previewResult = await runCheckDeployed([
+    'scripts/check-preview.mjs',
+    `http://127.0.0.1:${address.port}/rbage/`,
+  ])
+  if (previewResult.status !== 0 || !previewResult.stdout.includes('(static only)')) {
+    throw new Error(`profile-backed preview check failed\n${previewResult.stdout}\n${previewResult.stderr}`)
   }
   reviewedSnapshot = {
     ...reviewedSnapshot,

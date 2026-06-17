@@ -11,7 +11,7 @@
     "prod:build": "vue-tsc -b && vite build --outDir dist-prod",
     "prod:app": "vite preview --host 127.0.0.1 --port 5174 --strictPort --outDir dist-prod",
     "check:deployed": "node scripts/check-deployed.mjs",
-    "check:preview": "node scripts/check-deployed.mjs http://127.0.0.1:5174/rbage/ --static-only",
+    "check:preview": "node scripts/check-preview.mjs",
     "db:apply": "node scripts/workbench-apply-sql.mjs",
     "db:deploy": "node scripts/deploy-workbench-database.mjs",
     "db:apply:newsletter": "node scripts/apply-newsletter-sql.mjs",
