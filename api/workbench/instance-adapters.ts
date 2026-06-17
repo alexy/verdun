@@ -28,6 +28,7 @@ export type LocalWorkbenchStatus = {
 }
 
 export type LocalWorkbenchAdapter = {
+  compatibilityTables?: string[]
   readSnapshot: () => Promise<WorkbenchSnapshot>
   readStatus: () => Promise<LocalWorkbenchStatus>
   writeReview?: (recordId: string, review: ReviewValue) => Promise<void>
@@ -36,6 +37,7 @@ export type LocalWorkbenchAdapter = {
 }
 
 const garbageWorkbenchAdapter: LocalWorkbenchAdapter = {
+  compatibilityTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
   readSnapshot: readGarbageWorkbenchSnapshot,
   readStatus: readGarbageWorkbenchStatus,
   writeReview: writeGarbageWorkbenchReview,

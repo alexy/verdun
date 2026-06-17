@@ -4,6 +4,7 @@
 
 - Moved root Vue app component selection into `src/instances/app-registry.ts`; `src/App.vue` now stays a generic shell and no longer imports concrete Garbage or Greathouse app components directly.
 - Updated Greathouse workbench smoke coverage to enforce that concrete app imports stay in the instance app registry, while the root shell only calls the generic app resolver.
+- Moved legacy newsletter compatibility table reporting out of the generic workbench health route and into instance-adapter metadata; Greathouse health now reports no Garbage compatibility tables.
 
 ## 2026-06-16
 

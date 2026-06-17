@@ -37,9 +37,15 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const dbSource = await readFile('api/workbench/_db.ts', 'utf8')
+  const [dbSource, healthSource] = await Promise.all([
+    readFile('api/workbench/_db.ts', 'utf8'),
+    readFile('api/workbench/health.ts', 'utf8'),
+  ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
     throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
+  }
+  if (healthSource.includes('newsletter_')) {
+    throw new Error('generic workbench health route still names newsletter compatibility tables directly')
   }
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
     logLevel: 'error',
@@ -184,6 +190,14 @@ try {
   ) {
     throw new Error(`workbench status route did not resolve the Greathouse instance: ${JSON.stringify(greathouseStatusResponse.body)}`)
   }
+  const greathouseHealthResponse = await call(healthModule.default, 'GET', undefined, { instance: 'greathouse' })
+  if (
+    greathouseHealthResponse.code !== 200
+    || greathouseHealthResponse.body?.instance?.id !== 'greathouse'
+    || greathouseHealthResponse.body?.databaseContract?.compatibilityTables?.length !== 0
+  ) {
+    throw new Error(`workbench health route did not keep Greathouse free of Garbage compatibility tables: ${JSON.stringify(greathouseHealthResponse.body)}`)
+  }
 
   const healthResponse = await call(healthModule.default)
   if (healthResponse.code !== 200 || healthResponse.body?.service !== 'workbench') {
@@ -194,6 +208,9 @@ try {
   }
   if (!healthResponse.body?.databaseContract?.reusableViews?.includes('workbench_records')) {
     throw new Error('workbench health route did not expose reusable database views')
+  }
+  if (!healthResponse.body?.databaseContract?.compatibilityTables?.includes('newsletter_items')) {
+    throw new Error('workbench health route did not expose Garbage compatibility tables through instance metadata')
   }
   if (!healthResponse.body?.readSurfaces?.includes('records')) {
     throw new Error('workbench health route did not expose generic read surfaces')

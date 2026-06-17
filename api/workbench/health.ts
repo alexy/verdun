@@ -1,6 +1,8 @@
 import { allowMethods, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../core/http.js'
 import { readWorkbenchStatus } from './_db.js'
+import { localWorkbenchAdapter } from './instance-adapters'
 import { resolveWorkbenchInstance, supportedWorkbenchInstances } from '../../src/instances/registry'
+import type { WorkbenchInstance } from '../../src/core/workbench'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (!allowMethods(req, res, ['GET', 'HEAD'])) return
@@ -24,11 +26,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       readSurfaces: ['records', 'status', 'health'],
       writeSurfaces: ['review', 'focus', 'state'],
       collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
-      databaseContract: {
-        genericTables: ['instances', 'records', 'source_runs', 'collection_plans', 'review_state', 'focuses'],
-        compatibilityTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
-        reusableViews: ['workbench_records', 'workbench_source_runs', 'workbench_collection_plans', 'workbench_review_state', 'workbench_focuses'],
-      },
+      databaseContract: workbenchDatabaseContract(activeSnapshot.instance),
       activeSnapshot,
     })
   } catch (error) {
@@ -38,4 +36,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
 
 function hasDatabaseEnv(): boolean {
   return Boolean(process.env.POSTGRES_URL ?? process.env.DATABASE_URL ?? process.env.NEON_DATABASE_URL)
+}
+
+function workbenchDatabaseContract(instance: WorkbenchInstance) {
+  return {
+    genericTables: ['instances', 'records', 'source_runs', 'collection_plans', 'review_state', 'focuses'],
+    compatibilityTables: localWorkbenchAdapter(instance)?.compatibilityTables ?? [],
+    reusableViews: ['workbench_records', 'workbench_source_runs', 'workbench_collection_plans', 'workbench_review_state', 'workbench_focuses'],
+  }
 }
