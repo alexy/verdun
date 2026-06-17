@@ -48,6 +48,19 @@ pub struct ProjectQueryPlan {
 }
 
 #[derive(Debug, Deserialize)]
+struct EditorialState {
+    #[serde(default)]
+    focuses: Vec<EditorialFocus>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct EditorialFocus {
+    pub text: String,
+    #[serde(default)]
+    pub scope: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct HackerNewsResponse {
     pub hits: Vec<HackerNewsHit>,
 }
@@ -137,6 +150,223 @@ impl ExportPayload {
                 .collect(),
         }
     }
+}
+
+pub fn query_plans(
+    config: &CrawlerConfig,
+    editorial_focuses: &[EditorialFocus],
+) -> Vec<ProjectQueryPlan> {
+    config
+        .targets
+        .iter()
+        .map(|project| ProjectQueryPlan {
+            project: project.name.clone(),
+            topic: project.topic.clone(),
+            hacker_news_query: project_query(project),
+            live_terms: project_live_terms(project),
+            dev_to_tags: dev_to_tags(project),
+            review_targets: review_targets(config, project),
+            focus_terms: project_focus_terms(project, editorial_focuses),
+        })
+        .collect::<Vec<_>>()
+}
+
+pub fn read_editorial_focuses(path: &std::path::PathBuf) -> anyhow::Result<Vec<EditorialFocus>> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let state: EditorialState = serde_json::from_slice(
+        &std::fs::read(path)
+            .map_err(anyhow::Error::from)
+            .and_then(|bytes| Ok(bytes))?,
+    )
+    .map_err(anyhow::Error::from)?;
+    Ok(state
+        .focuses
+        .into_iter()
+        .filter(|focus| focus.scope != "archived" && !focus.text.trim().is_empty())
+        .collect())
+}
+
+pub fn project_query_for_collection(project: &CollectionTarget, focus_terms: &[String]) -> String {
+    let mut parts = vec![project.name.clone()];
+    parts.extend(project_live_terms(project).into_iter().take(2));
+    parts.extend(focus_terms.iter().take(2).cloned());
+    parts.sort();
+    parts.dedup();
+    parts.join(" ")
+}
+
+pub fn project_live_terms(project: &CollectionTarget) -> Vec<String> {
+    let generic_terms = [
+        "ai",
+        "arrow",
+        "backend",
+        "capability",
+        "columnar",
+        "cypher",
+        "data orchestration",
+        "dataframes",
+        "declarative lm",
+        "edge",
+        "embedded graph",
+        "expression api",
+        "graph",
+        "graph database",
+        "graph query",
+        "knowledge graph",
+        "lance",
+        "language model programs",
+        "llm",
+        "multimodal",
+        "multimodel",
+        "optimizers",
+        "prompt functions",
+        "python",
+        "realtime",
+        "replication",
+        "rust",
+        "rust graph",
+        "schema",
+        "security",
+        "sqlite",
+        "software-defined assets",
+        "sql compiler",
+        "spark connect",
+        "structured outputs",
+        "typed agents",
+        "typed extraction",
+        "typed graph",
+        "typed llm",
+        "typed policy",
+        "validation",
+        "vectors",
+    ];
+    project
+        .keywords
+        .iter()
+        .map(|keyword| keyword.to_lowercase())
+        .filter(|keyword| keyword.len() >= 4 && !generic_terms.contains(&keyword.as_str()))
+        .collect()
+}
+
+pub fn project_focus_terms(
+    project: &CollectionTarget,
+    editorial_focuses: &[EditorialFocus],
+) -> Vec<String> {
+    let project_name = project.name.to_lowercase();
+    let live_terms = project_live_terms(project);
+    let mut terms = Vec::new();
+    for focus in editorial_focuses {
+        let text = normalize_whitespace(&focus.text).to_lowercase();
+        if text.contains(&project_name) || live_terms.iter().any(|term| text.contains(term)) {
+            terms.extend(
+                focus
+                    .text
+                    .split(|character: char| {
+                        !character.is_alphanumeric() && character != '-' && character != '+'
+                    })
+                    .map(|term| term.trim().to_lowercase())
+                    .filter(|term| term.len() >= 4 && !is_generic_focus_term(term))
+                    .take(8),
+            );
+        }
+    }
+    terms.sort();
+    terms.dedup();
+    terms.truncate(8);
+    terms
+}
+
+pub fn dev_to_tags(project: &CollectionTarget) -> Vec<String> {
+    let mut tags = vec![slug(&project.name).replace('-', "")];
+    tags.extend(
+        project_live_terms(project)
+            .into_iter()
+            .map(|term| slug(&term).replace('-', ""))
+            .filter(|term| term.len() >= 3),
+    );
+    tags.sort();
+    tags.dedup();
+    tags
+}
+
+fn project_query(project: &CollectionTarget) -> String {
+    let mut parts = vec![project.name.clone()];
+    parts.extend(project_live_terms(project).into_iter().take(2));
+    parts.join(" ")
+}
+
+fn review_targets(config: &CrawlerConfig, project: &CollectionTarget) -> Vec<ReviewTarget> {
+    let query = project_query(project);
+    let query_param = url_query(&query);
+    let mut targets = Vec::new();
+    for source in &config.sources {
+        match source.name.as_str() {
+            "Hacker News" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("HN: {query}"),
+                url: format!(
+                    "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query={query_param}&sort=byDate&type=story"
+                ),
+                adapter: "hn-algolia".to_string(),
+            }),
+            "Lobste.rs" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("Lobste.rs: {query}"),
+                url: format!("https://lobste.rs/search?q={query_param}&what=stories&order=newest"),
+                adapter: "lobsters-search".to_string(),
+            }),
+            "dev.to" => {
+                for tag in dev_to_tags(project).into_iter().take(2) {
+                    targets.push(ReviewTarget {
+                        source: source.name.clone(),
+                        label: format!("dev.to #{tag}"),
+                        url: format!("https://dev.to/t/{tag}/latest"),
+                        adapter: "dev-to-tag".to_string(),
+                    });
+                }
+            }
+            "Medium" | "Substack" => {
+                for term in project_live_terms(project).into_iter().take(2) {
+                    targets.push(ReviewTarget {
+                        source: source.name.clone(),
+                        label: format!("{}: {term}", source.name),
+                        url: format!("{}/search?q={}", source.url.trim_end_matches('/'), url_query(&term)),
+                        adapter: "publication-search".to_string(),
+                    });
+                }
+            }
+            "LinkedIn" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("LinkedIn posts: {query}"),
+                url: format!("https://www.linkedin.com/search/results/content/?keywords={query_param}"),
+                adapter: "manual-review".to_string(),
+            }),
+            "X/Twitter" => targets.push(ReviewTarget {
+                source: source.name.clone(),
+                label: format!("X latest: {query}"),
+                url: format!("https://x.com/search?q={query_param}&src=typed_query&f=live"),
+                adapter: "manual-review".to_string(),
+            }),
+            _ => {}
+        }
+    }
+    targets
+}
+
+fn url_query(value: &str) -> String {
+    let mut encoded = String::new();
+    for byte in value.as_bytes() {
+        match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                encoded.push(char::from(*byte));
+            }
+            b' ' => encoded.push('+'),
+            _ => encoded.push_str(&format!("%{byte:02X}")),
+        }
+    }
+    encoded
 }
 
 pub fn item_dedupe_key(item: &NewsItem) -> String {
@@ -618,6 +848,30 @@ fn truncate_text(value: &str, max_chars: usize) -> String {
     let mut text = value.chars().take(max_chars).collect::<String>();
     text.push('…');
     text
+}
+
+fn normalize_whitespace(value: &str) -> String {
+    value.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn is_generic_focus_term(value: &str) -> bool {
+    [
+        "about",
+        "evidence",
+        "focus",
+        "material",
+        "more",
+        "platform",
+        "platforms",
+        "request",
+        "source",
+        "sources",
+        "systems",
+        "this-week",
+        "typed",
+        "week",
+    ]
+    .contains(&value)
 }
 
 fn news_item_record(item: &NewsItem) -> NormalizedRecord {

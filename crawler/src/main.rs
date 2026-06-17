@@ -3,16 +3,13 @@ use chrono::{DateTime, Duration, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 mod core;
 mod instances;
-use crate::core::{
-    CollectionTarget, CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, slug,
-};
+use crate::core::{CollectionTarget, CrawlerConfig, SourceConfig, SourceRun, SourceRunStatus};
 use crate::instances::garbage::{
-    self, DevToArticle, ExportPayload, FeedEntry, HackerNewsHit, HackerNewsResponse, LobstersStory,
-    ManualPost, NewsItem, ProjectQueryPlan, PublicSnapshot,
+    self, DevToArticle, EditorialFocus, ExportPayload, FeedEntry, HackerNewsHit,
+    HackerNewsResponse, LobstersStory, ManualPost, NewsItem, PublicSnapshot,
 };
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
-use serde::Deserialize;
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
 #[derive(Parser)]
@@ -146,7 +143,7 @@ fn collect(
     editorial_state: PathBuf,
 ) -> Result<()> {
     let config = read_crawler_config(&config)?;
-    let editorial_focuses = read_editorial_focuses(&editorial_state)?;
+    let editorial_focuses = garbage::read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
     let mut items = garbage::seed_items(&config);
     let mut source_runs = seed_source_runs(&config, live);
@@ -178,7 +175,7 @@ fn collect(
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let query_plans = query_plans(&config, &editorial_focuses);
+    let query_plans = garbage::query_plans(&config, &editorial_focuses);
     let public_snapshot = PublicSnapshot {
         generated_at: Utc::now(),
         theme: config.theme,
@@ -518,117 +515,12 @@ fn verify(config: PathBuf) -> Result<()> {
 
 fn queries(config: PathBuf, editorial_state: PathBuf) -> Result<()> {
     let config = read_crawler_config(&config)?;
-    let editorial_focuses = read_editorial_focuses(&editorial_state)?;
+    let editorial_focuses = garbage::read_editorial_focuses(&editorial_state)?;
     println!(
         "{}",
-        serde_json::to_string_pretty(&query_plans(&config, &editorial_focuses))?
+        serde_json::to_string_pretty(&garbage::query_plans(&config, &editorial_focuses))?
     );
     Ok(())
-}
-
-fn query_plans(
-    config: &CrawlerConfig,
-    editorial_focuses: &[EditorialFocus],
-) -> Vec<ProjectQueryPlan> {
-    config
-        .targets
-        .iter()
-        .map(|project| ProjectQueryPlan {
-            project: project.name.clone(),
-            topic: project.topic.clone(),
-            hacker_news_query: project_query(project),
-            live_terms: project_live_terms(project),
-            dev_to_tags: dev_to_tags(project),
-            review_targets: review_targets(config, project),
-            focus_terms: project_focus_terms(project, editorial_focuses),
-        })
-        .collect::<Vec<_>>()
-}
-
-fn review_targets(config: &CrawlerConfig, project: &CollectionTarget) -> Vec<ReviewTarget> {
-    let query = project_query(project);
-    let query_param = url_query(&query);
-    let mut targets = Vec::new();
-    for source in &config.sources {
-        match source.name.as_str() {
-            "Hacker News" => targets.push(ReviewTarget {
-                source: source.name.clone(),
-                label: format!("HN: {query}"),
-                url: format!(
-                    "https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query={query_param}&sort=byDate&type=story"
-                ),
-                adapter: "hn-algolia".to_string(),
-            }),
-            "Lobste.rs" => targets.push(ReviewTarget {
-                source: source.name.clone(),
-                label: format!("Lobste.rs: {query}"),
-                url: format!("https://lobste.rs/search?q={query_param}&what=stories&order=newest"),
-                adapter: "lobsters-search".to_string(),
-            }),
-            "dev.to" => {
-                for tag in dev_to_tags(project).into_iter().take(2) {
-                    targets.push(ReviewTarget {
-                        source: source.name.clone(),
-                        label: format!("dev.to #{tag}"),
-                        url: format!("https://dev.to/t/{tag}/latest"),
-                        adapter: "dev-to-tag".to_string(),
-                    });
-                }
-            }
-            "Medium" | "Substack" => {
-                for term in project_live_terms(project).into_iter().take(2) {
-                    targets.push(ReviewTarget {
-                        source: source.name.clone(),
-                        label: format!("{}: {term}", source.name),
-                        url: format!("{}/search?q={}", source.url.trim_end_matches('/'), url_query(&term)),
-                        adapter: "publication-search".to_string(),
-                    });
-                }
-            }
-            "LinkedIn" => targets.push(ReviewTarget {
-                source: source.name.clone(),
-                label: format!("LinkedIn posts: {query}"),
-                url: format!("https://www.linkedin.com/search/results/content/?keywords={query_param}"),
-                adapter: "manual-review".to_string(),
-            }),
-            "X/Twitter" => targets.push(ReviewTarget {
-                source: source.name.clone(),
-                label: format!("X latest: {query}"),
-                url: format!("https://x.com/search?q={query_param}&src=typed_query&f=live"),
-                adapter: "manual-review".to_string(),
-            }),
-            _ => {}
-        }
-    }
-    targets
-}
-
-#[derive(Debug, Deserialize)]
-struct EditorialState {
-    #[serde(default)]
-    focuses: Vec<EditorialFocus>,
-}
-
-#[derive(Debug, Deserialize)]
-struct EditorialFocus {
-    text: String,
-    #[serde(default)]
-    scope: String,
-}
-
-fn read_editorial_focuses(path: &PathBuf) -> Result<Vec<EditorialFocus>> {
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let state: EditorialState = serde_json::from_slice(
-        &fs::read(path).with_context(|| format!("reading {}", path.display()))?,
-    )
-    .with_context(|| format!("parsing {}", path.display()))?;
-    Ok(state
-        .focuses
-        .into_iter()
-        .filter(|focus| focus.scope != "archived" && !focus.text.trim().is_empty())
-        .collect())
 }
 
 fn verify_required_projects(config: &CrawlerConfig) -> Result<()> {
@@ -675,7 +567,7 @@ fn verify_required_projects(config: &CrawlerConfig) -> Result<()> {
             "{project_name} must have at least three matching keywords"
         );
         anyhow::ensure!(
-            !project_live_terms(project).is_empty(),
+            !garbage::project_live_terms(project).is_empty(),
             "{project_name} must have at least one distinctive live-search term"
         );
     }
@@ -880,8 +772,8 @@ fn fetch_hacker_news(
 ) -> Result<Vec<NewsItem>> {
     let mut items = Vec::new();
     for project in &config.targets {
-        let focus_terms = project_focus_terms(project, editorial_focuses);
-        let query = project_query_for_collection(project, &focus_terms);
+        let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
+        let query = garbage::project_query_for_collection(project, &focus_terms);
         let response = client
             .get("https://hn.algolia.com/api/v1/search_by_date")
             .query(&[
@@ -925,8 +817,8 @@ fn fetch_lobsters(
     let mut items = Vec::new();
     for project in &config.targets {
         let mut project_count = 0;
-        let focus_terms = project_focus_terms(project, editorial_focuses);
-        let query = project_query_for_collection(project, &focus_terms);
+        let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
+        let query = garbage::project_query_for_collection(project, &focus_terms);
         let html = client
             .get("https://lobste.rs/search")
             .query(&[
@@ -1083,8 +975,8 @@ fn fetch_dev_to(
     let mut seen_articles = BTreeMap::new();
     let mut items = Vec::new();
     for project in &config.targets {
-        let focus_terms = project_focus_terms(project, editorial_focuses);
-        for tag in dev_to_tags(project).into_iter().take(2) {
+        let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
+        for tag in garbage::dev_to_tags(project).into_iter().take(2) {
             let response = client
                 .get("https://dev.to/api/articles")
                 .query(&[("per_page", "20"), ("top", "30"), ("tag", tag.as_str())])
@@ -1152,7 +1044,7 @@ fn fetch_feed_source(
         let entries = parse_feed_entries(&text, feed_url);
         for entry in entries {
             for project in &config.targets {
-                let focus_terms = project_focus_terms(project, editorial_focuses);
+                let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
                 let count = *counts.get(project.name.as_str()).unwrap_or(&0);
                 if count >= max_per_project
                     || !feed_entry_matches_project(&entry, project, &focus_terms)
@@ -1190,7 +1082,7 @@ fn collect_manual_source(
     let mut items = Vec::new();
     for post in posts {
         for project in &config.targets {
-            let focus_terms = project_focus_terms(project, editorial_focuses);
+            let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
             let count = *counts.get(project.name.as_str()).unwrap_or(&0);
             if count >= max_per_project
                 || !manual_post_matches_project(&post, project, &focus_terms)
@@ -1264,21 +1156,6 @@ fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
-}
-
-fn project_query(project: &CollectionTarget) -> String {
-    let mut parts = vec![project.name.clone()];
-    parts.extend(project_live_terms(project).into_iter().take(2));
-    parts.join(" ")
-}
-
-fn project_query_for_collection(project: &CollectionTarget, focus_terms: &[String]) -> String {
-    let mut parts = vec![project.name.clone()];
-    parts.extend(project_live_terms(project).into_iter().take(2));
-    parts.extend(focus_terms.iter().take(2).cloned());
-    parts.sort();
-    parts.dedup();
-    parts.join(" ")
 }
 
 fn hn_hit_matches_project(
@@ -1496,7 +1373,7 @@ fn text_matches_project(text: &str, project: &CollectionTarget, focus_terms: &[S
     if contains_distinct_term(&text, &project_name) {
         return true;
     }
-    project_live_terms(project)
+    garbage::project_live_terms(project)
         .iter()
         .chain(focus_terms.iter())
         .any(|keyword| contains_distinct_term(&text, keyword))
@@ -1519,134 +1396,6 @@ fn contains_distinct_term(text: &str, term: &str) -> bool {
         start = index + term.len();
     }
     false
-}
-
-fn project_live_terms(project: &CollectionTarget) -> Vec<String> {
-    let generic_terms = [
-        "ai",
-        "arrow",
-        "backend",
-        "capability",
-        "columnar",
-        "cypher",
-        "data orchestration",
-        "dataframes",
-        "declarative lm",
-        "edge",
-        "embedded graph",
-        "expression api",
-        "graph",
-        "graph database",
-        "graph query",
-        "knowledge graph",
-        "lance",
-        "language model programs",
-        "llm",
-        "multimodal",
-        "multimodel",
-        "optimizers",
-        "prompt functions",
-        "python",
-        "realtime",
-        "replication",
-        "rust",
-        "rust graph",
-        "schema",
-        "security",
-        "sqlite",
-        "software-defined assets",
-        "sql compiler",
-        "spark connect",
-        "structured outputs",
-        "typed agents",
-        "typed extraction",
-        "typed graph",
-        "typed llm",
-        "typed policy",
-        "validation",
-        "vectors",
-    ];
-    project
-        .keywords
-        .iter()
-        .map(|keyword| keyword.to_lowercase())
-        .filter(|keyword| keyword.len() >= 4 && !generic_terms.contains(&keyword.as_str()))
-        .collect()
-}
-
-fn project_focus_terms(
-    project: &CollectionTarget,
-    editorial_focuses: &[EditorialFocus],
-) -> Vec<String> {
-    let project_name = project.name.to_lowercase();
-    let live_terms = project_live_terms(project);
-    let mut terms = Vec::new();
-    for focus in editorial_focuses {
-        let text = normalize_whitespace(&focus.text).to_lowercase();
-        if text.contains(&project_name) || live_terms.iter().any(|term| text.contains(term)) {
-            terms.extend(
-                focus
-                    .text
-                    .split(|character: char| {
-                        !character.is_alphanumeric() && character != '-' && character != '+'
-                    })
-                    .map(|term| term.trim().to_lowercase())
-                    .filter(|term| term.len() >= 4 && !is_generic_focus_term(term))
-                    .take(8),
-            );
-        }
-    }
-    terms.sort();
-    terms.dedup();
-    terms.truncate(8);
-    terms
-}
-
-fn is_generic_focus_term(value: &str) -> bool {
-    [
-        "about",
-        "evidence",
-        "focus",
-        "material",
-        "more",
-        "platform",
-        "platforms",
-        "request",
-        "source",
-        "sources",
-        "systems",
-        "this-week",
-        "typed",
-        "week",
-    ]
-    .contains(&value)
-}
-
-fn dev_to_tags(project: &CollectionTarget) -> Vec<String> {
-    let mut tags = vec![slug(&project.name).replace('-', "")];
-    tags.extend(
-        project_live_terms(project)
-            .into_iter()
-            .map(|term| slug(&term).replace('-', ""))
-            .filter(|term| term.len() >= 3),
-    );
-    tags.sort();
-    tags.dedup();
-    tags
-}
-
-fn url_query(value: &str) -> String {
-    let mut encoded = String::new();
-    for byte in value.as_bytes() {
-        match byte {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
-                encoded.push(char::from(*byte));
-            }
-            b' ' => encoded.push('+'),
-            _ => encoded.push_str(&format!("%{byte:02X}")),
-        }
-    }
-    encoded
 }
 
 fn sql_string(value: &str) -> String {

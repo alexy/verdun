@@ -13,6 +13,7 @@
 - Moved Garbage source-run construction and manual-source freshness wording into `crawler/src/instances/garbage.rs`.
 - Moved Garbage watchlist seed item construction and provenance metadata generation into `crawler/src/instances/garbage.rs`.
 - Moved Garbage parsed source record structs and live/manual item constructors into `crawler/src/instances/garbage.rs`.
+- Moved Garbage editorial-focus parsing, query-plan generation, review-target generation, live-search term selection, and dev.to tag derivation into `crawler/src/instances/garbage.rs`.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
@@ -21,5 +22,5 @@ Known remaining extraction work:
 
 - Garbage-specific newsletter, Ulysses, Strongly Typed AI ontology, readiness checks, and `/rbage/` behavior still live inside Verdun.
 - Legacy newsletter database/API paths still coexist with generic workbench paths.
-- The Rust crawler now has a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, and item constructors, but live/manual fetch adapters, parsing, and matching still live in `crawler/src/main.rs`.
+- The Rust crawler now has a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, and query/focus planning, but live/manual fetch adapters, parsing, and matching still live in `crawler/src/main.rs`.
 - Greathouse is still a pilot fixture rather than a full app consuming Verdun core.
