@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless'
+import { randomUUID } from 'crypto'
 import { readSnapshot, readStatus, writeFocus, writeVote } from '../newsletter/_db.js'
 import { garbageSnapshotToWorkbench } from '../../src/instances/garbage/workbench'
 import { garbageInstance } from '../../src/instances/garbage/config'
@@ -101,11 +102,39 @@ export async function readWorkbenchStatus(): Promise<WorkbenchStatus> {
 }
 
 export async function writeReview(recordId: string, review: ReviewValue): Promise<void> {
+  const databaseUrl = workbenchDatabaseUrl()
+  if (databaseUrl) return writeDatabaseWorkbenchReview(neon(databaseUrl), recordId, review)
   return writeVote(recordId, review)
 }
 
 export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['scope']): Promise<WorkbenchFocus | null> {
+  const databaseUrl = workbenchDatabaseUrl()
+  if (databaseUrl) return writeDatabaseWorkbenchFocus(neon(databaseUrl), text, scope)
   return writeFocus(text, scope)
+}
+
+export async function writeDatabaseWorkbenchReview(sql: SqlClient, recordId: string, review: ReviewValue): Promise<void> {
+  await sql.query(`
+    insert into review_state (instance, record_id, review, updated_at)
+    values ('garbage', $1, $2, now())
+    on conflict (instance, record_id)
+    do update set review = excluded.review, updated_at = excluded.updated_at
+  `, [recordId, review])
+}
+
+export async function writeDatabaseWorkbenchFocus(sql: SqlClient, text: string, scope: WorkbenchFocus['scope']): Promise<WorkbenchFocus | null> {
+  const focus: WorkbenchFocus = {
+    id: randomUUID(),
+    text,
+    scope,
+    createdAt: new Date().toISOString(),
+  }
+  const rows = await sql.query(`
+    insert into focuses (instance, id, text, scope, created_at)
+    values ('garbage', $1, $2, $3, $4::timestamptz)
+    returning id, text, scope, created_at::text
+  `, [focus.id, focus.text, focus.scope, focus.createdAt]) as WorkbenchFocusRow[]
+  return rows[0] ? toWorkbenchFocus(rows[0]) : focus
 }
 
 export async function readDatabaseWorkbenchSnapshot(sql: SqlClient): Promise<WorkbenchSnapshot> {

@@ -95,6 +95,18 @@ try {
   if (databaseStatus.recordCount !== 1 || databaseStatus.collectionPlanCount !== 1 || databaseStatus.editorialPersistence !== 'database') {
     throw new Error(`workbench database-view status did not map generic counts: ${JSON.stringify(databaseStatus)}`)
   }
+  const writeSql = fakeWorkbenchWriteSql()
+  await dbModule.writeDatabaseWorkbenchReview(writeSql, 'db-pydantic', 1)
+  const focus = await dbModule.writeDatabaseWorkbenchFocus(writeSql, 'Database focus write.', 'this_week')
+  if (!writeSql.reviewWrites.some((write) => write.recordId === 'db-pydantic' && write.review === 1)) {
+    throw new Error(`workbench generic review write did not target review_state: ${JSON.stringify(writeSql.reviewWrites)}`)
+  }
+  if (!writeSql.focusWrites.some((write) => write.text === 'Database focus write.' && write.scope === 'this_week')) {
+    throw new Error(`workbench generic focus write did not target focuses: ${JSON.stringify(writeSql.focusWrites)}`)
+  }
+  if (focus?.text !== 'Database focus write.' || focus?.scope !== 'this_week') {
+    throw new Error(`workbench generic focus write did not return a focus: ${JSON.stringify(focus)}`)
+  }
 
   const recordsResponse = await call(recordsModule.default)
   if (recordsResponse.code !== 200 || recordsResponse.body?.records?.length !== snapshot.records.length) {
@@ -231,6 +243,35 @@ function fakeWorkbenchSql() {
         }]
       }
       throw new Error(`unexpected fake workbench SQL query: ${sql}`)
+    },
+  }
+}
+
+function fakeWorkbenchWriteSql() {
+  const reviewWrites = []
+  const focusWrites = []
+  return {
+    reviewWrites,
+    focusWrites,
+    async query(sql, params = []) {
+      if (sql.includes('insert into review_state')) {
+        reviewWrites.push({
+          recordId: params[0],
+          review: params[1],
+        })
+        return []
+      }
+      if (sql.includes('insert into focuses')) {
+        const row = {
+          id: params[0],
+          text: params[1],
+          scope: params[2],
+          created_at: params[3],
+        }
+        focusWrites.push(row)
+        return [row]
+      }
+      throw new Error(`unexpected fake workbench write SQL query: ${sql}`)
     },
   }
 }
