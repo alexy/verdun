@@ -1,0 +1,22 @@
+[
+  {
+    "subject": "Berkeley 2BR",
+    "url": "https://example.com/zillow/berkeley-two-bedroom-condo",
+    "street_address": "2020 Blake St Apt 4",
+    "city": "Berkeley",
+    "state": "CA",
+    "zipcode": "94704",
+    "zestimate": 842000,
+    "rent_zestimate": 4100,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "home_status": "FOR_SALE",
+    "observed_at": "2026-06-16T16:10:00Z",
+    "days_on_zillow": 4,
+    "page_view_count": 238,
+    "favorite_count": 17,
+    "source_status": "fresh",
+    "tags": ["berkeley", "2br", "zillow", "demand-signal"],
+    "score": 88
+  }
+]

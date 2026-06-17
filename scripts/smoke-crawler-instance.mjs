@@ -140,6 +140,19 @@ try {
   if (!redfinListing.summary.includes('$875,000 Redfin listing') || !redfinListing.summary.includes('4 comparable signals')) {
     throw new Error(`Redfin listing summary was not property-shaped: ${redfinListing.summary}`)
   }
+  const zillowListing = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'zillow-listing-json')
+  if (!zillowListing) {
+    throw new Error('greathouse snapshot did not contain a Zillow adapter listing record')
+  }
+  if (zillowListing.raw_json?.provenance?.stage !== 'property_source') {
+    throw new Error(`Zillow listing used wrong provenance stage: ${zillowListing.raw_json?.provenance?.stage}`)
+  }
+  if (zillowListing.raw_json?.property?.zestimate !== 842000 || zillowListing.raw_json?.property?.rent_zestimate !== 4100 || zillowListing.raw_json?.property?.favorite_count !== 17) {
+    throw new Error(`Zillow listing did not preserve valuation and demand details: ${JSON.stringify(zillowListing.raw_json?.property)}`)
+  }
+  if (!zillowListing.summary.includes('$842,000 Zillow listing') || !zillowListing.summary.includes('238 page views') || !zillowListing.summary.includes('17 saves')) {
+    throw new Error(`Zillow listing summary was not property-shaped: ${zillowListing.summary}`)
+  }
   const diagnostic = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'local-diagnostic-json' && item.project === 'Oakland blocked source')
   if (!diagnostic) {
     throw new Error('greathouse snapshot did not contain a diagnostic-shaped record')
@@ -160,8 +173,12 @@ try {
   const reviewAdapters = new Set(
     snapshot.query_plans?.flatMap((plan) => plan.review_targets?.map((target) => target.adapter) ?? []) ?? [],
   )
-  if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('redfin-listing-json') || !reviewAdapters.has('local-diagnostic-json') || !reviewAdapters.has('browser-diagnostic-json')) {
+  if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('redfin-listing-json') || !reviewAdapters.has('zillow-listing-json') || !reviewAdapters.has('local-diagnostic-json') || !reviewAdapters.has('browser-diagnostic-json')) {
     throw new Error(`greathouse review targets did not expose local JSON adapters: ${[...reviewAdapters].join(', ')}`)
+  }
+  const zillowRun = snapshot.source_runs?.find((run) => run.source === 'Zillow property feed')
+  if (zillowRun?.project_counts?.['Berkeley 2BR'] !== 1 || !zillowRun.message.includes('Zillow listing adapter')) {
+    throw new Error(`Zillow source run did not expose source health: ${JSON.stringify(zillowRun)}`)
   }
   const browserRun = snapshot.source_runs?.find((run) => run.source === 'Redfin browser diagnostics')
   if (browserRun?.project_counts?.['Oakland blocked source'] !== 1 || !browserRun.message.includes('Browser diagnostic adapter')) {

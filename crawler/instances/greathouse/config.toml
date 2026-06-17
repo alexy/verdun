@@ -27,6 +27,13 @@ adapter = "redfin-listing-json"
 fixture_path = "crawler/instances/greathouse/fixtures/redfin-listings.json"
 
 [[sources]]
+name = "Zillow property feed"
+kind = "listing"
+url = "https://example.com/zillow/property-feed"
+adapter = "zillow-listing-json"
+fixture_path = "crawler/instances/greathouse/fixtures/zillow-listings.json"
+
+[[sources]]
 name = "Redfin diagnostics"
 kind = "diagnostic"
 url = "https://example.com/redfin-diagnostics"

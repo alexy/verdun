@@ -148,6 +148,7 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
                     | "http-diagnostic-json"
                     | "http-status-diagnostic"
                     | "redfin-listing-json"
+                    | "zillow-listing-json"
                     | "browser-diagnostic-json"
             ),
             "{} uses unsupported Greathouse adapter {}",
@@ -156,6 +157,7 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
         );
         if adapter.starts_with("local-")
             || adapter == "redfin-listing-json"
+            || adapter == "zillow-listing-json"
             || adapter == "browser-diagnostic-json"
         {
             let data_path = source.fixture_path.as_ref().with_context(|| {
@@ -281,6 +283,8 @@ struct HttpJsonSourceAdapter {
 struct HttpStatusDiagnosticAdapter;
 
 struct RedfinListingJsonAdapter;
+
+struct ZillowListingJsonAdapter;
 
 struct BrowserDiagnosticJsonAdapter;
 
@@ -487,6 +491,47 @@ impl GreathouseSourceAdapter for RedfinListingJsonAdapter {
     }
 }
 
+impl GreathouseSourceAdapter for ZillowListingJsonAdapter {
+    fn adapter_name(&self) -> &'static str {
+        "zillow-listing-json"
+    }
+
+    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+        let path = source
+            .fixture_path
+            .as_ref()
+            .with_context(|| format!("{} has no fixture_path configured", source.name))?;
+        let records: Vec<ZillowListingRecord> = serde_json::from_slice(
+            &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+        )
+        .with_context(|| format!("parsing Zillow listing JSON from {}", path.display()))?;
+        records
+            .into_iter()
+            .enumerate()
+            .map(|(index, record)| {
+                let subject = record.subject.clone();
+                let target = config
+                    .targets
+                    .iter()
+                    .find(|target| target.name == subject)
+                    .with_context(|| {
+                        format!(
+                            "{} Zillow adapter data references unknown subject {}",
+                            source.name, subject
+                        )
+                    })?;
+                Ok(greathouse_item(
+                    target,
+                    source,
+                    record.into_local_record(),
+                    self.adapter_name(),
+                    index,
+                ))
+            })
+            .collect()
+    }
+}
+
 impl GreathouseSourceAdapter for BrowserDiagnosticJsonAdapter {
     fn adapter_name(&self) -> &'static str {
         "browser-diagnostic-json"
@@ -542,6 +587,7 @@ static HTTP_DIAGNOSTIC_JSON_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapt
 };
 static HTTP_STATUS_DIAGNOSTIC_ADAPTER: HttpStatusDiagnosticAdapter = HttpStatusDiagnosticAdapter;
 static REDFIN_LISTING_JSON_ADAPTER: RedfinListingJsonAdapter = RedfinListingJsonAdapter;
+static ZILLOW_LISTING_JSON_ADAPTER: ZillowListingJsonAdapter = ZillowListingJsonAdapter;
 static BROWSER_DIAGNOSTIC_JSON_ADAPTER: BrowserDiagnosticJsonAdapter = BrowserDiagnosticJsonAdapter;
 
 fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSourceAdapter> {
@@ -552,6 +598,7 @@ fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSo
         Some("http-diagnostic-json") => Ok(&HTTP_DIAGNOSTIC_JSON_ADAPTER),
         Some("http-status-diagnostic") => Ok(&HTTP_STATUS_DIAGNOSTIC_ADAPTER),
         Some("redfin-listing-json") => Ok(&REDFIN_LISTING_JSON_ADAPTER),
+        Some("zillow-listing-json") => Ok(&ZILLOW_LISTING_JSON_ADAPTER),
         Some("browser-diagnostic-json") => Ok(&BROWSER_DIAGNOSTIC_JSON_ADAPTER),
         Some(adapter) => anyhow::bail!(
             "{} uses unsupported Greathouse adapter {}",
@@ -594,6 +641,8 @@ fn source_run_message(source: &SourceConfig) -> String {
     } else if adapter == "redfin-listing-json" {
         "Redfin listing adapter normalized property evidence from external crawler output"
             .to_string()
+    } else if adapter == "zillow-listing-json" {
+        "Zillow listing adapter normalized valuation and demand evidence from external crawler output".to_string()
     } else if adapter == "browser-diagnostic-json" {
         "Browser diagnostic adapter normalized rendered-page source health from external crawler output".to_string()
     } else if adapter.starts_with("http-") && source.kind == "diagnostic" {
@@ -718,6 +767,28 @@ struct RedfinListingRecord {
     observed_at: Option<DateTime<Utc>>,
     days_on_market: Option<i64>,
     comparable_count: Option<i64>,
+    source_status: Option<String>,
+    tags: Option<Vec<String>>,
+    score: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ZillowListingRecord {
+    subject: String,
+    url: String,
+    street_address: String,
+    city: Option<String>,
+    state: Option<String>,
+    zipcode: Option<String>,
+    zestimate: Option<i64>,
+    rent_zestimate: Option<i64>,
+    bedrooms: Option<f32>,
+    bathrooms: Option<f32>,
+    home_status: Option<String>,
+    observed_at: Option<DateTime<Utc>>,
+    days_on_zillow: Option<i64>,
+    page_view_count: Option<i64>,
+    favorite_count: Option<i64>,
     source_status: Option<String>,
     tags: Option<Vec<String>>,
     score: Option<i32>,
@@ -863,6 +934,87 @@ impl RedfinListingRecord {
                 "status": self.status,
                 "days_on_market": self.days_on_market,
                 "comparable_count": comparable_count,
+                "source_status": source_status,
+            }),
+        }
+    }
+}
+
+impl ZillowListingRecord {
+    fn into_local_record(self) -> GreathouseLocalRecord {
+        let bedroom_label = self
+            .bedrooms
+            .map(format_count)
+            .unwrap_or_else(|| "unknown".to_string());
+        let bathroom_label = self
+            .bathrooms
+            .map(format_count)
+            .unwrap_or_else(|| "unknown".to_string());
+        let zestimate_label = self
+            .zestimate
+            .map(format_price)
+            .unwrap_or_else(|| "unpriced".to_string());
+        let rent_label = self
+            .rent_zestimate
+            .map(format_price)
+            .unwrap_or_else(|| "unknown rent".to_string());
+        let location = [
+            self.city.as_deref(),
+            self.state.as_deref(),
+            self.zipcode.as_deref(),
+        ]
+        .into_iter()
+        .flatten()
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join(", ");
+        let title = if location.is_empty() {
+            format!("Zillow listing: {}", self.street_address)
+        } else {
+            format!("Zillow listing: {} ({})", self.street_address, location)
+        };
+        let status = self
+            .home_status
+            .clone()
+            .unwrap_or_else(|| "unknown status".to_string());
+        let source_status = self
+            .source_status
+            .clone()
+            .unwrap_or_else(|| "observed".to_string());
+        let days_on_zillow = self
+            .days_on_zillow
+            .map(|days| format!("{days} days on Zillow"))
+            .unwrap_or_else(|| "unknown listing age".to_string());
+        let page_views = self.page_view_count.unwrap_or(0);
+        let favorites = self.favorite_count.unwrap_or(0);
+        let summary = format!(
+            "{zestimate_label} Zillow listing with {bedroom_label} beds, {bathroom_label} baths, {status}, {rent_label} rent estimate, {days_on_zillow}, {page_views} page views, and {favorites} saves."
+        );
+        let mut tags = self.tags.unwrap_or_default();
+        tags.push("zillow".to_string());
+        tags.push(source_status.clone());
+        GreathouseLocalRecord {
+            subject: self.subject,
+            url: self.url,
+            title: Some(title),
+            observed_at: self.observed_at,
+            summary: Some(summary),
+            tags,
+            score: self.score,
+            stage: Some("property_source".to_string()),
+            property_json: serde_json::json!({
+                "street_address": self.street_address,
+                "city": self.city,
+                "state": self.state,
+                "zipcode": self.zipcode,
+                "zestimate": self.zestimate,
+                "rent_zestimate": self.rent_zestimate,
+                "bedrooms": self.bedrooms,
+                "bathrooms": self.bathrooms,
+                "home_status": self.home_status,
+                "days_on_zillow": self.days_on_zillow,
+                "page_view_count": self.page_view_count,
+                "favorite_count": self.favorite_count,
                 "source_status": source_status,
             }),
         }

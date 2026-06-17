@@ -3,6 +3,7 @@
 ## 2026-06-17
 
 - Removed the old `api/newsletter/*` compatibility route files; Garbage newsletter APIs are now exposed through the explicit `api/garbage/newsletter/*` namespace.
+- Added a Zillow-shaped Greathouse listing adapter and fixture so a second production property-source format refills the same generic crawler snapshot and workbench SQL contract.
 - Changed generic SQL export to load from the core `CrawlerSnapshot` contract instead of the Garbage `ExportPayload`; the legacy newsletter target remains the explicit Garbage payload path.
 - Moved crawler CLI default config paths, public snapshot paths, instance display names, and base paths onto crawler instance metadata; shared `main.rs` no longer embeds Garbage path/base defaults.
 - Moved the legacy `newsletter_*` SQL exporter out of crawler `main.rs` and into the Garbage crawler instance module, with smoke coverage preventing the shared CLI from re-embedding newsletter table exports.
