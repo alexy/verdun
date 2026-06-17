@@ -1,0 +1,34 @@
+import { allowMethods, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../newsletter/_http.js'
+import { readWorkbenchStatus } from './_db.js'
+
+export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
+  if (!allowMethods(req, res, ['GET', 'HEAD'])) return
+
+  const databaseConfigured = hasDatabaseEnv()
+  try {
+    const activeSnapshot = await readWorkbenchStatus()
+    sendJson(res, {
+      ok: true,
+      service: 'workbench',
+      surface: 'health',
+      state: databaseConfigured ? 'database_configured' : 'database_not_configured',
+      databaseConfigured,
+      instance: activeSnapshot.instance,
+      editorialPersistence: activeSnapshot.editorialPersistence,
+      readSurfaces: ['records', 'status', 'health'],
+      writeSurfaces: ['review-state', 'focus'],
+      collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
+      databaseContract: {
+        currentTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
+        reusableViews: ['workbench_records', 'workbench_source_runs', 'workbench_collection_plans', 'workbench_review_state', 'workbench_focuses'],
+      },
+      activeSnapshot,
+    })
+  } catch (error) {
+    sendApiError(res, error)
+  }
+}
+
+function hasDatabaseEnv(): boolean {
+  return Boolean(process.env.POSTGRES_URL ?? process.env.DATABASE_URL ?? process.env.NEON_DATABASE_URL)
+}

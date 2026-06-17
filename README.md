@@ -8,6 +8,7 @@ The first reusable boundary is now explicit:
 - Garbage instance configuration lives in `src/instances/garbage/config.ts`.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
 - Generic `workbench_*` database views live in `db/migrations/0002_workbench_views.sql` over the current newsletter tables.
+- Generic Vercel read surfaces live under `api/workbench/` and project the current Garbage instance as records, status, and health.
 - Existing newsletter routes, scripts, and database tables still use their current names while the boundary is extracted incrementally.
 
 The first slice mirrors the useful Greathouse shape without touching Greathouse:

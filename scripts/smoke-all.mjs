@@ -33,6 +33,7 @@ const steps = [
   ['npm', ['run', 'smoke:source-gap-review']],
   ['npm', ['run', 'smoke:ulysses']],
   ['npm', ['run', 'smoke:view']],
+  ['npm', ['run', 'smoke:workbench']],
 ]
 
 for (const [command, args] of steps) {

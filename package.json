@@ -42,6 +42,7 @@
     "smoke:source-gap-review": "node scripts/smoke-source-gap-review.mjs",
     "smoke:ulysses": "node scripts/smoke-ulysses-export.mjs",
     "smoke:view": "node scripts/smoke-view-model.mjs",
+    "smoke:workbench": "node scripts/smoke-workbench-api.mjs",
     "draft": "node scripts/newsletter-draft.mjs",
     "review:gaps": "node scripts/source-gap-review.mjs",
     "audit:grust": "node scripts/grust-watchlist-audit.mjs",
