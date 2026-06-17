@@ -2,6 +2,8 @@
 
 ## 2026-06-17
 
+- Moved workbench instance registration metadata into instance-owned files (`src/instances/garbage/instance.ts` and `src/instances/greathouse/instance.ts`); the shared instance registry now consumes `registeredWorkbenchInstances` instead of importing Garbage or Greathouse config/pilot modules directly.
+- Updated Greathouse workbench smoke coverage to enforce that default-instance and static-snapshot metadata stay in instance registration files while `src/instances/registry.ts` only consumes registration metadata.
 - Moved concrete Vue app component imports into instance-owned registrations (`src/instances/garbage/app.ts` and `src/instances/greathouse/app.ts`); the shared app resolver now consumes `registeredWorkbenchApps` instead of importing Garbage or Greathouse components directly.
 - Updated Greathouse workbench smoke coverage to enforce that concrete app component imports stay in instance registration files while `src/instances/app-registry.ts` only consumes registration metadata.
 - Moved root Vue app component selection into `src/instances/app-registry.ts`; `src/App.vue` now stays a generic shell and no longer imports concrete Garbage or Greathouse app components directly.

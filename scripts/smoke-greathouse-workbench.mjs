@@ -14,10 +14,13 @@ const { module: registryModule } = await runnerImport('./src/instances/registry.
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const [greathouseAppSource, greathouseAppRegistrationSource, garbageAppRegistrationSource, appSource, appComponentsSource, appRegistrySource, registrySource] = await Promise.all([
+const [greathouseAppSource, greathouseAppRegistrationSource, garbageAppRegistrationSource, greathouseInstanceRegistrationSource, garbageInstanceRegistrationSource, instanceRegistrationsSource, appSource, appComponentsSource, appRegistrySource, registrySource] = await Promise.all([
   readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
   readFile('src/instances/greathouse/app.ts', 'utf8'),
   readFile('src/instances/garbage/app.ts', 'utf8'),
+  readFile('src/instances/greathouse/instance.ts', 'utf8'),
+  readFile('src/instances/garbage/instance.ts', 'utf8'),
+  readFile('src/instances/instances.ts', 'utf8'),
   readFile('src/App.vue', 'utf8'),
   readFile('src/instances/app-components.ts', 'utf8'),
   readFile('src/instances/app-registry.ts', 'utf8'),
@@ -67,6 +70,15 @@ if (!greathouseAppRegistrationSource.includes('GreathouseApp') || !greathouseApp
 if (!garbageAppRegistrationSource.includes('GarbageApp') || !garbageAppRegistrationSource.includes('garbageInstance.id')) {
   throw new Error('Garbage app component is not registered from its instance boundary')
 }
+if (!greathouseInstanceRegistrationSource.includes('greathouseInstance') || !greathouseInstanceRegistrationSource.includes('greathousePilotSnapshot')) {
+  throw new Error('Greathouse instance metadata is not registered from its instance boundary')
+}
+if (!garbageInstanceRegistrationSource.includes('garbageInstance') || !garbageInstanceRegistrationSource.includes('default: true')) {
+  throw new Error('Garbage default instance metadata is not registered from its instance boundary')
+}
+if (!instanceRegistrationsSource.includes('garbageWorkbenchInstance') || !instanceRegistrationsSource.includes('greathouseWorkbenchInstance')) {
+  throw new Error('registered instance list is missing an instance metadata registration')
+}
 if (!appSource.includes('resolveWorkbenchAppForPath')) {
   throw new Error('root app shell is not wired through the instance app resolver')
 }
@@ -88,8 +100,17 @@ if (appRegistrySource.includes('GreathouseApp') || appRegistrySource.includes('G
 if (appRegistrySource.includes('?? GarbageApp')) {
   throw new Error('instance app registry still falls back directly to the Garbage app instead of the registered default')
 }
-if (registrySource.includes('return garbageInstance') || registrySource.includes('instance.id === greathouseInstance.id')) {
-  throw new Error('instance registry still hard-codes default or static-snapshot instance branches')
+if (!registrySource.includes('registeredWorkbenchInstances')) {
+  throw new Error('instance registry is not backed by registered instance metadata')
+}
+if (
+  registrySource.includes('garbageInstance') ||
+  registrySource.includes('greathouseInstance') ||
+  registrySource.includes('greathousePilotSnapshot') ||
+  registrySource.includes('return garbageInstance') ||
+  registrySource.includes('instance.id === greathouseInstance.id')
+) {
+  throw new Error('instance registry still imports or hard-codes concrete instance metadata')
 }
 if (registryModule.resolveWorkbenchInstanceForPath('/greathouse/').id !== 'greathouse') {
   throw new Error('registry did not resolve /greathouse/ to the Greathouse instance')

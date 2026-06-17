@@ -1,20 +1,8 @@
 import type { WorkbenchInstance, WorkbenchSnapshot } from '../core/workbench'
-import { garbageInstance } from './garbage/config'
-import { greathouseInstance } from './greathouse/config'
-import { greathousePilotSnapshot } from './greathouse/pilot'
+import type { WorkbenchInstanceRegistration } from './instance-types'
+import { registeredWorkbenchInstances } from './instances'
 
-type RegisteredWorkbenchInstance = {
-  instance: WorkbenchInstance
-  default?: boolean
-  staticSnapshot?: () => WorkbenchSnapshot
-}
-
-const registeredInstances: RegisteredWorkbenchInstance[] = [
-  { instance: garbageInstance, default: true },
-  { instance: greathouseInstance, staticSnapshot: greathousePilotSnapshot },
-]
-
-const instances = registeredInstances.map((entry) => entry.instance)
+const instances = registeredWorkbenchInstances.map((entry) => entry.instance)
 
 export function defaultWorkbenchInstance(): WorkbenchInstance {
   return defaultWorkbenchEntry().instance
@@ -43,9 +31,9 @@ export function resolveWorkbenchInstanceForPath(pathname: string): WorkbenchInst
 }
 
 export function staticWorkbenchSnapshot(instance: WorkbenchInstance): WorkbenchSnapshot | null {
-  return registeredInstances.find((entry) => entry.instance.id === instance.id)?.staticSnapshot?.() ?? null
+  return registeredWorkbenchInstances.find((entry) => entry.instance.id === instance.id)?.staticSnapshot?.() ?? null
 }
 
-function defaultWorkbenchEntry(): RegisteredWorkbenchInstance {
-  return registeredInstances.find((entry) => entry.default) ?? registeredInstances[0]
+function defaultWorkbenchEntry(): WorkbenchInstanceRegistration {
+  return registeredWorkbenchInstances.find((entry) => entry.default) ?? registeredWorkbenchInstances[0]
 }
