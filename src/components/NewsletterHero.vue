@@ -1,44 +1,35 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+import WorkbenchHero from './workbench/WorkbenchHero.vue'
+
+type WorkbenchMetric = {
+  label: string
+  value: number | string
+}
+
+const props = defineProps<{
   downvotedCount: number
   itemCount: number
   liveSourceCount: number
   sourceCount: number
   upvotedCount: number
 }>()
+
+const metrics = computed<WorkbenchMetric[]>(() => [
+  { value: props.itemCount, label: 'items' },
+  { value: props.upvotedCount, label: 'upvoted' },
+  { value: props.downvotedCount, label: 'downvoted' },
+  { value: props.sourceCount, label: 'sources' },
+  { value: props.liveSourceCount, label: 'live' },
+])
 </script>
 
 <template>
-  <section class="hero">
-    <div class="hero__copy">
-      <p class="eyebrow">Collected.ga editorial desk</p>
-      <h1>Strongly typed AI and data news, ready for weekly judgement.</h1>
-      <p>
-        Triage project releases, community links, and social signals into a focused literary newsletter queue.
-      </p>
-    </div>
-    <div class="metrics" aria-label="Newsletter queue metrics">
-      <span class="role-pill role-pill--info">Info</span>
-      <div>
-        <span>{{ itemCount }}</span>
-        <p>items</p>
-      </div>
-      <div>
-        <span>{{ upvotedCount }}</span>
-        <p>upvoted</p>
-      </div>
-      <div>
-        <span>{{ downvotedCount }}</span>
-        <p>downvoted</p>
-      </div>
-      <div>
-        <span>{{ sourceCount }}</span>
-        <p>sources</p>
-      </div>
-      <div>
-        <span>{{ liveSourceCount }}</span>
-        <p>live</p>
-      </div>
-    </div>
-  </section>
+  <WorkbenchHero
+    eyebrow="Collected.ga editorial desk"
+    title="Strongly typed AI and data news, ready for weekly judgement."
+    description="Triage project releases, community links, and social signals into a focused literary newsletter queue."
+    metrics-label="Newsletter queue metrics"
+    :metrics="metrics"
+  />
 </template>

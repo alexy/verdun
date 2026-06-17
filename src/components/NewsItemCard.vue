@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ArrowDown, ArrowUp, ExternalLink } from '@lucide/vue'
+import { ExternalLink } from '@lucide/vue'
 import type { NewsItem, VoteValue } from '../lib/newsletter'
 import { credoBlurb, ontologyMatchesForItem } from '../lib/ontology'
+import WorkbenchReviewRail from './workbench/WorkbenchReviewRail.vue'
 
-const props = defineProps<{
+defineProps<{
   inDraft: boolean
   item: NewsItem
 }>()
@@ -28,10 +29,6 @@ function formatDate(value: string): string {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(value))
 }
 
-function nextVote(target: VoteValue): VoteValue {
-  return props.item.vote === target ? 0 : target
-}
-
 function stageLabel(stage: string): string {
   if (stage === 'watchlist-seed') return 'watchlist seed'
   return stage.replace(/[-_]+/g, ' ')
@@ -40,30 +37,13 @@ function stageLabel(stage: string): string {
 
 <template>
   <article :id="itemAnchor(item.id)" class="news-card" :class="{ included: item.vote > 0, rejected: item.vote < 0, 'in-draft': inDraft }">
-    <div class="vote-rail" aria-label="Vote controls">
-      <span class="role-pill role-pill--action vote-role">Action</span>
-      <button
-        type="button"
-        :aria-pressed="item.vote > 0"
-        :class="{ active: item.vote > 0 }"
-        title="Upvote"
-        @click="$emit('vote', item.id, nextVote(1))"
-      >
-        <ArrowUp :size="18" aria-hidden="true" />
-        <span class="vote-label">Include</span>
-      </button>
-      <span class="vote-score" aria-label="Source score">{{ item.score }}</span>
-      <button
-        type="button"
-        :aria-pressed="item.vote < 0"
-        :class="{ active: item.vote < 0 }"
-        title="Downvote"
-        @click="$emit('vote', item.id, nextVote(-1))"
-      >
-        <ArrowDown :size="18" aria-hidden="true" />
-        <span class="vote-label">Skip</span>
-      </button>
-    </div>
+    <WorkbenchReviewRail
+      :review="item.vote"
+      :score="item.score"
+      include-title="Upvote"
+      skip-title="Downvote"
+      @review="(vote) => $emit('vote', item.id, vote)"
+    />
     <div class="news-card__body">
       <div class="item-meta">
         <span>{{ item.project }}</span>
