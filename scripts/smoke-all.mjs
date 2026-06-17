@@ -21,7 +21,7 @@ const steps = [
   ['npm', ['run', 'smoke:greathouse-workbench']],
   ['npm', ['run', 'smoke:db-apply', '--', sqlPath, snapshotPath]],
   ['npm', ['run', 'smoke:db-deploy', '--', sqlPath, snapshotPath]],
-  ['npm', ['run', 'smoke:db-deploy', '--', customGenericSqlPath, snapshotPath, '--instance', 'greathouse', '--base-path', '/greathouse/', '--static-snapshot', 'data/greathouse-snapshot.json']],
+  ['npm', ['run', 'smoke:db-deploy', '--', customGenericSqlPath, snapshotPath, '--instance', 'greathouse']],
   ['npm', ['run', 'smoke:manual-source']],
   ['npm', ['run', 'smoke:check-deployed']],
   ['npm', ['run', 'smoke:api']],

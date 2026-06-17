@@ -1,6 +1,8 @@
 export const garbageDeployCheckProfile = {
   id: 'garbage',
+  default: true,
   defaultBaseUrl: 'https://collected.ga/rbage/',
+  basePath: '/rbage/',
   previewBaseUrl: 'http://127.0.0.1:5174/rbage/',
   devAppBaseUrl: 'http://127.0.0.1:5176/rbage/',
   sourceSnapshotPath: 'public/data/newsletter-snapshot.json',

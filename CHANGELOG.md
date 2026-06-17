@@ -2,6 +2,9 @@
 
 ## 2026-06-17
 
+- Added a Greathouse deploy-check profile with preview URL, static snapshot, count gates, and required subject/plan metadata; Greathouse deployed checks can now run from profile metadata instead of explicit CLI gates.
+- Changed deploy-check profile selection to use registered profile metadata with an explicit default flag instead of returning the Garbage profile directly.
+- Added deploy-profile base paths and made `scripts/deploy-workbench-database.mjs` carry profile `basePath` and `staticSnapshotPath` into deployed checks, so Greathouse deployment preflights no longer need explicit asset-base/static-snapshot arguments.
 - Moved workbench instance registration metadata into instance-owned files (`src/instances/garbage/instance.ts` and `src/instances/greathouse/instance.ts`); the shared instance registry now consumes `registeredWorkbenchInstances` instead of importing Garbage or Greathouse config/pilot modules directly.
 - Updated Greathouse workbench smoke coverage to enforce that default-instance and static-snapshot metadata stay in instance registration files while `src/instances/registry.ts` only consumes registration metadata.
 - Moved concrete Vue app component imports into instance-owned registrations (`src/instances/garbage/app.ts` and `src/instances/greathouse/app.ts`); the shared app resolver now consumes `registeredWorkbenchApps` instead of importing Garbage or Greathouse components directly.

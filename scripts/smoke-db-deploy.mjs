@@ -37,11 +37,12 @@ const instance = optionValue(extraArgs, '--instance')
 if (instance && !dryRun.stdout.includes(`--instance ${instance}`)) {
   throw new Error(`workbench database deployment dry run did not preserve instance in deployed-check target\n${dryRun.stdout}`)
 }
-const basePath = optionValue(extraArgs, '--base-path')
+const instanceProfile = deployCheckProfile(instance)
+const basePath = optionValue(extraArgs, '--base-path') ?? instanceProfile?.basePath
 if (basePath && !dryRun.stdout.includes(`--asset-base ${basePath}`)) {
   throw new Error(`workbench database deployment dry run did not preserve base path in deployed-check target\n${dryRun.stdout}`)
 }
-const staticSnapshot = optionValue(extraArgs, '--static-snapshot')
+const staticSnapshot = optionValue(extraArgs, '--static-snapshot') ?? instanceProfile?.staticSnapshotPath
 if (staticSnapshot && !dryRun.stdout.includes(`--static-snapshot ${staticSnapshot}`)) {
   throw new Error(`workbench database deployment dry run did not preserve static snapshot in deployed-check target\n${dryRun.stdout}`)
 }

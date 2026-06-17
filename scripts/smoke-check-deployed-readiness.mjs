@@ -4,6 +4,8 @@ import { readFile } from 'node:fs/promises'
 
 const rawSnapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
+const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
+const greathouseDeployProfileSource = await readFile('scripts/instances/greathouse/deploy-checks.mjs', 'utf8')
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
 for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json']) {
   if (checkDeployedSource.includes(marker)) {
@@ -12,6 +14,12 @@ for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft'
 }
 if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs') {
   throw new Error('check:preview should use the profile-backed preview checker')
+}
+if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployProfilesSource.includes('return garbageDeployCheckProfile.id')) {
+  throw new Error('deploy check profiles are not resolved from profile registration metadata')
+}
+if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDeployProfileSource.includes("staticSnapshotPath: 'data/greathouse-snapshot.json'")) {
+  throw new Error('Greathouse deploy profile is missing static snapshot metadata')
 }
 const freshGeneratedAt = new Date().toISOString()
 let reviewedSnapshot = {
@@ -76,9 +84,9 @@ const greathouseSnapshot = {
   records: [
     {
       id: 'greathouse-listing-1',
-      title: 'Mountain View three bedroom near transit',
+      title: 'Berkeley two-bedroom near transit',
       url: 'https://example.com/listings/1',
-      subject: 'Mountain View',
+      subject: 'Berkeley 2BR',
       summary: 'Fresh listing with source provenance and comparable evidence.',
       review: 1,
       score: 94,
@@ -88,7 +96,7 @@ const greathouseSnapshot = {
       id: 'greathouse-diagnostic-1',
       title: 'Source diagnostic for protected listing endpoint',
       url: 'https://example.com/diagnostics/redfin',
-      subject: 'Source diagnostics',
+      subject: 'Oakland blocked source',
       summary: 'Blocked-source diagnostic retained as normalized review evidence.',
       review: 0,
       score: 71,
@@ -100,7 +108,7 @@ const greathouseSnapshot = {
       source: 'local-listing-json',
       status: 'ok',
       itemCount: 1,
-      subjectCounts: { 'Mountain View': 1 },
+      subjectCounts: { 'Berkeley 2BR': 1 },
       message: 'Loaded local listing fixture.',
       collectedAt: freshGeneratedAt,
     },
@@ -108,16 +116,21 @@ const greathouseSnapshot = {
       source: 'http-status-diagnostic',
       status: 'ok',
       itemCount: 1,
-      subjectCounts: { 'Source diagnostics': 1 },
+      subjectCounts: { 'Oakland blocked source': 1 },
       message: 'Recorded blocked-source diagnostic.',
       collectedAt: freshGeneratedAt,
     },
   ],
   collectionPlans: [
     {
-      subject: 'Mountain View',
-      query: 'Mountain View homes source diagnostics',
-      liveTerms: ['Mountain View', 'listing freshness'],
+      subject: 'Berkeley 2BR',
+      query: 'Berkeley 2BR homes source diagnostics',
+      liveTerms: ['Berkeley 2BR', 'listing freshness'],
+    },
+    {
+      subject: 'Oakland blocked source',
+      query: 'Oakland blocked source diagnostics',
+      liveTerms: ['Oakland blocked source', 'retry'],
     },
   ],
   focuses: [
@@ -346,18 +359,6 @@ try {
     `http://127.0.0.1:${address.port}/greathouse/`,
     '--instance',
     'greathouse',
-    '--static-snapshot',
-    'data/greathouse-snapshot.json',
-    '--min-records',
-    '2',
-    '--min-source-runs',
-    '2',
-    '--min-collection-plans',
-    '1',
-    '--required-subject',
-    'Mountain View',
-    '--required-subject',
-    'Source diagnostics',
   ])
   if (greathouseResult.status !== 0) {
     throw new Error(`check-deployed Greathouse workbench smoke failed\n${greathouseResult.stdout}\n${greathouseResult.stderr}`)
