@@ -117,18 +117,32 @@ try {
   if (!redfinListing.summary.includes('$875,000 Redfin listing') || !redfinListing.summary.includes('4 comparable signals')) {
     throw new Error(`Redfin listing summary was not property-shaped: ${redfinListing.summary}`)
   }
-  const diagnostic = snapshot.items?.find((item) => item.source_kind === 'diagnostic' && item.project === 'Oakland blocked source')
+  const diagnostic = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'local-diagnostic-json' && item.project === 'Oakland blocked source')
   if (!diagnostic) {
     throw new Error('greathouse snapshot did not contain a diagnostic-shaped record')
   }
   if (diagnostic.raw_json?.provenance?.adapter !== 'local-diagnostic-json') {
     throw new Error(`diagnostic record used wrong adapter provenance: ${diagnostic.raw_json?.provenance?.adapter}`)
   }
+  const browserDiagnostic = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'browser-diagnostic-json')
+  if (!browserDiagnostic) {
+    throw new Error('greathouse snapshot did not contain a browser diagnostic record')
+  }
+  if (browserDiagnostic.raw_json?.provenance?.stage !== 'browser_diagnostic') {
+    throw new Error(`browser diagnostic used wrong provenance stage: ${browserDiagnostic.raw_json?.provenance?.stage}`)
+  }
+  if (browserDiagnostic.raw_json?.property?.blocked_reason !== 'captcha' || browserDiagnostic.raw_json?.property?.screenshot_path !== 'crawler/instances/greathouse/artifacts/oakland-source-blocked.png') {
+    throw new Error(`browser diagnostic did not preserve rendered-page evidence: ${JSON.stringify(browserDiagnostic.raw_json?.property)}`)
+  }
   const reviewAdapters = new Set(
     snapshot.query_plans?.flatMap((plan) => plan.review_targets?.map((target) => target.adapter) ?? []) ?? [],
   )
-  if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('redfin-listing-json') || !reviewAdapters.has('local-diagnostic-json')) {
+  if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('redfin-listing-json') || !reviewAdapters.has('local-diagnostic-json') || !reviewAdapters.has('browser-diagnostic-json')) {
     throw new Error(`greathouse review targets did not expose local JSON adapters: ${[...reviewAdapters].join(', ')}`)
+  }
+  const browserRun = snapshot.source_runs?.find((run) => run.source === 'Redfin browser diagnostics')
+  if (browserRun?.project_counts?.['Oakland blocked source'] !== 1 || !browserRun.message.includes('Browser diagnostic adapter')) {
+    throw new Error(`browser diagnostic source run did not expose source health: ${JSON.stringify(browserRun)}`)
   }
 
   const exportGeneric = spawnSync('cargo', [

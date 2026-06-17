@@ -132,12 +132,16 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
                     | "http-diagnostic-json"
                     | "http-status-diagnostic"
                     | "redfin-listing-json"
+                    | "browser-diagnostic-json"
             ),
             "{} uses unsupported Greathouse adapter {}",
             source.name,
             adapter
         );
-        if adapter.starts_with("local-") || adapter == "redfin-listing-json" {
+        if adapter.starts_with("local-")
+            || adapter == "redfin-listing-json"
+            || adapter == "browser-diagnostic-json"
+        {
             let data_path = source.fixture_path.as_ref().with_context(|| {
                 format!(
                     "{} must configure fixture_path for {}",
@@ -261,6 +265,8 @@ struct HttpJsonSourceAdapter {
 struct HttpStatusDiagnosticAdapter;
 
 struct RedfinListingJsonAdapter;
+
+struct BrowserDiagnosticJsonAdapter;
 
 impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
     fn adapter_name(&self) -> &'static str {
@@ -465,6 +471,47 @@ impl GreathouseSourceAdapter for RedfinListingJsonAdapter {
     }
 }
 
+impl GreathouseSourceAdapter for BrowserDiagnosticJsonAdapter {
+    fn adapter_name(&self) -> &'static str {
+        "browser-diagnostic-json"
+    }
+
+    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+        let path = source
+            .fixture_path
+            .as_ref()
+            .with_context(|| format!("{} has no fixture_path configured", source.name))?;
+        let records: Vec<BrowserDiagnosticRecord> = serde_json::from_slice(
+            &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+        )
+        .with_context(|| format!("parsing browser diagnostic JSON from {}", path.display()))?;
+        records
+            .into_iter()
+            .enumerate()
+            .map(|(index, record)| {
+                let subject = record.subject.clone();
+                let target = config
+                    .targets
+                    .iter()
+                    .find(|target| target.name == subject)
+                    .with_context(|| {
+                        format!(
+                            "{} browser diagnostic data references unknown subject {}",
+                            source.name, subject
+                        )
+                    })?;
+                Ok(greathouse_item(
+                    target,
+                    source,
+                    record.into_local_record(source),
+                    self.adapter_name(),
+                    index,
+                ))
+            })
+            .collect()
+    }
+}
+
 static LOCAL_LISTING_JSON_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapter {
     adapter: "local-listing-json",
 };
@@ -479,6 +526,7 @@ static HTTP_DIAGNOSTIC_JSON_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapt
 };
 static HTTP_STATUS_DIAGNOSTIC_ADAPTER: HttpStatusDiagnosticAdapter = HttpStatusDiagnosticAdapter;
 static REDFIN_LISTING_JSON_ADAPTER: RedfinListingJsonAdapter = RedfinListingJsonAdapter;
+static BROWSER_DIAGNOSTIC_JSON_ADAPTER: BrowserDiagnosticJsonAdapter = BrowserDiagnosticJsonAdapter;
 
 fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSourceAdapter> {
     match source.adapter.as_deref() {
@@ -488,6 +536,7 @@ fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSo
         Some("http-diagnostic-json") => Ok(&HTTP_DIAGNOSTIC_JSON_ADAPTER),
         Some("http-status-diagnostic") => Ok(&HTTP_STATUS_DIAGNOSTIC_ADAPTER),
         Some("redfin-listing-json") => Ok(&REDFIN_LISTING_JSON_ADAPTER),
+        Some("browser-diagnostic-json") => Ok(&BROWSER_DIAGNOSTIC_JSON_ADAPTER),
         Some(adapter) => anyhow::bail!(
             "{} uses unsupported Greathouse adapter {}",
             source.name,
@@ -529,6 +578,8 @@ fn source_run_message(source: &SourceConfig) -> String {
     } else if adapter == "redfin-listing-json" {
         "Redfin listing adapter normalized property evidence from external crawler output"
             .to_string()
+    } else if adapter == "browser-diagnostic-json" {
+        "Browser diagnostic adapter normalized rendered-page source health from external crawler output".to_string()
     } else if adapter.starts_with("http-") && source.kind == "diagnostic" {
         "HTTP diagnostic adapter retained blocked-source evidence for retry".to_string()
     } else if adapter.starts_with("http-") {
@@ -656,6 +707,83 @@ struct RedfinListingRecord {
     score: Option<i32>,
 }
 
+#[derive(Debug, Deserialize)]
+struct BrowserDiagnosticRecord {
+    subject: String,
+    url: String,
+    final_url: Option<String>,
+    page_title: Option<String>,
+    observed_at: Option<DateTime<Utc>>,
+    http_status: Option<u16>,
+    blocked_reason: Option<String>,
+    source_status: Option<String>,
+    screenshot_path: Option<String>,
+    visible_text_sample: Option<String>,
+    #[serde(default)]
+    console_errors: Vec<String>,
+    score: Option<i32>,
+}
+
+impl BrowserDiagnosticRecord {
+    fn into_local_record(self, source: &SourceConfig) -> GreathouseLocalRecord {
+        let status = self.source_status.clone().unwrap_or_else(|| {
+            browser_source_status(self.http_status, self.blocked_reason.as_deref())
+        });
+        let blocked_reason = self
+            .blocked_reason
+            .clone()
+            .unwrap_or_else(|| "none".to_string());
+        let http_status = self
+            .http_status
+            .map(|status| status.to_string())
+            .unwrap_or_else(|| "unknown".to_string());
+        let page_title = self
+            .page_title
+            .clone()
+            .unwrap_or_else(|| "untitled page".to_string());
+        let summary = format!(
+            "Browser diagnostic for {} resolved HTTP {http_status}, status {status}, blocked reason {blocked_reason}, and {} console errors.",
+            source.name,
+            self.console_errors.len(),
+        );
+        GreathouseLocalRecord {
+            subject: self.subject,
+            url: self.final_url.clone().unwrap_or(self.url.clone()),
+            title: Some(format!("Browser diagnostic: {page_title}")),
+            observed_at: self.observed_at,
+            summary: Some(summary),
+            tags: vec![
+                "browser-diagnostic".to_string(),
+                status.clone(),
+                if blocked_reason == "none" {
+                    "rendered".to_string()
+                } else {
+                    "blocked-source".to_string()
+                },
+            ],
+            score: self.score.or_else(|| {
+                if blocked_reason == "none" && self.http_status.is_some_and(|status| status < 400) {
+                    Some(55)
+                } else {
+                    Some(88)
+                }
+            }),
+            stage: Some("browser_diagnostic".to_string()),
+            property_json: serde_json::json!({
+                "requested_url": self.url,
+                "final_url": self.final_url,
+                "page_title": self.page_title,
+                "http_status": self.http_status,
+                "blocked_reason": self.blocked_reason,
+                "source_status": status,
+                "screenshot_path": self.screenshot_path,
+                "visible_text_sample": self.visible_text_sample,
+                "console_errors": self.console_errors,
+            }),
+        }
+    }
+}
+
 impl RedfinListingRecord {
     fn into_local_record(self) -> GreathouseLocalRecord {
         let bedroom_label = self
@@ -743,4 +871,14 @@ fn format_price(value: i64) -> String {
         formatted.push(character);
     }
     format!("${}", formatted.chars().rev().collect::<String>())
+}
+
+fn browser_source_status(http_status: Option<u16>, blocked_reason: Option<&str>) -> String {
+    if blocked_reason.is_some_and(|reason| !reason.is_empty()) {
+        "blocked".to_string()
+    } else if http_status.is_some_and(|status| status < 400) {
+        "rendered".to_string()
+    } else {
+        "needs_review".to_string()
+    }
 }

@@ -32,3 +32,10 @@ kind = "diagnostic"
 url = "https://example.com/redfin-diagnostics"
 adapter = "local-diagnostic-json"
 fixture_path = "crawler/instances/greathouse/fixtures/diagnostics.json"
+
+[[sources]]
+name = "Redfin browser diagnostics"
+kind = "diagnostic"
+url = "https://example.com/redfin-browser-diagnostics"
+adapter = "browser-diagnostic-json"
+fixture_path = "crawler/instances/greathouse/fixtures/browser-diagnostics.json"

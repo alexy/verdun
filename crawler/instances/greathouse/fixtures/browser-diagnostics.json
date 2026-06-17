@@ -1,0 +1,16 @@
+[
+  {
+    "subject": "Oakland blocked source",
+    "url": "https://example.com/redfin/oakland-source",
+    "final_url": "https://example.com/redfin/oakland-source?blocked=1",
+    "page_title": "Access verification required",
+    "observed_at": "2026-06-16T15:35:00Z",
+    "http_status": 403,
+    "blocked_reason": "captcha",
+    "source_status": "blocked",
+    "screenshot_path": "crawler/instances/greathouse/artifacts/oakland-source-blocked.png",
+    "visible_text_sample": "Please verify you are human before continuing.",
+    "console_errors": ["net::ERR_BLOCKED_BY_CLIENT"],
+    "score": 89
+  }
+]
