@@ -1,6 +1,7 @@
 import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../newsletter/_http.js'
 import { writeReview } from './_db.js'
 import type { ReviewValue } from '../../src/core/workbench'
+import { resolveWorkbenchInstance } from '../../src/instances/registry'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (!allowMethods(req, res, ['POST'])) return
@@ -12,8 +13,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
     return
   }
   try {
-    await writeReview(recordId, review)
-    sendJson(res, { ok: true, recordId, review })
+    const instance = resolveWorkbenchInstance(req.query.instance)
+    await writeReview(recordId, review, instance)
+    sendJson(res, { ok: true, instance: instance.id, recordId, review })
   } catch (error) {
     sendApiError(res, error)
   }

@@ -24,9 +24,9 @@ function responseRecorder() {
   }
 }
 
-async function call(handler, method = 'GET', body = undefined) {
+async function call(handler, method = 'GET', body = undefined, query = {}) {
   const response = responseRecorder()
-  await handler({ method, query: {}, body }, response)
+  await handler({ method, query, body }, response)
   return response
 }
 
@@ -140,9 +140,31 @@ try {
     throw new Error(`workbench status route did not return generic status: ${JSON.stringify(statusResponse.body)}`)
   }
 
+  const greathouseRecordsResponse = await call(recordsModule.default, 'GET', undefined, { instance: 'greathouse' })
+  if (
+    greathouseRecordsResponse.code !== 200
+    || greathouseRecordsResponse.body?.instance?.id !== 'greathouse'
+    || !greathouseRecordsResponse.body?.records?.some((record) => record.provenance?.adapter === 'local-listing-json')
+  ) {
+    throw new Error(`workbench records route did not resolve the Greathouse instance: ${JSON.stringify(greathouseRecordsResponse.body)}`)
+  }
+
+  const greathouseStatusResponse = await call(statusModule.default, 'GET', undefined, { instance: 'greathouse' })
+  if (
+    greathouseStatusResponse.code !== 200
+    || greathouseStatusResponse.body?.instance?.id !== 'greathouse'
+    || greathouseStatusResponse.body?.writable !== false
+    || greathouseStatusResponse.body?.recordCount !== greathouseRecordsResponse.body.records.length
+  ) {
+    throw new Error(`workbench status route did not resolve the Greathouse instance: ${JSON.stringify(greathouseStatusResponse.body)}`)
+  }
+
   const healthResponse = await call(healthModule.default)
   if (healthResponse.code !== 200 || healthResponse.body?.service !== 'workbench') {
     throw new Error('workbench health route did not identify the generic workbench service')
+  }
+  if (!healthResponse.body?.supportedInstances?.some((instance) => instance.id === 'greathouse' && instance.basePath === '/greathouse/')) {
+    throw new Error(`workbench health route did not expose supported instances: ${JSON.stringify(healthResponse.body?.supportedInstances)}`)
   }
   if (!healthResponse.body?.databaseContract?.reusableViews?.includes('workbench_records')) {
     throw new Error('workbench health route did not expose reusable database views')
@@ -169,6 +191,17 @@ try {
   })
   if (focusResponse.code !== 200 || focusResponse.body?.focus?.text !== 'Workbench focus smoke note.') {
     throw new Error(`workbench focus route did not accept a generic focus: ${JSON.stringify(focusResponse.body)}`)
+  }
+  const greathouseReviewResponse = await call(reviewModule.default, 'POST', {
+    recordId: 'listing-redfin-berkeley-01',
+    review: 1,
+  }, { instance: 'greathouse' })
+  if (greathouseReviewResponse.code !== 403 || greathouseReviewResponse.body?.error !== 'workbench_instance_read_only') {
+    throw new Error(`workbench review route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseReviewResponse.body)}`)
+  }
+  const unknownInstanceResponse = await call(recordsModule.default, 'GET', undefined, { instance: 'unknown' })
+  if (unknownInstanceResponse.code !== 400 || unknownInstanceResponse.body?.error !== 'unknown_workbench_instance') {
+    throw new Error(`workbench records route did not reject unknown instances: ${JSON.stringify(unknownInstanceResponse.body)}`)
   }
   const updatedSnapshot = await dbModule.readWorkbenchSnapshot()
   if (!updatedSnapshot.records.some((record) => record.id === recordId && record.review === 1)) {
@@ -223,8 +256,8 @@ function fakeWorkbenchSql(expectedInstance = 'garbage') {
             score: 86,
             review: 1,
             provenance_json: {
-              stage: 'live',
-              adapter: 'property-listing-fixture',
+              stage: 'local_json',
+              adapter: 'local-listing-json',
               source: 'Redfin',
               source_kind: 'listing',
               source_url: 'https://example.com/redfin',
@@ -299,7 +332,7 @@ function fakeWorkbenchSql(expectedInstance = 'garbage') {
               source: 'Redfin',
               label: 'Redfin Berkeley 2BR',
               url: 'https://example.com/redfin/search/berkeley-2br',
-              adapter: 'property-listing-fixture',
+              adapter: 'local-listing-json',
             }],
             focus_terms: ['transit'],
           }]

@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import { readSnapshot, readStatus, writeFocus, writeVote } from '../newsletter/_db.js'
 import { garbageSnapshotToWorkbench } from '../../src/instances/garbage/workbench'
 import { garbageInstance } from '../../src/instances/garbage/config'
+import { defaultWorkbenchInstance, staticWorkbenchSnapshot } from '../../src/instances/registry'
 import type {
   ReviewValue,
   SourceRunStatus,
@@ -76,42 +77,71 @@ export type WorkbenchStatus = {
   writable: boolean
 }
 
-export async function readWorkbenchSnapshot(): Promise<WorkbenchSnapshot> {
+export async function readWorkbenchSnapshot(instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchSnapshot> {
   const databaseUrl = workbenchDatabaseUrl()
-  if (!databaseUrl) return garbageSnapshotToWorkbench(await readSnapshot())
-  return readDatabaseWorkbenchSnapshot(neon(databaseUrl))
+  if (!databaseUrl) return readStaticWorkbenchSnapshot(instance)
+  return readDatabaseWorkbenchSnapshot(neon(databaseUrl), instance)
 }
 
-export async function readWorkbenchStatus(): Promise<WorkbenchStatus> {
+export async function readWorkbenchStatus(instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchStatus> {
   const databaseUrl = workbenchDatabaseUrl()
   if (!databaseUrl) {
-    const newsletterStatus = await readStatus()
-    const snapshot = await readWorkbenchSnapshot()
+    if (instance.id === garbageInstance.id) {
+      const newsletterStatus = await readStatus()
+      const snapshot = await readWorkbenchSnapshot(instance)
+      return {
+        instance: snapshot.instance,
+        editorialPersistence: newsletterStatus.editorialPersistence,
+        generatedAt: newsletterStatus.generatedAt,
+        recordCount: newsletterStatus.itemCount,
+        focusCount: newsletterStatus.focusCount,
+        reviewCount: newsletterStatus.voteCount,
+        sourceRunCount: newsletterStatus.sourceRunCount,
+        collectionPlanCount: newsletterStatus.queryPlanCount,
+        writable: newsletterStatus.writable,
+      }
+    }
+    const snapshot = await readStaticWorkbenchSnapshot(instance)
     return {
       instance: snapshot.instance,
-      editorialPersistence: newsletterStatus.editorialPersistence,
-      generatedAt: newsletterStatus.generatedAt,
-      recordCount: newsletterStatus.itemCount,
-      focusCount: newsletterStatus.focusCount,
-      reviewCount: newsletterStatus.voteCount,
-      sourceRunCount: newsletterStatus.sourceRunCount,
-      collectionPlanCount: newsletterStatus.queryPlanCount,
-      writable: newsletterStatus.writable,
+      editorialPersistence: snapshot.editorialPersistence,
+      generatedAt: snapshot.generatedAt,
+      recordCount: snapshot.records.length,
+      focusCount: snapshot.focuses.length,
+      reviewCount: snapshot.records.filter((record) => record.review !== 0).length,
+      sourceRunCount: snapshot.sourceRuns.length,
+      collectionPlanCount: snapshot.collectionPlans.length,
+      writable: false,
     }
   }
-  return readDatabaseWorkbenchStatus(neon(databaseUrl))
+  return readDatabaseWorkbenchStatus(neon(databaseUrl), instance)
 }
 
-export async function writeReview(recordId: string, review: ReviewValue): Promise<void> {
+export async function writeReview(recordId: string, review: ReviewValue, instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<void> {
   const databaseUrl = workbenchDatabaseUrl()
-  if (databaseUrl) return writeDatabaseWorkbenchReview(neon(databaseUrl), recordId, review)
+  if (databaseUrl) return writeDatabaseWorkbenchReview(neon(databaseUrl), recordId, review, instance)
+  if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
   return writeVote(recordId, review)
 }
 
-export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['scope']): Promise<WorkbenchFocus | null> {
+export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['scope'], instance: WorkbenchInstance = defaultWorkbenchInstance()): Promise<WorkbenchFocus | null> {
   const databaseUrl = workbenchDatabaseUrl()
-  if (databaseUrl) return writeDatabaseWorkbenchFocus(neon(databaseUrl), text, scope)
+  if (databaseUrl) return writeDatabaseWorkbenchFocus(neon(databaseUrl), text, scope, instance)
+  if (instance.id !== garbageInstance.id) throw readOnlyInstanceError(instance)
   return writeFocus(text, scope)
+}
+
+async function readStaticWorkbenchSnapshot(instance: WorkbenchInstance): Promise<WorkbenchSnapshot> {
+  if (instance.id === garbageInstance.id) return garbageSnapshotToWorkbench(await readSnapshot())
+  const snapshot = staticWorkbenchSnapshot(instance)
+  if (snapshot) return snapshot
+  throw readOnlyInstanceError(instance)
+}
+
+function readOnlyInstanceError(instance: WorkbenchInstance): Error {
+  const error = new Error(instance.readOnlyMessage)
+  Object.assign(error, { statusCode: 403, code: 'workbench_instance_read_only' })
+  return error
 }
 
 export async function writeDatabaseWorkbenchReview(

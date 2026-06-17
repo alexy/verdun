@@ -1,12 +1,13 @@
 import { allowMethods, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../newsletter/_http.js'
 import { readWorkbenchStatus } from './_db.js'
+import { resolveWorkbenchInstance, supportedWorkbenchInstances } from '../../src/instances/registry'
 
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   if (!allowMethods(req, res, ['GET', 'HEAD'])) return
 
   const databaseConfigured = hasDatabaseEnv()
   try {
-    const activeSnapshot = await readWorkbenchStatus()
+    const activeSnapshot = await readWorkbenchStatus(resolveWorkbenchInstance(req.query.instance))
     sendJson(res, {
       ok: true,
       service: 'workbench',
@@ -14,6 +15,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       state: databaseConfigured ? 'database_configured' : 'database_not_configured',
       databaseConfigured,
       instance: activeSnapshot.instance,
+      supportedInstances: supportedWorkbenchInstances().map((instance) => ({
+        id: instance.id,
+        name: instance.name,
+        basePath: instance.basePath,
+      })),
       editorialPersistence: activeSnapshot.editorialPersistence,
       readSurfaces: ['records', 'status', 'health'],
       writeSurfaces: ['review', 'focus'],

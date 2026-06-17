@@ -20,7 +20,7 @@ if (snapshot.instance.id !== 'greathouse' || snapshot.instance.basePath !== '/gr
 if (!snapshot.records.some((record) => record.sourceKind === 'listing' && record.subject === 'Berkeley 2BR')) {
   throw new Error('Greathouse pilot did not expose listing-shaped records through the workbench contract')
 }
-if (!snapshot.records.some((record) => record.sourceKind === 'diagnostic' && record.provenance?.adapter === 'blocked-source-diagnostic-fixture')) {
+if (!snapshot.records.some((record) => record.sourceKind === 'diagnostic' && record.provenance?.adapter === 'local-diagnostic-json')) {
   throw new Error('Greathouse pilot did not preserve blocked-source diagnostic provenance')
 }
 if (!view.subjectOptions.value.includes('Berkeley 2BR') || !view.sourceOptions.value.includes('Redfin')) {
