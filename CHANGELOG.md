@@ -11,6 +11,7 @@
 - Changed `scripts/smoke-all.mjs` to resolve its default source snapshot through the default deploy profile instead of embedding the Garbage newsletter snapshot path.
 - Changed local UI smoke defaults (`smoke-browser`, `smoke-responsive`, and `smoke-app`) to resolve their preview URLs from deploy profile metadata instead of embedding Garbage `/rbage/` URLs directly.
 - Changed the generic SQL loader smoke to resolve its default snapshot, instance id, base path, and required subjects/plans through deploy profile metadata instead of embedding Garbage-specific expectations.
+- Changed `smoke-db-apply` and `smoke-db-deploy` to resolve their default source snapshot through deploy profile metadata instead of embedding the Garbage newsletter snapshot path.
 
 ## 2026-06-16
 

@@ -1,8 +1,10 @@
 import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
-const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
+const profile = deployCheckProfile(defaultDeployCheckProfileId())
+const snapshotPath = process.argv[3] ?? profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
 const extraArgs = process.argv.slice(4)
 const deploySource = readFileSync('scripts/deploy-workbench-database.mjs', 'utf8')
 
