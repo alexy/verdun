@@ -16,8 +16,24 @@ pub static GARBAGE_CRAWLER_INSTANCE: GarbageCrawlerInstance = GarbageCrawlerInst
 pub struct GarbageCrawlerInstance;
 
 impl CrawlerInstance for GarbageCrawlerInstance {
+    fn id(&self) -> &'static str {
+        "garbage"
+    }
+
+    fn verify_config(&self, config: &CrawlerConfig) -> Result<()> {
+        verify_config(config)
+    }
+
     fn read_editorial_focuses(&self, path: &PathBuf) -> Result<Vec<EditorialFocus>> {
         read_editorial_focuses(path)
+    }
+
+    fn query_plans(
+        &self,
+        config: &CrawlerConfig,
+        editorial_focuses: &[EditorialFocus],
+    ) -> Vec<ProjectQueryPlan> {
+        query_plans(config, editorial_focuses)
     }
 
     fn seed_items(&self, config: &CrawlerConfig) -> Vec<NewsItem> {
@@ -555,6 +571,131 @@ pub fn collect_manual_source(
         post_count,
         latest_published_at,
     })
+}
+
+fn verify_config(config: &CrawlerConfig) -> Result<()> {
+    anyhow::ensure!(!config.targets.is_empty(), "config must include projects");
+    anyhow::ensure!(!config.sources.is_empty(), "config must include sources");
+    anyhow::ensure!(
+        config
+            .targets
+            .iter()
+            .any(|project| project.name == "Pydantic"),
+        "Pydantic must be tracked"
+    );
+    anyhow::ensure!(
+        config
+            .targets
+            .iter()
+            .any(|project| project.name == "LakeSail"),
+        "LakeSail must be tracked"
+    );
+    verify_required_projects(config)?;
+    verify_required_sources(config)?;
+    Ok(())
+}
+
+fn verify_required_projects(config: &CrawlerConfig) -> Result<()> {
+    for project_name in [
+        "Pydantic",
+        "BAML",
+        "DSPy",
+        "Instructor",
+        "LakeSail",
+        "Apache Arrow",
+        "DataFusion",
+        "Delta Lake",
+        "Ibis",
+        "Dagster",
+        "Grust Sail",
+        "Turso",
+        "LanceDB",
+        "HelixDB",
+        "SurrealDB",
+        "pgGraph",
+        "Grust",
+        "TypeSec",
+        "Garde",
+        "zod-rs",
+        "FalkorDB",
+        "LadybugDB",
+        "CocoIndex",
+    ] {
+        let project = config
+            .targets
+            .iter()
+            .find(|candidate| candidate.name == project_name)
+            .with_context(|| format!("{project_name} must be tracked"))?;
+        anyhow::ensure!(
+            !project.topic.trim().is_empty(),
+            "{project_name} must have a topic"
+        );
+        anyhow::ensure!(
+            project.homepage.starts_with("https://"),
+            "{project_name} must have an https homepage"
+        );
+        anyhow::ensure!(
+            project.keywords.len() >= 3,
+            "{project_name} must have at least three matching keywords"
+        );
+        anyhow::ensure!(
+            !project_live_terms(project).is_empty(),
+            "{project_name} must have at least one distinctive live-search term"
+        );
+    }
+    Ok(())
+}
+
+fn verify_required_sources(config: &CrawlerConfig) -> Result<()> {
+    for source_name in ["Hacker News", "Lobste.rs", "dev.to"] {
+        let source = required_source(config, source_name)?;
+        anyhow::ensure!(
+            source.feed_urls.as_ref().is_none_or(Vec::is_empty),
+            "{source_name} should use its API adapter, not feed_urls"
+        );
+        anyhow::ensure!(
+            source.manual_path.is_none(),
+            "{source_name} should use its API adapter, not manual_path"
+        );
+    }
+    for source_name in ["Medium", "Substack"] {
+        let source = required_source(config, source_name)?;
+        let feeds = source
+            .feed_urls
+            .as_ref()
+            .filter(|feeds| !feeds.is_empty())
+            .with_context(|| format!("{source_name} must configure feed_urls"))?;
+        anyhow::ensure!(
+            feeds.iter().all(|feed| feed.starts_with("https://")),
+            "{source_name} feed_urls must be https"
+        );
+    }
+    for source_name in ["LinkedIn", "X/Twitter"] {
+        let source = required_source(config, source_name)?;
+        let path = source
+            .manual_path
+            .as_ref()
+            .with_context(|| format!("{source_name} must configure manual_path"))?;
+        anyhow::ensure!(
+            path.exists(),
+            "{source_name} manual import file must exist at {}",
+            path.display()
+        );
+    }
+    Ok(())
+}
+
+fn required_source<'a>(config: &'a CrawlerConfig, source_name: &str) -> Result<&'a SourceConfig> {
+    let source = config
+        .sources
+        .iter()
+        .find(|candidate| candidate.name == source_name)
+        .with_context(|| format!("{source_name} must be tracked"))?;
+    anyhow::ensure!(
+        source.url.starts_with("https://"),
+        "{source_name} must have an https source URL"
+    );
+    Ok(source)
 }
 
 fn live_items(

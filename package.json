@@ -21,6 +21,7 @@
     "smoke:api": "node scripts/smoke-api-local.mjs",
     "smoke:api-http": "node scripts/smoke-api-http.mjs",
     "smoke:crawler-dedupe": "node scripts/smoke-crawler-dedupe.mjs",
+    "smoke:crawler-instance": "node scripts/smoke-crawler-instance.mjs",
     "smoke:crawler-provenance": "node scripts/smoke-crawler-provenance.mjs",
     "smoke:db-apply": "node scripts/smoke-db-apply.mjs",
     "smoke:db-deploy": "node scripts/smoke-db-deploy.mjs",

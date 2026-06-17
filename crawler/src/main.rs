@@ -3,8 +3,8 @@ use chrono::{Duration, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 mod core;
 mod instances;
-use crate::core::{CrawlerConfig, SourceConfig, SourceRun};
-use crate::instances::garbage::{self, ExportPayload, NewsItem, PublicSnapshot};
+use crate::core::{CrawlerConfig, SourceRun};
+use crate::instances::garbage::{ExportPayload, NewsItem, PublicSnapshot};
 use std::{fs, path::PathBuf};
 
 #[derive(Parser)]
@@ -17,6 +17,8 @@ struct Cli {
 #[derive(Subcommand)]
 enum CommandKind {
     Collect {
+        #[arg(long, default_value = "garbage")]
+        instance: String,
         #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
         config: PathBuf,
         #[arg(long, default_value = "crawler/data/items.json")]
@@ -53,10 +55,14 @@ enum CommandKind {
         out: PathBuf,
     },
     Verify {
+        #[arg(long, default_value = "garbage")]
+        instance: String,
         #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
         config: PathBuf,
     },
     Queries {
+        #[arg(long, default_value = "garbage")]
+        instance: String,
         #[arg(long, default_value = "crawler/instances/garbage/config.toml")]
         config: PathBuf,
         #[arg(long, default_value = "crawler/data/editorial-state.json")]
@@ -68,6 +74,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
         CommandKind::Collect {
+            instance,
             config,
             out,
             source_runs_out,
@@ -77,6 +84,7 @@ fn main() -> Result<()> {
             since_days,
             editorial_state,
         } => collect(
+            instance,
             config,
             out,
             source_runs_out,
@@ -107,11 +115,12 @@ fn main() -> Result<()> {
                 base_path,
             },
         ),
-        CommandKind::Verify { config } => verify(config),
+        CommandKind::Verify { instance, config } => verify(instance, config),
         CommandKind::Queries {
+            instance,
             config,
             editorial_state,
-        } => queries(config, editorial_state),
+        } => queries(instance, config, editorial_state),
     }
 }
 
@@ -128,6 +137,7 @@ struct ExportInstance {
 }
 
 fn collect(
+    instance: String,
     config: PathBuf,
     out: PathBuf,
     source_runs_out: PathBuf,
@@ -137,7 +147,7 @@ fn collect(
     since_days: i64,
     editorial_state: PathBuf,
 ) -> Result<()> {
-    let crawler_instance = instances::default_crawler_instance();
+    let crawler_instance = instances::crawler_instance(&instance)?;
     let config = read_crawler_config(&config)?;
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
@@ -176,7 +186,7 @@ fn collect(
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let query_plans = garbage::query_plans(&config, &editorial_focuses);
+    let query_plans = crawler_instance.query_plans(&config, &editorial_focuses);
     let public_snapshot = PublicSnapshot {
         generated_at: Utc::now(),
         theme: config.theme,
@@ -485,28 +495,13 @@ fn load_export_payload(
     })
 }
 
-fn verify(config: PathBuf) -> Result<()> {
+fn verify(instance: String, config: PathBuf) -> Result<()> {
+    let crawler_instance = instances::crawler_instance(&instance)?;
     let config = read_crawler_config(&config)?;
-    anyhow::ensure!(!config.targets.is_empty(), "config must include projects");
-    anyhow::ensure!(!config.sources.is_empty(), "config must include sources");
-    anyhow::ensure!(
-        config
-            .targets
-            .iter()
-            .any(|project| project.name == "Pydantic"),
-        "Pydantic must be tracked"
-    );
-    anyhow::ensure!(
-        config
-            .targets
-            .iter()
-            .any(|project| project.name == "LakeSail"),
-        "LakeSail must be tracked"
-    );
-    verify_required_projects(&config)?;
-    verify_required_sources(&config)?;
+    crawler_instance.verify_config(&config)?;
     println!(
-        "verified {} projects and {} sources for {}",
+        "verified {} instance with {} projects and {} sources for {}",
+        crawler_instance.id(),
         config.targets.len(),
         config.sources.len(),
         config.theme
@@ -514,117 +509,15 @@ fn verify(config: PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn queries(config: PathBuf, editorial_state: PathBuf) -> Result<()> {
+fn queries(instance: String, config: PathBuf, editorial_state: PathBuf) -> Result<()> {
+    let crawler_instance = instances::crawler_instance(&instance)?;
     let config = read_crawler_config(&config)?;
-    let editorial_focuses = garbage::read_editorial_focuses(&editorial_state)?;
+    let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     println!(
         "{}",
-        serde_json::to_string_pretty(&garbage::query_plans(&config, &editorial_focuses))?
+        serde_json::to_string_pretty(&crawler_instance.query_plans(&config, &editorial_focuses))?
     );
     Ok(())
-}
-
-fn verify_required_projects(config: &CrawlerConfig) -> Result<()> {
-    for project_name in [
-        "Pydantic",
-        "BAML",
-        "DSPy",
-        "Instructor",
-        "LakeSail",
-        "Apache Arrow",
-        "DataFusion",
-        "Delta Lake",
-        "Ibis",
-        "Dagster",
-        "Grust Sail",
-        "Turso",
-        "LanceDB",
-        "HelixDB",
-        "SurrealDB",
-        "pgGraph",
-        "Grust",
-        "TypeSec",
-        "Garde",
-        "zod-rs",
-        "FalkorDB",
-        "LadybugDB",
-        "CocoIndex",
-    ] {
-        let project = config
-            .targets
-            .iter()
-            .find(|candidate| candidate.name == project_name)
-            .with_context(|| format!("{project_name} must be tracked"))?;
-        anyhow::ensure!(
-            !project.topic.trim().is_empty(),
-            "{project_name} must have a topic"
-        );
-        anyhow::ensure!(
-            project.homepage.starts_with("https://"),
-            "{project_name} must have an https homepage"
-        );
-        anyhow::ensure!(
-            project.keywords.len() >= 3,
-            "{project_name} must have at least three matching keywords"
-        );
-        anyhow::ensure!(
-            !garbage::project_live_terms(project).is_empty(),
-            "{project_name} must have at least one distinctive live-search term"
-        );
-    }
-    Ok(())
-}
-
-fn verify_required_sources(config: &CrawlerConfig) -> Result<()> {
-    for source_name in ["Hacker News", "Lobste.rs", "dev.to"] {
-        let source = required_source(config, source_name)?;
-        anyhow::ensure!(
-            source.feed_urls.as_ref().is_none_or(Vec::is_empty),
-            "{source_name} should use its API adapter, not feed_urls"
-        );
-        anyhow::ensure!(
-            source.manual_path.is_none(),
-            "{source_name} should use its API adapter, not manual_path"
-        );
-    }
-    for source_name in ["Medium", "Substack"] {
-        let source = required_source(config, source_name)?;
-        let feeds = source
-            .feed_urls
-            .as_ref()
-            .filter(|feeds| !feeds.is_empty())
-            .with_context(|| format!("{source_name} must configure feed_urls"))?;
-        anyhow::ensure!(
-            feeds.iter().all(|feed| feed.starts_with("https://")),
-            "{source_name} feed_urls must be https"
-        );
-    }
-    for source_name in ["LinkedIn", "X/Twitter"] {
-        let source = required_source(config, source_name)?;
-        let path = source
-            .manual_path
-            .as_ref()
-            .with_context(|| format!("{source_name} must configure manual_path"))?;
-        anyhow::ensure!(
-            path.exists(),
-            "{source_name} manual import file must exist at {}",
-            path.display()
-        );
-    }
-    Ok(())
-}
-
-fn required_source<'a>(config: &'a CrawlerConfig, source_name: &str) -> Result<&'a SourceConfig> {
-    let source = config
-        .sources
-        .iter()
-        .find(|candidate| candidate.name == source_name)
-        .with_context(|| format!("{source_name} must be tracked"))?;
-    anyhow::ensure!(
-        source.url.starts_with("https://"),
-        "{source_name} must have an https source URL"
-    );
-    Ok(source)
 }
 
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
@@ -648,6 +541,7 @@ fn sql_text_array(values: &[String]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::instances::garbage;
     use chrono::DateTime;
 
     #[test]
