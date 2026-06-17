@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process'
 
-const sqlPath = '/tmp/verdun-newsletter-load.sql'
-const genericSqlPath = '/tmp/verdun-generic-load.sql'
+const sqlPath = '/tmp/verdun-generic-load.sql'
+const newsletterSqlPath = '/tmp/verdun-newsletter-load.sql'
 const customGenericSqlPath = '/tmp/verdun-greathouse-generic-load.sql'
 const snapshotPath = 'public/data/newsletter-snapshot.json'
 
@@ -10,15 +10,15 @@ const steps = [
   ['cargo', ['check', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['test', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'verify']],
-  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'newsletter', '--snapshot', snapshotPath, '--out', sqlPath]],
-  ['npm', ['run', 'smoke:loader', '--', sqlPath, snapshotPath]],
-  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'generic', '--snapshot', snapshotPath, '--out', genericSqlPath]],
-  ['npm', ['run', 'smoke:generic-loader', '--', genericSqlPath, snapshotPath]],
+  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--snapshot', snapshotPath, '--out', sqlPath]],
+  ['npm', ['run', 'smoke:generic-loader', '--', sqlPath, snapshotPath]],
+  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'newsletter', '--snapshot', snapshotPath, '--out', newsletterSqlPath]],
+  ['npm', ['run', 'smoke:loader', '--', newsletterSqlPath, snapshotPath]],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'generic', '--instance', 'greathouse', '--instance-name', 'Greathouse', '--base-path', '/greathouse/', '--snapshot', snapshotPath, '--out', customGenericSqlPath]],
   ['npm', ['run', 'smoke:generic-loader', '--', customGenericSqlPath, snapshotPath, '--allow-custom-instance', '--expect-instance', 'greathouse', '--expect-base-path', '/greathouse/']],
   ['npm', ['run', 'smoke:greathouse-workbench']],
-  ['npm', ['run', 'smoke:db-apply', '--', genericSqlPath, snapshotPath]],
-  ['npm', ['run', 'smoke:db-deploy', '--', genericSqlPath, snapshotPath]],
+  ['npm', ['run', 'smoke:db-apply', '--', sqlPath, snapshotPath]],
+  ['npm', ['run', 'smoke:db-deploy', '--', sqlPath, snapshotPath]],
   ['npm', ['run', 'smoke:manual-source']],
   ['npm', ['run', 'smoke:check-deployed']],
   ['npm', ['run', 'smoke:api']],
