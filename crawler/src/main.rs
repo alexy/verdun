@@ -8,7 +8,7 @@ use crate::instances::garbage::{ExportPayload, NewsItem, PublicSnapshot};
 use std::{fs, path::PathBuf};
 
 #[derive(Parser)]
-#[command(author, version, about = "Verdun newsletter crawler and loader")]
+#[command(author, version, about = "Verdun reusable crawler and database loader")]
 struct Cli {
     #[command(subcommand)]
     command: CommandKind,
@@ -39,7 +39,7 @@ enum CommandKind {
     ExportSql {
         #[arg(long)]
         snapshot: Option<PathBuf>,
-        #[arg(long, value_enum, default_value_t = SqlExportTarget::Newsletter)]
+        #[arg(long, value_enum, default_value_t = SqlExportTarget::Generic)]
         target: SqlExportTarget,
         #[arg(long, default_value = "garbage")]
         instance: String,
@@ -51,7 +51,7 @@ enum CommandKind {
         input: PathBuf,
         #[arg(long, default_value = "crawler/data/source-runs.json")]
         source_runs: PathBuf,
-        #[arg(long, default_value = "/tmp/verdun-newsletter-load.sql")]
+        #[arg(long, default_value = "/tmp/verdun-workbench-load.sql")]
         out: PathBuf,
     },
     Verify {
@@ -197,7 +197,7 @@ fn collect(
     fs::write(&public_out, serde_json::to_string_pretty(&public_snapshot)?)
         .with_context(|| format!("writing {}", public_out.display()))?;
     println!(
-        "wrote {} newsletter items to {}, {}, and {}",
+        "wrote {} records to {}, {}, and {}",
         item_count,
         out.display(),
         source_runs_out.display(),

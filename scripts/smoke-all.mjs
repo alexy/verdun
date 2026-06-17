@@ -10,7 +10,7 @@ const steps = [
   ['cargo', ['check', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['test', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'verify']],
-  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--snapshot', snapshotPath, '--out', sqlPath]],
+  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'newsletter', '--snapshot', snapshotPath, '--out', sqlPath]],
   ['npm', ['run', 'smoke:loader', '--', sqlPath, snapshotPath]],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'generic', '--snapshot', snapshotPath, '--out', genericSqlPath]],
   ['npm', ['run', 'smoke:generic-loader', '--', genericSqlPath, snapshotPath]],

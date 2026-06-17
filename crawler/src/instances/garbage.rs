@@ -706,7 +706,7 @@ fn live_items(
 ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
     let client = Client::builder()
         .timeout(StdDuration::from_secs(12))
-        .user_agent("verdun-newsletter-crawler/0.1")
+        .user_agent("verdun-crawler/0.1")
         .build()
         .context("building HTTP client")?;
     let mut items = Vec::new();

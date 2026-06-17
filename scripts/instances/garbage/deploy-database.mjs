@@ -24,6 +24,8 @@ export async function runDeployDatabaseCli(args, env = process.env) {
       'crawler/Cargo.toml',
       '--',
       'export-sql',
+      '--target',
+      'newsletter',
       '--snapshot',
       snapshotPath,
       '--out',

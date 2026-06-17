@@ -65,6 +65,7 @@ try {
   const sourceRunsPath = join(workDir, 'source-runs.json')
   const snapshotPath = join(workDir, 'greathouse-snapshot.json')
   const sqlPath = join(workDir, 'greathouse-generic.sql')
+  const defaultSqlPath = join(workDir, 'greathouse-default.sql')
   const collectGreathouse = spawnSync('cargo', [
     'run',
     '--manifest-path',
@@ -134,6 +135,34 @@ try {
   if (exportGeneric.error) throw exportGeneric.error
   if (exportGeneric.status !== 0) {
     throw new Error(`greathouse generic export failed\n${exportGeneric.stdout}\n${exportGeneric.stderr}`)
+  }
+  const exportDefault = spawnSync('cargo', [
+    'run',
+    '--manifest-path',
+    'crawler/Cargo.toml',
+    '--',
+    'export-sql',
+    '--instance',
+    'greathouse',
+    '--instance-name',
+    'Greathouse',
+    '--base-path',
+    '/greathouse/',
+    '--snapshot',
+    snapshotPath,
+    '--out',
+    defaultSqlPath,
+  ], { encoding: 'utf8' })
+  if (exportDefault.error) throw exportDefault.error
+  if (exportDefault.status !== 0) {
+    throw new Error(`greathouse default export failed\n${exportDefault.stdout}\n${exportDefault.stderr}`)
+  }
+  if (!exportDefault.stdout.includes('wrote generic SQL load')) {
+    throw new Error(`default export did not use generic SQL target\n${exportDefault.stdout}`)
+  }
+  const defaultSql = await readFile(defaultSqlPath, 'utf8')
+  if (!defaultSql.includes('insert into records') || defaultSql.includes('insert into newsletter_items')) {
+    throw new Error('default export did not write generic workbench tables')
   }
 
   const loader = spawnSync('npm', [

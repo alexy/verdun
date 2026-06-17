@@ -40,13 +40,14 @@
 - Moved Garbage publishing helper implementations under `scripts/instances/garbage/`; the public newsletter draft, Ghost publish, and source-gap scripts now act as compatibility CLI/module wrappers.
 - Moved Garbage newsletter SQL reload helper implementations under `scripts/instances/garbage/`; the public apply/deploy database scripts now act as compatibility CLI/module wrappers.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
+- Changed `verdun-crawler export-sql` to default to the generic workbench SQL target; Garbage newsletter table export is now an explicit `--target newsletter` compatibility path.
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
 
 Known remaining extraction work:
 
 - Garbage-specific newsletter, Ulysses, Strongly Typed AI ontology, readiness checks, and `/rbage/` behavior still live inside Verdun.
-- Legacy newsletter database/API paths still coexist with generic workbench paths.
+- Legacy newsletter database/API paths still coexist with generic workbench paths, but default SQL export now targets the generic workbench contract.
 - The Rust crawler now has a `CrawlerInstance` dispatch trait and a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
 - Crawler instance selection supports `--instance garbage` and `--instance greathouse`.
 - Workbench API routes support explicit Garbage/Greathouse instance selection, and the browser app now reads/reviews/focuses/imports Garbage state through generic workbench routes.
