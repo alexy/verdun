@@ -20,8 +20,19 @@ assertCount('insert into collection_plans', queryPlans.length)
 if (!sql.includes("insert into instances")) {
   throw new Error('generic SQL export is missing instance upsert')
 }
-if (!sql.includes("'garbage'") || !sql.includes("'/rbage/'")) {
+const allowsCustomInstance = process.argv.includes('--allow-custom-instance')
+if (!allowsCustomInstance && (!sql.includes("'garbage'") || !sql.includes("'/rbage/'"))) {
   throw new Error('generic SQL export is missing Garbage instance namespace')
+}
+if (allowsCustomInstance) {
+  const instance = valueAfter('--expect-instance')
+  const basePath = valueAfter('--expect-base-path')
+  if (instance && !sql.includes(sqlString(instance))) {
+    throw new Error(`generic SQL export is missing custom instance ${instance}`)
+  }
+  if (basePath && !sql.includes(sqlString(basePath))) {
+    throw new Error(`generic SQL export is missing custom base path ${basePath}`)
+  }
 }
 for (const table of ['records', 'source_runs', 'collection_plans']) {
   if (!sql.includes(`on conflict (instance, ${table === 'records' ? 'id' : table === 'source_runs' ? 'source' : 'subject'}) do update set`)) {
@@ -71,6 +82,11 @@ function sqlString(value) {
 
 function sqlTextArray(values) {
   return `array[${values.map(sqlString).join(", ")}]`
+}
+
+function valueAfter(flag) {
+  const index = process.argv.indexOf(flag)
+  return index >= 0 ? process.argv[index + 1] : undefined
 }
 
 function hasSnapshotCollectedAt(sql, snapshotGeneratedAt) {
