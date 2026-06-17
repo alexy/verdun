@@ -9,6 +9,7 @@ The first reusable boundary is now explicit:
 - Generic reusable Vue controls live under `src/components/workbench/` and currently back the Garbage hero metrics and review rail.
 - Garbage instance configuration lives in `src/instances/garbage/config.ts`.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
+- A small Greathouse pilot instance lives in `src/instances/greathouse/` and exercises listing/diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
 - Generic Vercel workbench surfaces live under `api/workbench/` and project the current Garbage instance as records, status, health, review writes, and focus writes.
 - Existing newsletter routes, scripts, and database tables still use their current names while the boundary is extracted incrementally.

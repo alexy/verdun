@@ -8,6 +8,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 
 - Verdun is now being extracted as the reusable core; the live newsletter app is the Garbage instance layered on top of it.
 - Generic workbench contracts live in `src/core/workbench.ts`, while Garbage instance configuration and ontology data live under `src/instances/garbage/`.
+- A Greathouse pilot fixture under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
 - Greathouse-style dashboard components extracted under `src/components/`, including `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`, so shared shell/editorial/inbox/draft/hero/source-health/item-card UI can be generalized later.
 - Frontend snapshot loading plus optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`; filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`, leaving `App.vue` as component composition.
