@@ -8,6 +8,7 @@
 - Moved Garbage deployment-check defaults into `scripts/instances/garbage/deploy-checks.mjs`; the generic deployed-check script now consumes instance deploy profiles instead of embedding Garbage URL, snapshot, required-subject, and draft API assumptions.
 - Added `sourceSnapshotPath` to deploy profiles and made generic workbench database apply/deploy scripts resolve their default snapshot and default instance behavior through profile metadata instead of embedding the Garbage newsletter snapshot path or special-casing `garbage`.
 - Added a profile-backed `scripts/check-preview.mjs`; `npm run check:preview` no longer embeds the Garbage `/rbage/` preview URL directly and instead resolves the preview URL from instance deploy profile metadata.
+- Changed `scripts/smoke-all.mjs` to resolve its default source snapshot through the default deploy profile instead of embedding the Garbage newsletter snapshot path.
 
 ## 2026-06-16
 

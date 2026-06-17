@@ -4,9 +4,13 @@ import { readFileSync } from 'node:fs'
 const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
 const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
 const applySource = readFileSync('scripts/workbench-apply-sql.mjs', 'utf8')
+const smokeAllSource = readFileSync('scripts/smoke-all.mjs', 'utf8')
 
 if (applySource.includes('public/data/newsletter-snapshot.json')) {
   throw new Error('generic workbench apply script still embeds the Garbage newsletter snapshot default')
+}
+if (smokeAllSource.includes("const snapshotPath = 'public/data/newsletter-snapshot.json'")) {
+  throw new Error('smoke-all still embeds the Garbage newsletter snapshot as its default source snapshot')
 }
 
 const dryRun = spawnSync('node', [

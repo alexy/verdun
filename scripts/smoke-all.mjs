@@ -1,9 +1,11 @@
 import { spawnSync } from 'node:child_process'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 const sqlPath = '/tmp/verdun-generic-load.sql'
 const newsletterSqlPath = '/tmp/verdun-newsletter-load.sql'
 const customGenericSqlPath = '/tmp/verdun-greathouse-generic-load.sql'
-const snapshotPath = 'public/data/newsletter-snapshot.json'
+const profile = deployCheckProfile(defaultDeployCheckProfileId())
+const snapshotPath = profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
 
 const steps = [
   ['npm', ['run', 'build']],
