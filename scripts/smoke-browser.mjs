@@ -1,6 +1,8 @@
 import { spawn, spawnSync } from 'node:child_process'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
-const previewUrl = process.argv[2] ?? 'http://127.0.0.1:5174/rbage/'
+const profile = deployCheckProfile(defaultDeployCheckProfileId())
+const previewUrl = process.argv[2] ?? profile?.previewBaseUrl ?? 'http://127.0.0.1:5174/'
 const startupTimeoutMs = 20_000
 
 function run(command, args) {

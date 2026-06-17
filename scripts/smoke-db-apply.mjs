@@ -5,12 +5,24 @@ const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
 const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
 const applySource = readFileSync('scripts/workbench-apply-sql.mjs', 'utf8')
 const smokeAllSource = readFileSync('scripts/smoke-all.mjs', 'utf8')
+const smokeBrowserSource = readFileSync('scripts/smoke-browser.mjs', 'utf8')
+const smokeResponsiveSource = readFileSync('scripts/smoke-responsive.mjs', 'utf8')
+const smokeAppSource = readFileSync('scripts/smoke-app.mjs', 'utf8')
 
 if (applySource.includes('public/data/newsletter-snapshot.json')) {
   throw new Error('generic workbench apply script still embeds the Garbage newsletter snapshot default')
 }
 if (smokeAllSource.includes("const snapshotPath = 'public/data/newsletter-snapshot.json'")) {
   throw new Error('smoke-all still embeds the Garbage newsletter snapshot as its default source snapshot')
+}
+for (const [label, source] of [
+  ['smoke-browser', smokeBrowserSource],
+  ['smoke-responsive', smokeResponsiveSource],
+  ['smoke-app', smokeAppSource],
+]) {
+  if (source.includes('/rbage/')) {
+    throw new Error(`${label} still embeds the Garbage preview base path instead of using profile metadata`)
+  }
 }
 
 const dryRun = spawnSync('node', [

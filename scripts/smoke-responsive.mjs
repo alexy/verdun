@@ -1,7 +1,9 @@
 import { chromium } from '@playwright/test'
 import { existsSync } from 'node:fs'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
-const baseUrl = process.argv[2] ?? 'http://127.0.0.1:5174/rbage/'
+const profile = deployCheckProfile(defaultDeployCheckProfileId())
+const baseUrl = process.argv[2] ?? profile?.previewBaseUrl ?? 'http://127.0.0.1:5174/'
 const chromiumExecutable = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
   ?? (existsSync('/opt/homebrew/bin/chromium') ? '/opt/homebrew/bin/chromium' : undefined)
 const browser = await chromium.launch(chromiumExecutable ? { executablePath: chromiumExecutable } : undefined)

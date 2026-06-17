@@ -3,8 +3,10 @@ import { existsSync } from 'node:fs'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
-const baseUrl = process.argv[2] ?? 'http://127.0.0.1:5176/rbage/'
+const profile = deployCheckProfile(defaultDeployCheckProfileId())
+const baseUrl = process.argv[2] ?? profile?.devAppBaseUrl ?? 'http://127.0.0.1:5176/'
 const chromiumExecutable = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
   ?? (existsSync('/opt/homebrew/bin/chromium') ? '/opt/homebrew/bin/chromium' : undefined)
 const browser = await chromium.launch(chromiumExecutable ? { executablePath: chromiumExecutable } : undefined)
