@@ -78,6 +78,8 @@ Without `--apply`, the helper regenerates `/tmp/verdun-newsletter-load.sql` from
 
 ## Crawler
 
+The reusable crawler core lives under `crawler/src/`; the current Garbage crawler instance owns its watchlist and manual social review files under `crawler/instances/garbage/`.
+
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-load.sql
@@ -110,8 +112,8 @@ Live collection currently supports Hacker News through the Algolia API, Lobste.r
 
 Manual social imports live at:
 
-- `crawler/data/manual/linkedin.json`
-- `crawler/data/manual/x-twitter.json`
+- `crawler/instances/garbage/manual/linkedin.json`
+- `crawler/instances/garbage/manual/x-twitter.json`
 
 Use those files for exported, saved, or explicitly reviewed posts rather than unauthenticated scraping. Keep their `published_at` values current for the issue being prepared; stale manual files show up as source-health errors during `collect --live`. Future authenticated adapters can reuse the same normalized post shape.
 

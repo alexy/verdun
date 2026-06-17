@@ -188,10 +188,10 @@ feed_urls = [
 name = "LinkedIn"
 kind = "social"
 url = "https://www.linkedin.com"
-manual_path = "crawler/data/manual/linkedin.json"
+manual_path = "crawler/instances/garbage/manual/linkedin.json"
 
 [[sources]]
 name = "X/Twitter"
 kind = "social"
 url = "https://x.com"
-manual_path = "crawler/data/manual/x-twitter.json"
+manual_path = "crawler/instances/garbage/manual/x-twitter.json"

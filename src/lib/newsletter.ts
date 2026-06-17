@@ -431,7 +431,7 @@ export function buildSourceGapReviewMarkdown(
   }
 
   lines.push(
-    'Use this checklist before Ulysses export. For useful social/manual finds, add a reviewed entry to `crawler/data/manual/linkedin.json` or `crawler/data/manual/x-twitter.json`, then rerun `collect --live`.',
+    'Use this checklist before Ulysses export. For useful social/manual finds, add a reviewed entry to `crawler/instances/garbage/manual/linkedin.json` or `crawler/instances/garbage/manual/x-twitter.json`, then rerun `collect --live`.',
     '',
   )
 

@@ -19,7 +19,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum CommandKind {
     Collect {
-        #[arg(long, default_value = "crawler/config/watchlist.toml")]
+        #[arg(long, default_value = "crawler/instances/garbage/watchlist.toml")]
         config: PathBuf,
         #[arg(long, default_value = "crawler/data/items.json")]
         out: PathBuf,
@@ -47,11 +47,11 @@ enum CommandKind {
         out: PathBuf,
     },
     Verify {
-        #[arg(long, default_value = "crawler/config/watchlist.toml")]
+        #[arg(long, default_value = "crawler/instances/garbage/watchlist.toml")]
         config: PathBuf,
     },
     Queries {
-        #[arg(long, default_value = "crawler/config/watchlist.toml")]
+        #[arg(long, default_value = "crawler/instances/garbage/watchlist.toml")]
         config: PathBuf,
         #[arg(long, default_value = "crawler/data/editorial-state.json")]
         editorial_state: PathBuf,

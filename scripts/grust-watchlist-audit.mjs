@@ -19,7 +19,7 @@ const signalRules = [
 
 const options = parseArgs(process.argv.slice(2))
 const grustRoot = options.get('--grust-root') ?? '/Users/alexy/src/grust'
-const watchlistPath = options.get('--watchlist') ?? 'crawler/config/watchlist.toml'
+const watchlistPath = options.get('--watchlist') ?? 'crawler/instances/garbage/watchlist.toml'
 const outPath = options.get('--out') ?? 'crawler/data/grust-watchlist-audit.md'
 
 const audit = await buildGrustWatchlistAudit({ grustRoot, watchlistPath })

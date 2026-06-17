@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 
-const watchlist = await readFile('crawler/config/watchlist.toml', 'utf8')
+const watchlist = await readFile('crawler/instances/garbage/watchlist.toml', 'utf8')
 const requiredProjects = projectNames(watchlist)
 const snapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
 const items = snapshot.items ?? []
