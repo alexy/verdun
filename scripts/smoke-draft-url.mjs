@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
-import { buildNewsletterDraft, evaluateNewsletterProseQuality, loadSnapshotFile } from './newsletter-draft.mjs'
+import { buildNewsletterDraft, evaluateNewsletterProseQuality, loadSnapshotFile } from './instances/garbage/newsletter-draft.mjs'
 
 process.env.NEWSLETTER_APPLY_LOCAL_STATE = 'false'
 

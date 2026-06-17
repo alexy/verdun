@@ -1,5 +1,5 @@
-import { buildNewsletterDraft, loadSnapshotFile } from './newsletter-draft.mjs'
-import { assertGhostPublishGates, assertGhostStatusAllowed, ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './publish-ghost.mjs'
+import { buildNewsletterDraft, loadSnapshotFile } from './instances/garbage/newsletter-draft.mjs'
+import { assertGhostPublishGates, assertGhostStatusAllowed, ghostEndpoint, ghostExcerpt, ghostJwt, ghostPostPayload, ghostSlug, parseGhostArgs } from './instances/garbage/publish-ghost.mjs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
