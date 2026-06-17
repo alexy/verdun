@@ -1,6 +1,6 @@
-import { readSnapshot, readStatus } from '../newsletter/_db.js'
+import { readSnapshot, readStatus, writeFocus, writeVote } from '../newsletter/_db.js'
 import { garbageSnapshotToWorkbench } from '../../src/instances/garbage/workbench'
-import type { WorkbenchSnapshot } from '../../src/core/workbench'
+import type { ReviewValue, WorkbenchFocus, WorkbenchSnapshot } from '../../src/core/workbench'
 
 export type WorkbenchStatus = {
   instance: WorkbenchSnapshot['instance']
@@ -32,4 +32,12 @@ export async function readWorkbenchStatus(): Promise<WorkbenchStatus> {
     collectionPlanCount: newsletterStatus.queryPlanCount,
     writable: newsletterStatus.writable,
   }
+}
+
+export async function writeReview(recordId: string, review: ReviewValue): Promise<void> {
+  return writeVote(recordId, review)
+}
+
+export async function writeWorkbenchFocus(text: string, scope: WorkbenchFocus['scope']): Promise<WorkbenchFocus | null> {
+  return writeFocus(text, scope)
 }

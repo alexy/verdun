@@ -24,9 +24,9 @@ function responseRecorder() {
   }
 }
 
-async function call(handler, method = 'GET') {
+async function call(handler, method = 'GET', body = undefined) {
   const response = responseRecorder()
-  await handler({ method, query: {} }, response)
+  await handler({ method, query: {}, body }, response)
   return response
 }
 
@@ -50,6 +50,14 @@ try {
     optimizeDeps: { noDiscovery: true },
   })
   const { module: healthModule } = await runnerImport('./api/workbench/health.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
+  const { module: reviewModule } = await runnerImport('./api/workbench/review.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
+  const { module: focusModule } = await runnerImport('./api/workbench/focus.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
@@ -93,9 +101,36 @@ try {
   if (!healthResponse.body?.readSurfaces?.includes('records')) {
     throw new Error('workbench health route did not expose generic read surfaces')
   }
+  if (!healthResponse.body?.writeSurfaces?.includes('review') || !healthResponse.body?.writeSurfaces?.includes('focus')) {
+    throw new Error('workbench health route did not expose generic write surfaces')
+  }
 
   const blocked = await call(recordsModule.default, 'DELETE')
   if (blocked.code !== 405) throw new Error('workbench records route did not reject DELETE')
+
+  const recordId = snapshot.records[0]?.id
+  if (!recordId) throw new Error('workbench smoke could not find a record to review')
+  const reviewResponse = await call(reviewModule.default, 'POST', { recordId, review: 1 })
+  if (reviewResponse.code !== 200 || reviewResponse.body?.review !== 1) {
+    throw new Error(`workbench review route did not accept a generic review: ${JSON.stringify(reviewResponse.body)}`)
+  }
+  const focusResponse = await call(focusModule.default, 'POST', {
+    text: 'Workbench focus smoke note.',
+    scope: 'this_week',
+  })
+  if (focusResponse.code !== 200 || focusResponse.body?.focus?.text !== 'Workbench focus smoke note.') {
+    throw new Error(`workbench focus route did not accept a generic focus: ${JSON.stringify(focusResponse.body)}`)
+  }
+  const updatedSnapshot = await dbModule.readWorkbenchSnapshot()
+  if (!updatedSnapshot.records.some((record) => record.id === recordId && record.review === 1)) {
+    throw new Error('workbench review route did not persist into projected records')
+  }
+  if (!updatedSnapshot.focuses.some((focus) => focus.text === 'Workbench focus smoke note.')) {
+    throw new Error('workbench focus route did not persist into projected focuses')
+  }
+
+  const invalidReview = await call(reviewModule.default, 'POST', { recordId, review: 4 })
+  if (invalidReview.code !== 400) throw new Error('workbench review route did not reject invalid review values')
 } finally {
   delete process.env.VERCEL
   delete process.env.POSTGRES_URL

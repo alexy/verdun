@@ -16,7 +16,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse): Promis
       instance: activeSnapshot.instance,
       editorialPersistence: activeSnapshot.editorialPersistence,
       readSurfaces: ['records', 'status', 'health'],
-      writeSurfaces: ['review-state', 'focus'],
+      writeSurfaces: ['review', 'focus'],
       collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
       databaseContract: {
         currentTables: ['newsletter_items', 'newsletter_source_runs', 'newsletter_query_plans', 'newsletter_votes', 'newsletter_focuses'],
