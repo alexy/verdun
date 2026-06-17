@@ -5,8 +5,8 @@ mod core;
 mod instances;
 use crate::core::{CollectionTarget, CrawlerConfig, SourceConfig, SourceRun, SourceRunStatus};
 use crate::instances::garbage::{
-    self, DevToArticle, EditorialFocus, ExportPayload, FeedEntry, HackerNewsHit,
-    HackerNewsResponse, LobstersStory, ManualPost, NewsItem, PublicSnapshot,
+    self, DevToArticle, EditorialFocus, ExportPayload, FeedEntry, LobstersStory, ManualPost,
+    NewsItem, PublicSnapshot,
 };
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
@@ -644,7 +644,13 @@ fn live_items(
         .iter()
         .find(|source| source.name == "Hacker News")
     {
-        match fetch_hacker_news(&client, config, source, max_per_project, editorial_focuses) {
+        match garbage::fetch_hacker_news(
+            &client,
+            config,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(garbage::ok_source_run(
@@ -761,45 +767,6 @@ fn live_items(
 
 fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
     items.retain(|item| item.published_at >= since);
-}
-
-fn fetch_hacker_news(
-    client: &Client,
-    config: &CrawlerConfig,
-    source: &SourceConfig,
-    max_per_project: usize,
-    editorial_focuses: &[EditorialFocus],
-) -> Result<Vec<NewsItem>> {
-    let mut items = Vec::new();
-    for project in &config.targets {
-        let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
-        let query = garbage::project_query_for_collection(project, &focus_terms);
-        let response = client
-            .get("https://hn.algolia.com/api/v1/search_by_date")
-            .query(&[
-                ("query", query.as_str()),
-                ("tags", "story"),
-                (
-                    "hitsPerPage",
-                    &(max_per_project * 2).max(1).min(20).to_string(),
-                ),
-            ])
-            .send()
-            .with_context(|| format!("fetching Hacker News for {}", project.name))?
-            .error_for_status()
-            .with_context(|| format!("Hacker News returned error for {}", project.name))?
-            .json::<HackerNewsResponse>()
-            .with_context(|| format!("decoding Hacker News for {}", project.name))?;
-        for hit in response
-            .hits
-            .into_iter()
-            .filter(|hit| hn_hit_matches_project(hit, project, &focus_terms))
-            .take(max_per_project)
-        {
-            items.push(garbage::hn_item(project, source, hit, &focus_terms));
-        }
-    }
-    Ok(items)
 }
 
 fn fetch_lobsters(
@@ -1156,22 +1123,6 @@ fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
-}
-
-fn hn_hit_matches_project(
-    hit: &HackerNewsHit,
-    project: &CollectionTarget,
-    focus_terms: &[String],
-) -> bool {
-    let text = format!(
-        "{} {}",
-        hit.title.as_deref().unwrap_or_default(),
-        hit.url
-            .as_deref()
-            .or(hit.story_url.as_deref())
-            .unwrap_or_default()
-    );
-    text_matches_project(&text, project, focus_terms)
 }
 
 fn lobsters_story_matches_project(

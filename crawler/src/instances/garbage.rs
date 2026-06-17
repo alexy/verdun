@@ -1,4 +1,6 @@
+use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
+use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -291,6 +293,45 @@ pub fn dev_to_tags(project: &CollectionTarget) -> Vec<String> {
     tags
 }
 
+pub fn fetch_hacker_news(
+    client: &Client,
+    config: &CrawlerConfig,
+    source: &SourceConfig,
+    max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
+) -> Result<Vec<NewsItem>> {
+    let mut items = Vec::new();
+    for project in &config.targets {
+        let focus_terms = project_focus_terms(project, editorial_focuses);
+        let query = project_query_for_collection(project, &focus_terms);
+        let response = client
+            .get("https://hn.algolia.com/api/v1/search_by_date")
+            .query(&[
+                ("query", query.as_str()),
+                ("tags", "story"),
+                (
+                    "hitsPerPage",
+                    &(max_per_project * 2).max(1).min(20).to_string(),
+                ),
+            ])
+            .send()
+            .with_context(|| format!("fetching Hacker News for {}", project.name))?
+            .error_for_status()
+            .with_context(|| format!("Hacker News returned error for {}", project.name))?
+            .json::<HackerNewsResponse>()
+            .with_context(|| format!("decoding Hacker News for {}", project.name))?;
+        for hit in response
+            .hits
+            .into_iter()
+            .filter(|hit| hn_hit_matches_project(hit, project, &focus_terms))
+            .take(max_per_project)
+        {
+            items.push(hn_item(project, source, hit, &focus_terms));
+        }
+    }
+    Ok(items)
+}
+
 fn project_query(project: &CollectionTarget) -> String {
     let mut parts = vec![project.name.clone()];
     parts.extend(project_live_terms(project).into_iter().take(2));
@@ -367,6 +408,58 @@ fn url_query(value: &str) -> String {
         }
     }
     encoded
+}
+
+fn hn_hit_matches_project(
+    hit: &HackerNewsHit,
+    project: &CollectionTarget,
+    focus_terms: &[String],
+) -> bool {
+    let text = format!(
+        "{} {}",
+        hit.title.as_deref().unwrap_or_default(),
+        hit.url
+            .as_deref()
+            .or(hit.story_url.as_deref())
+            .unwrap_or_default()
+    );
+    text_matches_project(&text, project, focus_terms)
+}
+
+fn text_matches_project(text: &str, project: &CollectionTarget, focus_terms: &[String]) -> bool {
+    let text = text.to_lowercase();
+    let project_name = project.name.to_lowercase();
+    if project.name == "LanceDB" {
+        return text.contains("lancedb")
+            || text.contains("lance-format")
+            || text.contains("lancedb.com");
+    }
+    if contains_distinct_term(&text, &project_name) {
+        return true;
+    }
+    project_live_terms(project)
+        .iter()
+        .chain(focus_terms.iter())
+        .any(|keyword| contains_distinct_term(&text, keyword))
+}
+
+fn contains_distinct_term(text: &str, term: &str) -> bool {
+    if term.is_empty() {
+        return false;
+    }
+    let mut start = 0;
+    while let Some(offset) = text[start..].find(term) {
+        let index = start + offset;
+        let before = text[..index].chars().next_back();
+        let after = text[index + term.len()..].chars().next();
+        let before_boundary = before.is_none_or(|character| !character.is_ascii_alphanumeric());
+        let after_boundary = after.is_none_or(|character| !character.is_ascii_alphanumeric());
+        if before_boundary && after_boundary {
+            return true;
+        }
+        start = index + term.len();
+    }
+    false
 }
 
 pub fn item_dedupe_key(item: &NewsItem) -> String {
