@@ -1,34 +1,49 @@
 const defaultBaseUrl = 'https://collected.ga/rbage/'
 const args = process.argv.slice(2)
+const valueOptions = new Set(['--asset-base', '--instance', '--min-collection-plans', '--min-records', '--min-source-runs', '--required-plan', '--required-subject', '--static-snapshot'])
 const staticOnly = args.includes('--static-only')
 const requireReady = args.includes('--require-ready')
 const requireDatabase = args.includes('--require-database')
-const baseArg = args.find((arg) => !arg.startsWith('--')) ?? process.env.VERDUN_DEPLOYED_URL ?? defaultBaseUrl
+const instance = optionValue('--instance') ?? process.env.VERDUN_INSTANCE ?? 'garbage'
+const staticSnapshotPath = optionValue('--static-snapshot') ?? process.env.VERDUN_STATIC_SNAPSHOT ?? 'data/newsletter-snapshot.json'
+const baseArg = positionalArg() ?? process.env.VERDUN_DEPLOYED_URL ?? defaultBaseUrl
 const baseUrl = normalizeBaseUrl(baseArg)
 const origin = new URL(baseUrl).origin
+const assetBasePath = optionValue('--asset-base') ?? new URL(baseUrl).pathname
+const checkDraft = args.includes('--check-draft')
+const skipDraft = args.includes('--skip-draft') || (!checkDraft && instance !== 'garbage')
+const requiredSubjects = optionValues('--required-subject')
+const requiredPlans = optionValues('--required-plan')
+const garbageDefaultSubjects = ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']
+const garbageDefaultPlans = ['BAML', 'DSPy', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Ibis', 'Dagster', 'Garde', 'zod-rs']
+const minRecords = numberOption('--min-records', instance === 'garbage' ? 23 : 1)
+const minSourceRuns = numberOption('--min-source-runs', 1)
+const minCollectionPlans = numberOption('--min-collection-plans', instance === 'garbage' ? 23 : 0)
+const expectedSubjects = requiredSubjects.length ? requiredSubjects : (instance === 'garbage' ? garbageDefaultSubjects : [])
+const expectedPlans = requiredPlans.length ? requiredPlans : (instance === 'garbage' ? garbageDefaultPlans : [])
 
 const appHtml = await fetchText(baseUrl, 'app route')
 if (!appHtml.includes('<div id="app"></div>')) {
   throw new Error(`${baseUrl} did not return the Verdun app shell`)
 }
-if (!appHtml.includes('/rbage/assets/')) {
-  throw new Error(`${baseUrl} is not using the /rbage/ asset base path`)
+if (!appHtml.includes(`${assetBasePath}assets/`)) {
+  throw new Error(`${baseUrl} is not using the ${assetBasePath} asset base path`)
 }
 
-const staticSnapshot = await fetchJson(new URL('data/newsletter-snapshot.json', baseUrl), 'static snapshot')
+const staticSnapshot = await fetchJson(new URL(staticSnapshotPath, baseUrl), 'static snapshot')
 await validateSnapshot(staticSnapshot, 'static snapshot')
 
 if (!staticOnly) {
-  const apiSnapshot = await fetchJson(new URL('/api/workbench/records?instance=garbage', origin), 'workbench records API')
+  const apiSnapshot = await fetchJson(new URL(`/api/workbench/records?instance=${encodeURIComponent(instance)}`, origin), 'workbench records API')
   await validateSnapshot(apiSnapshot, 'workbench records API')
-  const apiStatus = await fetchJson(new URL('/api/workbench/status?instance=garbage', origin), 'workbench status API')
+  const apiStatus = await fetchJson(new URL(`/api/workbench/status?instance=${encodeURIComponent(instance)}`, origin), 'workbench status API')
   validateStatus(apiStatus)
-  const apiHealth = await fetchJson(new URL('/api/workbench/health?instance=garbage', origin), 'workbench health API')
+  const apiHealth = await fetchJson(new URL(`/api/workbench/health?instance=${encodeURIComponent(instance)}`, origin), 'workbench health API')
   validateHealth(apiHealth, apiStatus)
-  await validateDraftApi(origin)
+  if (!skipDraft) await validateDraftApi(origin)
 }
 
-console.log(`verified Verdun deployment at ${baseUrl}${staticOnly ? ' (static only)' : ''}${requireReady ? ' with readiness gate' : ''}${requireDatabase ? ' with database gate' : ''}`)
+console.log(`verified Verdun ${instance} deployment at ${baseUrl}${staticOnly ? ' (static only)' : ''}${skipDraft ? ' without draft API checks' : ''}${requireReady ? ' with readiness gate' : ''}${requireDatabase ? ' with database gate' : ''}`)
 
 function normalizeBaseUrl(value) {
   const url = new URL(value)
@@ -72,14 +87,14 @@ function networkError(label, url, error) {
     return `${label} could not resolve ${hostname}. If this is a newly attached Vercel custom domain, verify it with \`npx vercel domains inspect ${hostname}\`, \`npx vercel alias ls\`, and retry after DNS propagation.`
   }
   if (code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || code === 'ENETUNREACH') {
-    return `${label} could not reach ${url}: ${code}. Check network access or verify the protected deployment with \`npx vercel curl /rbage/ --deployment <deployment-url>\`.`
+    return `${label} could not reach ${url}: ${code}. Check network access or verify the protected deployment with \`npx vercel curl ${assetBasePath} --deployment <deployment-url>\`.`
   }
   return `${label} fetch failed at ${url}: ${cause?.message ?? error?.message ?? error}`
 }
 
 function responseError(label, url, status) {
   const hint = status === 401
-    ? ' If this is a Vercel Authentication-protected deployment, verify it with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl "/api/workbench/records?instance=garbage" --deployment <deployment-url>`.'
+    ? ` If this is a Vercel Authentication-protected deployment, verify it with \`npx vercel curl ${assetBasePath} --deployment <deployment-url>\` and \`npx vercel curl "/api/workbench/records?instance=${instance}" --deployment <deployment-url>\`.`
     : ''
   return `${label} returned ${status} at ${url}.${hint}`
 }
@@ -95,17 +110,17 @@ async function validateSnapshot(snapshot, label) {
   if (!['database', 'local_file', 'browser'].includes(editorialPersistence)) {
     throw new Error(`${label} did not report editorial persistence mode`)
   }
-  if (items.length < 23) throw new Error(`${label} has too few newsletter items: ${items.length}`)
-  if (!sourceRuns.length) throw new Error(`${label} has no source health metadata`)
-  if (queryPlans.length < 23) throw new Error(`${label} has too few crawler query plans: ${queryPlans.length}`)
-  for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
+  if (items.length < minRecords) throw new Error(`${label} has too few records: ${items.length}`)
+  if (sourceRuns.length < minSourceRuns) throw new Error(`${label} has too few source runs: ${sourceRuns.length}`)
+  if (queryPlans.length < minCollectionPlans) throw new Error(`${label} has too few collection plans: ${queryPlans.length}`)
+  for (const project of expectedSubjects) {
     if (!items.some((item) => (item?.project ?? item?.subject) === project)) {
-      throw new Error(`${label} is missing required project item: ${project}`)
+      throw new Error(`${label} is missing required subject record: ${project}`)
     }
   }
-  for (const project of ['BAML', 'DSPy', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Ibis', 'Dagster', 'Garde', 'zod-rs']) {
+  for (const project of expectedPlans) {
     if (!queryPlans.some((plan) => (plan?.project ?? plan?.subject) === project)) {
-      throw new Error(`${label} is missing required query plan: ${project}`)
+      throw new Error(`${label} is missing required collection plan: ${project}`)
     }
   }
   const firstItem = items.find((item) => item && typeof item === 'object')
@@ -137,9 +152,9 @@ function validateStatus(status) {
   }
   const itemCount = Number(status.itemCount ?? status.recordCount)
   const queryPlanCount = Number(status.queryPlanCount ?? status.collectionPlanCount)
-  if (itemCount < 23) throw new Error(`status API has too few items: ${itemCount}`)
-  if (Number(status.sourceRunCount) < 3) throw new Error(`status API has too few source runs: ${status.sourceRunCount}`)
-  if (queryPlanCount < 23) throw new Error(`status API has too few query plans: ${queryPlanCount}`)
+  if (itemCount < minRecords) throw new Error(`status API has too few records: ${itemCount}`)
+  if (Number(status.sourceRunCount) < minSourceRuns) throw new Error(`status API has too few source runs: ${status.sourceRunCount}`)
+  if (queryPlanCount < minCollectionPlans) throw new Error(`status API has too few collection plans: ${queryPlanCount}`)
 }
 
 function validateHealth(health, status) {
@@ -324,4 +339,41 @@ function sourceRunStatus(run) {
 
 function arrayValue(value) {
   return Array.isArray(value) ? value : []
+}
+
+function optionValue(name) {
+  const equals = args.find((arg) => arg.startsWith(`${name}=`))
+  if (equals) return equals.slice(name.length + 1)
+  const index = args.indexOf(name)
+  return index >= 0 ? args[index + 1] : undefined
+}
+
+function optionValues(name) {
+  const values = []
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index]
+    if (arg === name && args[index + 1]) values.push(args[index + 1])
+    if (arg.startsWith(`${name}=`)) values.push(arg.slice(name.length + 1))
+  }
+  return values
+}
+
+function numberOption(name, fallback) {
+  const rawValue = optionValue(name)
+  if (rawValue === undefined) return fallback
+  const value = Number(rawValue)
+  if (!Number.isFinite(value) || value < 0) throw new Error(`${name} must be a non-negative number`)
+  return value
+}
+
+function positionalArg() {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index]
+    if (valueOptions.has(arg)) {
+      index += 1
+      continue
+    }
+    if (!arg.startsWith('--')) return arg
+  }
+  return undefined
 }

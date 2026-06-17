@@ -55,6 +55,86 @@ function browserStatusJson() {
   })
 }
 let statusJson = databaseStatusJson()
+const greathouseSnapshot = {
+  instance: {
+    id: 'greathouse',
+    name: 'Greathouse',
+    basePath: '/greathouse/',
+  },
+  generatedAt: freshGeneratedAt,
+  editorialPersistence: 'database',
+  records: [
+    {
+      id: 'greathouse-listing-1',
+      title: 'Mountain View three bedroom near transit',
+      url: 'https://example.com/listings/1',
+      subject: 'Mountain View',
+      summary: 'Fresh listing with source provenance and comparable evidence.',
+      review: 1,
+      score: 94,
+      observedAt: freshGeneratedAt,
+    },
+    {
+      id: 'greathouse-diagnostic-1',
+      title: 'Source diagnostic for protected listing endpoint',
+      url: 'https://example.com/diagnostics/redfin',
+      subject: 'Source diagnostics',
+      summary: 'Blocked-source diagnostic retained as normalized review evidence.',
+      review: 0,
+      score: 71,
+      observedAt: freshGeneratedAt,
+    },
+  ],
+  sourceRuns: [
+    {
+      source: 'local-listing-json',
+      status: 'ok',
+      itemCount: 1,
+      subjectCounts: { 'Mountain View': 1 },
+      message: 'Loaded local listing fixture.',
+      collectedAt: freshGeneratedAt,
+    },
+    {
+      source: 'http-status-diagnostic',
+      status: 'ok',
+      itemCount: 1,
+      subjectCounts: { 'Source diagnostics': 1 },
+      message: 'Recorded blocked-source diagnostic.',
+      collectedAt: freshGeneratedAt,
+    },
+  ],
+  collectionPlans: [
+    {
+      subject: 'Mountain View',
+      query: 'Mountain View homes source diagnostics',
+      liveTerms: ['Mountain View', 'listing freshness'],
+    },
+  ],
+  focuses: [
+    {
+      id: 'focus-greathouse-source-health',
+      text: 'Prioritize source freshness and blocked-source diagnostics.',
+      scope: 'ongoing',
+      createdAt: freshGeneratedAt,
+    },
+  ],
+}
+function greathouseSnapshotJson() {
+  return JSON.stringify(greathouseSnapshot)
+}
+function greathouseStatusJson() {
+  return JSON.stringify({
+    instance: greathouseSnapshot.instance,
+    editorialPersistence: 'database',
+    generatedAt: greathouseSnapshot.generatedAt,
+    recordCount: greathouseSnapshot.records.length,
+    focusCount: greathouseSnapshot.focuses.length,
+    reviewCount: 1,
+    sourceRunCount: greathouseSnapshot.sourceRuns.length,
+    collectionPlanCount: greathouseSnapshot.collectionPlans.length,
+    writable: true,
+  })
+}
 function healthJson() {
   const status = JSON.parse(statusJson)
   const databaseConfigured = status.editorialPersistence === 'database'
@@ -65,6 +145,21 @@ function healthJson() {
     state: databaseConfigured ? 'database_configured' : 'database_not_configured',
     databaseConfigured,
     editorialPersistence: status.editorialPersistence,
+    readSurfaces: ['records', 'status', 'health'],
+    writeSurfaces: ['review', 'focus'],
+    collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
+    activeSnapshot: status,
+  })
+}
+function greathouseHealthJson() {
+  const status = JSON.parse(greathouseStatusJson())
+  return JSON.stringify({
+    ok: true,
+    service: 'workbench',
+    surface: 'health',
+    state: 'database_configured',
+    databaseConfigured: true,
+    editorialPersistence: 'database',
     readSurfaces: ['records', 'status', 'health'],
     writeSurfaces: ['review', 'focus'],
     collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
@@ -114,14 +209,39 @@ const server = createServer((request, response) => {
     response.end('<!doctype html><div id="app"></div><script type="module" src="/rbage/assets/index.js"></script>')
     return
   }
+  if (url.pathname === '/greathouse/' || url.pathname === '/greathouse/index.html') {
+    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+    response.end('<!doctype html><div id="app"></div><script type="module" src="/greathouse/assets/index.js"></script>')
+    return
+  }
+  if (url.pathname === '/greathouse/data/greathouse-snapshot.json') {
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+    response.end(greathouseSnapshotJson())
+    return
+  }
+  if (url.pathname === '/api/workbench/records' && url.searchParams.get('instance') === 'greathouse') {
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+    response.end(greathouseSnapshotJson())
+    return
+  }
   if (url.pathname === '/rbage/data/newsletter-snapshot.json' || url.pathname === '/api/workbench/records') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(snapshotJson())
     return
   }
+  if (url.pathname === '/api/workbench/status' && url.searchParams.get('instance') === 'greathouse') {
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+    response.end(greathouseStatusJson())
+    return
+  }
   if (url.pathname === '/api/workbench/status') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
     response.end(statusJson)
+    return
+  }
+  if (url.pathname === '/api/workbench/health' && url.searchParams.get('instance') === 'greathouse') {
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+    response.end(greathouseHealthJson())
     return
   }
   if (url.pathname === '/api/workbench/health') {
@@ -202,6 +322,31 @@ try {
   ])
   if (browserResult.status === 0 || !browserResult.stderr.includes('not database-backed')) {
     throw new Error(`check-deployed database gate should reject browser persistence\n${browserResult.stdout}\n${browserResult.stderr}`)
+  }
+  statusJson = databaseStatusJson()
+  const greathouseResult = await runCheckDeployed([
+    'scripts/check-deployed.mjs',
+    `http://127.0.0.1:${address.port}/greathouse/`,
+    '--instance',
+    'greathouse',
+    '--static-snapshot',
+    'data/greathouse-snapshot.json',
+    '--min-records',
+    '2',
+    '--min-source-runs',
+    '2',
+    '--min-collection-plans',
+    '1',
+    '--required-subject',
+    'Mountain View',
+    '--required-subject',
+    'Source diagnostics',
+  ])
+  if (greathouseResult.status !== 0) {
+    throw new Error(`check-deployed Greathouse workbench smoke failed\n${greathouseResult.stdout}\n${greathouseResult.stderr}`)
+  }
+  if (!greathouseResult.stdout.includes('Verdun greathouse deployment') || !greathouseResult.stdout.includes('without draft API checks')) {
+    throw new Error('check-deployed Greathouse smoke did not report generic instance validation without draft checks')
   }
 } finally {
   server.closeIdleConnections?.()
