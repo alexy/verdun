@@ -10,6 +10,10 @@ const { module: workbenchViewModule } = await runnerImport('./src/composables/us
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
+const { module: registryModule } = await runnerImport('./src/instances/registry.ts', {
+  logLevel: 'error',
+  optimizeDeps: { noDiscovery: true },
+})
 const [greathouseAppSource, appSource] = await Promise.all([
   readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
   readFile('src/App.vue', 'utf8'),
@@ -52,6 +56,12 @@ if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
 if (!greathouseAppSource.includes('greathousePilotSnapshot') || !greathouseAppSource.includes('WorkbenchReviewRail')) {
   throw new Error('Greathouse workbench app component is not wired to the generic workbench pilot')
 }
-if (!appSource.includes("startsWith('/greathouse/')") || !appSource.includes('GreathouseApp')) {
-  throw new Error('root app shell is not wired to the Greathouse route selector')
+if (!appSource.includes('resolveWorkbenchInstanceForPath') || !appSource.includes('GreathouseApp')) {
+  throw new Error('root app shell is not wired through the registry-backed route selector')
+}
+if (registryModule.resolveWorkbenchInstanceForPath('/greathouse/').id !== 'greathouse') {
+  throw new Error('registry did not resolve /greathouse/ to the Greathouse instance')
+}
+if (registryModule.resolveWorkbenchInstanceForPath('/rbage/').id !== 'garbage') {
+  throw new Error('registry did not resolve /rbage/ to the Garbage instance')
 }

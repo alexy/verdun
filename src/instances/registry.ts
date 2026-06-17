@@ -23,6 +23,14 @@ export function resolveWorkbenchInstance(value: unknown): WorkbenchInstance {
   throw error
 }
 
+export function resolveWorkbenchInstanceForPath(pathname: string): WorkbenchInstance {
+  const normalizedPath = pathname.endsWith('/') ? pathname : `${pathname}/`
+  const instance = instances
+    .filter((candidate) => candidate.basePath !== '/')
+    .find((candidate) => normalizedPath.startsWith(candidate.basePath))
+  return instance ?? defaultWorkbenchInstance()
+}
+
 export function staticWorkbenchSnapshot(instance: WorkbenchInstance): WorkbenchSnapshot | null {
   if (instance.id === greathouseInstance.id) return greathousePilotSnapshot()
   return null
