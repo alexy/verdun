@@ -1,4 +1,4 @@
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type ProjectQueryPlan, type SourceRun, type SourceRunStatus, type VoteValue } from './newsletter'
+import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type ProjectQueryPlan, type SourceRun, type SourceRunStatus, type VoteValue } from '../instances/garbage/newsletter'
 
 type RawRecord = Record<string, unknown>
 

@@ -1,6 +1,6 @@
 import { computed, ref, type Ref } from 'vue'
-import type { NewsletterPublishManifest, NewsletterSnapshot } from '../lib/newsletter'
-import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, buildSourceGapReviewMarkdown, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../lib/newsletter'
+import type { NewsletterPublishManifest, NewsletterSnapshot } from '../instances/garbage/newsletter'
+import { buildEditorialStateExport, buildNewsletterDraft, buildPublishManifest, buildSourceGapReviewMarkdown, evaluateNewsletterReadiness, evaluateSourceCoverage, sortedNewsItems } from '../instances/garbage/newsletter'
 
 export type VoteFilter = 'all' | 'draft' | 'unreviewed' | 'upvoted' | 'downvoted'
 export type EvidenceFilter = 'all' | 'collected' | 'live' | 'manual' | 'seed'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Activity, Download, Plus } from '@lucide/vue'
-import type { ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../lib/newsletter'
+import type { ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../instances/garbage/newsletter'
 
 const props = defineProps<{
   pendingSourceCount: number

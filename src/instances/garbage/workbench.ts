@@ -5,7 +5,7 @@ import type {
   WorkbenchSnapshot,
   WorkbenchSourceRun,
 } from '../../core/workbench'
-import type { NewsItem, NewsletterSnapshot, ProjectQueryPlan, SourceRun } from '../../lib/newsletter'
+import type { NewsItem, NewsletterSnapshot, ProjectQueryPlan, SourceRun } from './newsletter'
 import { garbageInstance } from './config'
 
 export function garbageSnapshotToWorkbench(snapshot: NewsletterSnapshot): WorkbenchSnapshot {

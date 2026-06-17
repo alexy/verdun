@@ -8,7 +8,7 @@ import {
   evaluateSourceCoverage,
   type NewsletterDraft,
   type NewsletterSnapshot,
-} from '../../src/lib/newsletter.js'
+} from '../../src/instances/garbage/newsletter.js'
 
 type DraftFormat = 'json' | 'markdown' | 'html' | 'manifest'
 

@@ -18,7 +18,7 @@ if (outPath === '-') {
 }
 
 export async function buildSourceGapReview(snapshot, snapshotPath = 'public/data/newsletter-snapshot.json') {
-  const { module } = await runnerImport('./src/lib/newsletter.ts', {
+  const { module } = await runnerImport('./src/instances/garbage/newsletter.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
