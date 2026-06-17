@@ -11,6 +11,9 @@ const [crawlerMainSource, garbageInstanceSource] = await Promise.all([
 if (crawlerMainSource.includes('insert into newsletter_')) {
   throw new Error('crawler main still embeds legacy newsletter SQL table exports')
 }
+if (crawlerMainSource.includes('fn generic_export_sql(payload: &ExportPayload')) {
+  throw new Error('generic SQL exporter still depends on Garbage export payloads')
+}
 for (const marker of [
   'default_value = "garbage"',
   'default_value = "Garbage"',
