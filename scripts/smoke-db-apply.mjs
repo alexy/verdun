@@ -1,10 +1,10 @@
 import { spawnSync } from 'node:child_process'
 
-const sqlPath = process.argv[2] ?? '/tmp/verdun-newsletter-load.sql'
+const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
 const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
 
 const dryRun = spawnSync('node', [
-  'scripts/apply-newsletter-sql.mjs',
+  'scripts/workbench-apply-sql.mjs',
   '--sql',
   sqlPath,
   '--snapshot',
@@ -12,19 +12,22 @@ const dryRun = spawnSync('node', [
 ], { encoding: 'utf8' })
 if (dryRun.error) throw dryRun.error
 if (dryRun.status !== 0) {
-  throw new Error(`database apply dry run failed\n${dryRun.stdout}\n${dryRun.stderr}`)
+  throw new Error(`workbench database apply dry run failed\n${dryRun.stdout}\n${dryRun.stderr}`)
 }
 if (!dryRun.stdout.includes('dry run only')) {
-  throw new Error('database apply dry run did not report that it skipped external Postgres')
+  throw new Error('workbench database apply dry run did not report that it skipped external Postgres')
 }
 for (const migration of ['0001_newsletter.sql', '0002_workbench_views.sql', '0003_generic_workbench_tables.sql']) {
   if (!dryRun.stdout.includes(migration)) {
-    throw new Error(`database apply dry run did not include ${migration}`)
+    throw new Error(`workbench database apply dry run did not include ${migration}`)
   }
+}
+if (!dryRun.stdout.includes('validated generic workbench SQL')) {
+  throw new Error('workbench database apply dry run did not validate the generic workbench SQL contract')
 }
 
 const missingDatabase = spawnSync('node', [
-  'scripts/apply-newsletter-sql.mjs',
+  'scripts/workbench-apply-sql.mjs',
   '--sql',
   sqlPath,
   '--snapshot',
