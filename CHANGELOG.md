@@ -2,6 +2,7 @@
 
 ## 2026-06-17
 
+- Added `verdun-crawler collect --generic-out` so collection can write a core `CrawlerSnapshot` artifact with `records`, `source_runs`, and `collection_plans` alongside the existing legacy public snapshot; Greathouse smoke coverage now exports SQL and validates the generic loader from that core artifact directly.
 - Removed the old `api/newsletter/*` compatibility route files; Garbage newsletter APIs are now exposed through the explicit `api/garbage/newsletter/*` namespace.
 - Exposed the Garbage legacy news-item to core `NormalizedRecord` projection as an instance boundary function, preparing the remaining crawler `NewsItem` trait cleanup.
 - Moved crawler editorial focus state into `crawler/src/core.rs`; the shared crawler trait no longer imports that focus type from the Garbage module.

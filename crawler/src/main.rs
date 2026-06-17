@@ -28,6 +28,8 @@ enum CommandKind {
         #[arg(long)]
         public_out: Option<PathBuf>,
         #[arg(long)]
+        generic_out: Option<PathBuf>,
+        #[arg(long)]
         live: bool,
         #[arg(long, default_value_t = 4)]
         max_live_per_project: usize,
@@ -79,6 +81,7 @@ fn main() -> Result<()> {
             out,
             source_runs_out,
             public_out,
+            generic_out,
             live,
             max_live_per_project,
             since_days,
@@ -89,6 +92,7 @@ fn main() -> Result<()> {
             out,
             source_runs_out,
             public_out,
+            generic_out,
             live,
             max_live_per_project,
             since_days,
@@ -140,6 +144,7 @@ fn collect(
     out: PathBuf,
     source_runs_out: PathBuf,
     public_out: Option<PathBuf>,
+    generic_out: Option<PathBuf>,
     live: bool,
     max_live_per_project: usize,
     since_days: i64,
@@ -183,13 +188,31 @@ fn collect(
         serde_json::to_string_pretty(&source_runs)?,
     )
     .with_context(|| format!("writing {}", source_runs_out.display()))?;
+    let generated_at = Utc::now();
+    let collection_plans = crawler_instance.collection_plans(&config, &editorial_focuses);
+    if let Some(generic_out) = generic_out {
+        if let Some(parent) = generic_out.parent() {
+            fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
+        }
+        let generic_snapshot = CrawlerSnapshot {
+            generated_at,
+            theme: config.theme.clone(),
+            records: items.iter().map(garbage::news_item_record).collect(),
+            source_runs: source_runs.clone(),
+            collection_plans: collection_plans.clone(),
+        };
+        fs::write(
+            &generic_out,
+            serde_json::to_string_pretty(&generic_snapshot)?,
+        )
+        .with_context(|| format!("writing {}", generic_out.display()))?;
+    }
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let query_plans =
-        legacy_query_plans(crawler_instance.collection_plans(&config, &editorial_focuses));
+    let query_plans = legacy_query_plans(collection_plans);
     let public_snapshot = PublicSnapshot {
-        generated_at: Utc::now(),
+        generated_at,
         theme: config.theme,
         items,
         source_runs,

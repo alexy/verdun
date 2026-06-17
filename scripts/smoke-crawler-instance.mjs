@@ -98,6 +98,7 @@ try {
   const itemsPath = join(workDir, 'items.json')
   const sourceRunsPath = join(workDir, 'source-runs.json')
   const snapshotPath = join(workDir, 'greathouse-snapshot.json')
+  const genericSnapshotPath = join(workDir, 'greathouse-generic-snapshot.json')
   const sqlPath = join(workDir, 'greathouse-generic.sql')
   const defaultSqlPath = join(workDir, 'greathouse-default.sql')
   const httpItemsPath = join(workDir, 'http-items.json')
@@ -120,6 +121,8 @@ try {
     sourceRunsPath,
     '--public-out',
     snapshotPath,
+    '--generic-out',
+    genericSnapshotPath,
     '--live',
   ], { encoding: 'utf8' })
   if (collectGreathouse.error) throw collectGreathouse.error
@@ -194,6 +197,21 @@ try {
   if (browserRun?.project_counts?.['Oakland blocked source'] !== 1 || !browserRun.message.includes('Browser diagnostic adapter')) {
     throw new Error(`browser diagnostic source run did not expose source health: ${JSON.stringify(browserRun)}`)
   }
+  const genericSnapshot = JSON.parse(await readFile(genericSnapshotPath, 'utf8'))
+  if (!Array.isArray(genericSnapshot.records) || genericSnapshot.items) {
+    throw new Error('generic collect output did not use the core CrawlerSnapshot records shape')
+  }
+  const genericZillowListing = genericSnapshot.records.find((record) => record.source === 'Zillow property feed' && record.subject === 'Berkeley 2BR')
+  if (!genericZillowListing) {
+    throw new Error('generic collect output did not project Zillow listing into normalized records')
+  }
+  if (genericZillowListing.provenance_json?.adapter !== 'zillow-listing-json') {
+    throw new Error(`generic Zillow record used wrong provenance projection: ${genericZillowListing.provenance_json?.adapter}`)
+  }
+  const genericPlan = genericSnapshot.collection_plans?.find((plan) => plan.subject === 'Berkeley 2BR')
+  if (!genericPlan || genericPlan.project || genericPlan.hacker_news_query || !genericPlan.query || !Array.isArray(genericPlan.tags)) {
+    throw new Error(`generic collect output did not use normalized collection plans: ${JSON.stringify(genericPlan)}`)
+  }
 
   const exportGeneric = spawnSync('cargo', [
     'run',
@@ -206,7 +224,7 @@ try {
     '--instance',
     'greathouse',
     '--snapshot',
-    snapshotPath,
+    genericSnapshotPath,
     '--out',
     sqlPath,
   ], { encoding: 'utf8' })
@@ -244,7 +262,7 @@ try {
     'smoke:generic-loader',
     '--',
     sqlPath,
-    snapshotPath,
+    genericSnapshotPath,
     '--allow-custom-instance',
     '--expect-instance',
     'greathouse',

@@ -10,9 +10,9 @@ const [sql, snapshot] = await Promise.all([
   readFile(snapshotPath, 'utf8').then((text) => JSON.parse(text)),
 ])
 
-const items = snapshot.items ?? []
+const items = snapshot.records ?? snapshot.items ?? []
 const sourceRuns = snapshot.source_runs ?? snapshot.sourceRuns ?? []
-const queryPlans = snapshot.query_plans ?? snapshot.queryPlans ?? []
+const queryPlans = snapshot.collection_plans ?? snapshot.query_plans ?? snapshot.queryPlans ?? []
 const snapshotGeneratedAt = snapshot.generated_at ?? snapshot.generatedAt
 const defaultInstance = profile?.id ?? defaultDeployCheckProfileId()
 const defaultBasePath = new URL(profile?.defaultBaseUrl ?? 'http://127.0.0.1/').pathname
@@ -56,33 +56,33 @@ for (const required of ['provenance_json', 'normalized_json', 'raw_json', 'dedup
 }
 if (!allowsCustomInstance) {
   for (const project of defaultRequiredSubjects) {
-    if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)
+    if (!items.some((item) => subjectOf(item) === project)) throw new Error(`snapshot is missing required project ${project}`)
     if (!sql.includes(sqlString(project))) throw new Error(`generic SQL export is missing required subject ${project}`)
   }
   for (const project of defaultRequiredPlans) {
-    if (!queryPlans.some((plan) => plan.project === project)) throw new Error(`snapshot is missing query plan for ${project}`)
+    if (!queryPlans.some((plan) => planSubject(plan) === project)) throw new Error(`snapshot is missing query plan for ${project}`)
   }
 } else {
-  for (const project of new Set(items.map((item) => item.project))) {
+  for (const project of new Set(items.map(subjectOf))) {
     if (!sql.includes(sqlString(project))) throw new Error(`generic SQL export is missing custom subject ${project}`)
-    if (!queryPlans.some((plan) => plan.project === project)) throw new Error(`snapshot is missing query plan for custom subject ${project}`)
+    if (!queryPlans.some((plan) => planSubject(plan) === project)) throw new Error(`snapshot is missing query plan for custom subject ${project}`)
   }
 }
 for (const item of representativeItems(items)) {
   if (!sql.includes(sqlString(item.id))) throw new Error(`generic SQL export is missing record id ${item.id}`)
   if (!sql.includes(sqlString(item.url))) throw new Error(`generic SQL export is missing URL for ${item.id}`)
-  if (!sql.includes(sqlString(item.project))) throw new Error(`generic SQL export is missing subject for ${item.id}`)
+  if (!sql.includes(sqlString(subjectOf(item)))) throw new Error(`generic SQL export is missing subject for ${item.id}`)
   const rawJson = item.raw_json ?? item.rawJson ?? {}
   if (rawJson.provenance && !sql.includes(sqlString(JSON.stringify(rawJson.provenance)))) {
     throw new Error(`generic SQL export is missing provenance JSON for ${item.id}`)
   }
 }
 for (const plan of representativeQueryPlans(queryPlans)) {
-  const query = plan.hacker_news_query ?? plan.hackerNewsQuery
-  if (!sql.includes(sqlString(plan.project))) throw new Error(`generic SQL export is missing collection plan subject ${plan.project}`)
-  if (!sql.includes(sqlString(query))) throw new Error(`generic SQL export is missing collection query for ${plan.project}`)
+  const query = planQuery(plan)
+  if (!sql.includes(sqlString(planSubject(plan)))) throw new Error(`generic SQL export is missing collection plan subject ${planSubject(plan)}`)
+  if (!sql.includes(sqlString(query))) throw new Error(`generic SQL export is missing collection query for ${planSubject(plan)}`)
   if (!sql.includes(sqlTextArray(plan.live_terms ?? plan.liveTerms ?? []))) {
-    throw new Error(`generic SQL export is missing live terms for ${plan.project}`)
+    throw new Error(`generic SQL export is missing live terms for ${planSubject(plan)}`)
   }
 }
 
@@ -114,11 +114,23 @@ function hasSnapshotCollectedAt(sql, snapshotGeneratedAt) {
   return [...candidates].some((candidate) => sql.includes(`${sqlString(candidate)}::timestamptz`))
 }
 
+function subjectOf(item) {
+  return item.subject ?? item.project
+}
+
+function planSubject(plan) {
+  return plan.subject ?? plan.project
+}
+
+function planQuery(plan) {
+  return plan.query ?? plan.hacker_news_query ?? plan.hackerNewsQuery
+}
+
 function representativeItems(items) {
   const seen = new Set()
   return [
     items.find((item) => item.raw_json?.provenance),
-    ...defaultRequiredSubjects.slice(0, 2).map((subject) => items.find((item) => item.project === subject)),
+    ...defaultRequiredSubjects.slice(0, 2).map((subject) => items.find((item) => subjectOf(item) === subject)),
     items[0],
     items[Math.floor(items.length / 2)],
   ].filter((item) => {
@@ -131,11 +143,11 @@ function representativeItems(items) {
 function representativeQueryPlans(queryPlans) {
   const seen = new Set()
   return [
-    ...defaultRequiredPlans.slice(0, 3).map((subject) => queryPlans.find((plan) => plan.project === subject)),
+    ...defaultRequiredPlans.slice(0, 3).map((subject) => queryPlans.find((plan) => planSubject(plan) === subject)),
     queryPlans[0],
   ].filter((plan) => {
-    if (!plan || seen.has(plan.project)) return false
-    seen.add(plan.project)
+    if (!plan || seen.has(planSubject(plan))) return false
+    seen.add(planSubject(plan))
     return true
   })
 }
