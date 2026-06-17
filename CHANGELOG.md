@@ -25,6 +25,7 @@
 - Moved Greathouse scaffold records into `crawler/instances/greathouse/fixtures/` and load them through per-source `fixture_path` config rather than generating all records in Rust.
 - Added a Greathouse source-adapter boundary so fixture loading is one replaceable adapter behind `GreathouseSourceAdapter`.
 - Added explicit Greathouse local JSON adapter selection (`local-listing-json` and `local-diagnostic-json`) so review targets and record provenance use configured adapter IDs instead of fixture-only defaults.
+- Added Greathouse HTTP JSON adapters (`http-listing-json` and `http-diagnostic-json`) behind `GreathouseSourceAdapter`, with local HTTP-server smoke coverage that verifies provenance, source-run messages, and generic SQL compatibility without external network dependency.
 - Added a reusable workbench instance registry and wired `api/workbench` records/status/health/review/focus routes to resolve `?instance=garbage` or `?instance=greathouse`, with Greathouse pilot reads and read-only write rejection when no instance database is configured.
 - Switched the browser snapshot composable to load Garbage through `api/workbench/records?instance=garbage` and write votes/focuses through generic workbench review/focus routes; the newsletter draft/editorial-state APIs remain Garbage-specific compatibility surfaces.
 - Added a generic workbench state import route at `api/workbench/state.ts` and switched Garbage browser editorial-state imports to `/api/workbench/state?instance=garbage`.
@@ -54,5 +55,5 @@ Known remaining extraction work:
 - Newsletter draft generation, readiness, Ulysses export, Ghost publishing helpers, SQL reload helpers, editorial-state import, ontology rendering, Garbage-specific UI panels, newsletter composables, and newsletter route implementations are now implemented under the Garbage instance, but public compatibility API/script names still remain.
 - Workbench API routes no longer depend on the newsletter HTTP helper path or the legacy newsletter DB helper path for local static/local-file mode.
 - Garbage local static/local-file fallback now reuses the Garbage API instance newsletter store internally, while the legacy `api/newsletter/_db.ts` path remains as a compatibility re-export.
-- Greathouse crawler collection now dispatches through configured local JSON adapters, but it still does not have real network/browser property-source adapters.
+- Greathouse crawler collection now dispatches through configured local and HTTP JSON adapters, but it still does not have source-specific browser/property adapters.
 - Greathouse is still a partial consumer rather than a full app consuming Verdun core.

@@ -1,7 +1,8 @@
 use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
+use reqwest::blocking::Client;
 use serde::Deserialize;
-use std::path::PathBuf;
+use std::{path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
     CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
@@ -117,33 +118,42 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
         );
     }
     for source in &config.sources {
-        anyhow::ensure!(
-            source.url.starts_with("https://"),
-            "{} must have an https source URL",
-            source.name
-        );
         let adapter = source
             .adapter
             .as_deref()
             .with_context(|| format!("{} must configure adapter", source.name))?;
         anyhow::ensure!(
-            matches!(adapter, "local-listing-json" | "local-diagnostic-json"),
+            matches!(
+                adapter,
+                "local-listing-json"
+                    | "local-diagnostic-json"
+                    | "http-listing-json"
+                    | "http-diagnostic-json"
+            ),
             "{} uses unsupported Greathouse adapter {}",
             source.name,
             adapter
         );
-        let data_path = source.fixture_path.as_ref().with_context(|| {
-            format!(
-                "{} must configure fixture_path for {}",
-                source.name, adapter
-            )
-        })?;
-        anyhow::ensure!(
-            data_path.exists(),
-            "{} local adapter data file must exist at {}",
-            source.name,
-            data_path.display()
-        );
+        if adapter.starts_with("local-") {
+            let data_path = source.fixture_path.as_ref().with_context(|| {
+                format!(
+                    "{} must configure fixture_path for {}",
+                    source.name, adapter
+                )
+            })?;
+            anyhow::ensure!(
+                data_path.exists(),
+                "{} local adapter data file must exist at {}",
+                source.name,
+                data_path.display()
+            );
+        } else {
+            anyhow::ensure!(
+                source.url.starts_with("https://") || source.url.starts_with("http://127.0.0.1:"),
+                "{} must have an https source URL, except loopback smoke adapters",
+                source.name
+            );
+        }
     }
     Ok(())
 }
@@ -186,7 +196,12 @@ fn greathouse_item(
             )
         }
     });
-    let stage = record.stage.as_deref().unwrap_or("local_json");
+    let default_stage = if adapter.starts_with("http-") {
+        "live_http"
+    } else {
+        "local_json"
+    };
+    let stage = record.stage.as_deref().unwrap_or(default_stage);
     let mut tags = record.tags;
     if tags.is_empty() {
         tags = target.keywords.iter().take(4).cloned().collect();
@@ -235,6 +250,10 @@ struct LocalJsonSourceAdapter {
     adapter: &'static str,
 }
 
+struct HttpJsonSourceAdapter {
+    adapter: &'static str,
+}
+
 impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
     fn adapter_name(&self) -> &'static str {
         self.adapter
@@ -275,17 +294,75 @@ impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
     }
 }
 
+impl GreathouseSourceAdapter for HttpJsonSourceAdapter {
+    fn adapter_name(&self) -> &'static str {
+        self.adapter
+    }
+
+    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+        let client = Client::builder()
+            .user_agent("verdun-crawler/0.1 greathouse")
+            .timeout(StdDuration::from_secs(15))
+            .build()?;
+        let response = client
+            .get(&source.url)
+            .send()
+            .with_context(|| format!("fetching {}", source.url))?;
+        let status = response.status();
+        anyhow::ensure!(
+            status.is_success(),
+            "{} HTTP adapter returned {}",
+            source.name,
+            status
+        );
+        let records: Vec<GreathouseLocalRecord> = response
+            .json()
+            .with_context(|| format!("parsing HTTP JSON from {}", source.url))?;
+        records
+            .into_iter()
+            .enumerate()
+            .map(|(index, record)| {
+                let target = config
+                    .targets
+                    .iter()
+                    .find(|target| target.name == record.subject)
+                    .with_context(|| {
+                        format!(
+                            "{} HTTP adapter data references unknown subject {}",
+                            source.name, record.subject
+                        )
+                    })?;
+                Ok(greathouse_item(
+                    target,
+                    source,
+                    record,
+                    self.adapter_name(),
+                    index,
+                ))
+            })
+            .collect()
+    }
+}
+
 static LOCAL_LISTING_JSON_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapter {
     adapter: "local-listing-json",
 };
 static LOCAL_DIAGNOSTIC_JSON_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapter {
     adapter: "local-diagnostic-json",
 };
+static HTTP_LISTING_JSON_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapter {
+    adapter: "http-listing-json",
+};
+static HTTP_DIAGNOSTIC_JSON_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapter {
+    adapter: "http-diagnostic-json",
+};
 
 fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSourceAdapter> {
     match source.adapter.as_deref() {
         Some("local-listing-json") => Ok(&LOCAL_LISTING_JSON_ADAPTER),
         Some("local-diagnostic-json") => Ok(&LOCAL_DIAGNOSTIC_JSON_ADAPTER),
+        Some("http-listing-json") => Ok(&HTTP_LISTING_JSON_ADAPTER),
+        Some("http-diagnostic-json") => Ok(&HTTP_DIAGNOSTIC_JSON_ADAPTER),
         Some(adapter) => anyhow::bail!(
             "{} uses unsupported Greathouse adapter {}",
             source.name,
@@ -313,15 +390,24 @@ fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<Sou
                     SourceRunStatus::Ok
                 },
                 item_count,
-                message: if source.kind == "diagnostic" {
-                    "local diagnostic JSON retained blocked-source evidence for retry".to_string()
-                } else {
-                    "local listing JSON loaded through the Greathouse crawler instance".to_string()
-                },
+                message: source_run_message(source),
                 project_counts: Default::default(),
             }
         })
         .collect()
+}
+
+fn source_run_message(source: &SourceConfig) -> String {
+    let adapter = source.adapter.as_deref().unwrap_or("missing-adapter");
+    if adapter.starts_with("http-") && source.kind == "diagnostic" {
+        "HTTP diagnostic adapter retained blocked-source evidence for retry".to_string()
+    } else if adapter.starts_with("http-") {
+        "HTTP listing adapter loaded through the Greathouse crawler instance".to_string()
+    } else if source.kind == "diagnostic" {
+        "local diagnostic JSON retained blocked-source evidence for retry".to_string()
+    } else {
+        "local listing JSON loaded through the Greathouse crawler instance".to_string()
+    }
 }
 
 fn review_targets(
