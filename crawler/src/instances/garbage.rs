@@ -3,12 +3,45 @@ use chrono::{DateTime, Duration, Utc};
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, fs};
+use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
     CollectionTarget, CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord,
     ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, slug, stable_id,
 };
+use crate::instances::CrawlerInstance;
+
+pub static GARBAGE_CRAWLER_INSTANCE: GarbageCrawlerInstance = GarbageCrawlerInstance;
+
+pub struct GarbageCrawlerInstance;
+
+impl CrawlerInstance for GarbageCrawlerInstance {
+    fn read_editorial_focuses(&self, path: &PathBuf) -> Result<Vec<EditorialFocus>> {
+        read_editorial_focuses(path)
+    }
+
+    fn seed_items(&self, config: &CrawlerConfig) -> Vec<NewsItem> {
+        seed_items(config)
+    }
+
+    fn seed_source_runs(&self, config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
+        seed_source_runs(config, live)
+    }
+
+    fn collect_live_items(
+        &self,
+        config: &CrawlerConfig,
+        max_per_project: usize,
+        since: DateTime<Utc>,
+        editorial_focuses: &[EditorialFocus],
+    ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
+        live_items(config, max_per_project, since, editorial_focuses)
+    }
+
+    fn dedupe_items(&self, items: Vec<NewsItem>) -> Vec<NewsItem> {
+        dedupe_items(items)
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NewsItem {
@@ -522,6 +555,164 @@ pub fn collect_manual_source(
         post_count,
         latest_published_at,
     })
+}
+
+fn live_items(
+    config: &CrawlerConfig,
+    max_per_project: usize,
+    since: DateTime<Utc>,
+    editorial_focuses: &[EditorialFocus],
+) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
+    let client = Client::builder()
+        .timeout(StdDuration::from_secs(12))
+        .user_agent("verdun-newsletter-crawler/0.1")
+        .build()
+        .context("building HTTP client")?;
+    let mut items = Vec::new();
+    let mut source_runs = Vec::new();
+    if let Some(source) = config
+        .sources
+        .iter()
+        .find(|source| source.name == "Hacker News")
+    {
+        match fetch_hacker_news(&client, config, source, max_per_project, editorial_focuses) {
+            Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
+                source_runs.push(ok_source_run(
+                    source,
+                    &source_items,
+                    "HN Algolia search_by_date",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
+    if let Some(source) = config
+        .sources
+        .iter()
+        .find(|source| source.name == "Lobste.rs")
+    {
+        match fetch_lobsters(&client, config, source, max_per_project, editorial_focuses) {
+            Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
+                source_runs.push(ok_source_run(source, &source_items, "Lobste.rs search"));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
+    if let Some(source) = config.sources.iter().find(|source| source.name == "dev.to") {
+        match fetch_dev_to(&client, config, source, max_per_project, editorial_focuses) {
+            Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
+                source_runs.push(ok_source_run(source, &source_items, "dev.to articles API"));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
+    if let Some(source) = config.sources.iter().find(|source| source.name == "Medium") {
+        match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
+            Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
+                source_runs.push(ok_source_run(
+                    source,
+                    &source_items,
+                    "configured RSS/Atom feeds",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
+    if let Some(source) = config
+        .sources
+        .iter()
+        .find(|source| source.name == "Substack")
+    {
+        match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
+            Ok(mut source_items) => {
+                retain_recent(&mut source_items, since);
+                source_runs.push(ok_source_run(
+                    source,
+                    &source_items,
+                    "configured RSS/Atom feeds",
+                ));
+                items.append(&mut source_items);
+            }
+            Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+        }
+    }
+    for source_name in ["LinkedIn", "X/Twitter"] {
+        if let Some(source) = config
+            .sources
+            .iter()
+            .find(|source| source.name == source_name)
+        {
+            match collect_manual_source(config, source, max_per_project, editorial_focuses) {
+                Ok(manual_source) => {
+                    let mut source_items = manual_source.items;
+                    retain_recent(&mut source_items, since);
+                    source_runs.push(manual_source_run(
+                        source,
+                        &source_items,
+                        manual_source.post_count,
+                        manual_source.latest_published_at,
+                        since,
+                    ));
+                    items.append(&mut source_items);
+                }
+                Err(error) => source_runs.push(error_source_run(source, &format!("{error:#}"))),
+            }
+        }
+    }
+    Ok((items, source_runs))
+}
+
+fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
+    items.retain(|item| item.published_at >= since);
+}
+
+fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
+    config
+        .sources
+        .iter()
+        .filter_map(|source| {
+            let status = if live {
+                SourceRunStatus::Pending
+            } else {
+                SourceRunStatus::Skipped
+            };
+            let message = match source.name.as_str() {
+                "Hacker News" | "Lobste.rs" | "dev.to" if live => return None,
+                "Medium" | "Substack"
+                    if live
+                        && source
+                            .feed_urls
+                            .as_ref()
+                            .is_some_and(|feeds| !feeds.is_empty()) =>
+                {
+                    return None;
+                }
+                "Hacker News" | "Lobste.rs" | "dev.to" => {
+                    "run with --live to collect this public source"
+                }
+                "Medium" | "Substack" => "configure feed_urls and run with --live",
+                "LinkedIn" | "X/Twitter" if live && source.manual_path.is_some() => return None,
+                "LinkedIn" | "X/Twitter" => "configure manual_path or authenticated adapter",
+                _ => "adapter pending",
+            };
+            Some(SourceRun {
+                source: source.name.clone(),
+                kind: source.kind.clone(),
+                status,
+                item_count: 0,
+                message: message.to_string(),
+                project_counts: BTreeMap::new(),
+            })
+        })
+        .collect()
 }
 
 pub fn parse_lobsters_search_stories(html: &str) -> Vec<LobstersStory> {

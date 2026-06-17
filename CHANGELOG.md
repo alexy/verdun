@@ -19,6 +19,7 @@
 - Moved the Garbage dev.to live fetch adapter and matching into `crawler/src/instances/garbage.rs`.
 - Moved the Garbage RSS/Atom feed fetch adapter, parser, and matching into `crawler/src/instances/garbage.rs`.
 - Moved Garbage manual source collection and matching into `crawler/src/instances/garbage.rs`.
+- Added a crawler instance dispatch boundary in `crawler/src/instances/mod.rs`; `main.rs` now calls the default `CrawlerInstance` instead of invoking Garbage source adapters directly.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
@@ -27,5 +28,6 @@ Known remaining extraction work:
 
 - Garbage-specific newsletter, Ulysses, Strongly Typed AI ontology, readiness checks, and `/rbage/` behavior still live inside Verdun.
 - Legacy newsletter database/API paths still coexist with generic workbench paths.
-- The Rust crawler now has a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
+- The Rust crawler now has a `CrawlerInstance` dispatch trait and a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
+- Crawler instance selection still defaults to Garbage; Greathouse is not yet a real crawler instance.
 - Greathouse is still a pilot fixture rather than a full app consuming Verdun core.
