@@ -1,18 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import GarbageApp from './instances/garbage/GarbageApp.vue'
-import GreathouseApp from './instances/greathouse/GreathouseApp.vue'
-import { resolveWorkbenchInstanceForPath } from './instances/registry'
-
-const appComponents = {
-  garbage: GarbageApp,
-  greathouse: GreathouseApp,
-}
+import { resolveWorkbenchAppForPath } from './instances/app-registry'
 
 const activeApp = computed(() => {
   const pathname = typeof window === 'undefined' ? '/' : window.location.pathname
-  const instance = resolveWorkbenchInstanceForPath(pathname)
-  return appComponents[instance.id as keyof typeof appComponents] ?? GarbageApp
+  return resolveWorkbenchAppForPath(pathname)
 })
 </script>
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-06-17
+
+- Moved root Vue app component selection into `src/instances/app-registry.ts`; `src/App.vue` now stays a generic shell and no longer imports concrete Garbage or Greathouse app components directly.
+- Updated Greathouse workbench smoke coverage to enforce that concrete app imports stay in the instance app registry, while the root shell only calls the generic app resolver.
+
 ## 2026-06-16
 
 - Started extracting Verdun as the reusable core rather than treating Garbage as the app boundary.

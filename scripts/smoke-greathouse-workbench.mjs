@@ -14,9 +14,10 @@ const { module: registryModule } = await runnerImport('./src/instances/registry.
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const [greathouseAppSource, appSource] = await Promise.all([
+const [greathouseAppSource, appSource, appRegistrySource] = await Promise.all([
   readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
   readFile('src/App.vue', 'utf8'),
+  readFile('src/instances/app-registry.ts', 'utf8'),
 ])
 
 const snapshotRef = ref(pilotModule.greathousePilotSnapshot())
@@ -56,8 +57,18 @@ if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
 if (!greathouseAppSource.includes('greathousePilotSnapshot') || !greathouseAppSource.includes('WorkbenchReviewRail')) {
   throw new Error('Greathouse workbench app component is not wired to the generic workbench pilot')
 }
-if (!appSource.includes('resolveWorkbenchInstanceForPath') || !appSource.includes('GreathouseApp')) {
-  throw new Error('root app shell is not wired through the registry-backed route selector')
+if (!appSource.includes('resolveWorkbenchAppForPath')) {
+  throw new Error('root app shell is not wired through the instance app resolver')
+}
+if (appSource.includes('GreathouseApp') || appSource.includes('GarbageApp')) {
+  throw new Error('root app shell imports concrete instance apps instead of the app registry')
+}
+if (
+  !appRegistrySource.includes('resolveWorkbenchInstanceForPath') ||
+  !appRegistrySource.includes('GreathouseApp') ||
+  !appRegistrySource.includes('GarbageApp')
+) {
+  throw new Error('instance app registry is not wired to metadata-backed route selection')
 }
 if (registryModule.resolveWorkbenchInstanceForPath('/greathouse/').id !== 'greathouse') {
   throw new Error('registry did not resolve /greathouse/ to the Greathouse instance')
