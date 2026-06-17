@@ -5,9 +5,8 @@ mod core;
 mod instances;
 use crate::core::{CollectionTarget, CrawlerConfig, SourceConfig, SourceRun, SourceRunStatus};
 use crate::instances::garbage::{
-    self, EditorialFocus, ExportPayload, FeedEntry, ManualPost, NewsItem, PublicSnapshot,
+    self, EditorialFocus, ExportPayload, ManualPost, NewsItem, PublicSnapshot,
 };
-use regex::Regex;
 use reqwest::blocking::Client;
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
@@ -701,7 +700,13 @@ fn live_items(
         }
     }
     if let Some(source) = config.sources.iter().find(|source| source.name == "Medium") {
-        match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
+        match garbage::fetch_feed_source(
+            &client,
+            config,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(garbage::ok_source_run(
@@ -721,7 +726,13 @@ fn live_items(
         .iter()
         .find(|source| source.name == "Substack")
     {
-        match fetch_feed_source(&client, config, source, max_per_project, editorial_focuses) {
+        match garbage::fetch_feed_source(
+            &client,
+            config,
+            source,
+            max_per_project,
+            editorial_focuses,
+        ) {
             Ok(mut source_items) => {
                 retain_recent(&mut source_items, since);
                 source_runs.push(garbage::ok_source_run(
@@ -766,47 +777,6 @@ fn live_items(
 
 fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
     items.retain(|item| item.published_at >= since);
-}
-
-fn fetch_feed_source(
-    client: &Client,
-    config: &CrawlerConfig,
-    source: &SourceConfig,
-    max_per_project: usize,
-    editorial_focuses: &[EditorialFocus],
-) -> Result<Vec<NewsItem>> {
-    let feed_urls = source
-        .feed_urls
-        .as_ref()
-        .filter(|feeds| !feeds.is_empty())
-        .with_context(|| format!("{} has no feed_urls configured", source.name))?;
-    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
-    let mut items = Vec::new();
-    for feed_url in feed_urls {
-        let text = client
-            .get(feed_url)
-            .send()
-            .with_context(|| format!("fetching feed {feed_url}"))?
-            .error_for_status()
-            .with_context(|| format!("feed returned error for {feed_url}"))?
-            .text()
-            .with_context(|| format!("reading feed body for {feed_url}"))?;
-        let entries = parse_feed_entries(&text, feed_url);
-        for entry in entries {
-            for project in &config.targets {
-                let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
-                let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-                if count >= max_per_project
-                    || !feed_entry_matches_project(&entry, project, &focus_terms)
-                {
-                    continue;
-                }
-                items.push(garbage::feed_item(project, source, &entry, &focus_terms));
-                counts.insert(project.name.as_str(), count + 1);
-            }
-        }
-    }
-    Ok(items)
 }
 
 fn collect_manual_source(
@@ -908,19 +878,6 @@ fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
 }
 
-fn feed_entry_matches_project(
-    entry: &FeedEntry,
-    project: &CollectionTarget,
-    focus_terms: &[String],
-) -> bool {
-    let link_without_query = entry.link.split('?').next().unwrap_or(&entry.link);
-    let text = format!(
-        "{} {} {} {}",
-        entry.title, link_without_query, entry.summary, entry.match_text
-    );
-    text_matches_project(&text, project, focus_terms)
-}
-
 fn manual_post_matches_project(
     post: &ManualPost,
     project: &CollectionTarget,
@@ -928,148 +885,6 @@ fn manual_post_matches_project(
 ) -> bool {
     let text = format!("{} {} {}", post.title, post.url, post.text);
     text_matches_project(&text, project, focus_terms)
-}
-
-fn parse_feed_entries(text: &str, feed_url: &str) -> Vec<FeedEntry> {
-    let blocks = xml_blocks(text, "item");
-    let blocks = if blocks.is_empty() {
-        xml_blocks(text, "entry")
-    } else {
-        blocks
-    };
-    blocks
-        .into_iter()
-        .filter_map(|block| feed_entry_from_block(&block, feed_url))
-        .collect()
-}
-
-fn feed_entry_from_block(block: &str, feed_url: &str) -> Option<FeedEntry> {
-    let title = clean_feed_text(&xml_text(block, "title")?);
-    let link = clean_feed_url(&feed_link(block)?);
-    let description = xml_text(block, "description").map(|value| clean_feed_text(&value));
-    let summary_text = xml_text(block, "summary").map(|value| clean_feed_text(&value));
-    let content = xml_text(block, "content").map(|value| clean_feed_text(&value));
-    let summary = description
-        .clone()
-        .or_else(|| summary_text.clone())
-        .or_else(|| content.clone())
-        .unwrap_or_default();
-    let match_text = [Some(title.clone()), description, summary_text, content]
-        .into_iter()
-        .flatten()
-        .filter(|value| !value.is_empty())
-        .collect::<Vec<_>>()
-        .join(" ");
-    let published_at = xml_text(block, "pubDate")
-        .or_else(|| xml_text(block, "published"))
-        .or_else(|| xml_text(block, "updated"))
-        .and_then(|value| parse_feed_date(&value))
-        .unwrap_or_else(Utc::now);
-    Some(FeedEntry {
-        title,
-        link,
-        published_at,
-        summary,
-        match_text,
-        feed_url: feed_url.to_string(),
-    })
-}
-
-fn xml_blocks(text: &str, tag: &str) -> Vec<String> {
-    let pattern = format!(r"(?is)<{tag}\b[^>]*>(.*?)</{tag}>");
-    Regex::new(&pattern)
-        .expect("valid xml block regex")
-        .captures_iter(text)
-        .filter_map(|capture| capture.get(1).map(|match_| match_.as_str().to_string()))
-        .collect()
-}
-
-fn xml_text(text: &str, tag: &str) -> Option<String> {
-    let pattern = format!(r"(?is)<(?:\w+:)?{tag}(?::\w+)?\b[^>]*>(.*?)</(?:\w+:)?{tag}(?::\w+)?>");
-    Regex::new(&pattern)
-        .ok()?
-        .captures(text)
-        .and_then(|capture| capture.get(1).map(|match_| match_.as_str().to_string()))
-}
-
-fn feed_link(block: &str) -> Option<String> {
-    if let Some(link) = xml_text(block, "link").map(|value| clean_feed_text(&value)) {
-        if link.starts_with("http") {
-            return Some(link);
-        }
-    }
-    Regex::new(r#"(?is)<link\b[^>]*href=["']([^"']+)["'][^>]*/?>"#)
-        .ok()?
-        .captures(block)
-        .and_then(|capture| {
-            capture
-                .get(1)
-                .map(|match_| decode_xml_entities(match_.as_str()))
-        })
-}
-
-fn clean_feed_url(value: &str) -> String {
-    if value.contains("medium.com") {
-        return value.split('?').next().unwrap_or(value).to_string();
-    }
-    value.to_string()
-}
-
-fn parse_feed_date(value: &str) -> Option<DateTime<Utc>> {
-    DateTime::parse_from_rfc2822(value)
-        .map(|date| date.with_timezone(&Utc))
-        .ok()
-        .or_else(|| {
-            DateTime::parse_from_rfc3339(value)
-                .map(|date| date.with_timezone(&Utc))
-                .ok()
-        })
-}
-
-fn clean_feed_text(value: &str) -> String {
-    let without_cdata = value.replace("<![CDATA[", "").replace("]]>", "");
-    let without_tags = Regex::new(r"(?is)<[^>]+>")
-        .expect("valid html tag regex")
-        .replace_all(&without_cdata, " ");
-    let text = normalize_whitespace(&decode_xml_entities(&without_tags));
-    let text = Regex::new(r"(?i)\bContinue reading on [^»]+»?")
-        .expect("valid continue-reading regex")
-        .replace_all(&text, "");
-    text.trim().to_string()
-}
-
-fn decode_xml_entities(value: &str) -> String {
-    let text = Regex::new(r"&#x([0-9a-fA-F]+);")
-        .expect("valid hex entity regex")
-        .replace_all(value, |captures: &regex::Captures<'_>| {
-            u32::from_str_radix(&captures[1], 16)
-                .ok()
-                .and_then(char::from_u32)
-                .unwrap_or(' ')
-                .to_string()
-        })
-        .to_string();
-    let text = Regex::new(r"&#([0-9]+);")
-        .expect("valid decimal entity regex")
-        .replace_all(&text, |captures: &regex::Captures<'_>| {
-            captures[1]
-                .parse::<u32>()
-                .ok()
-                .and_then(char::from_u32)
-                .unwrap_or(' ')
-                .to_string()
-        })
-        .to_string();
-    text.replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&apos;", "'")
-        .replace("&#39;", "'")
-}
-
-fn normalize_whitespace(value: &str) -> String {
-    value.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
 fn text_matches_project(text: &str, project: &CollectionTarget, focus_terms: &[String]) -> bool {
