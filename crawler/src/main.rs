@@ -151,7 +151,7 @@ fn collect(
     let config = read_crawler_config(&config)?;
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
-    let mut items = crawler_instance.seed_items(&config);
+    let mut items = crawler_instance.seed_items(&config)?;
     let mut source_runs = crawler_instance.seed_source_runs(&config, live);
     if live {
         let since = Utc::now() - Duration::days(since_days);

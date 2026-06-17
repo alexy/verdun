@@ -36,8 +36,8 @@ impl CrawlerInstance for GarbageCrawlerInstance {
         query_plans(config, editorial_focuses)
     }
 
-    fn seed_items(&self, config: &CrawlerConfig) -> Vec<NewsItem> {
-        seed_items(config)
+    fn seed_items(&self, config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
+        Ok(seed_items(config))
     }
 
     fn seed_source_runs(&self, config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {

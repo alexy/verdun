@@ -16,8 +16,10 @@ keywords = ["oakland", "blocked-source", "retry", "diagnostic"]
 name = "Redfin"
 kind = "listing"
 url = "https://example.com/redfin"
+fixture_path = "crawler/instances/greathouse/fixtures/listings.json"
 
 [[sources]]
 name = "Redfin diagnostics"
 kind = "diagnostic"
 url = "https://example.com/redfin-diagnostics"
+fixture_path = "crawler/instances/greathouse/fixtures/diagnostics.json"

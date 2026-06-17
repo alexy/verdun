@@ -22,6 +22,7 @@
 - Added a crawler instance dispatch boundary in `crawler/src/instances/mod.rs`; `main.rs` now calls the default `CrawlerInstance` instead of invoking Garbage source adapters directly.
 - Added explicit crawler instance selection for `collect`, `verify`, and `queries`, with smoke coverage that verifies `garbage` works and unsupported instances fail clearly.
 - Added a Greathouse crawler instance scaffold and `crawler/instances/greathouse/config.toml`; smoke coverage now verifies Greathouse collection, generic SQL export, and generic loader compatibility.
+- Moved Greathouse scaffold records into `crawler/instances/greathouse/fixtures/` and load them through per-source `fixture_path` config rather than generating all records in Rust.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
@@ -32,5 +33,5 @@ Known remaining extraction work:
 - Legacy newsletter database/API paths still coexist with generic workbench paths.
 - The Rust crawler now has a `CrawlerInstance` dispatch trait and a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
 - Crawler instance selection supports `--instance garbage` and `--instance greathouse`.
-- Greathouse crawler collection is still fixture-based rather than backed by real property/listing adapters.
+- Greathouse crawler collection is still fixture-file-based rather than backed by real property/listing adapters.
 - Greathouse is still a partial consumer rather than a full app consuming Verdun core.

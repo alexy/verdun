@@ -1,0 +1,13 @@
+[
+  {
+    "subject": "Berkeley 2BR",
+    "url": "https://example.com/greathouse/berkeley-two-bedroom",
+    "title": "Berkeley two-bedroom with transit access",
+    "observed_at": "2026-06-16T12:00:00Z",
+    "summary": "Listing candidate with walkable transit, recent observation time, and enough comparable context for review.",
+    "tags": ["berkeley", "2br", "transit", "shortlist"],
+    "score": 86,
+    "adapter": "property-listing-fixture",
+    "stage": "fixture"
+  }
+]

@@ -26,6 +26,7 @@ pub struct SourceConfig {
     pub url: String,
     pub feed_urls: Option<Vec<String>>,
     pub manual_path: Option<PathBuf>,
+    pub fixture_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -17,7 +17,7 @@ pub trait CrawlerInstance {
         config: &CrawlerConfig,
         editorial_focuses: &[EditorialFocus],
     ) -> Vec<ProjectQueryPlan>;
-    fn seed_items(&self, config: &CrawlerConfig) -> Vec<NewsItem>;
+    fn seed_items(&self, config: &CrawlerConfig) -> Result<Vec<NewsItem>>;
     fn seed_source_runs(&self, config: &CrawlerConfig, live: bool) -> Vec<SourceRun>;
     fn collect_live_items(
         &self,

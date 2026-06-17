@@ -1,5 +1,6 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
+use serde::Deserialize;
 use std::path::PathBuf;
 
 use crate::core::{
@@ -51,7 +52,7 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
             .collect()
     }
 
-    fn seed_items(&self, config: &CrawlerConfig) -> Vec<NewsItem> {
+    fn seed_items(&self, config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
         greathouse_items(config)
     }
 
@@ -80,7 +81,9 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
         _since: DateTime<Utc>,
         _editorial_focuses: &[EditorialFocus],
     ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
-        Ok((greathouse_items(config), live_source_runs(config)))
+        let items = greathouse_items(config)?;
+        let source_runs = source_runs_from_items(config, &items);
+        Ok((items, source_runs))
     }
 
     fn dedupe_items(&self, items: Vec<NewsItem>) -> Vec<NewsItem> {
@@ -119,22 +122,52 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
             "{} must have an https source URL",
             source.name
         );
+        let fixture_path = source
+            .fixture_path
+            .as_ref()
+            .with_context(|| format!("{} must configure fixture_path", source.name))?;
+        anyhow::ensure!(
+            fixture_path.exists(),
+            "{} fixture file must exist at {}",
+            source.name,
+            fixture_path.display()
+        );
     }
     Ok(())
 }
 
-fn greathouse_items(config: &CrawlerConfig) -> Vec<NewsItem> {
-    config
-        .targets
-        .iter()
+fn greathouse_items(config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
+    let mut items = Vec::new();
+    for source in &config.sources {
+        items.extend(load_source_fixtures(config, source)?);
+    }
+    Ok(items)
+}
+
+fn load_source_fixtures(config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+    let path = source
+        .fixture_path
+        .as_ref()
+        .with_context(|| format!("{} has no fixture_path configured", source.name))?;
+    let fixtures: Vec<GreathouseFixtureRecord> = serde_json::from_slice(
+        &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )
+    .with_context(|| format!("parsing {}", path.display()))?;
+    fixtures
+        .into_iter()
         .enumerate()
-        .filter_map(|(index, target)| {
-            let source = if target.topic.contains("diagnostic") {
-                find_source(config, "diagnostic").or_else(|| config.sources.first())
-            } else {
-                find_source(config, "listing").or_else(|| config.sources.first())
-            }?;
-            Some(greathouse_item(target, source, index))
+        .map(|(index, fixture)| {
+            let target = config
+                .targets
+                .iter()
+                .find(|target| target.name == fixture.subject)
+                .with_context(|| {
+                    format!(
+                        "{} fixture references unknown subject {}",
+                        source.name, fixture.subject
+                    )
+                })?;
+            Ok(greathouse_item(target, source, fixture, index))
         })
         .collect()
 }
@@ -142,29 +175,21 @@ fn greathouse_items(config: &CrawlerConfig) -> Vec<NewsItem> {
 fn greathouse_item(
     target: &crate::core::CollectionTarget,
     source: &SourceConfig,
+    fixture: GreathouseFixtureRecord,
     index: usize,
 ) -> NewsItem {
-    let observed_at = Utc::now();
-    let evidence_url = format!(
-        "{}/{}",
-        source.url.trim_end_matches('/'),
-        target.name.replace(' ', "-").to_lowercase()
-    );
+    let observed_at = fixture.observed_at.unwrap_or_else(Utc::now);
+    let evidence_url = fixture.url.clone();
     let is_diagnostic = source.kind == "diagnostic" || target.topic.contains("diagnostic");
-    NewsItem {
-        id: stable_id("greathouse", &format!("{}:{evidence_url}", target.name)),
-        title: if is_diagnostic {
+    let title = fixture.title.unwrap_or_else(|| {
+        if is_diagnostic {
             format!("{} source diagnostic", target.name)
         } else {
             format!("{} property candidate", target.name)
-        },
-        source: source.name.clone(),
-        source_kind: source.kind.clone(),
-        url: evidence_url.clone(),
-        published_at: observed_at,
-        project: target.name.clone(),
-        topic: target.topic.clone(),
-        summary: if is_diagnostic {
+        }
+    });
+    let summary = fixture.summary.unwrap_or_else(|| {
+        if is_diagnostic {
             format!(
                 "{} records blocked-source evidence for retry and manual review.",
                 target.name
@@ -174,25 +199,42 @@ fn greathouse_item(
                 "{} is a property-search candidate with comparable, location, and source-freshness signals.",
                 target.name
             )
-        },
+        }
+    });
+    let adapter = fixture.adapter.unwrap_or_else(|| {
+        if is_diagnostic {
+            "blocked-source-diagnostic-fixture".to_string()
+        } else {
+            "property-listing-fixture".to_string()
+        }
+    });
+    let mut tags = fixture.tags;
+    if tags.is_empty() {
+        tags = target.keywords.iter().take(4).cloned().collect();
+    }
+    tags.push(source.kind.clone());
+    NewsItem {
+        id: stable_id("greathouse", &format!("{}:{evidence_url}", target.name)),
+        title,
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: evidence_url.clone(),
+        published_at: observed_at,
+        project: target.name.clone(),
+        topic: target.topic.clone(),
+        summary,
         why_it_matters: if is_diagnostic {
             "Greathouse keeps blocked-source diagnostics as first-class collection records instead of hiding crawler failures.".to_string()
         } else {
             "Greathouse needs normalized listing evidence that can be compared, reviewed, and reloaded through Verdun's generic database contract.".to_string()
         },
-        tags: target
-            .keywords
-            .iter()
-            .take(4)
-            .cloned()
-            .chain([source.kind.clone()])
-            .collect(),
-        score: 70 + (index as i32 * 5).min(20),
+        tags,
+        score: fixture.score.unwrap_or(70 + (index as i32 * 5).min(20)),
         raw_json: serde_json::json!({
-            "collection_stage": "fixture",
+            "collection_stage": fixture.stage.as_deref().unwrap_or("fixture"),
             "provenance": {
-                "stage": "fixture",
-                "adapter": if is_diagnostic { "blocked-source-diagnostic-fixture" } else { "property-listing-fixture" },
+                "stage": fixture.stage.as_deref().unwrap_or("fixture"),
+                "adapter": adapter,
                 "source": source.name,
                 "source_kind": source.kind,
                 "source_url": source.url,
@@ -205,16 +247,15 @@ fn greathouse_item(
     }
 }
 
-fn live_source_runs(config: &CrawlerConfig) -> Vec<SourceRun> {
+fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<SourceRun> {
     config
         .sources
         .iter()
         .map(|source| {
-            let item_count = if source.kind == "listing" || source.kind == "diagnostic" {
-                1
-            } else {
-                0
-            };
+            let item_count = items
+                .iter()
+                .filter(|item| item.source == source.name)
+                .count();
             SourceRun {
                 source: source.name.clone(),
                 kind: source.kind.clone(),
@@ -298,10 +339,20 @@ fn clean_focus_term(value: &str) -> String {
         .to_lowercase()
 }
 
-fn find_source<'a>(config: &'a CrawlerConfig, kind: &str) -> Option<&'a SourceConfig> {
-    config.sources.iter().find(|source| source.kind == kind)
-}
-
 fn url_query(value: &str) -> String {
     value.split_whitespace().collect::<Vec<_>>().join("+")
+}
+
+#[derive(Debug, Deserialize)]
+struct GreathouseFixtureRecord {
+    subject: String,
+    url: String,
+    title: Option<String>,
+    observed_at: Option<DateTime<Utc>>,
+    summary: Option<String>,
+    #[serde(default)]
+    tags: Vec<String>,
+    score: Option<i32>,
+    adapter: Option<String>,
+    stage: Option<String>,
 }
