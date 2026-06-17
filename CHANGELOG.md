@@ -2,6 +2,8 @@
 
 ## 2026-06-17
 
+- Moved concrete Vue app component imports into instance-owned registrations (`src/instances/garbage/app.ts` and `src/instances/greathouse/app.ts`); the shared app resolver now consumes `registeredWorkbenchApps` instead of importing Garbage or Greathouse components directly.
+- Updated Greathouse workbench smoke coverage to enforce that concrete app component imports stay in instance registration files while `src/instances/app-registry.ts` only consumes registration metadata.
 - Moved root Vue app component selection into `src/instances/app-registry.ts`; `src/App.vue` now stays a generic shell and no longer imports concrete Garbage or Greathouse app components directly.
 - Updated Greathouse workbench smoke coverage to enforce that concrete app imports stay in the instance app registry, while the root shell only calls the generic app resolver.
 - Moved legacy newsletter compatibility table reporting out of the generic workbench health route and into instance-adapter metadata; Greathouse health now reports no Garbage compatibility tables.

@@ -14,9 +14,12 @@ const { module: registryModule } = await runnerImport('./src/instances/registry.
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const [greathouseAppSource, appSource, appRegistrySource, registrySource] = await Promise.all([
+const [greathouseAppSource, greathouseAppRegistrationSource, garbageAppRegistrationSource, appSource, appComponentsSource, appRegistrySource, registrySource] = await Promise.all([
   readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
+  readFile('src/instances/greathouse/app.ts', 'utf8'),
+  readFile('src/instances/garbage/app.ts', 'utf8'),
   readFile('src/App.vue', 'utf8'),
+  readFile('src/instances/app-components.ts', 'utf8'),
   readFile('src/instances/app-registry.ts', 'utf8'),
   readFile('src/instances/registry.ts', 'utf8'),
 ])
@@ -58,18 +61,29 @@ if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
 if (!greathouseAppSource.includes('greathousePilotSnapshot') || !greathouseAppSource.includes('WorkbenchReviewRail')) {
   throw new Error('Greathouse workbench app component is not wired to the generic workbench pilot')
 }
+if (!greathouseAppRegistrationSource.includes('GreathouseApp') || !greathouseAppRegistrationSource.includes('greathouseInstance.id')) {
+  throw new Error('Greathouse app component is not registered from its instance boundary')
+}
+if (!garbageAppRegistrationSource.includes('GarbageApp') || !garbageAppRegistrationSource.includes('garbageInstance.id')) {
+  throw new Error('Garbage app component is not registered from its instance boundary')
+}
 if (!appSource.includes('resolveWorkbenchAppForPath')) {
   throw new Error('root app shell is not wired through the instance app resolver')
 }
 if (appSource.includes('GreathouseApp') || appSource.includes('GarbageApp')) {
   throw new Error('root app shell imports concrete instance apps instead of the app registry')
 }
+if (!appComponentsSource.includes('garbageWorkbenchApp') || !appComponentsSource.includes('greathouseWorkbenchApp')) {
+  throw new Error('registered app component list is missing an instance app registration')
+}
 if (
   !appRegistrySource.includes('resolveWorkbenchInstanceForPath') ||
-  !appRegistrySource.includes('GreathouseApp') ||
-  !appRegistrySource.includes('GarbageApp')
+  !appRegistrySource.includes('registeredWorkbenchApps')
 ) {
   throw new Error('instance app registry is not wired to metadata-backed route selection')
+}
+if (appRegistrySource.includes('GreathouseApp') || appRegistrySource.includes('GarbageApp')) {
+  throw new Error('instance app registry imports concrete instance apps instead of app registrations')
 }
 if (appRegistrySource.includes('?? GarbageApp')) {
   throw new Error('instance app registry still falls back directly to the Garbage app instead of the registered default')
