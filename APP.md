@@ -16,7 +16,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Vercel has `collected.ga` attached to the `garbage` project and aliased to the latest production deployment; `npm run check:deployed` is the public DNS/route check, while `npx vercel domains inspect collected.ga` and `npx vercel alias ls` verify Vercel-side domain state during DNS propagation.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.
 - `npm run check:deployed -- --require-database` verifies the deployed API is backed by writable external database persistence rather than browser-local fallback.
-- Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/newsletter/items --deployment <deployment-url>`.
+- Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/garbage/newsletter/items --deployment <deployment-url>`.
 - Inbox filtering by search text, vote state, project, source, and evidence stage so editors can prioritize live/manual collected items before watchlist seed placeholders.
 - News cards expose labeled Include/Skip controls with pressed-state feedback, and `npm run smoke:browser` now includes a narrow-viewport clickability smoke for mobile-sized layouts.
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
@@ -25,16 +25,16 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - `src/instances/garbage/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
 - Garbage publishing readiness checks in `src/instances/garbage/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
 - Vercel API routes:
-  - `GET /api/newsletter/items`
-  - `GET /api/newsletter/status`
-  - `GET /api/newsletter/health`
-  - `GET /api/newsletter/draft`
-  - `POST /api/newsletter/vote`
-  - `POST /api/newsletter/focus`
-  - `POST /api/newsletter/editorial-state`
-- Backend route helpers live in `api/newsletter/_http.ts`, leaving `api/newsletter/_db.ts` as the persistence adapter.
+  - `GET /api/garbage/newsletter/items`
+  - `GET /api/garbage/newsletter/status`
+  - `GET /api/garbage/newsletter/health`
+  - `GET /api/garbage/newsletter/draft`
+  - `POST /api/garbage/newsletter/vote`
+  - `POST /api/garbage/newsletter/focus`
+  - `POST /api/garbage/newsletter/editorial-state`
+- Generic backend route helpers live in `api/core/http.ts`, while Garbage data access and local fallback state live under `api/instances/garbage/`.
 - Generic Verdun workbench read routes live in `api/workbench/records.ts`, `api/workbench/status.ts`, and `api/workbench/health.ts`; their DB helper now accepts a `WorkbenchInstance` namespace while the public routes default to Garbage.
-- `GET /api/newsletter/health` follows the Greathouse service-health pattern and reports database env state, read/write surfaces, guarded publishing surfaces, the Rust loader command, and active snapshot counts.
+- `GET /api/garbage/newsletter/health` follows the Greathouse service-health pattern and reports database env state, read/write surfaces, guarded publishing surfaces, the Rust loader command, and active snapshot counts.
 - Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local development without a database uses ignored `crawler/data/editorial-state.json`.
 - The app can import exported `{ votes, focuses }` editorial-state JSON into writable API modes, so a browser-local review session can be promoted into durable Postgres-backed state after the external database is configured.
 - External Postgres schema in `db/migrations/0001_newsletter.sql`.
@@ -69,7 +69,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Fallback draft selection prefers live/manual collected items over watchlist seed placeholders and keeps project diversity unless the editor explicitly upvotes different items.
 - Draft rendering normalizes thin feed snippets, generic feed captions, and crawler boilerplate into fuller source-aware/project-aware prose before Markdown/Ghost output.
 - Local draft generation overlays ignored `crawler/data/editorial-state.json` so no-database app upvotes/focus notes drive the Ulysses and Ghost draft paths; `NEWSLETTER_APPLY_LOCAL_STATE=false` renders the raw snapshot.
-- Draft and Ghost scripts can read a snapshot from a local JSON file or an `http(s)` URL, including the deployed `/api/newsletter/items` endpoint.
+- Draft and Ghost scripts can read a snapshot from a local JSON file or an `http(s)` URL, including the deployed `/api/garbage/newsletter/items` endpoint.
 - Draft and Ghost scripts support `--require-upvotes` / `NEWSLETTER_REQUIRE_UPVOTES=true` to block publishing from a fallback-ranked draft when no item has been explicitly upvoted.
 - Draft and Ghost scripts support `--require-ready` / `NEWSLETTER_REQUIRE_READY=true` to apply the same publishing readiness checks used by the app before writing or posting a draft.
 - The Garbage app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/instances/garbage/newsletter.ts`.

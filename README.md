@@ -29,16 +29,16 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Public item cards surface crawler provenance as editorial evidence, including the adapter/stage that brought each item into the queue.
 - Item cards use labeled Include/Skip controls with pressed-state feedback so browser-local editorial votes are visibly actionable on desktop and mobile-sized layouts.
 - Inbox filters can isolate live/manual collected evidence from watchlist seed placeholders for faster publish review.
-- `GET /api/newsletter/draft` exposes the same generated draft as JSON, Markdown, HTML, or publish manifest for local automation and audit.
-- `GET /api/newsletter/health` exposes the Greathouse-style service health surface: database env state, read/write routes, guarded publishing commands, loader expectations, and active snapshot counts.
+- `GET /api/garbage/newsletter/draft` exposes the same generated draft as JSON, Markdown, HTML, or publish manifest for local automation and audit.
+- `GET /api/garbage/newsletter/health` exposes the Greathouse-style service health surface: database env state, read/write routes, guarded publishing commands, loader expectations, and active snapshot counts.
 - Publish manifests and the draft preview summarize selected evidence by live/manual/seed counts and source mix before Ulysses or Ghost handoff.
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, healthy watched sources, and a fresh collection snapshot before local Ulysses export.
 - Source health calls out watched projects from the crawler query plan that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.
 - The maintained Garbage ontology lives in `src/instances/garbage/ontology.json` and is reused by the app and local Markdown draft generation.
 - The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
 - Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, while filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`.
-- Backend route mechanics live in `api/newsletter/_http.ts`, while data access and local fallback state stay in `api/newsletter/_db.ts`, matching the Greathouse-style reusable backend boundary.
-- The app's editorial-state import posts `{ votes, focuses }` to `POST /api/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.
+- Generic backend route mechanics live in `api/core/http.ts`, while Garbage data access and local fallback state stay under `api/instances/garbage/`.
+- The app's editorial-state import posts `{ votes, focuses }` to `POST /api/garbage/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.
 
 ## Local app
 
@@ -63,7 +63,7 @@ npx vercel domains inspect collected.ga
 npx vercel alias ls
 ```
 
-That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the static public snapshot, `GET /api/newsletter/items`, `GET /api/newsletter/status`, `GET /api/newsletter/health`, and the draft publishing API in JSON, Markdown, and manifest formats. Add `--require-ready` after editorial review to apply the same publishing readiness criteria used by Ulysses export to the deployed/static/API snapshots and `GET /api/newsletter/draft?require-ready=true`. Add `--require-database` after configuring external Postgres to prove the deployed API reports writable `database` persistence with enough loaded items, source runs, and query plans. The Vercel project has `collected.ga` attached as the custom domain and aliased to the latest production deployment; if DNS is still propagating, confirm Vercel sees the domain with `npx vercel domains inspect collected.ga` and the alias with `npx vercel alias ls`, then retry the public check. For a Vercel deployment protected by Vercel Authentication, verify the route and API with `npx vercel curl /rbage/ --deployment <deployment-url>`, `npx vercel curl /api/newsletter/items --deployment <deployment-url>`, and `npx vercel curl /api/newsletter/health --deployment <deployment-url>` from the linked project directory. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring the Vercel API route.
+That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the static public snapshot, `GET /api/garbage/newsletter/items`, `GET /api/garbage/newsletter/status`, `GET /api/garbage/newsletter/health`, and the draft publishing API in JSON, Markdown, and manifest formats. Add `--require-ready` after editorial review to apply the same publishing readiness criteria used by Ulysses export to the deployed/static/API snapshots and `GET /api/garbage/newsletter/draft?require-ready=true`. Add `--require-database` after configuring external Postgres to prove the deployed API reports writable `database` persistence with enough loaded items, source runs, and query plans. The Vercel project has `collected.ga` attached as the custom domain and aliased to the latest production deployment; if DNS is still propagating, confirm Vercel sees the domain with `npx vercel domains inspect collected.ga` and the alias with `npx vercel alias ls`, then retry the public check. For a Vercel deployment protected by Vercel Authentication, verify the route and API with `npx vercel curl /rbage/ --deployment <deployment-url>`, `npx vercel curl /api/garbage/newsletter/items --deployment <deployment-url>`, and `npx vercel curl /api/garbage/newsletter/health --deployment <deployment-url>` from the linked project directory. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring the Vercel API route.
 
 ## Database
 
@@ -154,14 +154,14 @@ npm run garbage:review:gaps
 
 That writes an ignored `crawler/data/source-gap-review.md` checklist from the current snapshot, grouping uncovered projects with their Hacker News, Lobste.rs, dev.to, Medium, Substack, LinkedIn, and X/Twitter review targets. Add useful reviewed social finds to the manual JSON files, then rerun `collect --live`.
 
-When the deployed API is backed by external Postgres, importing that same editorial-state JSON in the app also persists matching item votes and non-duplicate focus notes through `POST /api/newsletter/editorial-state`. This provides the bridge from temporary browser-local review to durable editorial state once `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL` is configured in Vercel.
+When the deployed API is backed by external Postgres, importing that same editorial-state JSON in the app also persists matching item votes and non-duplicate focus notes through `POST /api/garbage/newsletter/editorial-state`. This provides the bridge from temporary browser-local review to durable editorial state once `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL` is configured in Vercel.
 
 When no items are explicitly upvoted, the draft builder prefers live/manual collected items over watchlist seed placeholders and caps the fallback spine at two items per project before filling any remaining slots.
 
 The draft renderer also rewrites thin feed snippets, generic feed captions, author labels, and crawler boilerplate into source-aware/project-aware sentences before Markdown or Ghost HTML is produced.
 
 ```sh
-NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/newsletter/items npm run garbage:draft
+NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/garbage/newsletter/items npm run garbage:draft
 NEWSLETTER_REQUIRE_UPVOTES=true npm run garbage:ulysses:draft
 NEWSLETTER_REQUIRE_READY=true npm run garbage:ulysses:draft
 npm run garbage:ulysses:ready
