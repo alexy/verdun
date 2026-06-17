@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import { ref } from 'vue'
 import { runnerImport } from 'vite'
 
@@ -9,6 +10,10 @@ const { module: workbenchViewModule } = await runnerImport('./src/composables/us
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
+const [greathouseAppSource, appSource] = await Promise.all([
+  readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
+  readFile('src/App.vue', 'utf8'),
+])
 
 const snapshotRef = ref(pilotModule.greathousePilotSnapshot())
 const view = workbenchViewModule.useWorkbenchView(snapshotRef)
@@ -43,4 +48,10 @@ if (!view.coverage.value.uncoveredSubjects.includes('Oakland blocked source')) {
 }
 if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
   throw new Error('shared workbench source counters did not handle Greathouse source runs')
+}
+if (!greathouseAppSource.includes('greathousePilotSnapshot') || !greathouseAppSource.includes('WorkbenchReviewRail')) {
+  throw new Error('Greathouse workbench app component is not wired to the generic workbench pilot')
+}
+if (!appSource.includes("startsWith('/greathouse/')") || !appSource.includes('GreathouseApp')) {
+  throw new Error('root app shell is not wired to the Greathouse route selector')
 }

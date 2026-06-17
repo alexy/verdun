@@ -39,6 +39,7 @@
 - Moved Garbage-specific newsletter hero and draft preview components under `src/instances/garbage/components/`, leaving the shared `WorkbenchHero` in the generic component tree.
 - Moved the remaining Garbage newsletter app panels and newsletter composables under `src/instances/garbage/components/` and `src/instances/garbage/composables/`, leaving `src/components/` for app-shell and generic workbench controls.
 - Moved the Garbage Vue app composition into `src/instances/garbage/GarbageApp.vue`; root `src/App.vue` is now only a thin instance shell.
+- Added a Greathouse pilot Vue app at `src/instances/greathouse/GreathouseApp.vue` and wired the root shell to mount it for `/greathouse/` paths using the generic workbench view and review controls.
 - Extracted generic API request/response helpers to `api/core/http.ts`; `api/workbench` routes now use the generic helper while `api/newsletter/_http.ts` remains a compatibility re-export.
 - Added a Garbage API workbench fallback adapter under `api/instances/garbage/workbench.ts`; `api/workbench/_db.ts` no longer imports `api/newsletter/_db.ts` directly for static/local-file mode.
 - Moved Garbage newsletter API store logic under `api/instances/garbage/newsletter-store.ts`; `api/newsletter/_db.ts` is now only a compatibility re-export.
@@ -62,5 +63,5 @@ Known remaining extraction work:
 - Newsletter draft generation, readiness, Ulysses export, Ghost publishing helpers, SQL reload helpers, editorial-state import, ontology rendering, snapshot normalization, Garbage-specific UI panels/composables/app composition, and newsletter route implementations are now implemented under the Garbage instance, with explicit Garbage API/package commands; public compatibility API/script names still remain.
 - Workbench API routes no longer depend on the newsletter HTTP helper path or the legacy newsletter DB helper path for local static/local-file mode.
 - Garbage local static/local-file fallback now reuses the Garbage API instance newsletter store internally, while the legacy `api/newsletter/_db.ts` path remains as a compatibility re-export.
-- Greathouse crawler collection now dispatches through configured local JSON, HTTP JSON, and HTTP status-diagnostic adapters, but it still does not have source-specific browser/property adapters.
-- Greathouse is still a partial consumer rather than a full app consuming Verdun core.
+- Greathouse crawler collection now dispatches through configured local JSON, HTTP JSON, and HTTP status-diagnostic adapters, and Greathouse has a pilot Vue app consuming generic workbench controls, but it still does not have source-specific browser/property adapters.
+- Greathouse is still a pilot consumer, not a complete production app.
