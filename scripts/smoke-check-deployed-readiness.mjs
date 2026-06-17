@@ -3,6 +3,12 @@ import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 
 const rawSnapshot = JSON.parse(await readFile('public/data/newsletter-snapshot.json', 'utf8'))
+const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
+for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json']) {
+  if (checkDeployedSource.includes(marker)) {
+    throw new Error(`generic deployed checker still embeds Garbage deploy marker: ${marker}`)
+  }
+}
 const freshGeneratedAt = new Date().toISOString()
 let reviewedSnapshot = {
   ...rawSnapshot,

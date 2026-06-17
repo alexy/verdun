@@ -1,26 +1,27 @@
-const defaultBaseUrl = 'https://collected.ga/rbage/'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
+
 const args = process.argv.slice(2)
 const valueOptions = new Set(['--asset-base', '--instance', '--min-collection-plans', '--min-records', '--min-source-runs', '--required-plan', '--required-subject', '--static-snapshot'])
 const staticOnly = args.includes('--static-only')
 const requireReady = args.includes('--require-ready')
 const requireDatabase = args.includes('--require-database')
-const instance = optionValue('--instance') ?? process.env.VERDUN_INSTANCE ?? 'garbage'
-const staticSnapshotPath = optionValue('--static-snapshot') ?? process.env.VERDUN_STATIC_SNAPSHOT ?? 'data/newsletter-snapshot.json'
-const baseArg = positionalArg() ?? process.env.VERDUN_DEPLOYED_URL ?? defaultBaseUrl
+const instance = optionValue('--instance') ?? process.env.VERDUN_INSTANCE ?? defaultDeployCheckProfileId()
+const profile = deployCheckProfile(instance)
+const staticSnapshotPath = optionValue('--static-snapshot') ?? process.env.VERDUN_STATIC_SNAPSHOT ?? profile?.staticSnapshotPath ?? 'data/workbench-snapshot.json'
+const baseArg = positionalArg() ?? process.env.VERDUN_DEPLOYED_URL ?? profile?.defaultBaseUrl
+if (!baseArg) throw new Error(`No deployed URL configured for ${instance}. Pass a base URL or set VERDUN_DEPLOYED_URL.`)
 const baseUrl = normalizeBaseUrl(baseArg)
 const origin = new URL(baseUrl).origin
 const assetBasePath = optionValue('--asset-base') ?? new URL(baseUrl).pathname
 const checkDraft = args.includes('--check-draft')
-const skipDraft = args.includes('--skip-draft') || (!checkDraft && instance !== 'garbage')
+const skipDraft = args.includes('--skip-draft') || (!checkDraft && !profile?.draft)
 const requiredSubjects = optionValues('--required-subject')
 const requiredPlans = optionValues('--required-plan')
-const garbageDefaultSubjects = ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']
-const garbageDefaultPlans = ['BAML', 'DSPy', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Ibis', 'Dagster', 'Garde', 'zod-rs']
-const minRecords = numberOption('--min-records', instance === 'garbage' ? 23 : 1)
+const minRecords = numberOption('--min-records', profile?.minRecords ?? 1)
 const minSourceRuns = numberOption('--min-source-runs', 1)
-const minCollectionPlans = numberOption('--min-collection-plans', instance === 'garbage' ? 23 : 0)
-const expectedSubjects = requiredSubjects.length ? requiredSubjects : (instance === 'garbage' ? garbageDefaultSubjects : [])
-const expectedPlans = requiredPlans.length ? requiredPlans : (instance === 'garbage' ? garbageDefaultPlans : [])
+const minCollectionPlans = numberOption('--min-collection-plans', profile?.minCollectionPlans ?? 0)
+const expectedSubjects = requiredSubjects.length ? requiredSubjects : profile?.requiredSubjects ?? []
+const expectedPlans = requiredPlans.length ? requiredPlans : profile?.requiredPlans ?? []
 
 const appHtml = await fetchText(baseUrl, 'app route')
 if (!appHtml.includes('<div id="app"></div>')) {
@@ -40,7 +41,7 @@ if (!staticOnly) {
   validateStatus(apiStatus)
   const apiHealth = await fetchJson(new URL(`/api/workbench/health?instance=${encodeURIComponent(instance)}`, origin), 'workbench health API')
   validateHealth(apiHealth, apiStatus)
-  if (!skipDraft) await validateDraftApi(origin)
+  if (!skipDraft) await validateDraftApi(origin, profile?.draft)
 }
 
 console.log(`verified Verdun ${instance} deployment at ${baseUrl}${staticOnly ? ' (static only)' : ''}${skipDraft ? ' without draft API checks' : ''}${requireReady ? ' with readiness gate' : ''}${requireDatabase ? ' with database gate' : ''}`)
@@ -190,8 +191,9 @@ function validateHealth(health, status) {
   }
 }
 
-async function validateDraftApi(origin) {
-  const draftUrl = new URL('/api/garbage/newsletter/draft', origin)
+async function validateDraftApi(origin, draftProfile) {
+  if (!draftProfile) throw new Error(`No draft check profile configured for ${instance}. Pass --skip-draft or add an instance deploy-check profile.`)
+  const draftUrl = new URL(draftProfile.apiPath, origin)
   const draft = await fetchJson(draftUrl, 'draft API')
   if (!draft?.draft?.markdown?.includes('## Weekly throughline')) {
     throw new Error('draft API did not return generated Markdown with a weekly throughline')
@@ -203,20 +205,22 @@ async function validateDraftApi(origin) {
     throw new Error('draft API did not return readiness and prose-quality checks')
   }
 
-  const markdownUrl = new URL('/api/garbage/newsletter/draft?format=markdown', origin)
+  const markdownUrl = new URL(`${draftProfile.apiPath}?format=markdown`, origin)
   const markdown = await fetchTextContent(markdownUrl, 'draft Markdown API', 'text/markdown')
-  if (!markdown.includes('Strongly Typed AI/Data Notes') || !markdown.includes('## Sources watched')) {
-    throw new Error('draft Markdown API did not return the newsletter draft body')
+  for (const expectedText of arrayValue(draftProfile.markdownIncludes)) {
+    if (!markdown.includes(expectedText)) {
+      throw new Error(`draft Markdown API did not include expected text: ${expectedText}`)
+    }
   }
 
-  const manifestUrl = new URL('/api/garbage/newsletter/draft?format=manifest', origin)
+  const manifestUrl = new URL(`${draftProfile.apiPath}?format=manifest`, origin)
   const manifest = await fetchJson(manifestUrl, 'draft manifest API')
-  if (manifest?.snapshotInput !== 'api/garbage/newsletter/items' || manifest?.issue?.selectedItemCount !== manifest?.itemIds?.length) {
+  if (manifest?.snapshotInput !== draftProfile.manifestSnapshotInput || manifest?.issue?.selectedItemCount !== manifest?.itemIds?.length) {
     throw new Error('draft manifest API did not return a coherent publish manifest')
   }
 
   if (requireReady) {
-    const readyUrl = new URL('/api/garbage/newsletter/draft?require-ready=true', origin)
+    const readyUrl = new URL(`${draftProfile.apiPath}?require-ready=true`, origin)
     const readyDraft = await fetchJson(readyUrl, 'ready draft API')
     if (readyDraft?.manifest?.readiness?.status !== 'ready' || readyDraft?.manifest?.proseQuality?.status !== 'ready') {
       throw new Error('ready draft API did not return a ready publish manifest')
