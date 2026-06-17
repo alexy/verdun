@@ -24,6 +24,7 @@ pub struct SourceConfig {
     pub name: String,
     pub kind: String,
     pub url: String,
+    pub adapter: Option<String>,
     pub feed_urls: Option<Vec<String>>,
     pub manual_path: Option<PathBuf>,
     pub fixture_path: Option<PathBuf>,

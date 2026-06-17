@@ -122,15 +122,27 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
             "{} must have an https source URL",
             source.name
         );
-        let fixture_path = source
-            .fixture_path
-            .as_ref()
-            .with_context(|| format!("{} must configure fixture_path", source.name))?;
+        let adapter = source
+            .adapter
+            .as_deref()
+            .with_context(|| format!("{} must configure adapter", source.name))?;
         anyhow::ensure!(
-            fixture_path.exists(),
-            "{} fixture file must exist at {}",
+            matches!(adapter, "local-listing-json" | "local-diagnostic-json"),
+            "{} uses unsupported Greathouse adapter {}",
             source.name,
-            fixture_path.display()
+            adapter
+        );
+        let data_path = source.fixture_path.as_ref().with_context(|| {
+            format!(
+                "{} must configure fixture_path for {}",
+                source.name, adapter
+            )
+        })?;
+        anyhow::ensure!(
+            data_path.exists(),
+            "{} local adapter data file must exist at {}",
+            source.name,
+            data_path.display()
         );
     }
     Ok(())
@@ -139,7 +151,7 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
 fn greathouse_items(config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
     let mut items = Vec::new();
     for source in &config.sources {
-        items.extend(adapter_for_source(source).collect(config, source)?);
+        items.extend(adapter_for_source(source)?.collect(config, source)?);
     }
     Ok(items)
 }
@@ -147,20 +159,21 @@ fn greathouse_items(config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
 fn greathouse_item(
     target: &crate::core::CollectionTarget,
     source: &SourceConfig,
-    fixture: GreathouseFixtureRecord,
+    record: GreathouseLocalRecord,
+    adapter: &str,
     index: usize,
 ) -> NewsItem {
-    let observed_at = fixture.observed_at.unwrap_or_else(Utc::now);
-    let evidence_url = fixture.url.clone();
+    let observed_at = record.observed_at.unwrap_or_else(Utc::now);
+    let evidence_url = record.url.clone();
     let is_diagnostic = source.kind == "diagnostic" || target.topic.contains("diagnostic");
-    let title = fixture.title.unwrap_or_else(|| {
+    let title = record.title.unwrap_or_else(|| {
         if is_diagnostic {
             format!("{} source diagnostic", target.name)
         } else {
             format!("{} property candidate", target.name)
         }
     });
-    let summary = fixture.summary.unwrap_or_else(|| {
+    let summary = record.summary.unwrap_or_else(|| {
         if is_diagnostic {
             format!(
                 "{} records blocked-source evidence for retry and manual review.",
@@ -173,14 +186,8 @@ fn greathouse_item(
             )
         }
     });
-    let adapter = fixture.adapter.unwrap_or_else(|| {
-        if is_diagnostic {
-            "blocked-source-diagnostic-fixture".to_string()
-        } else {
-            "property-listing-fixture".to_string()
-        }
-    });
-    let mut tags = fixture.tags;
+    let stage = record.stage.as_deref().unwrap_or("local_json");
+    let mut tags = record.tags;
     if tags.is_empty() {
         tags = target.keywords.iter().take(4).cloned().collect();
     }
@@ -201,11 +208,11 @@ fn greathouse_item(
             "Greathouse needs normalized listing evidence that can be compared, reviewed, and reloaded through Verdun's generic database contract.".to_string()
         },
         tags,
-        score: fixture.score.unwrap_or(70 + (index as i32 * 5).min(20)),
+        score: record.score.unwrap_or(70 + (index as i32 * 5).min(20)),
         raw_json: serde_json::json!({
-            "collection_stage": fixture.stage.as_deref().unwrap_or("fixture"),
+            "collection_stage": stage,
             "provenance": {
-                "stage": fixture.stage.as_deref().unwrap_or("fixture"),
+                "stage": stage,
                 "adapter": adapter,
                 "source": source.name,
                 "source_kind": source.kind,
@@ -220,19 +227,17 @@ fn greathouse_item(
 }
 
 trait GreathouseSourceAdapter {
-    fn adapter_name(&self, source: &SourceConfig) -> &'static str;
+    fn adapter_name(&self) -> &'static str;
     fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>>;
 }
 
-struct FixtureSourceAdapter;
+struct LocalJsonSourceAdapter {
+    adapter: &'static str,
+}
 
-impl GreathouseSourceAdapter for FixtureSourceAdapter {
-    fn adapter_name(&self, source: &SourceConfig) -> &'static str {
-        if source.kind == "diagnostic" {
-            "blocked-source-diagnostic-fixture"
-        } else {
-            "property-listing-fixture"
-        }
+impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
+    fn adapter_name(&self) -> &'static str {
+        self.adapter
     }
 
     fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
@@ -240,36 +245,53 @@ impl GreathouseSourceAdapter for FixtureSourceAdapter {
             .fixture_path
             .as_ref()
             .with_context(|| format!("{} has no fixture_path configured", source.name))?;
-        let fixtures: Vec<GreathouseFixtureRecord> = serde_json::from_slice(
+        let records: Vec<GreathouseLocalRecord> = serde_json::from_slice(
             &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
         )
         .with_context(|| format!("parsing {}", path.display()))?;
-        fixtures
+        records
             .into_iter()
             .enumerate()
-            .map(|(index, fixture)| {
+            .map(|(index, record)| {
                 let target = config
                     .targets
                     .iter()
-                    .find(|target| target.name == fixture.subject)
+                    .find(|target| target.name == record.subject)
                     .with_context(|| {
                         format!(
-                            "{} fixture references unknown subject {}",
-                            source.name, fixture.subject
+                            "{} local adapter data references unknown subject {}",
+                            source.name, record.subject
                         )
                     })?;
-                Ok(greathouse_item(target, source, fixture, index))
+                Ok(greathouse_item(
+                    target,
+                    source,
+                    record,
+                    self.adapter_name(),
+                    index,
+                ))
             })
             .collect()
     }
 }
 
-static FIXTURE_SOURCE_ADAPTER: FixtureSourceAdapter = FixtureSourceAdapter;
+static LOCAL_LISTING_JSON_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapter {
+    adapter: "local-listing-json",
+};
+static LOCAL_DIAGNOSTIC_JSON_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapter {
+    adapter: "local-diagnostic-json",
+};
 
-fn adapter_for_source(source: &SourceConfig) -> &'static dyn GreathouseSourceAdapter {
-    match source.kind.as_str() {
-        "listing" | "diagnostic" => &FIXTURE_SOURCE_ADAPTER,
-        _ => &FIXTURE_SOURCE_ADAPTER,
+fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSourceAdapter> {
+    match source.adapter.as_deref() {
+        Some("local-listing-json") => Ok(&LOCAL_LISTING_JSON_ADAPTER),
+        Some("local-diagnostic-json") => Ok(&LOCAL_DIAGNOSTIC_JSON_ADAPTER),
+        Some(adapter) => anyhow::bail!(
+            "{} uses unsupported Greathouse adapter {}",
+            source.name,
+            adapter
+        ),
+        None => anyhow::bail!("{} must configure adapter", source.name),
     }
 }
 
@@ -292,9 +314,9 @@ fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<Sou
                 },
                 item_count,
                 message: if source.kind == "diagnostic" {
-                    "fixture retained blocked-source evidence for retry".to_string()
+                    "local diagnostic JSON retained blocked-source evidence for retry".to_string()
                 } else {
-                    "fixture listing loaded through the Greathouse crawler instance".to_string()
+                    "local listing JSON loaded through the Greathouse crawler instance".to_string()
                 },
                 project_counts: Default::default(),
             }
@@ -317,7 +339,10 @@ fn review_targets(
                 source.url.trim_end_matches('/'),
                 url_query(&target.name)
             ),
-            adapter: adapter_for_source(source).adapter_name(source).to_string(),
+            adapter: source
+                .adapter
+                .clone()
+                .unwrap_or_else(|| "missing-adapter".to_string()),
         })
         .collect()
 }
@@ -366,7 +391,7 @@ fn url_query(value: &str) -> String {
 }
 
 #[derive(Debug, Deserialize)]
-struct GreathouseFixtureRecord {
+struct GreathouseLocalRecord {
     subject: String,
     url: String,
     title: Option<String>,
@@ -375,6 +400,5 @@ struct GreathouseFixtureRecord {
     #[serde(default)]
     tags: Vec<String>,
     score: Option<i32>,
-    adapter: Option<String>,
     stage: Option<String>,
 }

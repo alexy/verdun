@@ -91,11 +91,25 @@ try {
   if (snapshot.theme !== 'Property intelligence and source diagnostics') {
     throw new Error(`greathouse snapshot had wrong theme: ${snapshot.theme}`)
   }
-  if (!snapshot.items?.some((item) => item.source_kind === 'listing' && item.project === 'Berkeley 2BR')) {
+  const listing = snapshot.items?.find((item) => item.source_kind === 'listing' && item.project === 'Berkeley 2BR')
+  if (!listing) {
     throw new Error('greathouse snapshot did not contain a listing-shaped record')
   }
-  if (!snapshot.items?.some((item) => item.source_kind === 'diagnostic' && item.project === 'Oakland blocked source')) {
+  if (listing.raw_json?.provenance?.adapter !== 'local-listing-json') {
+    throw new Error(`listing record used wrong adapter provenance: ${listing.raw_json?.provenance?.adapter}`)
+  }
+  const diagnostic = snapshot.items?.find((item) => item.source_kind === 'diagnostic' && item.project === 'Oakland blocked source')
+  if (!diagnostic) {
     throw new Error('greathouse snapshot did not contain a diagnostic-shaped record')
+  }
+  if (diagnostic.raw_json?.provenance?.adapter !== 'local-diagnostic-json') {
+    throw new Error(`diagnostic record used wrong adapter provenance: ${diagnostic.raw_json?.provenance?.adapter}`)
+  }
+  const reviewAdapters = new Set(
+    snapshot.query_plans?.flatMap((plan) => plan.review_targets?.map((target) => target.adapter) ?? []) ?? [],
+  )
+  if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('local-diagnostic-json')) {
+    throw new Error(`greathouse review targets did not expose local JSON adapters: ${[...reviewAdapters].join(', ')}`)
   }
 
   const exportGeneric = spawnSync('cargo', [

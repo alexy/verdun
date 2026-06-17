@@ -7,7 +7,6 @@
     "summary": "Crawler observed a blocked listing source and retained enough context for retry or manual review.",
     "tags": ["oakland", "blocked-source", "diagnostic"],
     "score": 62,
-    "adapter": "blocked-source-diagnostic-fixture",
-    "stage": "fixture"
+    "stage": "local_json"
   }
 ]

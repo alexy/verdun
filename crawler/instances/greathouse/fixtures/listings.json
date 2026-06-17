@@ -7,7 +7,6 @@
     "summary": "Listing candidate with walkable transit, recent observation time, and enough comparable context for review.",
     "tags": ["berkeley", "2br", "transit", "shortlist"],
     "score": 86,
-    "adapter": "property-listing-fixture",
-    "stage": "fixture"
+    "stage": "local_json"
   }
 ]

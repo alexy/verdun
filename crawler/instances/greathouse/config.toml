@@ -16,10 +16,12 @@ keywords = ["oakland", "blocked-source", "retry", "diagnostic"]
 name = "Redfin"
 kind = "listing"
 url = "https://example.com/redfin"
+adapter = "local-listing-json"
 fixture_path = "crawler/instances/greathouse/fixtures/listings.json"
 
 [[sources]]
 name = "Redfin diagnostics"
 kind = "diagnostic"
 url = "https://example.com/redfin-diagnostics"
+adapter = "local-diagnostic-json"
 fixture_path = "crawler/instances/greathouse/fixtures/diagnostics.json"
