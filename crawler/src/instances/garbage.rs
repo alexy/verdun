@@ -1,10 +1,10 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use crate::core::{
-    CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord, ReviewTarget, SourceConfig,
-    SourceRun, SourceRunStatus,
+    CollectionTarget, CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord,
+    ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -167,6 +167,104 @@ pub fn manual_source_run(
             if post_count == 1 { "" } else { "s" }
         ),
     )
+}
+
+pub fn seed_items(config: &CrawlerConfig) -> Vec<NewsItem> {
+    let source = config
+        .sources
+        .iter()
+        .find(|candidate| candidate.name == "Hacker News")
+        .cloned()
+        .unwrap_or_else(|| config.sources[0].clone());
+    config
+        .targets
+        .iter()
+        .enumerate()
+        .map(|(index, project)| project_item(project, &source, index))
+        .collect()
+}
+
+pub fn provenance(
+    stage: &str,
+    adapter: &str,
+    source: &SourceConfig,
+    project: &CollectionTarget,
+    evidence_url: &str,
+    focus_terms: &[String],
+) -> serde_json::Value {
+    serde_json::json!({
+        "stage": stage,
+        "adapter": adapter,
+        "source": source.name,
+        "source_kind": source.kind,
+        "source_url": source.url,
+        "evidence_url": evidence_url,
+        "project": project.name,
+        "matched_keywords": matched_keywords(project, focus_terms)
+    })
+}
+
+fn project_item(project: &CollectionTarget, source: &SourceConfig, index: usize) -> NewsItem {
+    let published_at = seed_base_time() - Duration::days(index as i64);
+    let title = format!(
+        "{} belongs in this week's typed AI/data systems watch",
+        project.name
+    );
+    let summary = format!(
+        "{} is being tracked for {} signals around {}.",
+        project.name,
+        project.topic,
+        project.keywords.join(", ")
+    );
+    let why_it_matters = format!(
+        "{} helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
+        project.name
+    );
+    let id = stable_id(&project.name, &project.homepage);
+    NewsItem {
+        id,
+        title,
+        source: source.name.clone(),
+        source_kind: source.kind.clone(),
+        url: project.homepage.clone(),
+        published_at,
+        project: project.name.clone(),
+        topic: project.topic.clone(),
+        summary,
+        why_it_matters,
+        tags: project.keywords.iter().take(4).cloned().collect(),
+        score: 90 - (index as i32 * 3),
+        raw_json: serde_json::json!({
+            "homepage": project.homepage,
+            "source_url": source.url,
+            "collection_stage": "watchlist-seed",
+            "provenance": provenance("watchlist-seed", "watchlist", source, project, &project.homepage, &[])
+        }),
+    }
+}
+
+fn seed_base_time() -> DateTime<Utc> {
+    DateTime::parse_from_rfc3339("2026-06-15T12:00:00Z")
+        .expect("valid seed timestamp")
+        .with_timezone(&Utc)
+}
+
+fn matched_keywords(project: &CollectionTarget, focus_terms: &[String]) -> Vec<String> {
+    let mut keywords = project
+        .keywords
+        .iter()
+        .take(5)
+        .cloned()
+        .chain(
+            focus_terms
+                .iter()
+                .take(5)
+                .map(|term| format!("focus:{term}")),
+        )
+        .collect::<Vec<_>>();
+    keywords.sort();
+    keywords.dedup();
+    keywords
 }
 
 fn news_item_record(item: &NewsItem) -> NormalizedRecord {

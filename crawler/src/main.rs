@@ -4,13 +4,13 @@ use clap::{Parser, Subcommand, ValueEnum};
 mod core;
 mod instances;
 use crate::core::{
-    CollectionTarget, CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus,
+    CollectionTarget, CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, slug,
+    stable_id,
 };
 use crate::instances::garbage::{self, ExportPayload, NewsItem, ProjectQueryPlan, PublicSnapshot};
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
 #[derive(Parser)]
@@ -146,7 +146,7 @@ fn collect(
     let config = read_crawler_config(&config)?;
     let editorial_focuses = read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
-    let mut items = seed_items(&config);
+    let mut items = garbage::seed_items(&config);
     let mut source_runs = seed_source_runs(&config, live);
     if live {
         let since = Utc::now() - Duration::days(since_days);
@@ -1249,66 +1249,6 @@ fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
 }
 
-fn seed_items(config: &CrawlerConfig) -> Vec<NewsItem> {
-    let source = config
-        .sources
-        .iter()
-        .find(|candidate| candidate.name == "Hacker News")
-        .cloned()
-        .unwrap_or_else(|| config.sources[0].clone());
-    config
-        .targets
-        .iter()
-        .enumerate()
-        .map(|(index, project)| project_item(project, &source, index))
-        .collect()
-}
-
-fn project_item(project: &CollectionTarget, source: &SourceConfig, index: usize) -> NewsItem {
-    let published_at = seed_base_time() - Duration::days(index as i64);
-    let title = format!(
-        "{} belongs in this week's typed AI/data systems watch",
-        project.name
-    );
-    let summary = format!(
-        "{} is being tracked for {} signals around {}.",
-        project.name,
-        project.topic,
-        project.keywords.join(", ")
-    );
-    let why_it_matters = format!(
-        "{} helps explain where typed contracts, local execution, and practical AI/data systems are converging.",
-        project.name
-    );
-    let id = stable_id(&project.name, &project.homepage);
-    NewsItem {
-        id,
-        title,
-        source: source.name.clone(),
-        source_kind: source.kind.clone(),
-        url: project.homepage.clone(),
-        published_at,
-        project: project.name.clone(),
-        topic: project.topic.clone(),
-        summary,
-        why_it_matters,
-        tags: project.keywords.iter().take(4).cloned().collect(),
-        score: 90 - (index as i32 * 3),
-        raw_json: serde_json::json!({
-            "homepage": project.homepage,
-            "source_url": source.url,
-            "collection_stage": "watchlist-seed",
-            "provenance": provenance("watchlist-seed", "watchlist", source, project, &project.homepage, &[])
-        }),
-    }
-}
-
-fn seed_base_time() -> DateTime<Utc> {
-    DateTime::parse_from_rfc3339("2026-06-15T12:00:00Z")
-        .expect("valid seed timestamp")
-        .with_timezone(&Utc)
-}
-
 #[derive(Debug, Deserialize)]
 struct HackerNewsResponse {
     hits: Vec<HackerNewsHit>,
@@ -1432,7 +1372,7 @@ fn hn_item(
         score: 60 + points.min(30) + comments.min(20),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "hn-algolia", source, project, &url, focus_terms),
+            "provenance": garbage::provenance("live", "hn-algolia", source, project, &url, focus_terms),
             "source": "hacker-news",
             "object_id": hit.object_id,
             "points": points,
@@ -1490,7 +1430,7 @@ fn lobsters_item(
         score: 62 + score.min(25) + comments.min(15),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "lobsters-search", source, project, &url, focus_terms),
+            "provenance": garbage::provenance("live", "lobsters-search", source, project, &url, focus_terms),
             "source": "lobsters",
             "short_id": story.short_id,
             "score": score,
@@ -1543,7 +1483,7 @@ fn dev_to_item(
         score: 55 + reactions.min(30) + comments.min(15),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "dev-to-articles", source, project, &url, focus_terms),
+            "provenance": garbage::provenance("live", "dev-to-articles", source, project, &url, focus_terms),
             "source": "dev-to",
             "article_id": article.id,
             "reactions": reactions,
@@ -1596,7 +1536,7 @@ fn feed_item(
         score: feed_score(project, entry),
         raw_json: serde_json::json!({
             "collection_stage": "live",
-            "provenance": provenance("live", "rss-atom-feed", source, project, &entry.link, focus_terms),
+            "provenance": garbage::provenance("live", "rss-atom-feed", source, project, &entry.link, focus_terms),
             "source": slug(&source.name),
             "feed_url": entry.feed_url
         }),
@@ -1637,31 +1577,11 @@ fn manual_post_item(
         score: 76,
         raw_json: serde_json::json!({
             "collection_stage": "manual",
-            "provenance": provenance("manual", "manual-json", source, project, &post.url, focus_terms),
+            "provenance": garbage::provenance("manual", "manual-json", source, project, &post.url, focus_terms),
             "source": slug(&source.name),
             "author": post.author
         }),
     }
-}
-
-fn provenance(
-    stage: &str,
-    adapter: &str,
-    source: &SourceConfig,
-    project: &CollectionTarget,
-    evidence_url: &str,
-    focus_terms: &[String],
-) -> serde_json::Value {
-    serde_json::json!({
-        "stage": stage,
-        "adapter": adapter,
-        "source": source.name,
-        "source_kind": source.kind,
-        "source_url": source.url,
-        "evidence_url": evidence_url,
-        "project": project.name,
-        "matched_keywords": matched_keywords(project, focus_terms)
-    })
 }
 
 fn project_query(project: &CollectionTarget) -> String {
@@ -1918,24 +1838,6 @@ fn text_matches_project(text: &str, project: &CollectionTarget, focus_terms: &[S
         .any(|keyword| contains_distinct_term(&text, keyword))
 }
 
-fn matched_keywords(project: &CollectionTarget, focus_terms: &[String]) -> Vec<String> {
-    let mut keywords = project
-        .keywords
-        .iter()
-        .take(5)
-        .cloned()
-        .chain(
-            focus_terms
-                .iter()
-                .take(5)
-                .map(|term| format!("focus:{term}")),
-        )
-        .collect::<Vec<_>>();
-    keywords.sort();
-    keywords.dedup();
-    keywords
-}
-
 fn contains_distinct_term(text: &str, term: &str) -> bool {
     if term.is_empty() {
         return false;
@@ -2067,39 +1969,6 @@ fn dev_to_tags(project: &CollectionTarget) -> Vec<String> {
     tags.sort();
     tags.dedup();
     tags
-}
-
-fn stable_id(project: &str, url: &str) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(project.as_bytes());
-    hasher.update(b"\n");
-    hasher.update(url.as_bytes());
-    let digest = hasher.finalize();
-    format!(
-        "{}-{:x}",
-        slug(project),
-        &digest[..6]
-            .iter()
-            .fold(0_u64, |acc, byte| (acc << 8) | u64::from(*byte))
-    )
-}
-
-fn slug(value: &str) -> String {
-    value
-        .to_lowercase()
-        .chars()
-        .map(|character| {
-            if character.is_ascii_alphanumeric() {
-                character
-            } else {
-                '-'
-            }
-        })
-        .collect::<String>()
-        .split('-')
-        .filter(|part| !part.is_empty())
-        .collect::<Vec<_>>()
-        .join("-")
 }
 
 fn url_query(value: &str) -> String {

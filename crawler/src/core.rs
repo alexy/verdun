@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, path::PathBuf};
 
 #[derive(Debug, Deserialize)]
@@ -104,4 +105,37 @@ pub struct CrawlerSnapshot {
     pub records: Vec<NormalizedRecord>,
     pub source_runs: Vec<SourceRun>,
     pub collection_plans: Vec<NormalizedCollectionPlan>,
+}
+
+pub fn stable_id(subject: &str, url: &str) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(subject.as_bytes());
+    hasher.update(b"\n");
+    hasher.update(url.as_bytes());
+    let digest = hasher.finalize();
+    format!(
+        "{}-{:x}",
+        slug(subject),
+        &digest[..6]
+            .iter()
+            .fold(0_u64, |acc, byte| (acc << 8) | u64::from(*byte))
+    )
+}
+
+pub fn slug(value: &str) -> String {
+    value
+        .to_lowercase()
+        .chars()
+        .map(|character| {
+            if character.is_ascii_alphanumeric() {
+                character
+            } else {
+                '-'
+            }
+        })
+        .collect::<String>()
+        .split('-')
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
 }
