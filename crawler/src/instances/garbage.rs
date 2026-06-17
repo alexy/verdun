@@ -3,7 +3,7 @@ use chrono::{DateTime, Duration, Utc};
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, fs};
 
 use crate::core::{
     CollectionTarget, CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord,
@@ -119,6 +119,13 @@ pub struct ManualPost {
     pub author: Option<String>,
     pub published_at: DateTime<Utc>,
     pub text: String,
+}
+
+#[derive(Debug, Default)]
+pub struct ManualSourceCollect {
+    pub items: Vec<NewsItem>,
+    pub post_count: usize,
+    pub latest_published_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Clone)]
@@ -476,6 +483,47 @@ pub fn fetch_feed_source(
     Ok(items)
 }
 
+pub fn collect_manual_source(
+    config: &CrawlerConfig,
+    source: &SourceConfig,
+    max_per_project: usize,
+    editorial_focuses: &[EditorialFocus],
+) -> Result<ManualSourceCollect> {
+    let path = source
+        .manual_path
+        .as_ref()
+        .with_context(|| format!("{} has no manual_path configured", source.name))?;
+    if !path.exists() {
+        return Ok(ManualSourceCollect::default());
+    }
+    let posts: Vec<ManualPost> = serde_json::from_slice(
+        &fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )
+    .with_context(|| format!("parsing {}", path.display()))?;
+    let post_count = posts.len();
+    let latest_published_at = posts.iter().map(|post| post.published_at).max();
+    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut items = Vec::new();
+    for post in posts {
+        for project in &config.targets {
+            let focus_terms = project_focus_terms(project, editorial_focuses);
+            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
+            if count >= max_per_project
+                || !manual_post_matches_project(&post, project, &focus_terms)
+            {
+                continue;
+            }
+            items.push(manual_post_item(project, source, &post, &focus_terms));
+            counts.insert(project.name.as_str(), count + 1);
+        }
+    }
+    Ok(ManualSourceCollect {
+        items,
+        post_count,
+        latest_published_at,
+    })
+}
+
 pub fn parse_lobsters_search_stories(html: &str) -> Vec<LobstersStory> {
     let short_id_re = Regex::new(r#"data-shortid="([^"]+)""#).expect("valid short id regex");
     let title_re = Regex::new(r#"(?s)<a class="u-url" href="([^"]+)"[^>]*>(.*?)</a>"#)
@@ -660,6 +708,15 @@ fn feed_entry_matches_project(
         "{} {} {} {}",
         entry.title, link_without_query, entry.summary, entry.match_text
     );
+    text_matches_project(&text, project, focus_terms)
+}
+
+fn manual_post_matches_project(
+    post: &ManualPost,
+    project: &CollectionTarget,
+    focus_terms: &[String],
+) -> bool {
+    let text = format!("{} {} {}", post.title, post.url, post.text);
     text_matches_project(&text, project, focus_terms)
 }
 

@@ -3,10 +3,8 @@ use chrono::{DateTime, Duration, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 mod core;
 mod instances;
-use crate::core::{CollectionTarget, CrawlerConfig, SourceConfig, SourceRun, SourceRunStatus};
-use crate::instances::garbage::{
-    self, EditorialFocus, ExportPayload, ManualPost, NewsItem, PublicSnapshot,
-};
+use crate::core::{CrawlerConfig, SourceConfig, SourceRun, SourceRunStatus};
+use crate::instances::garbage::{self, EditorialFocus, ExportPayload, NewsItem, PublicSnapshot};
 use reqwest::blocking::Client;
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
@@ -753,7 +751,8 @@ fn live_items(
             .iter()
             .find(|source| source.name == source_name)
         {
-            match collect_manual_source(config, source, max_per_project, editorial_focuses) {
+            match garbage::collect_manual_source(config, source, max_per_project, editorial_focuses)
+            {
                 Ok(manual_source) => {
                     let mut source_items = manual_source.items;
                     retain_recent(&mut source_items, since);
@@ -777,59 +776,6 @@ fn live_items(
 
 fn retain_recent(items: &mut Vec<NewsItem>, since: DateTime<Utc>) {
     items.retain(|item| item.published_at >= since);
-}
-
-fn collect_manual_source(
-    config: &CrawlerConfig,
-    source: &SourceConfig,
-    max_per_project: usize,
-    editorial_focuses: &[EditorialFocus],
-) -> Result<ManualSourceCollect> {
-    let path = source
-        .manual_path
-        .as_ref()
-        .with_context(|| format!("{} has no manual_path configured", source.name))?;
-    if !path.exists() {
-        return Ok(ManualSourceCollect::default());
-    }
-    let posts: Vec<ManualPost> = serde_json::from_slice(
-        &fs::read(path).with_context(|| format!("reading {}", path.display()))?,
-    )
-    .with_context(|| format!("parsing {}", path.display()))?;
-    let post_count = posts.len();
-    let latest_published_at = posts.iter().map(|post| post.published_at).max();
-    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
-    let mut items = Vec::new();
-    for post in posts {
-        for project in &config.targets {
-            let focus_terms = garbage::project_focus_terms(project, editorial_focuses);
-            let count = *counts.get(project.name.as_str()).unwrap_or(&0);
-            if count >= max_per_project
-                || !manual_post_matches_project(&post, project, &focus_terms)
-            {
-                continue;
-            }
-            items.push(garbage::manual_post_item(
-                project,
-                source,
-                &post,
-                &focus_terms,
-            ));
-            counts.insert(project.name.as_str(), count + 1);
-        }
-    }
-    Ok(ManualSourceCollect {
-        items,
-        post_count,
-        latest_published_at,
-    })
-}
-
-#[derive(Debug, Default)]
-struct ManualSourceCollect {
-    items: Vec<NewsItem>,
-    post_count: usize,
-    latest_published_at: Option<DateTime<Utc>>,
 }
 
 fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
@@ -876,51 +822,6 @@ fn seed_source_runs(config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
-}
-
-fn manual_post_matches_project(
-    post: &ManualPost,
-    project: &CollectionTarget,
-    focus_terms: &[String],
-) -> bool {
-    let text = format!("{} {} {}", post.title, post.url, post.text);
-    text_matches_project(&text, project, focus_terms)
-}
-
-fn text_matches_project(text: &str, project: &CollectionTarget, focus_terms: &[String]) -> bool {
-    let text = text.to_lowercase();
-    let project_name = project.name.to_lowercase();
-    if project.name == "LanceDB" {
-        return text.contains("lancedb")
-            || text.contains("lance-format")
-            || text.contains("lancedb.com");
-    }
-    if contains_distinct_term(&text, &project_name) {
-        return true;
-    }
-    garbage::project_live_terms(project)
-        .iter()
-        .chain(focus_terms.iter())
-        .any(|keyword| contains_distinct_term(&text, keyword))
-}
-
-fn contains_distinct_term(text: &str, term: &str) -> bool {
-    if term.is_empty() {
-        return false;
-    }
-    let mut start = 0;
-    while let Some(offset) = text[start..].find(term) {
-        let index = start + offset;
-        let before = text[..index].chars().next_back();
-        let after = text[index + term.len()..].chars().next();
-        let before_boundary = before.is_none_or(|character| !character.is_ascii_alphanumeric());
-        let after_boundary = after.is_none_or(|character| !character.is_ascii_alphanumeric());
-        if before_boundary && after_boundary {
-            return true;
-        }
-        start = index + term.len();
-    }
-    false
 }
 
 fn sql_string(value: &str) -> String {
