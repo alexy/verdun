@@ -19,7 +19,7 @@ export async function runApplyNewsletterSqlCli(args, env = process.env) {
   assertFile(snapshotPath, 'snapshot file')
   for (const migrationPath of migrationPaths) assertFile(migrationPath, 'migration file')
 
-  run('node', ['scripts/smoke-loader-sql.mjs', sqlPath, snapshotPath])
+  run('node', ['scripts/instances/garbage/smoke-loader-sql.mjs', sqlPath, snapshotPath])
   console.log(`migrations ready: ${migrationPaths.join(', ')}`)
 
   if (!apply) {

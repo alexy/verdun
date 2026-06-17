@@ -15,7 +15,7 @@ const steps = [
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--snapshot', snapshotPath, '--out', sqlPath]],
   ['npm', ['run', 'smoke:generic-loader', '--', sqlPath, snapshotPath]],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'newsletter', '--snapshot', snapshotPath, '--out', newsletterSqlPath]],
-  ['npm', ['run', 'smoke:loader', '--', newsletterSqlPath, snapshotPath]],
+  ['npm', ['run', 'garbage:smoke:loader', '--', newsletterSqlPath, snapshotPath]],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', 'generic', '--instance', 'greathouse', '--instance-name', 'Greathouse', '--base-path', '/greathouse/', '--snapshot', snapshotPath, '--out', customGenericSqlPath]],
   ['npm', ['run', 'smoke:generic-loader', '--', customGenericSqlPath, snapshotPath, '--allow-custom-instance', '--expect-instance', 'greathouse', '--expect-base-path', '/greathouse/']],
   ['npm', ['run', 'smoke:greathouse-workbench']],
