@@ -1,4 +1,4 @@
-import { allowMethods, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../newsletter/_http.js'
+import { allowMethods, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../core/http.js'
 import { readWorkbenchStatus } from './_db.js'
 import { resolveWorkbenchInstance, supportedWorkbenchInstances } from '../../src/instances/registry'
 

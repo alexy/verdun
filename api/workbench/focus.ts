@@ -1,4 +1,4 @@
-import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../newsletter/_http.js'
+import { allowMethods, parseBody, sendApiError, sendJson, type ApiRequest, type ApiResponse } from '../core/http.js'
 import { writeWorkbenchFocus } from './_db.js'
 import type { WorkbenchFocus } from '../../src/core/workbench'
 import { resolveWorkbenchInstance } from '../../src/instances/registry'

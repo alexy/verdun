@@ -1,4 +1,4 @@
-import { allowMethods, parseBody, sendJson } from '../api/newsletter/_http.ts'
+import { allowMethods, parseBody, sendJson } from '../api/core/http.ts'
 
 function responseRecorder() {
   return {

@@ -31,6 +31,7 @@
 - Moved the Strongly Typed AI ontology helper implementation under `src/instances/garbage/ontology.ts`; the generic `src/lib/ontology.ts` path is now only a compatibility re-export.
 - Moved Garbage newsletter/draft/readiness/export logic under `src/instances/garbage/newsletter.ts`; the generic `src/lib/newsletter.ts` path is now only a compatibility re-export.
 - Moved Garbage-specific newsletter hero and draft preview components under `src/instances/garbage/components/`, leaving the shared `WorkbenchHero` in the generic component tree.
+- Extracted generic API request/response helpers to `api/core/http.ts`; `api/workbench` routes now use the generic helper while `api/newsletter/_http.ts` remains a compatibility re-export.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
@@ -43,5 +44,6 @@ Known remaining extraction work:
 - Crawler instance selection supports `--instance garbage` and `--instance greathouse`.
 - Workbench API routes support explicit Garbage/Greathouse instance selection, and the browser app now reads/reviews/focuses Garbage through generic workbench routes.
 - Newsletter draft generation, readiness, Ulysses export, editorial-state import, ontology rendering, and the first Garbage-specific UI components are now implemented under the Garbage instance, but the app still uses some Garbage-specific newsletter UI component names and compatibility API route names.
+- Workbench API routes no longer depend on the newsletter HTTP helper path, but generic workbench database fallback still uses Garbage newsletter compatibility helpers for the local static/local-file mode.
 - Greathouse crawler collection now dispatches through configured local JSON adapters, but it still does not have real network/browser property-source adapters.
 - Greathouse is still a partial consumer rather than a full app consuming Verdun core.
