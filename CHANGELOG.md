@@ -12,6 +12,7 @@
 - Changed local UI smoke defaults (`smoke-browser`, `smoke-responsive`, and `smoke-app`) to resolve their preview URLs from deploy profile metadata instead of embedding Garbage `/rbage/` URLs directly.
 - Changed the generic SQL loader smoke to resolve its default snapshot, instance id, base path, and required subjects/plans through deploy profile metadata instead of embedding Garbage-specific expectations.
 - Changed `smoke-db-apply` and `smoke-db-deploy` to resolve their default source snapshot through deploy profile metadata instead of embedding the Garbage newsletter snapshot path.
+- Changed `src/instances/registry.ts` to store default-instance and static-snapshot behavior in registration metadata instead of branching directly on Garbage or Greathouse instances; app resolution now falls back through the registered default.
 
 ## 2026-06-16
 

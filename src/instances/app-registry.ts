@@ -10,5 +10,5 @@ const appComponents: Record<string, Component> = {
 
 export function resolveWorkbenchAppForPath(pathname: string): Component {
   const instance = resolveWorkbenchInstanceForPath(pathname)
-  return appComponents[instance.id] ?? appComponents[defaultWorkbenchInstance().id] ?? GarbageApp
+  return appComponents[instance.id] ?? appComponents[defaultWorkbenchInstance().id]
 }

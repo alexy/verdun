@@ -14,10 +14,11 @@ const { module: registryModule } = await runnerImport('./src/instances/registry.
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const [greathouseAppSource, appSource, appRegistrySource] = await Promise.all([
+const [greathouseAppSource, appSource, appRegistrySource, registrySource] = await Promise.all([
   readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
   readFile('src/App.vue', 'utf8'),
   readFile('src/instances/app-registry.ts', 'utf8'),
+  readFile('src/instances/registry.ts', 'utf8'),
 ])
 
 const snapshotRef = ref(pilotModule.greathousePilotSnapshot())
@@ -70,9 +71,21 @@ if (
 ) {
   throw new Error('instance app registry is not wired to metadata-backed route selection')
 }
+if (appRegistrySource.includes('?? GarbageApp')) {
+  throw new Error('instance app registry still falls back directly to the Garbage app instead of the registered default')
+}
+if (registrySource.includes('return garbageInstance') || registrySource.includes('instance.id === greathouseInstance.id')) {
+  throw new Error('instance registry still hard-codes default or static-snapshot instance branches')
+}
 if (registryModule.resolveWorkbenchInstanceForPath('/greathouse/').id !== 'greathouse') {
   throw new Error('registry did not resolve /greathouse/ to the Greathouse instance')
 }
 if (registryModule.resolveWorkbenchInstanceForPath('/rbage/').id !== 'garbage') {
   throw new Error('registry did not resolve /rbage/ to the Garbage instance')
+}
+if (registryModule.defaultWorkbenchInstance().id !== 'garbage') {
+  throw new Error('registry did not expose the configured default workbench instance')
+}
+if (registryModule.staticWorkbenchSnapshot(registryModule.resolveWorkbenchInstance('greathouse'))?.instance?.id !== 'greathouse') {
+  throw new Error('registry did not expose the Greathouse static snapshot from registration metadata')
 }

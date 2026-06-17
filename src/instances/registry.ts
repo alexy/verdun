@@ -3,10 +3,21 @@ import { garbageInstance } from './garbage/config'
 import { greathouseInstance } from './greathouse/config'
 import { greathousePilotSnapshot } from './greathouse/pilot'
 
-const instances = [garbageInstance, greathouseInstance]
+type RegisteredWorkbenchInstance = {
+  instance: WorkbenchInstance
+  default?: boolean
+  staticSnapshot?: () => WorkbenchSnapshot
+}
+
+const registeredInstances: RegisteredWorkbenchInstance[] = [
+  { instance: garbageInstance, default: true },
+  { instance: greathouseInstance, staticSnapshot: greathousePilotSnapshot },
+]
+
+const instances = registeredInstances.map((entry) => entry.instance)
 
 export function defaultWorkbenchInstance(): WorkbenchInstance {
-  return garbageInstance
+  return defaultWorkbenchEntry().instance
 }
 
 export function supportedWorkbenchInstances(): WorkbenchInstance[] {
@@ -32,6 +43,9 @@ export function resolveWorkbenchInstanceForPath(pathname: string): WorkbenchInst
 }
 
 export function staticWorkbenchSnapshot(instance: WorkbenchInstance): WorkbenchSnapshot | null {
-  if (instance.id === greathouseInstance.id) return greathousePilotSnapshot()
-  return null
+  return registeredInstances.find((entry) => entry.instance.id === instance.id)?.staticSnapshot?.() ?? null
+}
+
+function defaultWorkbenchEntry(): RegisteredWorkbenchInstance {
+  return registeredInstances.find((entry) => entry.default) ?? registeredInstances[0]
 }
