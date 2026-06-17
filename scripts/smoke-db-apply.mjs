@@ -5,6 +5,7 @@ const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
 const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
 const applySource = readFileSync('scripts/workbench-apply-sql.mjs', 'utf8')
 const smokeAllSource = readFileSync('scripts/smoke-all.mjs', 'utf8')
+const genericLoaderSource = readFileSync('scripts/smoke-generic-loader-sql.mjs', 'utf8')
 const smokeBrowserSource = readFileSync('scripts/smoke-browser.mjs', 'utf8')
 const smokeResponsiveSource = readFileSync('scripts/smoke-responsive.mjs', 'utf8')
 const smokeAppSource = readFileSync('scripts/smoke-app.mjs', 'utf8')
@@ -14,6 +15,11 @@ if (applySource.includes('public/data/newsletter-snapshot.json')) {
 }
 if (smokeAllSource.includes("const snapshotPath = 'public/data/newsletter-snapshot.json'")) {
   throw new Error('smoke-all still embeds the Garbage newsletter snapshot as its default source snapshot')
+}
+for (const marker of ['public/data/newsletter-snapshot.json', "'garbage'", "'/rbage/'", 'Pydantic', 'LakeSail']) {
+  if (genericLoaderSource.includes(marker)) {
+    throw new Error(`generic loader smoke still embeds default Garbage marker: ${marker}`)
+  }
 }
 for (const [label, source] of [
   ['smoke-browser', smokeBrowserSource],

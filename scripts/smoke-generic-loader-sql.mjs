@@ -1,7 +1,9 @@
 import { readFile } from 'node:fs/promises'
+import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
-const snapshotPath = process.argv[3] ?? 'public/data/newsletter-snapshot.json'
+const profile = deployCheckProfile(defaultDeployCheckProfileId())
+const snapshotPath = process.argv[3] ?? profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
 
 const [sql, snapshot] = await Promise.all([
   readFile(sqlPath, 'utf8'),
@@ -12,6 +14,10 @@ const items = snapshot.items ?? []
 const sourceRuns = snapshot.source_runs ?? snapshot.sourceRuns ?? []
 const queryPlans = snapshot.query_plans ?? snapshot.queryPlans ?? []
 const snapshotGeneratedAt = snapshot.generated_at ?? snapshot.generatedAt
+const defaultInstance = profile?.id ?? defaultDeployCheckProfileId()
+const defaultBasePath = new URL(profile?.defaultBaseUrl ?? 'http://127.0.0.1/').pathname
+const defaultRequiredSubjects = profile?.requiredSubjects ?? []
+const defaultRequiredPlans = profile?.requiredPlans ?? defaultRequiredSubjects
 
 assertCount('insert into records', items.length)
 assertCount('insert into source_runs', sourceRuns.length)
@@ -21,8 +27,8 @@ if (!sql.includes("insert into instances")) {
   throw new Error('generic SQL export is missing instance upsert')
 }
 const allowsCustomInstance = process.argv.includes('--allow-custom-instance')
-if (!allowsCustomInstance && (!sql.includes("'garbage'") || !sql.includes("'/rbage/'"))) {
-  throw new Error('generic SQL export is missing Garbage instance namespace')
+if (!allowsCustomInstance && (!sql.includes(sqlString(defaultInstance)) || !sql.includes(sqlString(defaultBasePath)))) {
+  throw new Error(`generic SQL export is missing default instance namespace: ${defaultInstance} at ${defaultBasePath}`)
 }
 if (allowsCustomInstance) {
   const instance = valueAfter('--expect-instance')
@@ -49,9 +55,11 @@ for (const required of ['provenance_json', 'normalized_json', 'raw_json', 'dedup
   if (!sql.includes(required)) throw new Error(`generic SQL export is missing ${required}`)
 }
 if (!allowsCustomInstance) {
-  for (const project of ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs']) {
+  for (const project of defaultRequiredSubjects) {
     if (!items.some((item) => item.project === project)) throw new Error(`snapshot is missing required project ${project}`)
     if (!sql.includes(sqlString(project))) throw new Error(`generic SQL export is missing required subject ${project}`)
+  }
+  for (const project of defaultRequiredPlans) {
     if (!queryPlans.some((plan) => plan.project === project)) throw new Error(`snapshot is missing query plan for ${project}`)
   }
 } else {
@@ -110,10 +118,9 @@ function representativeItems(items) {
   const seen = new Set()
   return [
     items.find((item) => item.raw_json?.provenance),
-    items.find((item) => item.source === 'Hacker News'),
-    items.find((item) => item.project === 'Pydantic'),
-    items.find((item) => item.project === 'LakeSail'),
+    ...defaultRequiredSubjects.slice(0, 2).map((subject) => items.find((item) => item.project === subject)),
     items[0],
+    items[Math.floor(items.length / 2)],
   ].filter((item) => {
     if (!item || seen.has(item.id)) return false
     seen.add(item.id)
@@ -124,9 +131,7 @@ function representativeItems(items) {
 function representativeQueryPlans(queryPlans) {
   const seen = new Set()
   return [
-    queryPlans.find((plan) => plan.project === 'Pydantic'),
-    queryPlans.find((plan) => plan.project === 'LakeSail'),
-    queryPlans.find((plan) => plan.project === 'Grust Sail'),
+    ...defaultRequiredPlans.slice(0, 3).map((subject) => queryPlans.find((plan) => plan.project === subject)),
     queryPlans[0],
   ].filter((plan) => {
     if (!plan || seen.has(plan.project)) return false
