@@ -1882,7 +1882,7 @@ fn is_generic_focus_term(value: &str) -> bool {
     .contains(&value)
 }
 
-fn news_item_record(item: &NewsItem) -> NormalizedRecord {
+pub fn news_item_record(item: &NewsItem) -> NormalizedRecord {
     let provenance_json = item
         .raw_json
         .get("provenance")

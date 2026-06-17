@@ -3,6 +3,7 @@
 ## 2026-06-17
 
 - Removed the old `api/newsletter/*` compatibility route files; Garbage newsletter APIs are now exposed through the explicit `api/garbage/newsletter/*` namespace.
+- Exposed the Garbage legacy news-item to core `NormalizedRecord` projection as an instance boundary function, preparing the remaining crawler `NewsItem` trait cleanup.
 - Moved crawler editorial focus state into `crawler/src/core.rs`; the shared crawler trait no longer imports that focus type from the Garbage module.
 - Changed the crawler instance trait to expose core `NormalizedCollectionPlan` values instead of the Garbage `ProjectQueryPlan` type; legacy query-plan JSON is now only produced at the public snapshot/CLI compatibility boundary.
 - Added a Zillow-shaped Greathouse listing adapter and fixture so a second production property-source format refills the same generic crawler snapshot and workbench SQL contract.

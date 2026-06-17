@@ -29,6 +29,9 @@ for (const marker of [
 if (!garbageInstanceSource.includes('pub fn newsletter_export_sql') || !garbageInstanceSource.includes('insert into newsletter_items')) {
   throw new Error('Garbage crawler instance does not own the legacy newsletter SQL exporter')
 }
+if (!garbageInstanceSource.includes('pub fn news_item_record') || !garbageInstanceSource.includes('NormalizedRecord')) {
+  throw new Error('Garbage crawler instance does not expose a core record projection for legacy news items')
+}
 if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.includes('Vec<NormalizedCollectionPlan>')) {
   throw new Error('crawler instance trait still exposes Garbage query-plan types instead of core collection plans')
 }
