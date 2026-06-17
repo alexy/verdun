@@ -6,7 +6,7 @@ mod instances;
 use crate::core::{
     CollectionTarget, CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus,
 };
-use crate::instances::garbage::{ExportPayload, NewsItem, ProjectQueryPlan, PublicSnapshot};
+use crate::instances::garbage::{self, ExportPayload, NewsItem, ProjectQueryPlan, PublicSnapshot};
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
 use serde::Deserialize;
@@ -158,7 +158,7 @@ fn collect(
             Err(error) => eprintln!("live collection skipped after error: {error:#}"),
         }
     }
-    let items = dedupe_items(items);
+    let items = garbage::dedupe_items(items);
     let item_count = items.len();
     if let Some(parent) = out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
@@ -1231,7 +1231,7 @@ fn ok_source_run(source: &SourceConfig, items: &[NewsItem], message: &str) -> So
         status: SourceRunStatus::Ok,
         item_count: items.len(),
         message: message.to_string(),
-        project_counts: project_counts(items),
+        project_counts: garbage::project_counts(items),
     }
 }
 
@@ -1266,7 +1266,7 @@ fn manual_source_run(
                 "manual JSON import is stale; latest reviewed post is older than {}",
                 since.to_rfc3339()
             ),
-            project_counts: project_counts(items),
+            project_counts: garbage::project_counts(items),
         };
     }
     ok_source_run(
@@ -1278,14 +1278,6 @@ fn manual_source_run(
             if post_count == 1 { "" } else { "s" }
         ),
     )
-}
-
-fn project_counts(items: &[NewsItem]) -> BTreeMap<String, usize> {
-    let mut counts = BTreeMap::new();
-    for item in items {
-        *counts.entry(item.project.clone()).or_insert(0) += 1;
-    }
-    counts
 }
 
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
@@ -1306,115 +1298,6 @@ fn seed_items(config: &CrawlerConfig) -> Vec<NewsItem> {
         .enumerate()
         .map(|(index, project)| project_item(project, &source, index))
         .collect()
-}
-
-fn dedupe_items(items: Vec<NewsItem>) -> Vec<NewsItem> {
-    let mut by_key = BTreeMap::new();
-    for item in items {
-        let key = item_dedupe_key(&item);
-        if let Some(existing) = by_key.get_mut(&key) {
-            if should_replace_dedupe_item(&item, existing) {
-                let previous = std::mem::replace(existing, item);
-                record_duplicate(existing, &previous);
-            } else {
-                record_duplicate(existing, &item);
-            }
-        } else {
-            by_key.insert(key, item);
-        }
-    }
-    let mut items = by_key.into_values().collect::<Vec<_>>();
-    items.sort_by(|left, right| {
-        right
-            .score
-            .cmp(&left.score)
-            .then_with(|| right.published_at.cmp(&left.published_at))
-            .then_with(|| left.project.cmp(&right.project))
-            .then_with(|| left.title.cmp(&right.title))
-    });
-    items
-}
-
-fn item_dedupe_key(item: &NewsItem) -> String {
-    if item_stage_rank(item) <= 1 {
-        return format!("seed:{}", item.id);
-    }
-    canonical_url(&item.url).unwrap_or_else(|| item.id.clone())
-}
-
-fn should_replace_dedupe_item(candidate: &NewsItem, existing: &NewsItem) -> bool {
-    item_stage_rank(candidate)
-        .cmp(&item_stage_rank(existing))
-        .then_with(|| candidate.score.cmp(&existing.score))
-        .then_with(|| candidate.published_at.cmp(&existing.published_at))
-        .is_gt()
-}
-
-fn item_stage_rank(item: &NewsItem) -> i32 {
-    match item
-        .raw_json
-        .get("collection_stage")
-        .and_then(|stage| stage.as_str())
-    {
-        Some("manual") => 3,
-        Some("live") => 2,
-        Some("watchlist-seed") => 1,
-        _ => 0,
-    }
-}
-
-fn record_duplicate(item: &mut NewsItem, duplicate: &NewsItem) {
-    let duplicate_record = serde_json::json!({
-        "id": duplicate.id,
-        "title": duplicate.title,
-        "source": duplicate.source,
-        "url": duplicate.url,
-        "project": duplicate.project,
-        "score": duplicate.score,
-        "collection_stage": duplicate.raw_json.get("collection_stage").and_then(|stage| stage.as_str())
-    });
-    if let Some(duplicates) = item
-        .raw_json
-        .get_mut("duplicates")
-        .and_then(|value| value.as_array_mut())
-    {
-        duplicates.push(duplicate_record);
-    } else if let Some(object) = item.raw_json.as_object_mut() {
-        object.insert(
-            "duplicates".to_string(),
-            serde_json::Value::Array(vec![duplicate_record]),
-        );
-    }
-}
-
-fn canonical_url(value: &str) -> Option<String> {
-    let trimmed = value.trim();
-    if trimmed.is_empty() {
-        return None;
-    }
-    let mut normalized = trimmed.split('#').next().unwrap_or(trimmed).to_lowercase();
-    if let Some(index) = normalized.find('?') {
-        let query = &normalized[index + 1..];
-        let meaningful_query = query
-            .split('&')
-            .filter(|part| {
-                !part.starts_with("utm_")
-                    && !part.starts_with("ref=")
-                    && !part.starts_with("source=")
-                    && !part.is_empty()
-            })
-            .collect::<Vec<_>>()
-            .join("&");
-        normalized.truncate(index);
-        if !meaningful_query.is_empty() {
-            normalized.push('?');
-            normalized.push_str(&meaningful_query);
-        }
-    }
-    while normalized.ends_with('/') {
-        normalized.pop();
-    }
-    Some(normalized.replace("://www.", "://"))
 }
 
 fn project_item(project: &CollectionTarget, source: &SourceConfig, index: usize) -> NewsItem {

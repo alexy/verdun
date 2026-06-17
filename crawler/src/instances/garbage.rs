@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 use crate::core::{
     CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord, ReviewTarget, SourceRun,
@@ -76,6 +77,41 @@ pub fn item_dedupe_key(item: &NewsItem) -> String {
     canonical_url(&item.url).unwrap_or_else(|| item.id.clone())
 }
 
+pub fn dedupe_items(items: Vec<NewsItem>) -> Vec<NewsItem> {
+    let mut by_key = BTreeMap::new();
+    for item in items {
+        let key = item_dedupe_key(&item);
+        if let Some(existing) = by_key.get_mut(&key) {
+            if should_replace_dedupe_item(&item, existing) {
+                let previous = std::mem::replace(existing, item);
+                record_duplicate(existing, &previous);
+            } else {
+                record_duplicate(existing, &item);
+            }
+        } else {
+            by_key.insert(key, item);
+        }
+    }
+    let mut items = by_key.into_values().collect::<Vec<_>>();
+    items.sort_by(|left, right| {
+        right
+            .score
+            .cmp(&left.score)
+            .then_with(|| right.published_at.cmp(&left.published_at))
+            .then_with(|| left.project.cmp(&right.project))
+            .then_with(|| left.title.cmp(&right.title))
+    });
+    items
+}
+
+pub fn project_counts(items: &[NewsItem]) -> BTreeMap<String, usize> {
+    let mut counts = BTreeMap::new();
+    for item in items {
+        *counts.entry(item.project.clone()).or_insert(0) += 1;
+    }
+    counts
+}
+
 fn news_item_record(item: &NewsItem) -> NormalizedRecord {
     let provenance_json = item
         .raw_json
@@ -117,6 +153,14 @@ fn project_query_plan_record(plan: &ProjectQueryPlan) -> NormalizedCollectionPla
     }
 }
 
+fn should_replace_dedupe_item(candidate: &NewsItem, existing: &NewsItem) -> bool {
+    item_stage_rank(candidate)
+        .cmp(&item_stage_rank(existing))
+        .then_with(|| candidate.score.cmp(&existing.score))
+        .then_with(|| candidate.published_at.cmp(&existing.published_at))
+        .is_gt()
+}
+
 fn item_stage_rank(item: &NewsItem) -> i32 {
     match item
         .raw_json
@@ -127,6 +171,30 @@ fn item_stage_rank(item: &NewsItem) -> i32 {
         Some("live") => 2,
         Some("watchlist-seed") => 1,
         _ => 0,
+    }
+}
+
+fn record_duplicate(item: &mut NewsItem, duplicate: &NewsItem) {
+    let duplicate_record = serde_json::json!({
+        "id": duplicate.id,
+        "title": duplicate.title,
+        "source": duplicate.source,
+        "url": duplicate.url,
+        "project": duplicate.project,
+        "score": duplicate.score,
+        "collection_stage": duplicate.raw_json.get("collection_stage").and_then(|stage| stage.as_str())
+    });
+    if let Some(duplicates) = item
+        .raw_json
+        .get_mut("duplicates")
+        .and_then(|value| value.as_array_mut())
+    {
+        duplicates.push(duplicate_record);
+    } else if let Some(object) = item.raw_json.as_object_mut() {
+        object.insert(
+            "duplicates".to_string(),
+            serde_json::Value::Array(vec![duplicate_record]),
+        );
     }
 }
 
