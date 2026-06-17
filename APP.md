@@ -53,7 +53,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Database-backed API snapshots and status responses preserve the source collection timestamp from `newsletter_source_runs.collected_at`, so deployed draft issue dates follow the crawler/load run rather than serverless request time.
 - Source-health metadata shown in the app sidebar, including per-project coverage for each watched source.
 - Source-health coverage gaps use the crawler query plan as the watched-project authority, identify watched projects without live/manual source matches, show crawler query hints and source-specific review links for the first gaps, can be saved directly as this-week focus requests, and include the same actionable gap signal in local Markdown drafts.
-- `npm run review:gaps` writes an ignored Markdown checklist of uncovered projects and their public/manual review targets for issue preparation.
+- `npm run garbage:review:gaps` writes an ignored Markdown checklist of uncovered projects and their public/manual review targets for issue preparation.
 - `verdun-crawler queries` and `collect` read exported/local editorial state when available and attach matching saved focus terms plus review targets for HN, Lobste.rs, dev.to, Medium, Substack, LinkedIn, and X/Twitter to project query plans.
 - Live public-source ingestion for Hacker News, Lobste.rs, project-tagged dev.to queries, configured Medium/Substack feeds, and manual LinkedIn/X JSON imports, merged with the curated watchlist for Pydantic, BAML, DSPy, Instructor, LakeSail, Apache Arrow, DataFusion, Delta Lake, Ibis, Dagster, Grust Sail, Turso, LanceDB, HelixDB, SurrealDB, pgGraph, Grust, TypeSec, Garde, zod-rs, FalkorDB, LadybugDB, and CocoIndex.
 - Feed ingestion matches descriptions, summaries, and encoded long-form content with term-boundary checks, so Substack/RSS items can be found without turning short names such as Garde into substring false positives.
@@ -61,7 +61,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - `verdun-crawler queries` prints the non-network query plan for watched projects before a live collection run.
 - Live/manual collection defaults to a 45-day recency window via `--since-days`, so weekly drafts do not pull stale search hits.
 - `verdun-crawler verify` guards the required project list, public-source adapters, Medium/Substack feed configuration, and LinkedIn/X manual import files.
-- Deterministic local Markdown draft generation in the app and from `npm run draft` / `npm run ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
+- Deterministic local Markdown draft generation in the app and from `npm run garbage:draft` / `npm run garbage:ulysses:draft`, including saved this-week and ongoing focus notes as an editorial brief.
 - Draft generation now opens with a weekly throughline that synthesizes selected projects by ontology, source evidence, topic, and saved editorial intent before the item list.
 - Draft item sections and publish manifests include selection reasons so upvotes, live/manual evidence, and fallback ranking are auditable.
 - Draft item sections include source-linked provenance evidence lines when crawler/API evidence is available.
@@ -77,15 +77,15 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - The app draft preview imports and exports `{ votes, focuses }` editorial state JSON in the same shape consumed by `VERDUN_LOCAL_STATE_FILE` for local Ulysses export.
 - The app draft preview exports the same publish manifest shape used by the CLI, so browser triage can audit selected item IDs, votes, focuses, readiness, coverage, and source/query-plan counts before local export.
 - Publish manifests and the draft preview summarize the selected spine's evidence mix by live/manual/seed counts and source mix before Ulysses or Ghost handoff.
-- `npm run ulysses:ready` gates local Ulysses Markdown export on explicit upvotes and publishing readiness, failing until local editorial state is ready.
-- `npm run ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
-- `npm run ulysses:ready -- --editorial-state /path/to/exported-state.json` uses a downloaded app editorial-state file directly and records it in the paired manifest as `editorialStateInput`.
+- `npm run garbage:ulysses:ready` gates local Ulysses Markdown export on explicit upvotes and publishing readiness, failing until local editorial state is ready.
+- `npm run garbage:ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
+- `npm run garbage:ulysses:ready -- --editorial-state /path/to/exported-state.json` uses a downloaded app editorial-state file directly and records it in the paired manifest as `editorialStateInput`.
 - `ULYSSES_IMPORT_DIR` or `--ulysses-import-dir` copies the generated Markdown and paired manifest into an external Ulysses handoff folder after a successful export.
 - File-based draft exports also write a same-stem `.manifest.json` with issue identity metadata, the snapshot input, publishing gates, selected item IDs, selected item metadata, votes, focuses, readiness checks, source coverage, source runs, and query-plan count.
 - Optional Ghost Admin API draft helper remains available, but the primary publishing path is local Markdown into Ulysses rather than drafting from Vercel.
-- `npm run ghost:draft -- --editorial-state /path/to/exported-state.json` applies the same browser-exported votes and focus notes as `npm run ulysses:ready` and records the file in the Ghost audit manifest.
-- `npm run ghost:dry-run -- --editorial-state /path/to/exported-state.json` validates the Ghost endpoint/payload/manifest shape, including deterministic slug and metadata fields, without credentials or network access; `--manifest-out` / `GHOST_MANIFEST_OUT` writes the same audit bundle to disk.
-- Real Ghost API writes require `--require-upvotes` and `--require-ready` by default; `npm run ghost:ready` is the guarded command, while non-draft Ghost statuses and ungated writes require explicit override flags.
+- `npm run garbage:ghost:draft -- --editorial-state /path/to/exported-state.json` applies the same browser-exported votes and focus notes as `npm run garbage:ulysses:ready` and records the file in the Ghost audit manifest.
+- `npm run garbage:ghost:dry-run -- --editorial-state /path/to/exported-state.json` validates the Ghost endpoint/payload/manifest shape, including deterministic slug and metadata fields, without credentials or network access; `--manifest-out` / `GHOST_MANIFEST_OUT` writes the same audit bundle to disk.
+- Real Ghost API writes require `--require-upvotes` and `--require-ready` by default; `npm run garbage:ghost:ready` is the guarded command, while non-draft Ghost statuses and ungated writes require explicit override flags.
 
 ## Next Work
 
@@ -104,5 +104,5 @@ Current local checks:
 - `npm run check:preview`
 - `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2`
 - `cargo run --manifest-path crawler/Cargo.toml -- queries`
-- `npm run draft`
+- `npm run garbage:draft`
 - `npm run smoke:app -- http://127.0.0.1:5174/rbage/`

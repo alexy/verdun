@@ -2,6 +2,7 @@
 
 ## 2026-06-17
 
+- Removed the generic Garbage publishing package aliases (`draft`, `review:gaps`, `ulysses:*`, and `ghost:*`); publishing commands now use explicit `garbage:*` package names.
 - Removed the unused generic publishing wrapper scripts (`scripts/newsletter-draft.mjs`, `scripts/publish-ghost.mjs`, and `scripts/source-gap-review.mjs`); Garbage publishing remains available through explicit `scripts/garbage-*.mjs` wrappers and `garbage:*` package commands.
 - Removed unused generic `src/lib/newsletter.ts`, `src/lib/ontology.ts`, and `src/lib/snapshot.ts` compatibility re-exports so Garbage newsletter, ontology, and snapshot logic are only exposed from the Garbage instance namespace.
 - Added a Greathouse deploy-check profile with preview URL, static snapshot, count gates, and required subject/plan metadata; Greathouse deployed checks can now run from profile metadata instead of explicit CLI gates.
@@ -74,7 +75,7 @@
 - Moved Garbage newsletter API store logic under `api/instances/garbage/newsletter-store.ts`; `api/newsletter/_db.ts` is now only a compatibility re-export.
 - Moved Garbage newsletter route implementations under `api/instances/garbage/newsletter/`; the public `api/newsletter/*` files now act as compatibility shims.
 - Moved Garbage publishing helper implementations under `scripts/instances/garbage/`; explicit Garbage draft, Ghost publish, and source-gap scripts now act as CLI/module wrappers.
-- Added explicit Garbage publishing package scripts (`garbage:draft`, `garbage:review:gaps`, `garbage:ulysses:*`, and `garbage:ghost:*`) and kept the old draft/Ulysses/Ghost names as compatibility aliases.
+- Added explicit Garbage publishing package scripts (`garbage:draft`, `garbage:review:gaps`, `garbage:ulysses:*`, and `garbage:ghost:*`).
 - Moved Garbage newsletter SQL reload helper implementations under `scripts/instances/garbage/`; the public apply/deploy database scripts now act as compatibility CLI/module wrappers.
 - Moved generic `slug` and `stable_id` helpers into `crawler/src/core.rs`.
 - Changed `verdun-crawler export-sql` to default to the generic workbench SQL target; Garbage newsletter table export is now an explicit `--target newsletter` compatibility path.

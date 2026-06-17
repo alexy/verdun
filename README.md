@@ -128,28 +128,28 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-newsletter-load.sql`.
 4. Run `npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, the preserved snapshot collection timestamp, query plans, required projects, tags, URLs, and provenance JSON.
 5. Run `npm run db:deploy -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate --apply` with the external Postgres URL set and Vercel production env configured, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes.
-6. Run `npm run review:gaps` to write `crawler/data/source-gap-review.md`, then work the uncovered-project checklist before final editorial picks.
+6. Run `npm run garbage:review:gaps` to write `crawler/data/source-gap-review.md`, then work the uncovered-project checklist before final editorial picks.
 7. Run `npm run check:deployed -- --require-ready` to verify the deployed route/API are serving a publishing-ready reviewed snapshot.
-8. Run `npm run ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
+8. Run `npm run garbage:ulysses:ready` to write the gated local Markdown export and paired publish manifest for Ulysses once readiness passes.
 
 ## Drafting for Ulysses
 
 Build a local Markdown draft from the current public snapshot for editing and publishing with Ulysses:
 
 ```sh
-npm run draft
+npm run garbage:draft
 ```
 
 The app's draft preview also exposes Markdown download and copy controls for the same shared draft builder output, plus a publish manifest JSON download for auditing the selected spine before local export.
 
 The generated article is written to `crawler/data/newsletter-draft.md` by default and includes a weekly throughline, an editorial arc for the selected spine, item selection reasons, source-linked item evidence lines from crawler provenance, source coverage gaps with crawler query hints, plus this-week and ongoing editorial focus notes when they are present in the local snapshot; in static local mode it uses the same fallback focus as the app preview. The Garbage app preview and CLI both use the publish manifest builder from `src/instances/garbage/newsletter.ts`; file exports write a sibling `.manifest.json` file recording issue identity metadata, the paired Markdown path, snapshot input, selected item IDs, selected item metadata with selection reasons, votes, focuses, readiness checks, prose-quality checks, source coverage, source runs, and query-plan count. The CLI uses the same draft builder as the Vue app, so the on-screen draft spine and local Markdown export stay aligned. When `crawler/data/editorial-state.json` exists, local app votes and focus notes are applied before the draft is built; set `NEWSLETTER_APPLY_LOCAL_STATE=false` to render the raw snapshot.
 
-The app's draft preview also offers `Editorial state` JSON export and import. The file contains the current `{ votes, focuses }` payload in the same shape as `crawler/data/editorial-state.json`, so a browser-only review session can be audited, restored in the app, or reused by setting `VERDUN_LOCAL_STATE_FILE` before running `npm run ulysses:ready`.
+The app's draft preview also offers `Editorial state` JSON export and import. The file contains the current `{ votes, focuses }` payload in the same shape as `crawler/data/editorial-state.json`, so a browser-only review session can be audited, restored in the app, or reused by setting `VERDUN_LOCAL_STATE_FILE` before running `npm run garbage:ulysses:ready`.
 
 For projects still missing live/manual source matches, run:
 
 ```sh
-npm run review:gaps
+npm run garbage:review:gaps
 ```
 
 That writes an ignored `crawler/data/source-gap-review.md` checklist from the current snapshot, grouping uncovered projects with their Hacker News, Lobste.rs, dev.to, Medium, Substack, LinkedIn, and X/Twitter review targets. Add useful reviewed social finds to the manual JSON files, then rerun `collect --live`.
@@ -161,28 +161,28 @@ When no items are explicitly upvoted, the draft builder prefers live/manual coll
 The draft renderer also rewrites thin feed snippets, generic feed captions, author labels, and crawler boilerplate into source-aware/project-aware sentences before Markdown or Ghost HTML is produced.
 
 ```sh
-NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/newsletter/items npm run draft
-NEWSLETTER_REQUIRE_UPVOTES=true npm run ulysses:draft
-NEWSLETTER_REQUIRE_READY=true npm run ulysses:draft
-npm run ulysses:ready
-npm run ulysses:ready -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
-NEWSLETTER_DRAFT_OUT=/path/to/ulysses-import/verdun-weekly.md npm run ulysses:draft -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
-ULYSSES_IMPORT_DIR=/path/to/ulysses-import npm run ulysses:ready -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
+NEWSLETTER_SNAPSHOT_FILE=https://collected.ga/api/newsletter/items npm run garbage:draft
+NEWSLETTER_REQUIRE_UPVOTES=true npm run garbage:ulysses:draft
+NEWSLETTER_REQUIRE_READY=true npm run garbage:ulysses:draft
+npm run garbage:ulysses:ready
+npm run garbage:ulysses:ready -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
+NEWSLETTER_DRAFT_OUT=/path/to/ulysses-import/verdun-weekly.md npm run garbage:ulysses:draft -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
+ULYSSES_IMPORT_DIR=/path/to/ulysses-import npm run garbage:ulysses:ready -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
 ```
 
-The snapshot input can be a local JSON file or an `http(s)` URL such as the deployed Vercel items API. Set `NEWSLETTER_REQUIRE_UPVOTES=true` or pass `--require-upvotes` to fail instead of publishing a fallback-ranked draft when no item has been explicitly upvoted. Set `NEWSLETTER_REQUIRE_READY=true` or pass `--require-ready` to apply the same publishing readiness checks shown in the app plus prose-quality checks that catch stale snapshots, missing throughline/arc, crawler/feed boilerplate, missing per-selected-item source-linked evidence, missing source links, missing credo fit, and missing selection audit before writing the Ulysses Markdown draft. After saving upvotes and focus notes in the app, `npm run ulysses:ready` applies both gates and writes the dated Ulysses export plus a same-stem `.manifest.json`; it intentionally fails if the local editorial state is not ready. Pass `--editorial-state /path/to/exported-state.json` to use a downloaded app `Editorial state` file directly; the paired manifest records that path as `editorialStateInput`. Without `NEWSLETTER_DRAFT_OUT`, `npm run ulysses:draft` and `npm run ulysses:ready` write a dated file under `crawler/data/ulysses/`, such as `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.md`, alongside `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.manifest.json`. That directory is ignored by git and is meant as the local Ulysses export area. Set `ULYSSES_DRAFT_DIR` to choose another export directory. Set `ULYSSES_IMPORT_DIR` or pass `--ulysses-import-dir /path/to/ulysses-import` to copy the generated Markdown and manifest pair into an external Ulysses handoff folder after the export succeeds.
+The snapshot input can be a local JSON file or an `http(s)` URL such as the deployed Vercel items API. Set `NEWSLETTER_REQUIRE_UPVOTES=true` or pass `--require-upvotes` to fail instead of publishing a fallback-ranked draft when no item has been explicitly upvoted. Set `NEWSLETTER_REQUIRE_READY=true` or pass `--require-ready` to apply the same publishing readiness checks shown in the app plus prose-quality checks that catch stale snapshots, missing throughline/arc, crawler/feed boilerplate, missing per-selected-item source-linked evidence, missing source links, missing credo fit, and missing selection audit before writing the Ulysses Markdown draft. After saving upvotes and focus notes in the app, `npm run garbage:ulysses:ready` applies both gates and writes the dated Ulysses export plus a same-stem `.manifest.json`; it intentionally fails if the local editorial state is not ready. Pass `--editorial-state /path/to/exported-state.json` to use a downloaded app `Editorial state` file directly; the paired manifest records that path as `editorialStateInput`. Without `NEWSLETTER_DRAFT_OUT`, `npm run garbage:ulysses:draft` and `npm run garbage:ulysses:ready` write a dated file under `crawler/data/ulysses/`, such as `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.md`, alongside `2026-06-15-strongly-typed-ai-data-notes-june-15-2026.manifest.json`. That directory is ignored by git and is meant as the local Ulysses export area. Set `ULYSSES_DRAFT_DIR` to choose another export directory. Set `ULYSSES_IMPORT_DIR` or pass `--ulysses-import-dir /path/to/ulysses-import` to copy the generated Markdown and manifest pair into an external Ulysses handoff folder after the export succeeds.
 
 An optional Ghost helper remains available for direct API drafts from the same local snapshot, but the editorial publishing sequence is local Markdown into Ulysses:
 
 ```sh
-npm run ghost:dry-run
-npm run ghost:dry-run -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
-npm run ghost:dry-run -- --manifest-out /path/to/ghost-publish.manifest.json
+npm run garbage:ghost:dry-run
+npm run garbage:ghost:dry-run -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
+npm run garbage:ghost:dry-run -- --manifest-out /path/to/ghost-publish.manifest.json
 
 GHOST_ADMIN_API_URL=https://collected.ga \
 GHOST_ADMIN_API_KEY='admin-key-id:admin-key-secret' \
 GHOST_MANIFEST_OUT=/path/to/ghost-publish.manifest.json \
-npm run ghost:ready -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
+npm run garbage:ghost:ready -- --editorial-state /path/to/downloaded-verdun-editorial-state.json
 ```
 
-`ghost:dry-run` prints the Ghost Admin API endpoint, post payload, and publish manifest without requiring credentials or making a network request. Pass `--editorial-state /path/to/exported-state.json` to apply the same browser-exported votes and focus notes used by `npm run ulysses:ready`; the paired manifest records that path as `editorialStateInput`. Pass `--manifest-out /path/to/file.json` or set `GHOST_MANIFEST_OUT` to write the same audit bundle to disk for dry-run or real publishing. The payload uses the same rendered draft as the Ulysses export and includes a deterministic slug, bounded excerpt, meta title, meta description, and newsletter taxonomy tags. `ghost:ready` uses the Ghost Admin API key format directly, applies the upvote/readiness gates, and posts with `status=draft`. Real Ghost API writes refuse ungated drafts unless `--allow-ungated-publish` or `GHOST_ALLOW_UNGATED_PUBLISH=true` is set. Non-draft Ghost statuses such as `published`, `scheduled`, or `sent` require `--allow-non-draft` or `GHOST_ALLOW_NON_DRAFT=true`.
+`garbage:ghost:dry-run` prints the Ghost Admin API endpoint, post payload, and publish manifest without requiring credentials or making a network request. Pass `--editorial-state /path/to/exported-state.json` to apply the same browser-exported votes and focus notes used by `npm run garbage:ulysses:ready`; the paired manifest records that path as `editorialStateInput`. Pass `--manifest-out /path/to/file.json` or set `GHOST_MANIFEST_OUT` to write the same audit bundle to disk for dry-run or real publishing. The payload uses the same rendered draft as the Ulysses export and includes a deterministic slug, bounded excerpt, meta title, meta description, and newsletter taxonomy tags. `garbage:ghost:ready` uses the Ghost Admin API key format directly, applies the upvote/readiness gates, and posts with `status=draft`. Real Ghost API writes refuse ungated drafts unless `--allow-ungated-publish` or `GHOST_ALLOW_UNGATED_PUBLISH=true` is set. Non-draft Ghost statuses such as `published`, `scheduled`, or `sent` require `--allow-non-draft` or `GHOST_ALLOW_NON_DRAFT=true`.

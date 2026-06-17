@@ -55,14 +55,7 @@
     "garbage:ghost:draft": "node scripts/garbage-publish-ghost.mjs",
     "garbage:ghost:dry-run": "node scripts/garbage-publish-ghost.mjs --dry-run --require-upvotes --require-ready",
     "garbage:ghost:ready": "node scripts/garbage-publish-ghost.mjs --require-upvotes --require-ready",
-    "draft": "npm run garbage:draft --",
-    "review:gaps": "npm run garbage:review:gaps --",
-    "audit:grust": "node scripts/grust-watchlist-audit.mjs",
-    "ulysses:draft": "npm run garbage:ulysses:draft --",
-    "ulysses:ready": "npm run garbage:ulysses:ready --",
-    "ghost:draft": "npm run garbage:ghost:draft --",
-    "ghost:dry-run": "npm run garbage:ghost:dry-run --",
-    "ghost:ready": "npm run garbage:ghost:ready --"
+    "audit:grust": "node scripts/grust-watchlist-audit.mjs"
   },
   "dependencies": {
     "@lucide/vue": "^1.17.0",
