@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ExternalLink } from '@lucide/vue'
-import type { NewsItem, VoteValue } from '../instances/garbage/newsletter'
-import { credoBlurb, ontologyMatchesForItem } from '../instances/garbage/ontology'
-import WorkbenchReviewRail from './workbench/WorkbenchReviewRail.vue'
+import type { NewsItem, VoteValue } from '../newsletter'
+import { credoBlurb, ontologyMatchesForItem } from '../ontology'
+import WorkbenchReviewRail from '../../../components/workbench/WorkbenchReviewRail.vue'
 
 defineProps<{
   inDraft: boolean

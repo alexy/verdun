@@ -5,7 +5,7 @@ const { module: newsletterModule } = await runnerImport('./src/instances/garbage
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const { module: viewModule } = await runnerImport('./src/composables/useNewsletterView.ts', {
+const { module: viewModule } = await runnerImport('./src/instances/garbage/composables/useNewsletterView.ts', {
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })

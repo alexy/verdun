@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import AppHeader from './components/AppHeader.vue'
-import EditorialSidebar from './components/EditorialSidebar.vue'
-import InboxControls from './components/InboxControls.vue'
-import NewsItemCard from './components/NewsItemCard.vue'
+import EditorialSidebar from './instances/garbage/components/EditorialSidebar.vue'
+import InboxControls from './instances/garbage/components/InboxControls.vue'
+import NewsItemCard from './instances/garbage/components/NewsItemCard.vue'
 import NewsletterDraftPreview from './instances/garbage/components/NewsletterDraftPreview.vue'
 import NewsletterHero from './instances/garbage/components/NewsletterHero.vue'
-import { useNewsletterSnapshot } from './composables/useNewsletterSnapshot'
-import { useNewsletterView } from './composables/useNewsletterView'
+import { useNewsletterSnapshot } from './instances/garbage/composables/useNewsletterSnapshot'
+import { useNewsletterView } from './instances/garbage/composables/useNewsletterView'
 import { ontologyNodes } from './instances/garbage/ontology'
 
 const { editorialPersistence, error, importEditorialState, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()

@@ -1,6 +1,6 @@
 import { runnerImport } from 'vite'
 
-const { module: snapshotModule } = await runnerImport('./src/composables/useNewsletterSnapshot.ts', {
+const { module: snapshotModule } = await runnerImport('./src/instances/garbage/composables/useNewsletterSnapshot.ts', {
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
