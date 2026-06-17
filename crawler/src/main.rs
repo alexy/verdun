@@ -2,13 +2,14 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 mod core;
+mod instances;
 use crate::core::{
-    CollectionTarget, CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, NormalizedRecord,
-    ReviewTarget, SourceConfig, SourceRun, SourceRunStatus,
+    CollectionTarget, CrawlerConfig, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus,
 };
+use crate::instances::garbage::{ExportPayload, NewsItem, ProjectQueryPlan, PublicSnapshot};
 use regex::Regex;
 use reqwest::{StatusCode, blocking::Client};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
@@ -67,33 +68,6 @@ enum CommandKind {
         #[arg(long, default_value = "crawler/data/editorial-state.json")]
         editorial_state: PathBuf,
     },
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct NewsItem {
-    id: String,
-    title: String,
-    source: String,
-    source_kind: String,
-    url: String,
-    published_at: DateTime<Utc>,
-    project: String,
-    topic: String,
-    summary: String,
-    why_it_matters: String,
-    tags: Vec<String>,
-    score: i32,
-    raw_json: serde_json::Value,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct PublicSnapshot {
-    generated_at: DateTime<Utc>,
-    theme: String,
-    items: Vec<NewsItem>,
-    source_runs: Vec<SourceRun>,
-    #[serde(default)]
-    query_plans: Vec<ProjectQueryPlan>,
 }
 
 fn main() -> Result<()> {
@@ -157,19 +131,6 @@ struct ExportInstance {
     id: String,
     name: String,
     base_path: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct ProjectQueryPlan {
-    project: String,
-    topic: String,
-    hacker_news_query: String,
-    live_terms: Vec<String>,
-    dev_to_tags: Vec<String>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    review_targets: Vec<ReviewTarget>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    focus_terms: Vec<String>,
 }
 
 fn collect(
@@ -484,71 +445,6 @@ fn generic_export_sql(payload: &ExportPayload, instance: &ExportInstance) -> Res
     }
     sql.push_str("commit;\n");
     Ok(sql)
-}
-
-struct ExportPayload {
-    theme: String,
-    items: Vec<NewsItem>,
-    source_runs: Vec<SourceRun>,
-    query_plans: Vec<ProjectQueryPlan>,
-    generated_at: DateTime<Utc>,
-}
-
-impl ExportPayload {
-    fn normalized_snapshot(&self) -> CrawlerSnapshot {
-        CrawlerSnapshot {
-            generated_at: self.generated_at,
-            theme: self.theme.clone(),
-            records: self.items.iter().map(news_item_record).collect(),
-            source_runs: self.source_runs.clone(),
-            collection_plans: self
-                .query_plans
-                .iter()
-                .map(project_query_plan_record)
-                .collect(),
-        }
-    }
-}
-
-fn news_item_record(item: &NewsItem) -> NormalizedRecord {
-    let provenance_json = item
-        .raw_json
-        .get("provenance")
-        .cloned()
-        .unwrap_or_else(|| serde_json::json!({}));
-    NormalizedRecord {
-        id: item.id.clone(),
-        title: item.title.clone(),
-        url: item.url.clone(),
-        source: item.source.clone(),
-        source_kind: item.source_kind.clone(),
-        observed_at: item.published_at,
-        subject: item.project.clone(),
-        topic: item.topic.clone(),
-        summary: item.summary.clone(),
-        tags: item.tags.clone(),
-        score: item.score,
-        status: "active".to_string(),
-        dedupe_key: item_dedupe_key(item),
-        provenance_json,
-        normalized_json: serde_json::json!({
-            "project": item.project,
-            "why_it_matters": item.why_it_matters
-        }),
-        raw_json: item.raw_json.clone(),
-    }
-}
-
-fn project_query_plan_record(plan: &ProjectQueryPlan) -> NormalizedCollectionPlan {
-    NormalizedCollectionPlan {
-        subject: plan.project.clone(),
-        topic: plan.topic.clone(),
-        query: plan.hacker_news_query.clone(),
-        live_terms: plan.live_terms.clone(),
-        tags: plan.dev_to_tags.clone(),
-        review_targets: plan.review_targets.clone(),
-        focus_terms: plan.focus_terms.clone(),
-    }
 }
 
 fn load_export_payload(
