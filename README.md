@@ -11,6 +11,7 @@ The first reusable boundary is now explicit:
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
 - A small Greathouse pilot instance lives in `src/instances/greathouse/` and exercises listing/diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
+- Generic crawler structs live in `crawler/src/core.rs`; Garbage snapshots are adapted into `CrawlerSnapshot`, `NormalizedRecord`, and `NormalizedCollectionPlan` before reusable SQL export.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
 - Existing newsletter routes, scripts, and database tables still use their current names while the boundary is extracted incrementally.
 
@@ -79,7 +80,7 @@ Without `--apply`, the helper regenerates `/tmp/verdun-newsletter-load.sql` from
 
 ## Crawler
 
-The reusable crawler core lives under `crawler/src/`; the current Garbage crawler instance owns its crawler config at `crawler/instances/garbage/config.toml` and manual social review files under `crawler/instances/garbage/manual/`.
+The reusable crawler core lives under `crawler/src/`; the current Garbage crawler instance owns its crawler config at `crawler/instances/garbage/config.toml` and manual social review files under `crawler/instances/garbage/manual/`. Generic SQL export now runs through the core `CrawlerSnapshot` shape instead of writing directly from Garbage-specific newsletter items.
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json

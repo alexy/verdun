@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, path::PathBuf};
 
@@ -26,7 +27,7 @@ pub struct SourceConfig {
     pub manual_path: Option<PathBuf>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SourceRunStatus {
     Ok,
@@ -46,7 +47,7 @@ impl SourceRunStatus {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SourceRun {
     pub source: String,
     pub kind: String,
@@ -57,10 +58,50 @@ pub struct SourceRun {
     pub project_counts: BTreeMap<String, usize>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReviewTarget {
     pub source: String,
     pub label: String,
     pub url: String,
     pub adapter: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NormalizedRecord {
+    pub id: String,
+    pub title: String,
+    pub url: String,
+    pub source: String,
+    pub source_kind: String,
+    pub observed_at: DateTime<Utc>,
+    pub subject: String,
+    pub topic: String,
+    pub summary: String,
+    pub tags: Vec<String>,
+    pub score: i32,
+    pub status: String,
+    pub dedupe_key: String,
+    pub provenance_json: serde_json::Value,
+    pub normalized_json: serde_json::Value,
+    pub raw_json: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NormalizedCollectionPlan {
+    pub subject: String,
+    pub topic: String,
+    pub query: String,
+    pub live_terms: Vec<String>,
+    pub tags: Vec<String>,
+    pub review_targets: Vec<ReviewTarget>,
+    pub focus_terms: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CrawlerSnapshot {
+    pub generated_at: DateTime<Utc>,
+    pub theme: String,
+    pub records: Vec<NormalizedRecord>,
+    pub source_runs: Vec<SourceRun>,
+    pub collection_plans: Vec<NormalizedCollectionPlan>,
 }
