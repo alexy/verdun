@@ -23,7 +23,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - News cards surface crawler provenance as editorial evidence from the API/static snapshot.
 - News cards expose stable item anchors/permalinks and source domains for sharing and review.
 - `src/instances/garbage/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
-- Shared publishing readiness checks in `src/lib/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
+- Garbage publishing readiness checks in `src/instances/garbage/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
 - Vercel API routes:
   - `GET /api/newsletter/items`
   - `GET /api/newsletter/status`
@@ -72,7 +72,7 @@ Build a newsletter generator for strongly typed and functional AI/data news. The
 - Draft and Ghost scripts can read a snapshot from a local JSON file or an `http(s)` URL, including the deployed `/api/newsletter/items` endpoint.
 - Draft and Ghost scripts support `--require-upvotes` / `NEWSLETTER_REQUIRE_UPVOTES=true` to block publishing from a fallback-ranked draft when no item has been explicitly upvoted.
 - Draft and Ghost scripts support `--require-ready` / `NEWSLETTER_REQUIRE_READY=true` to apply the same publishing readiness checks used by the app before writing or posting a draft.
-- The app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/lib/newsletter.ts`.
+- The Garbage app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/instances/garbage/newsletter.ts`.
 - The app draft preview offers direct Markdown download/copy controls for the exact draft shown on screen.
 - The app draft preview imports and exports `{ votes, focuses }` editorial state JSON in the same shape consumed by `VERDUN_LOCAL_STATE_FILE` for local Ulysses export.
 - The app draft preview exports the same publish manifest shape used by the CLI, so browser triage can audit selected item IDs, votes, focuses, readiness, coverage, and source/query-plan counts before local export.

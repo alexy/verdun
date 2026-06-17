@@ -2,6 +2,7 @@
 
 ## 2026-06-17
 
+- Removed unused generic `src/lib/newsletter.ts`, `src/lib/ontology.ts`, and `src/lib/snapshot.ts` compatibility re-exports so Garbage newsletter, ontology, and snapshot logic are only exposed from the Garbage instance namespace.
 - Added a Greathouse deploy-check profile with preview URL, static snapshot, count gates, and required subject/plan metadata; Greathouse deployed checks can now run from profile metadata instead of explicit CLI gates.
 - Changed deploy-check profile selection to use registered profile metadata with an explicit default flag instead of returning the Garbage profile directly.
 - Added deploy-profile base paths and made `scripts/deploy-workbench-database.mjs` carry profile `basePath` and `staticSnapshotPath` into deployed checks, so Greathouse deployment preflights no longer need explicit asset-base/static-snapshot arguments.
@@ -58,9 +59,9 @@
 - Switched the browser snapshot composable to load Garbage through `api/workbench/records?instance=garbage` and write votes/focuses through generic workbench review/focus routes; the newsletter draft/editorial-state APIs remain Garbage-specific compatibility surfaces.
 - Added a generic workbench state import route at `api/workbench/state.ts` and switched Garbage browser editorial-state imports to `/api/workbench/state?instance=garbage`.
 - Updated deployment readiness checks to validate generic workbench records/status/health APIs while still checking the Garbage newsletter draft API.
-- Moved the Strongly Typed AI ontology helper implementation under `src/instances/garbage/ontology.ts`; the generic `src/lib/ontology.ts` path is now only a compatibility re-export.
-- Moved Garbage newsletter/draft/readiness/export logic under `src/instances/garbage/newsletter.ts`; the generic `src/lib/newsletter.ts` path is now only a compatibility re-export.
-- Moved Garbage snapshot normalization under `src/instances/garbage/snapshot.ts`; the generic `src/lib/snapshot.ts` path is now only a compatibility re-export.
+- Moved the Strongly Typed AI ontology helper implementation under `src/instances/garbage/ontology.ts`.
+- Moved Garbage newsletter/draft/readiness/export logic under `src/instances/garbage/newsletter.ts`.
+- Moved Garbage snapshot normalization under `src/instances/garbage/snapshot.ts`.
 - Moved Garbage-specific newsletter hero and draft preview components under `src/instances/garbage/components/`, leaving the shared `WorkbenchHero` in the generic component tree.
 - Moved the remaining Garbage newsletter app panels and newsletter composables under `src/instances/garbage/components/` and `src/instances/garbage/composables/`, leaving `src/components/` for app-shell and generic workbench controls.
 - Moved the Garbage Vue app composition into `src/instances/garbage/GarbageApp.vue`; root `src/App.vue` is now only a thin instance shell.
