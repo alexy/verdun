@@ -45,7 +45,7 @@
     "garbage:smoke:readiness": "node scripts/instances/garbage/smoke-readiness.mjs",
     "garbage:smoke:recency": "node scripts/instances/garbage/smoke-snapshot-recency.mjs",
     "smoke:responsive": "node scripts/smoke-responsive.mjs",
-    "smoke:snapshot": "node scripts/smoke-snapshot-composable.mjs",
+    "garbage:smoke:snapshot": "node scripts/instances/garbage/smoke-snapshot-composable.mjs",
     "garbage:smoke:source-gap-review": "node scripts/instances/garbage/smoke-source-gap-review.mjs",
     "garbage:smoke:ulysses": "node scripts/instances/garbage/smoke-ulysses-export.mjs",
     "garbage:smoke:view": "node scripts/instances/garbage/smoke-view-model.mjs",
