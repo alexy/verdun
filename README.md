@@ -64,6 +64,7 @@ The resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ul
 The resident newsletter draft CLI, Ghost CLI/smoke, and local/draft/health API smokes also shim to the parent package.
 The resident legacy newsletter SQL apply/deploy helpers and loader smoke also shim to the parent package while the compatibility migrations remain bundled.
 The resident newsletter snapshot composable and view-model smokes also shim to the parent package while the bundled UI modules remain in Verdun.
+The resident workbench compatibility smoke also shims to the parent package while the generic workbench API modules remain bundled in Verdun.
 
 ## Local app
 

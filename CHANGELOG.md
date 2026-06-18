@@ -70,6 +70,7 @@
 - Replaced resident Garbage newsletter draft CLI, Ghost CLI/smoke, and local/draft/health API smoke bodies with shims to the parent-owned `apps/garbage/scripts/` implementations.
 - Replaced resident legacy newsletter SQL apply/deploy helper and loader smoke bodies with shims to the parent-owned `apps/garbage/scripts/` implementations.
 - Replaced resident Garbage newsletter snapshot composable and view-model smoke bodies with shims to the parent-owned `apps/garbage/scripts/` implementations.
+- Replaced resident Garbage workbench compatibility smoke body with a shim to the parent-owned `apps/garbage/scripts/smoke-workbench-compat.mjs` implementation.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
 - Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
 - Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.
