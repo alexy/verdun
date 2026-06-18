@@ -17,6 +17,19 @@ if (crawlerMainSource.includes('fn generic_export_sql(payload: &ExportPayload'))
   throw new Error('generic SQL exporter still depends on Garbage export payloads')
 }
 for (const marker of [
+  'use crate::instances::garbage::{',
+  'fn legacy_query_plans',
+  'fn load_export_payload',
+  'fn load_crawler_snapshot',
+]) {
+  if (crawlerMainSource.includes(marker)) {
+    throw new Error(`crawler main still exposes ambiguous Garbage compatibility helper: ${marker}`)
+  }
+}
+if (!crawlerMainSource.includes('load_garbage_newsletter_export_payload') || !crawlerMainSource.includes('load_generic_crawler_snapshot')) {
+  throw new Error('crawler main does not separate generic snapshot loading from Garbage newsletter compatibility loading')
+}
+for (const marker of [
   'default_value = "garbage"',
   'default_value = "Garbage"',
   'default_value = "/rbage/"',

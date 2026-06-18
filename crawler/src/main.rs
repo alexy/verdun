@@ -3,8 +3,8 @@ use chrono::{Duration, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 mod core;
 mod instances;
-use crate::core::{CrawlerConfig, CrawlerSnapshot, NormalizedCollectionPlan, SourceRun};
-use crate::instances::garbage::{self, ExportPayload, NewsItem, ProjectQueryPlan, PublicSnapshot};
+use crate::core::{CrawlerConfig, CrawlerSnapshot};
+use crate::instances::garbage;
 use std::{fs, path::PathBuf};
 
 #[derive(Parser)]
@@ -224,7 +224,7 @@ fn export_sql(
     };
     let (sql, record_count, source_run_count, plan_count) = match target {
         SqlExportTarget::Newsletter => {
-            let payload = load_export_payload(snapshot, input, source_runs)?;
+            let payload = load_garbage_newsletter_export_payload(snapshot, input, source_runs)?;
             (
                 garbage::newsletter_export_sql(&payload)?,
                 payload.items.len(),
@@ -233,7 +233,7 @@ fn export_sql(
             )
         }
         SqlExportTarget::Generic => {
-            let snapshot = load_crawler_snapshot(snapshot, input, source_runs)?;
+            let snapshot = load_generic_crawler_snapshot(snapshot, input, source_runs)?;
             (
                 generic_export_sql(&snapshot, &instance)?,
                 snapshot.records.len(),
@@ -388,7 +388,7 @@ fn generic_export_sql(snapshot: &CrawlerSnapshot, instance: &ExportInstance) -> 
     Ok(sql)
 }
 
-fn load_crawler_snapshot(
+fn load_generic_crawler_snapshot(
     snapshot: Option<PathBuf>,
     input: PathBuf,
     source_runs: PathBuf,
@@ -401,31 +401,38 @@ fn load_crawler_snapshot(
             return serde_json::from_value(value)
                 .with_context(|| format!("parsing generic snapshot {}", snapshot.display()));
         }
-        let snapshot: PublicSnapshot = serde_json::from_value(value)
-            .with_context(|| format!("parsing Garbage snapshot {}", snapshot.display()))?;
-        return Ok(ExportPayload {
-            theme: snapshot.theme,
-            items: snapshot.items,
-            source_runs: snapshot.source_runs,
-            query_plans: snapshot.query_plans,
-            generated_at: snapshot.generated_at,
-        }
-        .normalized_snapshot());
+        return garbage_public_snapshot_value_as_crawler_snapshot(value, &snapshot);
     }
 
-    Ok(load_export_payload(None, input, source_runs)?.normalized_snapshot())
+    Ok(load_garbage_newsletter_export_payload(None, input, source_runs)?.normalized_snapshot())
 }
 
-fn load_export_payload(
+fn garbage_public_snapshot_value_as_crawler_snapshot(
+    value: serde_json::Value,
+    path: &PathBuf,
+) -> Result<CrawlerSnapshot> {
+    let snapshot: garbage::PublicSnapshot = serde_json::from_value(value)
+        .with_context(|| format!("parsing Garbage snapshot {}", path.display()))?;
+    Ok(garbage::ExportPayload {
+        theme: snapshot.theme,
+        items: snapshot.items,
+        source_runs: snapshot.source_runs,
+        query_plans: snapshot.query_plans,
+        generated_at: snapshot.generated_at,
+    }
+    .normalized_snapshot())
+}
+
+fn load_garbage_newsletter_export_payload(
     snapshot: Option<PathBuf>,
     input: PathBuf,
     source_runs: PathBuf,
-) -> Result<ExportPayload> {
+) -> Result<garbage::ExportPayload> {
     if let Some(snapshot) = snapshot {
-        let snapshot: PublicSnapshot = serde_json::from_slice(
+        let snapshot: garbage::PublicSnapshot = serde_json::from_slice(
             &fs::read(&snapshot).with_context(|| format!("reading {}", snapshot.display()))?,
         )?;
-        return Ok(ExportPayload {
+        return Ok(garbage::ExportPayload {
             theme: snapshot.theme,
             items: snapshot.items,
             source_runs: snapshot.source_runs,
@@ -434,10 +441,10 @@ fn load_export_payload(
         });
     }
 
-    let items: Vec<NewsItem> = serde_json::from_slice(
+    let items: Vec<garbage::NewsItem> = serde_json::from_slice(
         &fs::read(&input).with_context(|| format!("reading {}", input.display()))?,
     )?;
-    let source_runs: Vec<SourceRun> = if source_runs.exists() {
+    let source_runs: Vec<crate::core::SourceRun> = if source_runs.exists() {
         serde_json::from_slice(
             &fs::read(&source_runs)
                 .with_context(|| format!("reading {}", source_runs.display()))?,
@@ -445,7 +452,7 @@ fn load_export_payload(
     } else {
         Vec::new()
     };
-    Ok(ExportPayload {
+    Ok(garbage::ExportPayload {
         theme: "Strongly typed and functional AI/data systems".to_string(),
         items,
         source_runs,
@@ -480,26 +487,11 @@ fn queries(
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     println!(
         "{}",
-        serde_json::to_string_pretty(&legacy_query_plans(
-            crawler_instance.collection_plans(&config, &editorial_focuses),
-        ))?
+        serde_json::to_string_pretty(
+            &crawler_instance.collection_plans(&config, &editorial_focuses)
+        )?
     );
     Ok(())
-}
-
-fn legacy_query_plans(collection_plans: Vec<NormalizedCollectionPlan>) -> Vec<ProjectQueryPlan> {
-    collection_plans
-        .into_iter()
-        .map(|plan| ProjectQueryPlan {
-            project: plan.subject,
-            topic: plan.topic,
-            hacker_news_query: plan.query,
-            live_terms: plan.live_terms,
-            dev_to_tags: plan.tags,
-            review_targets: plan.review_targets,
-            focus_terms: plan.focus_terms,
-        })
-        .collect()
 }
 
 fn resolve_crawler_instance(

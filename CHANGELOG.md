@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Changed `verdun-crawler queries` to print generic `NormalizedCollectionPlan` JSON and renamed the crawler CLI snapshot loaders so generic snapshot loading and Garbage newsletter compatibility loading are explicit.
 - Changed Greathouse crawler adapters to emit core `NormalizedRecord` values directly instead of constructing Garbage `NewsItem` values internally.
 - Changed the crawler instance trait to return core `CrawlerCollection` output instead of exposing Garbage `NewsItem` vectors; the shared CLI now writes generic snapshots from instance collection output, and Greathouse public collection snapshots use the generic `records`/`collection_plans` shape.
 - Updated Verdun app/operator docs to reflect the current generic-default SQL export, core crawler collection output, and instance-owned Garbage compatibility paths.

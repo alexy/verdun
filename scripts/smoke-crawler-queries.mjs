@@ -20,19 +20,19 @@ const jsonStart = result.stdout.indexOf('[')
 if (jsonStart < 0) throw new Error('crawler queries did not print JSON')
 
 const plans = JSON.parse(result.stdout.slice(jsonStart))
-const byProject = new Map(plans.map((plan) => [plan.project, plan]))
+const byProject = new Map(plans.map((plan) => [subjectOf(plan), plan]))
 
 for (const project of ['BAML', 'DSPy', 'Instructor', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Ibis', 'Dagster', 'Garde', 'zod-rs']) {
   const plan = byProject.get(project)
   if (!plan) throw new Error(`queries output is missing ${project}`)
-  if (!plan.hacker_news_query.includes(project)) {
-    throw new Error(`${project} HN query does not include the project name`)
+  if (!plan.query.includes(project)) {
+    throw new Error(`${project} query does not include the project name`)
   }
   if (!Array.isArray(plan.live_terms) || !plan.live_terms.length) {
     throw new Error(`${project} has no distinctive live terms`)
   }
-  if (!Array.isArray(plan.dev_to_tags) || !plan.dev_to_tags.length) {
-    throw new Error(`${project} has no dev.to tags`)
+  if (!Array.isArray(plan.tags) || !plan.tags.length) {
+    throw new Error(`${project} has no collection tags`)
   }
 }
 
@@ -95,11 +95,11 @@ try {
   }
   const focusedJsonStart = focusedResult.stdout.indexOf('[')
   const focusedPlans = JSON.parse(focusedResult.stdout.slice(focusedJsonStart))
-  const apacheArrow = focusedPlans.find((plan) => plan.project === 'Apache Arrow')
+  const apacheArrow = focusedPlans.find((plan) => subjectOf(plan) === 'Apache Arrow')
   if (!apacheArrow?.focus_terms?.includes('flight') || !apacheArrow.focus_terms.includes('columnar')) {
     throw new Error('focused crawler queries did not attach editorial focus terms to Apache Arrow')
   }
-  const pydantic = focusedPlans.find((plan) => plan.project === 'Pydantic')
+  const pydantic = focusedPlans.find((plan) => subjectOf(plan) === 'Pydantic')
   if (pydantic?.focus_terms?.length) {
     throw new Error('focused crawler queries leaked Apache Arrow focus terms into Pydantic')
   }
@@ -130,4 +130,8 @@ try {
   }
 } finally {
   await rm(stateDir, { recursive: true, force: true })
+}
+
+function subjectOf(plan) {
+  return plan.subject ?? plan.project
 }
