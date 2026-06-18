@@ -65,9 +65,12 @@ if (vercelConfig.redirects?.[0]?.destination !== defaultProfile.basePath) {
 if (
   !deployProfilesSource.includes('registeredDeployCheckProfiles') ||
   deployProfilesSource.includes('garbageDeployCheckProfile') ||
-  deployProfilesSource.includes('greathouseDeployCheckProfile')
+  deployProfilesSource.includes('greathouseDeployCheckProfile') ||
+  deployProfilesSource.includes('./garbage/') ||
+  deployProfilesSource.includes('./greathouse/') ||
+  !deployProfilesSource.includes('readdir(instanceDirectory')
 ) {
-  throw new Error('deploy check profiles are not resolved from profile registration metadata')
+  throw new Error('deploy check profiles are not discovered from instance profile modules')
 }
 if (!profileModulePathMatchesInstance(defaultProfile)) {
   throw new Error('default deployed-check smoke fixture should be instance-owned profile metadata')

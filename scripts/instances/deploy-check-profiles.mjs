@@ -1,10 +1,6 @@
-import * as garbageProfile from './garbage/deploy-checks.mjs'
-import * as greathouseProfile from './greathouse/deploy-checks.mjs'
+import { readdir } from 'node:fs/promises'
 
-const registeredDeployCheckProfiles = [
-  garbageProfile.deployCheckProfile,
-  greathouseProfile.deployCheckProfile,
-]
+const registeredDeployCheckProfiles = await discoverDeployCheckProfiles()
 
 const deployCheckProfiles = new Map(registeredDeployCheckProfiles.map((profile) => [profile.id, profile]))
 
@@ -18,4 +14,18 @@ export function deployCheckProfile(instance) {
 
 export function supportedDeployCheckProfiles() {
   return registeredDeployCheckProfiles
+}
+
+async function discoverDeployCheckProfiles() {
+  const instanceDirectory = new URL('.', import.meta.url)
+  const entries = await readdir(instanceDirectory, { withFileTypes: true })
+  const profiles = await Promise.all(entries
+    .filter((entry) => entry.isDirectory())
+    .map(async (entry) => {
+      const module = await import(`./${entry.name}/deploy-checks.mjs`)
+      return module.deployCheckProfile ?? null
+    }))
+  return profiles
+    .filter(Boolean)
+    .sort((left, right) => left.id.localeCompare(right.id))
 }
