@@ -1,5 +1,5 @@
 import type { WorkbenchAppRegistration } from '../app-types'
-import GarbageApp from './GarbageApp.vue'
+import GarbageApp from '../../../../apps/garbage/src/app/GarbageApp.vue'
 import { garbageInstance } from '../../../../apps/garbage/src/config.ts'
 
 export const workbenchAppRegistration = {

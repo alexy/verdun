@@ -10,9 +10,9 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, and browser snapshot-normalization sources live in the parent package under `apps/garbage/src/`, while resident Verdun UI/API compatibility code imports them during extraction.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
-- Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under `src/instances/garbage/components/`.
+- Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/` with resident Verdun shims.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under parent-owned `apps/garbage/src/app/composables/`.
-- Garbage-specific newsletter, publishing, ontology, and source-gap styles live in `src/instances/garbage/style.css`; root `src/style.css` now keeps shared shell/workbench layout.
+- Garbage-specific newsletter app components, publishing/ontology/source-gap styles, and browser composables live under parent-owned `apps/garbage/src/app/`; root `src/style.css` now keeps shared shell/workbench layout and resident Garbage frontend files are shims.
 - Vite and generated Vercel routing use registered deploy profiles; Garbage remains the default `/rbage/` public path and Greathouse is routable at `/greathouse/`.
 - Vercel has `collected.ga` attached to the `garbage` project and aliased to the latest production deployment; `npm run check:deployed` is the public DNS/route check, while `npx vercel domains inspect collected.ga` and `npx vercel alias ls` verify Vercel-side domain state during DNS propagation.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.
@@ -62,7 +62,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - The resident Garbage newsletter store imports parent-owned `apps/garbage/src/api/newsletter-store.ts`; static/database/local editorial persistence is no longer implemented in resident Verdun source while newsletter routes remain bundled.
 - The resident Garbage newsletter route handlers import parent-owned `apps/garbage/src/api/newsletter/*`; public Vercel route files still live in Verdun as route shims.
 - The resident Garbage workbench adapter imports parent-owned `apps/garbage/src/api/workbench.ts`; the bundled adapter manifest still lives in Verdun to feed the generic local adapter registry.
-- Resident Garbage browser snapshot and view composables import parent-owned `apps/garbage/src/app/composables/*`; the bundled Vue component tree still lives in Verdun.
+- Resident Garbage browser snapshot/view composables, app component, component files, and style sheet import parent-owned `apps/garbage/src/app/*`; Verdun keeps only bundled frontend discovery shims.
 - The resident Garbage instance registration shim imports parent-owned `apps/garbage/src/instance-registration.ts`; default-instance metadata is no longer redefined in Verdun.
 - Resident Garbage UI components, composables, the API draft route, and compatibility scripts import parent-owned `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; the duplicate resident newsletter and ontology files have been removed.
 - The resident Garbage snapshot composable imports parent-owned `apps/garbage/src/snapshot.ts`; the duplicate resident snapshot normalizer has been removed and the snapshot smoke guards against its return.
@@ -127,7 +127,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 ## Next Work
 
-- Keep moving Garbage-specific app, publishing, and compatibility behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
+- Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
 - Replace the parent Garbage package's remaining explicit legacy Verdun path compatibility after the crawler/output boundary moves.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.

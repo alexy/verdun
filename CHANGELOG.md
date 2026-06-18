@@ -76,6 +76,7 @@
 - Moved Garbage newsletter API route implementations to parent-owned `apps/garbage/src/api/newsletter/` and replaced resident Verdun route handlers with shims.
 - Moved the Garbage local workbench adapter to parent-owned `apps/garbage/src/api/workbench.ts` and replaced the resident Verdun adapter with a shim.
 - Moved Garbage browser snapshot and view composables to parent-owned `apps/garbage/src/app/composables/` and replaced resident Verdun composables with shims.
+- Moved the Garbage Vue app, newsletter components, and instance stylesheet to parent-owned `apps/garbage/src/app/`, and replaced resident Verdun frontend files with shims.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
 - Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
 - Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.
@@ -185,7 +186,7 @@
 
 Known remaining extraction work:
 
-- Garbage-specific newsletter, Ulysses, Strongly Typed AI ontology, readiness checks, and `/rbage/` behavior still live inside Verdun.
+- Garbage crawler and compatibility route/discovery shims still live inside Verdun, while newsletter UI/API/publishing behavior is now largely parent-owned.
 - Legacy newsletter database/API paths still coexist with generic workbench paths, but default SQL export and default package database commands now target the generic workbench contract.
 - The Rust crawler now has a `CrawlerInstance` dispatch trait and a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
 - Crawler instance selection supports `--instance garbage` and `--instance greathouse`.

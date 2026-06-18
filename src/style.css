@@ -112,6 +112,11 @@ a {
   color: var(--ink);
 }
 
+.icon-button svg,
+.icon-button svg * {
+  pointer-events: none;
+}
+
 .topbar__actions {
   display: flex;
   align-items: center;
