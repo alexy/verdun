@@ -23,7 +23,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Garbage deploy-check profile metadata also declares an external npm-workspace command runner for `@garbage/instance`, so shared Verdun orchestration runs Garbage commands through the package instead of local Verdun `garbage:*` scripts.
 - Verdun deploy-profile discovery now loads Garbage through `scripts/instances/external-deploy-check-profile-modules.mjs`; the old resident Garbage deploy-profile and deployed-check hook shim files are gone.
 - Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/garbage/newsletter/items --deployment <deployment-url>`.
-- Deployed draft API and publishing-readiness validation is instance-owned: the generic deployed checker loads Garbage's validator from `scripts/instances/garbage/deployed-draft-checks.mjs` through deploy-profile metadata.
+- Deployed draft API and publishing-readiness validation is instance-owned: the generic deployed checker loads Garbage's validator from parent-owned `apps/garbage/scripts/deployed-draft-checks.mjs` through deploy-profile metadata.
 - Inbox filtering by search text, vote state, project, source, and evidence stage so editors can prioritize live/manual collected items before watchlist seed placeholders.
 - News cards expose labeled Include/Skip controls with pressed-state feedback, and `npm run smoke:browser` now includes a narrow-viewport clickability smoke for mobile-sized layouts.
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
@@ -50,7 +50,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Generic local workbench adapter types live in `api/workbench/local-adapter-types.ts`; Garbage fallback behavior is now an instance-owned registration rather than a Garbage-named adapter contract in the shared resolver.
 - Bundled API fallback adapters are isolated in `api/instances/bundled-workbench-adapters.ts`, so the generic adapter registry does not directly import Garbage.
 - The parent Garbage repo now exposes `@garbage/instance` package commands as the temporary stable command surface while Garbage implementation moves out of Verdun. Publishing entrypoints, the newsletter draft builder, workbench projection, default publishing data, draft/URL-draft/readiness/source-gap/Ulysses/Ghost/public-snapshot/recency/API smoke coverage, and Grust watchlist/dedupe/provenance/manual-source/query-plan crawler smoke commands now live in the parent package, import package TypeScript directly with Node, and no longer change cwd into Verdun; local API smoke is parent-owned while it still loads bundled API modules, and operational compatibility smokes still delegate through the external instance manifest into declared Verdun scripts.
-- Verdun's resident Grust watchlist audit and smoke scripts now only shim to the parent package.
+- Grust watchlist audit and smoke scripts are parent-owned in `apps/garbage/scripts/`; Verdun reaches them through deploy-profile command metadata.
 - Verdun's resident Garbage crawler dedupe, provenance, query-plan, and manual-source freshness smokes now only shim to the parent package.
 - Verdun's resident Garbage draft, URL draft, publishing-readiness, and snapshot-recency smokes now only shim to the parent package.
 - Verdun's resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ulysses export smoke now only shim to the parent package.
@@ -131,7 +131,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 - Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
 - Replace the parent Garbage package's remaining explicit legacy Verdun path compatibility after the crawler/output boundary moves.
-- Continue replacing resident Garbage script and route shim files with direct external package registration.
+- Continue replacing resident Garbage route/API/frontend shim files with direct external package registration.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 

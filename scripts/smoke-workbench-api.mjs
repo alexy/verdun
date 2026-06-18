@@ -49,7 +49,7 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterShimSource, garbageAdapterSource, garbageStoreShimSource, garbageStoreSource, garbageNewsletterDraftShimSource, garbageNewsletterDraftSource, garbageViewSmokeShimSource, garbageViewSmokeSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterShimSource, garbageAdapterSource, garbageStoreShimSource, garbageStoreSource, garbageNewsletterDraftShimSource, garbageNewsletterDraftSource, garbageViewSmokeSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
@@ -62,7 +62,6 @@ try {
     readFile('../apps/garbage/src/api/newsletter-store.ts', 'utf8'),
     readFile('api/instances/garbage/newsletter/draft.ts', 'utf8'),
     readFile('../apps/garbage/src/api/newsletter/draft.ts', 'utf8'),
-    readFile('scripts/instances/garbage/smoke-view-model.mjs', 'utf8'),
     readFile('../apps/garbage/scripts/smoke-view-model.mjs', 'utf8'),
   ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
@@ -117,11 +116,11 @@ try {
   if (!garbageNewsletterDraftSource.includes("from '../../newsletter.ts'")) {
     throw new Error('parent Garbage newsletter draft route should use the parent-owned newsletter module')
   }
-  if (!garbageViewSmokeShimSource.includes('apps/garbage/scripts/smoke-view-model.mjs')) {
-    throw new Error('resident Garbage view-model smoke should only shim to the parent package')
-  }
   if (!garbageViewSmokeSource.includes('../src/workbench.ts')) {
     throw new Error('Garbage view-model smoke should exercise the parent-owned workbench projection')
+  }
+  if (existsSync('scripts/instances/garbage/smoke-view-model.mjs')) {
+    throw new Error('Garbage view-model smoke should live in the external package, not a resident Verdun script shim')
   }
   if (existsSync('src/instances/garbage/workbench.ts')) {
     throw new Error('Garbage workbench projection should live in the parent package, not resident Verdun source')
