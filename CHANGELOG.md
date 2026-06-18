@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Refreshed `README.md` and `APP.md` to describe Verdun as the reusable core-in-extraction, Garbage as the newsletter instance, and Greathouse as an instance proof with local, HTTP, browser-diagnostic, Redfin-shaped, and Zillow-shaped crawler adapters.
 - Removed the remaining root `scripts/garbage-*.mjs` publishing wrappers; `garbage:*` package commands now call instance-owned publishing scripts under `scripts/instances/garbage/` directly.
 - Moved the Grust watchlist audit and its smoke test under `scripts/instances/garbage/`, with package commands renamed to `garbage:audit:grust` and `garbage:smoke:grust-watchlist`.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
@@ -121,5 +122,5 @@ Known remaining extraction work:
 - Newsletter draft generation, readiness, Ulysses export, Ghost publishing helpers, SQL reload helpers, editorial-state import, ontology rendering, snapshot normalization, Garbage-specific UI panels/composables/app composition, and newsletter route implementations are now implemented under the Garbage instance, with explicit Garbage API/package commands.
 - Workbench API routes no longer depend on the newsletter HTTP helper path or the legacy newsletter DB helper path for local static/local-file mode.
 - Garbage local static/local-file fallback now reuses the Garbage API instance newsletter store internally.
-- Greathouse crawler collection now dispatches through configured local JSON, HTTP JSON, and HTTP status-diagnostic adapters, and Greathouse has a pilot Vue app consuming generic workbench controls, but it still does not have source-specific browser/property adapters.
+- Greathouse crawler collection now dispatches through configured local JSON, HTTP JSON, HTTP status-diagnostic, browser-diagnostic, Redfin-shaped, and Zillow-shaped property adapters, and Greathouse has a pilot Vue app consuming generic workbench controls.
 - Greathouse is still a pilot consumer, not a complete production app.

@@ -1,27 +1,28 @@
 # Verdun
 
-Verdun is being extracted into the reusable core for database-backed collection/review workbenches. The current repository still carries the Garbage and Greathouse pilot instances while that extraction is underway, but the intended Verdun core is the generic Vercel app shell, API/database contract, and Rust crawler/reloader boundary.
+Verdun is being extracted into the reusable core for database-backed collection/review workbenches. The current repository still carries the Garbage and Greathouse instance proofs while that extraction is underway, but the intended Verdun core is the generic Vercel app shell, API/database contract, and Rust crawler/reloader boundary.
 
 The first reusable boundary is now explicit:
 
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
-- Generic reusable Vue controls live under `src/components/workbench/` and currently back the Garbage hero metrics and review rail.
+- Generic reusable Vue controls live under `src/components/workbench/` and currently back both the Garbage newsletter app and the Greathouse pilot workbench.
 - Garbage instance configuration lives in `src/instances/garbage/config.ts`.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
-- A small Greathouse pilot instance lives in `src/instances/greathouse/` and exercises listing/diagnostic records through the same `WorkbenchSnapshot` and generic view model.
+- A Greathouse pilot instance lives in `src/instances/greathouse/` and exercises property listing and blocked-source diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
-- Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly.
+- Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly from local JSON, HTTP JSON, HTTP status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
 - Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Garbage remains the default `/rbage/` app path and Greathouse has a reusable `/greathouse/` path.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
 
-The first slice mirrors the useful Greathouse shape without touching Greathouse:
+The current proof points are:
 
 - Vue/Vite app deployed by Vercel.
 - Vite is built from deploy profile metadata; the default Garbage profile uses `/rbage/` for `collected.ga/rbage/`, and profile selection can build the same shell for `/greathouse/`.
 - Vercel serverless API routes reading an external Postgres database.
-- Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
+- Rust crawler/loader crate that collects instance-owned records and exports SQL for the generic database shape.
+- Greathouse crawler adapters for local fixtures, HTTP JSON, status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings, all preserving the same `CrawlerSnapshot` contract.
 - Garbage Grust watchlist audit that checks the Garbage crawler still tracks the backend and typed-validation projects surfaced by the local `/Users/alexy/src/grust` workspace.
 - Crawler output keeps normalized provenance inside each item's `raw_json`, including source adapter, evidence URL, matched project, and matched keywords.
 - Crawler output deduplicates live/manual items by canonical URL, preferring stronger reviewed evidence while retaining duplicate source records in `raw_json.duplicates`.
@@ -40,6 +41,8 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under `src/instances/garbage/composables/`.
 - Generic backend route mechanics live in `api/core/http.ts`, while Garbage data access and local fallback state stay under `api/instances/garbage/`.
 - The app's editorial-state import posts `{ votes, focuses }` to `POST /api/garbage/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.
+
+The extraction is still incomplete: Verdun still contains Garbage instance code and compatibility shims, and the next architectural move is to keep shrinking the shared/core surface until Garbage and Greathouse are consumers rather than resident domains.
 
 ## Local app
 
