@@ -1,4 +1,9 @@
+import { existsSync } from 'node:fs'
 import { runnerImport } from 'vite'
+
+if (existsSync('src/instances/garbage/snapshot.ts')) {
+  throw new Error('Garbage snapshot normalization should live in the parent package, not resident Verdun source')
+}
 
 const { module: snapshotModule } = await runnerImport('./src/instances/garbage/composables/useNewsletterSnapshot.ts', {
   logLevel: 'error',

@@ -15,6 +15,7 @@
 - Removed the duplicate resident `src/instances/garbage/workbench.ts` projection file and added smoke coverage that fails if it reappears.
 - Changed the bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module to import parent-owned `apps/garbage/src/config.ts`; removed the duplicate resident `src/instances/garbage/config.ts` file while keeping legacy static/local state fallback paths for the current bundled runtime.
 - Changed resident Garbage UI components, composables, the API draft route, and compatibility scripts to import parent-owned `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; removed duplicate resident newsletter and ontology files.
+- Moved Garbage browser snapshot normalization to parent-owned `apps/garbage/src/snapshot.ts`, changed the resident snapshot composable to import it, removed duplicate resident `src/instances/garbage/snapshot.ts`, and added smoke coverage that fails if it reappears.
 - Documented that parent Garbage Ulysses export smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage Grust watchlist audit commands now live in the parent package while the crawler config remains bundled during extraction.
 - Documented that parent Garbage crawler dedupe and provenance smoke commands now live in the parent package while the Rust crawler remains bundled during extraction.
@@ -144,7 +145,7 @@
 - Updated deployment readiness checks to validate generic workbench records/status/health APIs while still checking the Garbage newsletter draft API.
 - Earlier moved the Strongly Typed AI ontology helper implementation under `src/instances/garbage/ontology.ts`; it now lives in the parent package at `apps/garbage/src/ontology.ts`.
 - Earlier moved Garbage newsletter/draft/readiness/export logic under `src/instances/garbage/newsletter.ts`; it now lives in the parent package at `apps/garbage/src/newsletter.ts`.
-- Moved Garbage snapshot normalization under `src/instances/garbage/snapshot.ts`.
+- Earlier moved Garbage snapshot normalization under `src/instances/garbage/snapshot.ts`; it now lives in the parent package at `apps/garbage/src/snapshot.ts`.
 - Moved Garbage-specific newsletter hero and draft preview components under `src/instances/garbage/components/`, leaving the shared `WorkbenchHero` in the generic component tree.
 - Moved the remaining Garbage newsletter app panels and newsletter composables under `src/instances/garbage/components/` and `src/instances/garbage/composables/`, leaving `src/components/` for app-shell and generic workbench controls.
 - Moved the Garbage Vue app composition into `src/instances/garbage/GarbageApp.vue`; root `src/App.vue` is now only a thin instance shell.

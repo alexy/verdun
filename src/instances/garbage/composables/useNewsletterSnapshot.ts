@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import type { EditorialStateExport, EditorialStateImportResult, NewsletterFocus, NewsletterSnapshot, VoteValue } from '../../../../../apps/garbage/src/newsletter.ts'
 import { applyEditorialStateExport, seedSnapshot } from '../../../../../apps/garbage/src/newsletter.ts'
-import { normalizeSnapshot } from '../snapshot'
+import { normalizeSnapshot } from '../../../../../apps/garbage/src/snapshot.ts'
 
 type SnapshotLoadResult = {
   apiAvailable: boolean
