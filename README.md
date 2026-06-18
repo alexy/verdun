@@ -13,6 +13,7 @@ The first reusable boundary is now explicit:
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`; Garbage newsletter table/view compatibility migrations live under `db/instances/garbage/migrations/` and are selected by the Garbage deploy profile.
 - Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly from local JSON, HTTP JSON, HTTP status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
+- Generic local workbench adapter contracts live in `api/workbench/local-adapter-types.ts`; instance-specific fallback adapters export neutral registration metadata from their own namespace.
 - Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Garbage remains the default `/rbage/` app path and Greathouse has a reusable `/greathouse/` path.
 - Deployed draft/readiness checks are deploy-profile hooks; Garbage owns newsletter draft validation under `scripts/instances/garbage/`, while the shared deployment checker validates only generic route, snapshot, status, and health mechanics.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
@@ -42,6 +43,7 @@ The current proof points are:
 - Garbage-specific newsletter, publishing, ontology, and source-gap CSS lives in `src/instances/garbage/style.css`; shared shell/workbench CSS remains in `src/style.css`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under `src/instances/garbage/composables/`.
 - Generic backend route mechanics live in `api/core/http.ts`, while Garbage data access and local fallback state stay under `api/instances/garbage/`.
+- Generic local adapter type and registration contracts live under `api/workbench/`; Garbage's no-database fallback is registered from `api/instances/garbage/workbench.ts` without a Garbage-named adapter export in the shared registry.
 - The app's editorial-state import posts `{ votes, focuses }` to `POST /api/garbage/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.
 
 The extraction is still incomplete: Verdun still contains Garbage instance code and compatibility shims, and the next architectural move is to keep shrinking the shared/core surface until Garbage and Greathouse are consumers rather than resident domains.

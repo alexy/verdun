@@ -48,10 +48,13 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, garbageAdapterSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
+    readFile('api/workbench/local-adapter-types.ts', 'utf8'),
+    readFile('api/instances/workbench-adapters.ts', 'utf8'),
+    readFile('api/instances/garbage/workbench.ts', 'utf8'),
   ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
     throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
@@ -65,6 +68,15 @@ try {
     instanceAdaptersSource.includes('../instances/garbage/')
   ) {
     throw new Error('generic workbench instance-adapter registry still embeds Garbage config or newsletter compatibility metadata')
+  }
+  if (!localAdapterTypesSource.includes('LocalWorkbenchAdapterRegistration')) {
+    throw new Error('local workbench adapter registration contract is missing from the neutral workbench type module')
+  }
+  if (registeredAdaptersSource.includes('garbageLocalWorkbenchAdapter')) {
+    throw new Error('local workbench adapter registry still consumes a Garbage-named adapter export instead of a neutral registration')
+  }
+  if (!garbageAdapterSource.includes('localWorkbenchAdapterRegistration') || !garbageAdapterSource.includes('compatibilityTables')) {
+    throw new Error('Garbage local workbench adapter no longer exposes instance-owned registration metadata')
   }
 
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
