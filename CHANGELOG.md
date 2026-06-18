@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved Garbage crawler dedupe, provenance, and query-plan smokes under `scripts/instances/garbage/`, exposed them as `garbage:smoke:crawler-dedupe`, `garbage:smoke:crawler-provenance`, and `garbage:smoke:queries`, and removed the old shared crawler smoke commands from `smoke:all`.
 - Moved the Garbage browser app and responsive UI smokes under `scripts/instances/garbage/`, exposed them as `garbage:smoke:app` and `garbage:smoke:responsive`, and changed `smoke:browser` to invoke UI smoke commands from deploy-profile metadata.
 - Moved the Garbage local newsletter API smoke and manual-source freshness smoke under `scripts/instances/garbage/`, exposed them as `garbage:smoke:api` and `garbage:smoke:manual-source`, and removed the old shared `smoke:api` / `smoke:manual-source` commands from `smoke:all`.
 - Moved the Garbage newsletter snapshot composable smoke under `scripts/instances/garbage/` and exposed it as `garbage:smoke:snapshot`, with the shared `smoke:all` runner picking it up from Garbage deploy-profile metadata instead of a shared `smoke:snapshot` command.
