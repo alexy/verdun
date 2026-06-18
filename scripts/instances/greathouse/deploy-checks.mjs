@@ -4,6 +4,7 @@ export const greathouseDeployCheckProfile = {
   previewBaseUrl: 'http://127.0.0.1:5174/greathouse/',
   devAppBaseUrl: 'http://127.0.0.1:5176/greathouse/',
   staticSnapshotPath: 'data/greathouse-snapshot.json',
+  smokeFixtureModule: './instances/greathouse/deployed-check-smoke-fixture.mjs',
   minRecords: 2,
   minSourceRuns: 2,
   minCollectionPlans: 1,

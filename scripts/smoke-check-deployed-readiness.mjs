@@ -5,7 +5,7 @@ import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/dep
 
 const garbageProfile = deployCheckProfile(defaultDeployCheckProfileId())
 const greathouseProfile = deployCheckProfile('greathouse')
-if (!garbageProfile?.sourceSnapshotPath || !garbageProfile?.draft || !garbageProfile?.smokeFixtureModule || !greathouseProfile) {
+if (!garbageProfile?.sourceSnapshotPath || !garbageProfile?.draft || !garbageProfile?.smokeFixtureModule || !greathouseProfile?.smokeFixtureModule) {
   throw new Error('deployed-check smoke requires Garbage and Greathouse deploy profiles')
 }
 const garbageBasePath = garbageProfile.basePath
@@ -67,7 +67,7 @@ if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployPro
 if (!garbageProfile.smokeFixtureModule.includes('/garbage/') || !garbageDeployProfileSource.includes('smokeFixtureModule')) {
   throw new Error('Garbage deployed-check smoke fixture should be instance-owned profile metadata')
 }
-if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDeployProfileSource.includes("staticSnapshotPath: 'data/greathouse-snapshot.json'")) {
+if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDeployProfileSource.includes("staticSnapshotPath: 'data/greathouse-snapshot.json'") || !greathouseDeployProfileSource.includes('smokeFixtureModule')) {
   throw new Error('Greathouse deploy profile is missing static snapshot metadata')
 }
 const freshGeneratedAt = new Date().toISOString()
@@ -78,106 +78,11 @@ const garbageFixture = createDeployedCheckSmokeFixture({
   generatedAt: freshGeneratedAt,
 })
 let statusJson = garbageFixture.databaseStatusJson()
-const greathouseSnapshot = {
-  instance: {
-    id: 'greathouse',
-    name: 'Greathouse',
-    basePath: '/greathouse/',
-  },
+const { createDeployedCheckSmokeFixture: createGreathouseDeployedCheckSmokeFixture } = await import(greathouseProfile.smokeFixtureModule)
+const greathouseFixture = createGreathouseDeployedCheckSmokeFixture({
+  profile: greathouseProfile,
   generatedAt: freshGeneratedAt,
-  editorialPersistence: 'database',
-  records: [
-    {
-      id: 'greathouse-listing-1',
-      title: 'Berkeley two-bedroom near transit',
-      url: 'https://example.com/listings/1',
-      subject: 'Berkeley 2BR',
-      summary: 'Fresh listing with source provenance and comparable evidence.',
-      review: 1,
-      score: 94,
-      observedAt: freshGeneratedAt,
-    },
-    {
-      id: 'greathouse-diagnostic-1',
-      title: 'Source diagnostic for protected listing endpoint',
-      url: 'https://example.com/diagnostics/redfin',
-      subject: 'Oakland blocked source',
-      summary: 'Blocked-source diagnostic retained as normalized review evidence.',
-      review: 0,
-      score: 71,
-      observedAt: freshGeneratedAt,
-    },
-  ],
-  sourceRuns: [
-    {
-      source: 'local-listing-json',
-      status: 'ok',
-      itemCount: 1,
-      subjectCounts: { 'Berkeley 2BR': 1 },
-      message: 'Loaded local listing fixture.',
-      collectedAt: freshGeneratedAt,
-    },
-    {
-      source: 'http-status-diagnostic',
-      status: 'ok',
-      itemCount: 1,
-      subjectCounts: { 'Oakland blocked source': 1 },
-      message: 'Recorded blocked-source diagnostic.',
-      collectedAt: freshGeneratedAt,
-    },
-  ],
-  collectionPlans: [
-    {
-      subject: 'Berkeley 2BR',
-      query: 'Berkeley 2BR homes source diagnostics',
-      liveTerms: ['Berkeley 2BR', 'listing freshness'],
-    },
-    {
-      subject: 'Oakland blocked source',
-      query: 'Oakland blocked source diagnostics',
-      liveTerms: ['Oakland blocked source', 'retry'],
-    },
-  ],
-  focuses: [
-    {
-      id: 'focus-greathouse-source-health',
-      text: 'Prioritize source freshness and blocked-source diagnostics.',
-      scope: 'ongoing',
-      createdAt: freshGeneratedAt,
-    },
-  ],
-}
-function greathouseSnapshotJson() {
-  return JSON.stringify(greathouseSnapshot)
-}
-function greathouseStatusJson() {
-  return JSON.stringify({
-    instance: greathouseSnapshot.instance,
-    editorialPersistence: 'database',
-    generatedAt: greathouseSnapshot.generatedAt,
-    recordCount: greathouseSnapshot.records.length,
-    focusCount: greathouseSnapshot.focuses.length,
-    reviewCount: 1,
-    sourceRunCount: greathouseSnapshot.sourceRuns.length,
-    collectionPlanCount: greathouseSnapshot.collectionPlans.length,
-    writable: true,
-  })
-}
-function greathouseHealthJson() {
-  const status = JSON.parse(greathouseStatusJson())
-  return JSON.stringify({
-    ok: true,
-    service: 'workbench',
-    surface: 'health',
-    state: 'database_configured',
-    databaseConfigured: true,
-    editorialPersistence: 'database',
-    readSurfaces: ['records', 'status', 'health'],
-    writeSurfaces: ['review', 'focus'],
-    collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
-    activeSnapshot: status,
-  })
-}
+})
 const server = createServer((request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1')
   if (url.pathname === garbageBasePath || url.pathname === `${garbageBasePath}index.html`) {
@@ -192,12 +97,12 @@ const server = createServer((request, response) => {
   }
   if (url.pathname === profileStaticPath(greathouseProfile)) {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(greathouseSnapshotJson())
+    response.end(greathouseFixture.snapshotJson())
     return
   }
   if (url.pathname === '/api/workbench/records' && url.searchParams.get('instance') === 'greathouse') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(greathouseSnapshotJson())
+    response.end(greathouseFixture.snapshotJson())
     return
   }
   if (url.pathname === profileStaticPath(garbageProfile) || url.pathname === '/api/workbench/records') {
@@ -207,7 +112,7 @@ const server = createServer((request, response) => {
   }
   if (url.pathname === '/api/workbench/status' && url.searchParams.get('instance') === 'greathouse') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(greathouseStatusJson())
+    response.end(greathouseFixture.statusJson())
     return
   }
   if (url.pathname === '/api/workbench/status') {
@@ -217,7 +122,7 @@ const server = createServer((request, response) => {
   }
   if (url.pathname === '/api/workbench/health' && url.searchParams.get('instance') === 'greathouse') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(greathouseHealthJson())
+    response.end(greathouseFixture.healthJson())
     return
   }
   if (url.pathname === '/api/workbench/health') {
