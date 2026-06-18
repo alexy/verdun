@@ -1,5 +1,5 @@
-#[path = "garbage.rs"]
-pub mod garbage;
+#[path = "external.rs"]
+mod external;
 #[path = "greathouse.rs"]
 pub mod greathouse;
 
@@ -7,7 +7,7 @@ use super::CrawlerInstanceRegistration;
 
 pub static BUNDLED_CRAWLER_INSTANCE_REGISTRATIONS: &[CrawlerInstanceRegistration] = &[
     CrawlerInstanceRegistration {
-        instance: &garbage::CRAWLER_INSTANCE,
+        instance: &external::garbage::CRAWLER_INSTANCE,
         default: true,
     },
     CrawlerInstanceRegistration {

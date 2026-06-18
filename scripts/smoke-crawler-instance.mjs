@@ -1,30 +1,34 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { createServer } from 'node:http'
+import { existsSync } from 'node:fs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 const [
   crawlerMainSource,
-  residentGarbageShimSource,
+  externalCrawlerRegistrySource,
   garbageInstanceSource,
   greathouseInstanceSource,
   instanceTraitSource,
   bundledInstancesSource,
 ] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
-  readFile('crawler/src/instances/garbage.rs', 'utf8'),
+  readFile('crawler/src/instances/external.rs', 'utf8'),
   readFile('../apps/garbage/crawler/src/instances/garbage.rs', 'utf8'),
   readFile('crawler/src/instances/greathouse.rs', 'utf8'),
   readFile('crawler/src/instances/mod.rs', 'utf8'),
   readFile('crawler/src/instances/bundled.rs', 'utf8'),
 ])
 if (
-  !residentGarbageShimSource.includes('../../apps/garbage/crawler/src/instances/garbage.rs')
-  || residentGarbageShimSource.includes('insert into newsletter_items')
-  || residentGarbageShimSource.includes('pub struct GarbageCrawlerInstance')
+  !externalCrawlerRegistrySource.includes('../../../../apps/garbage/crawler/src/instances/garbage.rs')
+  || externalCrawlerRegistrySource.includes('insert into newsletter_items')
+  || externalCrawlerRegistrySource.includes('pub struct GarbageCrawlerInstance')
 ) {
-  throw new Error('resident Garbage crawler module should only include the parent-owned implementation')
+  throw new Error('external crawler registry should only point at the parent-owned Garbage implementation')
+}
+if (existsSync('crawler/src/instances/garbage.rs')) {
+  throw new Error('Garbage crawler implementation should not live behind a resident Verdun instance module')
 }
 if (crawlerMainSource.includes('insert into newsletter_')) {
   throw new Error('crawler main still embeds legacy newsletter SQL table exports')
@@ -111,7 +115,7 @@ if (
   !garbageInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
   !greathouseInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
   !bundledInstancesSource.includes('BUNDLED_CRAWLER_INSTANCE_REGISTRATIONS') ||
-  !bundledInstancesSource.includes('garbage::CRAWLER_INSTANCE') ||
+  !bundledInstancesSource.includes('external::garbage::CRAWLER_INSTANCE') ||
   !bundledInstancesSource.includes('greathouse::CRAWLER_INSTANCE')
 ) {
   throw new Error('resident crawler instance modules should be isolated behind the bundled crawler registration manifest')
