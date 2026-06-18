@@ -11,7 +11,7 @@ use crate::core::{
 };
 use crate::instances::CrawlerInstance;
 
-pub static GREATHOUSE_CRAWLER_INSTANCE: GreathouseCrawlerInstance = GreathouseCrawlerInstance;
+pub static CRAWLER_INSTANCE: GreathouseCrawlerInstance = GreathouseCrawlerInstance;
 
 pub struct GreathouseCrawlerInstance;
 

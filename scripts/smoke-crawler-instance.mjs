@@ -73,6 +73,14 @@ if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.inc
 if (!instanceTraitSource.includes('REGISTERED_CRAWLER_INSTANCES') || !instanceTraitSource.includes('CrawlerInstanceRegistration')) {
   throw new Error('crawler instances are not resolved through a registration table')
 }
+if (
+  instanceTraitSource.includes('GARBAGE_CRAWLER_INSTANCE') ||
+  instanceTraitSource.includes('GREATHOUSE_CRAWLER_INSTANCE') ||
+  !garbageInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
+  !greathouseInstanceSource.includes('pub static CRAWLER_INSTANCE')
+) {
+  throw new Error('crawler instance modules should expose neutral CRAWLER_INSTANCE registrations')
+}
 if (instanceTraitSource.includes('match instance') || instanceTraitSource.includes('supported instances: garbage, greathouse')) {
   throw new Error('crawler instance resolver still hard-codes supported instances instead of using registrations')
 }

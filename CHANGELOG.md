@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Renamed Rust crawler instance statics to neutral per-module `CRAWLER_INSTANCE` exports, so the shared crawler registry no longer consumes Garbage/Greathouse-named static symbols.
 - Renamed instance-owned deployment profile exports to neutral `deployCheckProfile` symbols, so shared Vercel/deployment tooling no longer consumes Garbage/Greathouse-named deploy profile exports.
 - Renamed instance-owned app and workbench instance registration exports to neutral `workbenchAppRegistration` and `workbenchInstanceRegistration` symbols, so shared frontend registries no longer consume Garbage/Greathouse-named registration exports.
 - Moved local workbench adapter type definitions into `api/workbench/local-adapter-types.ts` and changed the Garbage fallback adapter to export neutral registration metadata, so the shared adapter resolver no longer owns instance adapter contracts or consumes a Garbage-named adapter symbol.

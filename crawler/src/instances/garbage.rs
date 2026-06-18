@@ -12,7 +12,7 @@ use crate::core::{
 };
 use crate::instances::{CrawlerInstance, LegacySqlExport};
 
-pub static GARBAGE_CRAWLER_INSTANCE: GarbageCrawlerInstance = GarbageCrawlerInstance;
+pub static CRAWLER_INSTANCE: GarbageCrawlerInstance = GarbageCrawlerInstance;
 
 pub struct GarbageCrawlerInstance;
 

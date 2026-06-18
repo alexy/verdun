@@ -69,11 +69,11 @@ pub trait CrawlerInstance: Sync {
 
 pub static REGISTERED_CRAWLER_INSTANCES: &[CrawlerInstanceRegistration] = &[
     CrawlerInstanceRegistration {
-        instance: &garbage::GARBAGE_CRAWLER_INSTANCE,
+        instance: &garbage::CRAWLER_INSTANCE,
         default: true,
     },
     CrawlerInstanceRegistration {
-        instance: &greathouse::GREATHOUSE_CRAWLER_INSTANCE,
+        instance: &greathouse::CRAWLER_INSTANCE,
         default: false,
     },
 ];
