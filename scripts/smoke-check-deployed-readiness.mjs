@@ -14,6 +14,8 @@ const rawSnapshot = JSON.parse(await readFile(defaultProfile.sourceSnapshotPath,
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
 const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
 const garbageDeployProfileSource = await readFile('scripts/instances/garbage/deploy-checks.mjs', 'utf8')
+const garbageDeployFixtureSource = await readFile('scripts/instances/garbage/deployed-check-smoke-fixture.mjs', 'utf8')
+const garbageDraftChecksSource = await readFile('scripts/instances/garbage/deployed-draft-checks.mjs', 'utf8')
 const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
@@ -75,6 +77,12 @@ if (
 }
 if (!garbageDeployProfileSource.includes('apps/garbage/scripts/deploy-checks.mjs') || garbageDeployProfileSource.includes('defaultBaseUrl')) {
   throw new Error('Garbage deploy-check profile metadata should live in the parent package with only a resident discovery shim in Verdun')
+}
+if (!garbageDeployFixtureSource.includes('apps/garbage/scripts/deployed-check-smoke-fixture.mjs') || garbageDeployFixtureSource.includes('draftMarkdown')) {
+  throw new Error('Garbage deployed-check smoke fixture should live in the parent package with only a resident hook shim in Verdun')
+}
+if (!garbageDraftChecksSource.includes('apps/garbage/scripts/deployed-draft-checks.mjs') || garbageDraftChecksSource.includes('function draftSelection')) {
+  throw new Error('Garbage deployed draft/readiness checks should live in the parent package with only a resident hook shim in Verdun')
 }
 if (!profileModulePathMatchesInstance(defaultProfile)) {
   throw new Error('default deployed-check smoke fixture should be instance-owned profile metadata')
