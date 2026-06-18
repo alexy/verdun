@@ -36,6 +36,7 @@
 - Added `api/instances/bundled-workbench-adapters.ts` as the bundled API fallback adapter manifest, so the generic local workbench adapter registry no longer imports the resident Garbage adapter directly.
 - Changed deploy-profile discovery to import profile modules by absolute file URL, preserving convention-based discovery when Vite temp-loads config modules during builds.
 - Changed deploy-check profile registration to discover `scripts/instances/*/deploy-checks.mjs` modules by convention, removing explicit Garbage/Greathouse imports from shared deployment tooling.
+- Moved Garbage deploy-check profile metadata to parent-owned `apps/garbage/scripts/deploy-checks.mjs`; resident Verdun now keeps only a deploy-profile discovery shim with smoke coverage preventing the full Garbage profile from returning there.
 - Changed frontend app and instance registries to discover bundled `src/instances/*/app.ts` and `src/instances/*/instance.ts` registration modules by convention, removing explicit Garbage/Greathouse imports from the shared frontend registries.
 - Moved crawler item payload, source-run, and editorial-state default paths onto the `CrawlerInstance` trait so Greathouse and future instances do not share Garbage's `crawler/data/*` CLI defaults.
 - Removed default-instance resolution from `api/workbench/_db.ts`; generic workbench database helpers now require explicit `WorkbenchInstance` arguments, leaving default app selection to the route/registry layer.

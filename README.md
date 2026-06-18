@@ -19,6 +19,7 @@ The first reusable boundary is now explicit:
 - Generic local workbench adapter contracts live in `api/workbench/local-adapter-types.ts`; instance-specific fallback adapters export neutral registration metadata from their own namespace.
 - Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Garbage remains the default `/rbage/` app path and Greathouse has a reusable `/greathouse/` path.
 - Instance deploy-check modules export neutral `deployCheckProfile` metadata, and the shared deployment registry discovers `scripts/instances/*/deploy-checks.mjs` profiles by convention.
+- Garbage deploy-check profile metadata is parent-owned at `apps/garbage/scripts/deploy-checks.mjs`; `scripts/instances/garbage/deploy-checks.mjs` is only a discovery shim while external package discovery is still being extracted.
 - Deployed draft/readiness checks are deploy-profile hooks; Garbage owns newsletter draft validation under `scripts/instances/garbage/`, while the shared deployment checker validates only generic route, snapshot, status, and health mechanics.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
 

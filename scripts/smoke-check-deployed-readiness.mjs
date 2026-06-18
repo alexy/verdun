@@ -13,6 +13,7 @@ const secondaryBasePath = secondaryProfile.basePath
 const rawSnapshot = JSON.parse(await readFile(defaultProfile.sourceSnapshotPath, 'utf8'))
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
 const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
+const garbageDeployProfileSource = await readFile('scripts/instances/garbage/deploy-checks.mjs', 'utf8')
 const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
@@ -71,6 +72,9 @@ if (
   !deployProfilesSource.includes('readdir(instanceDirectory')
 ) {
   throw new Error('deploy check profiles are not discovered from instance profile modules')
+}
+if (!garbageDeployProfileSource.includes('apps/garbage/scripts/deploy-checks.mjs') || garbageDeployProfileSource.includes('defaultBaseUrl')) {
+  throw new Error('Garbage deploy-check profile metadata should live in the parent package with only a resident discovery shim in Verdun')
 }
 if (!profileModulePathMatchesInstance(defaultProfile)) {
   throw new Error('default deployed-check smoke fixture should be instance-owned profile metadata')
