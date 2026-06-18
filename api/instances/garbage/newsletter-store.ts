@@ -328,7 +328,8 @@ async function readDatabaseGeneratedAt(sql: SqlClient): Promise<string> {
 }
 
 function readStaticSnapshot(): NewsletterSnapshot | null {
-  const snapshotPath = join(process.cwd(), ...garbageInstance.staticSnapshotPath.split('/'))
+  const snapshotPath = process.env.VERDUN_STATIC_SNAPSHOT_FILE
+    ?? join(process.cwd(), ...garbageInstance.staticSnapshotPath.split('/'))
   if (existsSync(snapshotPath)) {
     const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf8')) as StaticSnapshot
     return {

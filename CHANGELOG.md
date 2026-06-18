@@ -17,6 +17,8 @@
 - Documented that parent Garbage URL snapshot draft smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage publishing-readiness smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage Ghost smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
+- Documented that parent Garbage draft API and newsletter health smoke coverage now live in the parent package while the API implementation remains bundled during extraction.
+- Added `VERDUN_STATIC_SNAPSHOT_FILE` support to the Garbage newsletter API static fallback so parent package API smokes can use package-owned snapshot data without changing cwd into Verdun.
 - Documented that parent Garbage public snapshot coverage smoke now lives in the parent package while the crawler config remains bundled during extraction.
 - Documented that parent Garbage snapshot recency smoke now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage manual-source freshness smoke now lives in the parent package while the Rust crawler remains bundled during extraction.
