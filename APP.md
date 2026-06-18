@@ -27,6 +27,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - News cards expose stable item anchors/permalinks and source domains for sharing and review.
 - `src/instances/garbage/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
 - Garbage publishing readiness checks in `src/instances/garbage/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
+- App and instance registration exports are neutral inside each instance module, so the shared registries compose `workbenchAppRegistration` and `workbenchInstanceRegistration` entries instead of Garbage/Greathouse-named symbols.
 - Vercel API routes:
   - `GET /api/workbench/records?instance=garbage|greathouse`
   - `GET /api/workbench/status?instance=garbage|greathouse`

@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Renamed instance-owned app and workbench instance registration exports to neutral `workbenchAppRegistration` and `workbenchInstanceRegistration` symbols, so shared frontend registries no longer consume Garbage/Greathouse-named registration exports.
 - Moved local workbench adapter type definitions into `api/workbench/local-adapter-types.ts` and changed the Garbage fallback adapter to export neutral registration metadata, so the shared adapter resolver no longer owns instance adapter contracts or consumes a Garbage-named adapter symbol.
 - Moved Garbage newsletter/publishing/ontology CSS into `src/instances/garbage/style.css` and imported it from `GarbageApp.vue`, leaving root `src/style.css` focused on shared shell/workbench layout.
 - Moved Garbage newsletter database migrations under `db/instances/garbage/migrations/`, made `db/migrations/0003_generic_workbench_tables.sql` define only generic workbench tables/views, and changed database apply/deploy helpers to resolve profile-declared migration paths so Greathouse preflights do not load Garbage compatibility SQL.

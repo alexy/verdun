@@ -1,8 +1,8 @@
 import type { WorkbenchAppRegistration } from './app-types'
-import { garbageWorkbenchApp } from './garbage/app'
-import { greathouseWorkbenchApp } from './greathouse/app'
+import * as garbageApp from './garbage/app'
+import * as greathouseApp from './greathouse/app'
 
 export const registeredWorkbenchApps: WorkbenchAppRegistration[] = [
-  garbageWorkbenchApp,
-  greathouseWorkbenchApp,
+  garbageApp.workbenchAppRegistration,
+  greathouseApp.workbenchAppRegistration,
 ]

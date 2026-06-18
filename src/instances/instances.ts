@@ -1,8 +1,8 @@
 import type { WorkbenchInstanceRegistration } from './instance-types'
-import { garbageWorkbenchInstance } from './garbage/instance'
-import { greathouseWorkbenchInstance } from './greathouse/instance'
+import * as garbageInstance from './garbage/instance'
+import * as greathouseInstance from './greathouse/instance'
 
 export const registeredWorkbenchInstances: WorkbenchInstanceRegistration[] = [
-  garbageWorkbenchInstance,
-  greathouseWorkbenchInstance,
+  garbageInstance.workbenchInstanceRegistration,
+  greathouseInstance.workbenchInstanceRegistration,
 ]

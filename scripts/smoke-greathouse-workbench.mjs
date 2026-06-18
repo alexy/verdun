@@ -76,8 +76,12 @@ if (!greathouseInstanceRegistrationSource.includes('greathouseInstance') || !gre
 if (!garbageInstanceRegistrationSource.includes('garbageInstance') || !garbageInstanceRegistrationSource.includes('default: true')) {
   throw new Error('Garbage default instance metadata is not registered from its instance boundary')
 }
-if (!instanceRegistrationsSource.includes('garbageWorkbenchInstance') || !instanceRegistrationsSource.includes('greathouseWorkbenchInstance')) {
-  throw new Error('registered instance list is missing an instance metadata registration')
+if (
+  !instanceRegistrationsSource.includes('workbenchInstanceRegistration') ||
+  instanceRegistrationsSource.includes('garbageWorkbenchInstance') ||
+  instanceRegistrationsSource.includes('greathouseWorkbenchInstance')
+) {
+  throw new Error('registered instance list is not consuming neutral instance metadata registrations')
 }
 if (!appSource.includes('resolveWorkbenchAppForPath')) {
   throw new Error('root app shell is not wired through the instance app resolver')
@@ -85,8 +89,12 @@ if (!appSource.includes('resolveWorkbenchAppForPath')) {
 if (appSource.includes('GreathouseApp') || appSource.includes('GarbageApp')) {
   throw new Error('root app shell imports concrete instance apps instead of the app registry')
 }
-if (!appComponentsSource.includes('garbageWorkbenchApp') || !appComponentsSource.includes('greathouseWorkbenchApp')) {
-  throw new Error('registered app component list is missing an instance app registration')
+if (
+  !appComponentsSource.includes('workbenchAppRegistration') ||
+  appComponentsSource.includes('garbageWorkbenchApp') ||
+  appComponentsSource.includes('greathouseWorkbenchApp')
+) {
+  throw new Error('registered app component list is not consuming neutral app registrations')
 }
 if (
   !appRegistrySource.includes('resolveWorkbenchInstanceForPath') ||
