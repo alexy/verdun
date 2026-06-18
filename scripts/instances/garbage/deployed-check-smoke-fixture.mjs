@@ -126,3 +126,5 @@ Typed lakehouse and graph systems are moving from experiments into practical inf
   }
   return fixture
 }
+
+export const createDeployedCheckSmokeFixture = createGarbageDeployedCheckSmokeFixture

@@ -7,6 +7,7 @@ export const garbageDeployCheckProfile = {
   devAppBaseUrl: 'http://127.0.0.1:5176/rbage/',
   sourceSnapshotPath: 'public/data/newsletter-snapshot.json',
   staticSnapshotPath: 'data/newsletter-snapshot.json',
+  smokeFixtureModule: './instances/garbage/deployed-check-smoke-fixture.mjs',
   minRecords: 23,
   minCollectionPlans: 23,
   requiredSubjects: ['Pydantic', 'LakeSail', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Turso', 'LanceDB', 'HelixDB', 'SurrealDB', 'pgGraph', 'Garde', 'zod-rs'],

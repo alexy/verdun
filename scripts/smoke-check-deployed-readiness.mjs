@@ -2,11 +2,10 @@ import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
-import { createGarbageDeployedCheckSmokeFixture } from './instances/garbage/deployed-check-smoke-fixture.mjs'
 
 const garbageProfile = deployCheckProfile(defaultDeployCheckProfileId())
 const greathouseProfile = deployCheckProfile('greathouse')
-if (!garbageProfile?.sourceSnapshotPath || !garbageProfile?.draft || !greathouseProfile) {
+if (!garbageProfile?.sourceSnapshotPath || !garbageProfile?.draft || !garbageProfile?.smokeFixtureModule || !greathouseProfile) {
   throw new Error('deployed-check smoke requires Garbage and Greathouse deploy profiles')
 }
 const garbageBasePath = garbageProfile.basePath
@@ -14,6 +13,7 @@ const greathouseBasePath = greathouseProfile.basePath
 const rawSnapshot = JSON.parse(await readFile(garbageProfile.sourceSnapshotPath, 'utf8'))
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
 const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
+const garbageDeployProfileSource = await readFile('scripts/instances/garbage/deploy-checks.mjs', 'utf8')
 const greathouseDeployProfileSource = await readFile('scripts/instances/greathouse/deploy-checks.mjs', 'utf8')
 const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
@@ -64,11 +64,15 @@ if (vercelConfig.redirects?.[0]?.destination !== garbageProfile.basePath) {
 if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployProfilesSource.includes('return garbageDeployCheckProfile.id')) {
   throw new Error('deploy check profiles are not resolved from profile registration metadata')
 }
+if (!garbageProfile.smokeFixtureModule.includes('/garbage/') || !garbageDeployProfileSource.includes('smokeFixtureModule')) {
+  throw new Error('Garbage deployed-check smoke fixture should be instance-owned profile metadata')
+}
 if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDeployProfileSource.includes("staticSnapshotPath: 'data/greathouse-snapshot.json'")) {
   throw new Error('Greathouse deploy profile is missing static snapshot metadata')
 }
 const freshGeneratedAt = new Date().toISOString()
-const garbageFixture = createGarbageDeployedCheckSmokeFixture({
+const { createDeployedCheckSmokeFixture } = await import(garbageProfile.smokeFixtureModule)
+const garbageFixture = createDeployedCheckSmokeFixture({
   profile: garbageProfile,
   rawSnapshot,
   generatedAt: freshGeneratedAt,
