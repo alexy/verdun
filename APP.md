@@ -46,7 +46,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Generic backend route helpers live in `api/core/http.ts`, while Garbage data access and local fallback state live under `api/instances/garbage/`.
 - Generic local workbench adapter types live in `api/workbench/local-adapter-types.ts`; Garbage fallback behavior is now an instance-owned registration rather than a Garbage-named adapter contract in the shared resolver.
 - Bundled API fallback adapters are isolated in `api/instances/bundled-workbench-adapters.ts`, so the generic adapter registry does not directly import Garbage.
-- The parent Garbage repo now exposes `@garbage/instance` package commands as the temporary stable command surface while Garbage implementation moves out of Verdun. Publishing entrypoints and the newsletter draft builder now live in the parent package and no longer change cwd into Verdun; operational compatibility smokes still delegate through the external instance manifest into declared Verdun scripts.
+- The parent Garbage repo now exposes `@garbage/instance` package commands as the temporary stable command surface while Garbage implementation moves out of Verdun. Publishing entrypoints and the newsletter draft builder now live in the parent package, import package TypeScript directly with Node, and no longer change cwd into Verdun; operational compatibility smokes still delegate through the external instance manifest into declared Verdun scripts.
 - Generic Verdun workbench read routes live in `api/workbench/records.ts`, `api/workbench/status.ts`, and `api/workbench/health.ts`; their DB helper now requires an explicit `WorkbenchInstance` namespace while the public routes resolve defaults through the instance registry.
 - `GET /api/garbage/newsletter/health` follows the Greathouse service-health pattern and reports database env state, read/write surfaces, guarded publishing surfaces, the Rust loader command, and active snapshot counts.
 - Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local development without a database uses ignored `crawler/data/editorial-state.json`.
@@ -108,7 +108,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 ## Next Work
 
 - Keep moving Garbage-specific app, publishing, and compatibility behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
-- Replace the parent Garbage package's remaining bundled Verdun Vite loader and explicit Verdun data fallbacks with package-owned runtime and data boundaries one command group at a time.
+- Replace the parent Garbage package's remaining explicit Verdun data fallbacks with package-owned data boundaries one command group at a time.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 
