@@ -60,6 +60,7 @@ The parent Garbage repo now tracks `../apps/garbage/verdun.instance.json` as the
 The resident Grust watchlist audit and smoke scripts now only shim to the parent package, so Grust alignment remains a Garbage package concern while the Rust crawler boundary is still bundled.
 The resident Garbage crawler dedupe, provenance, query-plan, and manual-source freshness smokes also shim to the parent package while invoking the bundled Rust crawler through the parent runtime helper.
 The resident Garbage draft, URL draft, publishing-readiness, and snapshot-recency smokes now shim to the parent package as well.
+The resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ulysses export smoke also shim to the parent package.
 
 ## Local app
 
