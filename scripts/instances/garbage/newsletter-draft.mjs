@@ -77,7 +77,7 @@ function parseCliArgs(args) {
 }
 
 export async function buildNewsletterDraft(snapshot) {
-  const { module } = await runnerImport('./src/instances/garbage/newsletter.ts', {
+  const { module } = await runnerImport('../apps/garbage/src/newsletter.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
@@ -85,7 +85,7 @@ export async function buildNewsletterDraft(snapshot) {
 }
 
 export async function evaluateNewsletterReadiness(snapshot) {
-  const { module } = await runnerImport('./src/instances/garbage/newsletter.ts', {
+  const { module } = await runnerImport('../apps/garbage/src/newsletter.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
@@ -93,7 +93,7 @@ export async function evaluateNewsletterReadiness(snapshot) {
 }
 
 export async function evaluateSourceCoverage(snapshot) {
-  const { module } = await runnerImport('./src/instances/garbage/newsletter.ts', {
+  const { module } = await runnerImport('../apps/garbage/src/newsletter.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
@@ -101,7 +101,7 @@ export async function evaluateSourceCoverage(snapshot) {
 }
 
 export async function evaluateNewsletterProseQuality(draft, snapshot) {
-  const { module } = await runnerImport('./src/instances/garbage/newsletter.ts', {
+  const { module } = await runnerImport('../apps/garbage/src/newsletter.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
@@ -109,7 +109,7 @@ export async function evaluateNewsletterProseQuality(draft, snapshot) {
 }
 
 export async function sharedBuildPublishManifest(draft, snapshot, options = {}) {
-  const { module } = await runnerImport('./src/instances/garbage/newsletter.ts', {
+  const { module } = await runnerImport('../apps/garbage/src/newsletter.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })

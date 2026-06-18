@@ -1,6 +1,6 @@
 import { ref } from 'vue'
-import type { EditorialStateExport, EditorialStateImportResult, NewsletterFocus, NewsletterSnapshot, VoteValue } from '../newsletter'
-import { applyEditorialStateExport, seedSnapshot } from '../newsletter'
+import type { EditorialStateExport, EditorialStateImportResult, NewsletterFocus, NewsletterSnapshot, VoteValue } from '../../../../../apps/garbage/src/newsletter.ts'
+import { applyEditorialStateExport, seedSnapshot } from '../../../../../apps/garbage/src/newsletter.ts'
 import { normalizeSnapshot } from '../snapshot'
 
 type SnapshotLoadResult = {

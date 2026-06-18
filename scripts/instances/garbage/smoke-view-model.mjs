@@ -1,7 +1,7 @@
 import { runnerImport } from 'vite'
 import { ref } from 'vue'
 
-const { module: newsletterModule } = await runnerImport('./src/instances/garbage/newsletter.ts', {
+const { module: newsletterModule } = await runnerImport('../apps/garbage/src/newsletter.ts', {
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })

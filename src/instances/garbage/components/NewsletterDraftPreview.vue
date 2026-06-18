@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Check, Copy, Download, FileJson, FileText, Upload } from '@lucide/vue'
-import type { NewsletterDraft, NewsletterPublishManifest } from '../newsletter'
+import type { NewsletterDraft, NewsletterPublishManifest } from '../../../../../apps/garbage/src/newsletter.ts'
 
 const props = defineProps<{
   draft: NewsletterDraft

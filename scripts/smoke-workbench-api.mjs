@@ -109,6 +109,9 @@ try {
   if (existsSync('src/instances/garbage/config.ts')) {
     throw new Error('Garbage instance config should live in the parent package, not resident Verdun source')
   }
+  if (existsSync('src/instances/garbage/newsletter.ts') || existsSync('src/instances/garbage/ontology.ts') || existsSync('src/instances/garbage/ontology.json')) {
+    throw new Error('Garbage newsletter and ontology modules should live in the parent package, not resident Verdun source')
+  }
 
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
     logLevel: 'error',

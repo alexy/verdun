@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BookOpenText, ClipboardCheck, Database, Send, Sparkles } from '@lucide/vue'
-import type { NewsItem, NewsletterFocus, NewsletterReadiness, ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../newsletter'
-import type { OntologyNode } from '../ontology'
+import type { NewsItem, NewsletterFocus, NewsletterReadiness, ProjectQueryPlan, SourceCoverageSummary, SourceRun } from '../../../../../apps/garbage/src/newsletter.ts'
+import type { OntologyNode } from '../../../../../apps/garbage/src/ontology.ts'
 import type { DraftSourceSummary } from '../composables/useNewsletterView'
 import SourceHealthPanel from './SourceHealthPanel.vue'
 

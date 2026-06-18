@@ -7,7 +7,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 ## Current Slice
 
 - Verdun is now being extracted as the reusable core; the live newsletter app is the Garbage instance layered on top of it.
-- Generic workbench contracts live in `src/core/workbench.ts`; Garbage instance configuration lives in the parent package at `apps/garbage/src/config.ts`, while resident ontology data still lives under `src/instances/garbage/`.
+- Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, newsletter, and ontology sources live in the parent package under `apps/garbage/src/`, while resident Verdun UI/API compatibility code imports them during extraction.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
 - Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under `src/instances/garbage/components/`.
@@ -26,8 +26,8 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.
 - News cards surface crawler provenance as editorial evidence from the API/static snapshot.
 - News cards expose stable item anchors/permalinks and source domains for sharing and review.
-- `src/instances/garbage/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
-- Garbage publishing readiness checks in `src/instances/garbage/newsletter.ts` now gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
+- `apps/garbage/src/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
+- Garbage publishing readiness checks in `apps/garbage/src/newsletter.ts` gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
 - App and instance registration exports are neutral inside each instance module, and the shared frontend registries discover `app.ts` and `instance.ts` entries by convention instead of statically importing Garbage or Greathouse.
 - Vercel API routes:
   - `GET /api/workbench/records?instance=garbage|greathouse`
@@ -49,6 +49,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - The parent Garbage repo now exposes `@garbage/instance` package commands as the temporary stable command surface while Garbage implementation moves out of Verdun. Publishing entrypoints, the newsletter draft builder, workbench projection, default publishing data, draft/URL-draft/readiness/source-gap/Ulysses/Ghost/public-snapshot/recency/API smoke coverage, and Grust watchlist/dedupe/provenance/manual-source/query-plan crawler smoke commands now live in the parent package, import package TypeScript directly with Node, and no longer change cwd into Verdun; local API smoke is parent-owned while it still loads bundled API modules, and operational compatibility smokes still delegate through the external instance manifest into declared Verdun scripts.
 - The bundled Garbage API workbench adapter and view-model smoke import `apps/garbage/src/workbench.ts`, so generic workbench fallback routes and view-model coverage now consume the parent package's Garbage projection; the duplicate resident Verdun projection file has been removed.
 - The bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module import `apps/garbage/src/config.ts`; the duplicate resident config file has been removed while legacy static/local state fallback paths remain only for the current bundled runtime.
+- Resident Garbage UI components, composables, the API draft route, and compatibility scripts import parent-owned `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; the duplicate resident newsletter and ontology files have been removed.
 - Generic Verdun workbench read routes live in `api/workbench/records.ts`, `api/workbench/status.ts`, and `api/workbench/health.ts`; their DB helper now requires an explicit `WorkbenchInstance` namespace while the public routes resolve defaults through the instance registry.
 - `GET /api/garbage/newsletter/health` follows the Greathouse service-health pattern and reports database env state, read/write surfaces, guarded publishing surfaces, the Rust loader command, and active snapshot counts.
 - Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local development without a database uses ignored `crawler/data/editorial-state.json`.
@@ -93,7 +94,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Draft and Ghost scripts can read a snapshot from a local JSON file or an `http(s)` URL, including the deployed `/api/garbage/newsletter/items` endpoint.
 - Draft and Ghost scripts support `--require-upvotes` / `NEWSLETTER_REQUIRE_UPVOTES=true` to block publishing from a fallback-ranked draft when no item has been explicitly upvoted.
 - Draft and Ghost scripts support `--require-ready` / `NEWSLETTER_REQUIRE_READY=true` to apply the same publishing readiness checks used by the app before writing or posting a draft.
-- The Garbage app preview, local Markdown export, and optional Ghost helper share the same draft builder in `src/instances/garbage/newsletter.ts`.
+- The Garbage app preview, local Markdown export, and optional Ghost helper share the same draft builder in `apps/garbage/src/newsletter.ts`.
 - The app draft preview offers direct Markdown download/copy controls for the exact draft shown on screen.
 - The app draft preview imports and exports `{ votes, focuses }` editorial state JSON in the same shape consumed by `VERDUN_LOCAL_STATE_FILE` for local Ulysses export.
 - The app draft preview exports the same publish manifest shape used by the CLI, so browser triage can audit selected item IDs, votes, focuses, readiness, coverage, and source/query-plan counts before local export.

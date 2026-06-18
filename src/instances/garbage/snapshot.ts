@@ -1,4 +1,4 @@
-import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type ProjectQueryPlan, type SourceRun, type SourceRunStatus, type VoteValue } from './newsletter'
+import { seedSnapshot, type NewsletterFocus, type NewsletterSnapshot, type NewsItem, type NewsItemProvenance, type ProjectQueryPlan, type SourceRun, type SourceRunStatus, type VoteValue } from '../../../../apps/garbage/src/newsletter.ts'
 
 type RawRecord = Record<string, unknown>
 

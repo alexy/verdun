@@ -8,7 +8,7 @@ import NewsletterDraftPreview from './components/NewsletterDraftPreview.vue'
 import NewsletterHero from './components/NewsletterHero.vue'
 import { useNewsletterSnapshot } from './composables/useNewsletterSnapshot'
 import { useNewsletterView } from './composables/useNewsletterView'
-import { ontologyNodes } from './ontology'
+import { ontologyNodes } from '../../../../apps/garbage/src/ontology.ts'
 import './style.css'
 
 const { editorialPersistence, error, importEditorialState, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()
