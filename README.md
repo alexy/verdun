@@ -45,6 +45,7 @@ The current proof points are:
 - Garbage-specific newsletter, publishing, ontology, and source-gap CSS lives in `src/instances/garbage/style.css`; shared shell/workbench CSS remains in `src/style.css`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under `src/instances/garbage/composables/`.
 - Generic backend route mechanics live in `api/core/http.ts`, while Garbage data access and local fallback state stay under `api/instances/garbage/`.
+- Generic workbench DB helpers require an explicit `WorkbenchInstance`; default-instance resolution stays in the route/registry layer instead of the database helper.
 - Generic app and instance registries consume neutral registration exports from instance modules; Garbage and Greathouse component/config names stay inside their own instance namespaces.
 - Generic local adapter type and registration contracts live under `api/workbench/`; Garbage's no-database fallback is registered from `api/instances/garbage/workbench.ts` without a Garbage-named adapter export in the shared registry.
 - The app's editorial-state import posts `{ votes, focuses }` to `POST /api/garbage/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.

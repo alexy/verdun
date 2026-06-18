@@ -87,8 +87,17 @@ try {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
+  const { module: registryModule } = await runnerImport('./src/instances/registry.ts', {
+    logLevel: 'error',
+    optimizeDeps: { noDiscovery: true },
+  })
+  const defaultInstance = registryModule.defaultWorkbenchInstance()
 
-  const snapshot = await dbModule.readWorkbenchSnapshot()
+  if (dbSource.includes('defaultWorkbenchInstance')) {
+    throw new Error('generic workbench DB helper still owns default instance resolution')
+  }
+
+  const snapshot = await dbModule.readWorkbenchSnapshot(defaultInstance)
   if (snapshot.instance.id !== 'garbage' || snapshot.instance.basePath !== '/rbage/') {
     throw new Error(`workbench snapshot did not expose the Garbage instance: ${JSON.stringify(snapshot.instance)}`)
   }
@@ -102,12 +111,12 @@ try {
     throw new Error('workbench snapshot did not expose generic source-run subject counts')
   }
 
-  const status = await dbModule.readWorkbenchStatus()
+  const status = await dbModule.readWorkbenchStatus(defaultInstance)
   if (status.recordCount !== snapshot.records.length || status.collectionPlanCount !== snapshot.collectionPlans.length) {
     throw new Error(`workbench status counts did not match snapshot: ${JSON.stringify(status)}`)
   }
 
-  const databaseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql())
+  const databaseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql(), defaultInstance)
   if (
     databaseSnapshot.editorialPersistence !== 'database'
     || databaseSnapshot.records[0]?.subject !== 'Pydantic'
@@ -117,13 +126,13 @@ try {
   ) {
     throw new Error(`workbench database-view reader did not map generic rows: ${JSON.stringify(databaseSnapshot)}`)
   }
-  const databaseStatus = await dbModule.readDatabaseWorkbenchStatus(fakeWorkbenchSql())
+  const databaseStatus = await dbModule.readDatabaseWorkbenchStatus(fakeWorkbenchSql(), defaultInstance)
   if (databaseStatus.recordCount !== 1 || databaseStatus.collectionPlanCount !== 1 || databaseStatus.editorialPersistence !== 'database') {
     throw new Error(`workbench database-view status did not map generic counts: ${JSON.stringify(databaseStatus)}`)
   }
   const writeSql = fakeWorkbenchWriteSql()
-  await dbModule.writeDatabaseWorkbenchReview(writeSql, 'db-pydantic', 1)
-  const focus = await dbModule.writeDatabaseWorkbenchFocus(writeSql, 'Database focus write.', 'this_week')
+  await dbModule.writeDatabaseWorkbenchReview(writeSql, 'db-pydantic', 1, defaultInstance)
+  const focus = await dbModule.writeDatabaseWorkbenchFocus(writeSql, 'Database focus write.', 'this_week', defaultInstance)
   const stateImport = await dbModule.writeDatabaseWorkbenchState(writeSql, {
     reviews: { 'db-pydantic': -1 },
     focuses: [{
@@ -132,7 +141,7 @@ try {
       scope: 'ongoing',
       created_at: '2026-06-16T12:30:00.000Z',
     }],
-  })
+  }, defaultInstance)
   if (!writeSql.reviewWrites.some((write) => write.recordId === 'db-pydantic' && write.review === 1)) {
     throw new Error(`workbench generic review write did not target review_state: ${JSON.stringify(writeSql.reviewWrites)}`)
   }
@@ -272,7 +281,7 @@ try {
   if (unknownInstanceResponse.code !== 400 || unknownInstanceResponse.body?.error !== 'unknown_workbench_instance') {
     throw new Error(`workbench records route did not reject unknown instances: ${JSON.stringify(unknownInstanceResponse.body)}`)
   }
-  const updatedSnapshot = await dbModule.readWorkbenchSnapshot()
+  const updatedSnapshot = await dbModule.readWorkbenchSnapshot(defaultInstance)
   if (!updatedSnapshot.records.some((record) => record.id === recordId && record.review === -1)) {
     throw new Error('workbench state route did not persist imported reviews into projected records')
   }

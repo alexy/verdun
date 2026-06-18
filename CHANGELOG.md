@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Removed default-instance resolution from `api/workbench/_db.ts`; generic workbench database helpers now require explicit `WorkbenchInstance` arguments, leaving default app selection to the route/registry layer.
 - Renamed Rust crawler instance statics to neutral per-module `CRAWLER_INSTANCE` exports, so the shared crawler registry no longer consumes Garbage/Greathouse-named static symbols.
 - Renamed instance-owned deployment profile exports to neutral `deployCheckProfile` symbols, so shared Vercel/deployment tooling no longer consumes Garbage/Greathouse-named deploy profile exports.
 - Renamed instance-owned app and workbench instance registration exports to neutral `workbenchAppRegistration` and `workbenchInstanceRegistration` symbols, so shared frontend registries no longer consume Garbage/Greathouse-named registration exports.
