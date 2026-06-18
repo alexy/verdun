@@ -55,7 +55,7 @@ The current proof points are:
 
 The extraction is still incomplete: Verdun still contains Garbage instance code and compatibility shims, and the next architectural move is to keep shrinking the shared/core surface until Garbage and Greathouse are consumers rather than resident domains.
 
-The parent Garbage repo now tracks `../apps/garbage/verdun.instance.json` as the external instance-package anchor for the current bundled Garbage paths. Treat that manifest as the migration checklist for moving Garbage implementation out of Verdun. The parent repo also exposes a temporary `@garbage/instance` package command facade; commands such as `npm run garbage:draft`, `npm run garbage:review:gaps`, `npm run garbage:ulysses:ready`, and `npm run garbage:smoke:workbench` currently delegate into declared Verdun scripts until their implementations move into the Garbage package.
+The parent Garbage repo now tracks `../apps/garbage/verdun.instance.json` as the external instance-package anchor for the current bundled Garbage paths. Treat that manifest as the migration checklist for moving Garbage implementation out of Verdun. The parent repo also exposes a temporary `@garbage/instance` package command facade. Publishing entrypoints such as `npm run garbage:draft`, `npm run garbage:review:gaps`, and `npm run garbage:ulysses:ready` now live in the parent package while still importing the bundled Verdun newsletter builder; operations such as `npm run garbage:smoke:workbench` still delegate into declared Verdun scripts.
 
 ## Local app
 
