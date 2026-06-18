@@ -48,7 +48,7 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterSource, garbageViewSmokeSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
@@ -56,6 +56,7 @@ try {
     readFile('api/instances/workbench-adapters.ts', 'utf8'),
     readFile('api/instances/bundled-workbench-adapters.ts', 'utf8'),
     readFile('api/instances/garbage/workbench.ts', 'utf8'),
+    readFile('scripts/instances/garbage/smoke-view-model.mjs', 'utf8'),
   ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
     throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
@@ -84,6 +85,12 @@ try {
   }
   if (!garbageAdapterSource.includes('localWorkbenchAdapterRegistration') || !garbageAdapterSource.includes('compatibilityTables')) {
     throw new Error('Garbage local workbench adapter no longer exposes instance-owned registration metadata')
+  }
+  if (!garbageAdapterSource.includes('apps/garbage/src/workbench.ts')) {
+    throw new Error('Garbage local workbench adapter should consume the parent-owned workbench projection')
+  }
+  if (!garbageViewSmokeSource.includes('../apps/garbage/src/workbench.ts')) {
+    throw new Error('Garbage view-model smoke should exercise the parent-owned workbench projection')
   }
 
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {

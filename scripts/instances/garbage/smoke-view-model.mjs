@@ -13,7 +13,7 @@ const { module: workbenchViewModule } = await runnerImport('./src/composables/us
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const { module: garbageWorkbenchModule } = await runnerImport('./src/instances/garbage/workbench.ts', {
+const { module: garbageWorkbenchModule } = await runnerImport('../apps/garbage/src/workbench.ts', {
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
