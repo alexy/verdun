@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Changed Rust crawler instance resolution to use a `REGISTERED_CRAWLER_INSTANCES` table with default metadata instead of hard-coded `garbage`/`greathouse` resolver branches.
 - Moved legacy Garbage newsletter snapshot and split-file payload loading out of `crawler/src/main.rs` and into the Garbage crawler instance module, leaving shared CLI code to route through an explicit instance-owned compatibility function.
 - Changed `verdun-crawler queries` to print generic `NormalizedCollectionPlan` JSON and renamed the crawler CLI snapshot loaders so generic snapshot loading and Garbage newsletter compatibility loading are explicit.
 - Changed Greathouse crawler adapters to emit core `NormalizedRecord` values directly instead of constructing Garbage `NewsItem` values internally.

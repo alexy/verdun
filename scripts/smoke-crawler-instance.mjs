@@ -61,6 +61,12 @@ if (!garbageInstanceSource.includes('pub fn news_item_record') || !garbageInstan
 if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.includes('Vec<NormalizedCollectionPlan>')) {
   throw new Error('crawler instance trait still exposes Garbage query-plan types instead of core collection plans')
 }
+if (!instanceTraitSource.includes('REGISTERED_CRAWLER_INSTANCES') || !instanceTraitSource.includes('CrawlerInstanceRegistration')) {
+  throw new Error('crawler instances are not resolved through a registration table')
+}
+if (instanceTraitSource.includes('match instance') || instanceTraitSource.includes('supported instances: garbage, greathouse')) {
+  throw new Error('crawler instance resolver still hard-codes supported instances instead of using registrations')
+}
 if (!instanceTraitSource.includes('EditorialFocus') || !instanceTraitSource.includes('CrawlerCollection')) {
   throw new Error('crawler instance trait still imports editorial focus state from Garbage instead of core')
 }

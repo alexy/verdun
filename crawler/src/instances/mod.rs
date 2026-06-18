@@ -7,7 +7,12 @@ use std::path::PathBuf;
 
 use crate::core::{CrawlerCollection, CrawlerConfig, EditorialFocus, NormalizedCollectionPlan};
 
-pub trait CrawlerInstance {
+pub struct CrawlerInstanceRegistration {
+    pub instance: &'static dyn CrawlerInstance,
+    pub default: bool,
+}
+
+pub trait CrawlerInstance: Sync {
     fn id(&self) -> &'static str;
     fn display_name(&self) -> &'static str;
     fn base_path(&self) -> &'static str;
@@ -30,18 +35,42 @@ pub trait CrawlerInstance {
     ) -> Result<CrawlerCollection>;
 }
 
+pub static REGISTERED_CRAWLER_INSTANCES: &[CrawlerInstanceRegistration] = &[
+    CrawlerInstanceRegistration {
+        instance: &garbage::GARBAGE_CRAWLER_INSTANCE,
+        default: true,
+    },
+    CrawlerInstanceRegistration {
+        instance: &greathouse::GREATHOUSE_CRAWLER_INSTANCE,
+        default: false,
+    },
+];
+
 pub fn default_crawler_instance() -> &'static dyn CrawlerInstance {
-    &garbage::GARBAGE_CRAWLER_INSTANCE
+    REGISTERED_CRAWLER_INSTANCES
+        .iter()
+        .find(|entry| entry.default)
+        .or_else(|| REGISTERED_CRAWLER_INSTANCES.first())
+        .map(|entry| entry.instance)
+        .expect("at least one crawler instance is registered")
 }
 
 pub fn crawler_instance(instance: &str) -> Result<&'static dyn CrawlerInstance> {
-    match instance {
-        "garbage" => Ok(default_crawler_instance()),
-        "greathouse" => Ok(&greathouse::GREATHOUSE_CRAWLER_INSTANCE),
-        other => {
-            anyhow::bail!(
-                "unknown crawler instance {other:?}; supported instances: garbage, greathouse"
-            )
-        }
+    if let Some(entry) = REGISTERED_CRAWLER_INSTANCES
+        .iter()
+        .find(|entry| entry.instance.id() == instance)
+    {
+        return Ok(entry.instance);
     }
+    anyhow::bail!(
+        "unknown crawler instance {instance:?}; supported instances: {}",
+        supported_crawler_instance_ids().join(", ")
+    )
+}
+
+fn supported_crawler_instance_ids() -> Vec<&'static str> {
+    REGISTERED_CRAWLER_INSTANCES
+        .iter()
+        .map(|entry| entry.instance.id())
+        .collect()
 }
