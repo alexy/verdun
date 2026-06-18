@@ -74,6 +74,7 @@
 - Replaced resident Garbage browser app and responsive UI smoke bodies with shims to the parent-owned `apps/garbage/scripts/smoke-app.mjs` and `apps/garbage/scripts/smoke-responsive.mjs` implementations.
 - Moved the Garbage newsletter API store to parent-owned `apps/garbage/src/api/newsletter-store.ts` and replaced the resident Verdun store with a shim, leaving newsletter route handlers bundled for now.
 - Moved Garbage newsletter API route implementations to parent-owned `apps/garbage/src/api/newsletter/` and replaced resident Verdun route handlers with shims.
+- Moved the Garbage local workbench adapter to parent-owned `apps/garbage/src/api/workbench.ts` and replaced the resident Verdun adapter with a shim.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
 - Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
 - Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.
@@ -118,7 +119,7 @@
 - Changed the generic SQL loader smoke to resolve its default snapshot, instance id, base path, and required subjects/plans through deploy profile metadata instead of embedding Garbage-specific expectations.
 - Changed `smoke-db-apply` and `smoke-db-deploy` to resolve their default source snapshot through deploy profile metadata instead of embedding the Garbage newsletter snapshot path.
 - Changed `src/instances/registry.ts` to store default-instance and static-snapshot behavior in registration metadata instead of branching directly on Garbage or Greathouse instances; app resolution now falls back through the registered default.
-- Moved Garbage local workbench adapter metadata into `api/instances/garbage/workbench.ts`; the generic `api/workbench/instance-adapters.ts` now uses adapter registration entries instead of importing Garbage config or embedding newsletter compatibility tables.
+- Moved Garbage local workbench adapter metadata behind the instance adapter registration boundary; it now lives in parent-owned `apps/garbage/src/api/workbench.ts`, and the generic `api/workbench/instance-adapters.ts` uses adapter registration entries instead of importing Garbage config or embedding newsletter compatibility tables.
 - Moved the local workbench adapter registration list into `api/instances/workbench-adapters.ts`, so the generic `api/workbench/instance-adapters.ts` no longer imports instance-specific adapter modules directly.
 
 ## 2026-06-16

@@ -49,7 +49,7 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterSource, garbageStoreShimSource, garbageStoreSource, garbageNewsletterDraftShimSource, garbageNewsletterDraftSource, garbageViewSmokeShimSource, garbageViewSmokeSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterShimSource, garbageAdapterSource, garbageStoreShimSource, garbageStoreSource, garbageNewsletterDraftShimSource, garbageNewsletterDraftSource, garbageViewSmokeShimSource, garbageViewSmokeSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
@@ -57,6 +57,7 @@ try {
     readFile('api/instances/workbench-adapters.ts', 'utf8'),
     readFile('api/instances/bundled-workbench-adapters.ts', 'utf8'),
     readFile('api/instances/garbage/workbench.ts', 'utf8'),
+    readFile('../apps/garbage/src/api/workbench.ts', 'utf8'),
     readFile('api/instances/garbage/newsletter-store.ts', 'utf8'),
     readFile('../apps/garbage/src/api/newsletter-store.ts', 'utf8'),
     readFile('api/instances/garbage/newsletter/draft.ts', 'utf8'),
@@ -89,14 +90,17 @@ try {
   if (!bundledAdaptersSource.includes('./garbage/workbench.js') || !bundledAdaptersSource.includes('bundledLocalWorkbenchAdapterRegistrations')) {
     throw new Error('bundled API adapter manifest no longer owns the resident Garbage adapter import')
   }
+  if (!garbageAdapterShimSource.includes('apps/garbage/src/api/workbench.ts')) {
+    throw new Error('resident Garbage local workbench adapter should only shim to the parent package')
+  }
   if (!garbageAdapterSource.includes('localWorkbenchAdapterRegistration') || !garbageAdapterSource.includes('compatibilityTables')) {
     throw new Error('Garbage local workbench adapter no longer exposes instance-owned registration metadata')
   }
-  if (!garbageAdapterSource.includes('apps/garbage/src/workbench.ts')) {
-    throw new Error('Garbage local workbench adapter should consume the parent-owned workbench projection')
+  if (!garbageAdapterSource.includes("from '../workbench.ts'")) {
+    throw new Error('parent Garbage local workbench adapter should consume the parent-owned workbench projection')
   }
-  if (!garbageAdapterSource.includes('apps/garbage/src/config.ts')) {
-    throw new Error('Garbage local workbench adapter should consume the parent-owned Garbage config')
+  if (!garbageAdapterSource.includes("from '../config.ts'")) {
+    throw new Error('parent Garbage local workbench adapter should consume the parent-owned Garbage config')
   }
   if (!garbageStoreShimSource.includes('apps/garbage/src/api/newsletter-store.ts')) {
     throw new Error('resident Garbage newsletter store should only shim to the parent package')
