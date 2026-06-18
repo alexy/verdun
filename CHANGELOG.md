@@ -6,6 +6,7 @@
 - Documented the parent Garbage `@garbage/instance` command facade as the temporary external package surface that delegates declared commands into Verdun until those implementations move out.
 - Documented the next facade step: Garbage publishing entrypoints now live in the parent package while still importing bundled Verdun newsletter modules, and only operational compatibility smokes remain delegated.
 - Documented that the Garbage newsletter draft builder and ontology copy have moved into the parent package publishing surface, leaving runtime/data assumptions as the remaining publishing boundary.
+- Documented that parent publishing scripts no longer change cwd into Verdun and now use explicit Verdun data fallbacks during extraction.
 - Added `crawler/src/instances/bundled.rs` as the bundled Rust crawler registration manifest, so the generic crawler resolver no longer declares or references resident Garbage/Greathouse modules directly.
 - Added `api/instances/bundled-workbench-adapters.ts` as the bundled API fallback adapter manifest, so the generic local workbench adapter registry no longer imports the resident Garbage adapter directly.
 - Changed deploy-profile discovery to import profile modules by absolute file URL, preserving convention-based discovery when Vite temp-loads config modules during builds.
