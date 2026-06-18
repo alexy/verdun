@@ -43,11 +43,22 @@ async function stopPreview(server) {
   })
 }
 
-runCommand('npm', ['run', 'prod:build'])
+if (profile?.commandRunner?.kind === 'npm-workspace') {
+  runCommand('npm', ['--workspace', profile.commandRunner.workspace, 'run', 'build:app'], {
+    cwd: profile.commandRunner.workspaceRoot,
+  })
+} else {
+  runCommand('npm', ['run', 'prod:build'])
+}
 
-console.log('\n> npm run prod:app')
-const server = spawn('npm', ['run', 'prod:app'], {
+const previewCommand = profile?.commandRunner?.kind === 'npm-workspace'
+  ? ['npm', ['--workspace', profile.commandRunner.workspace, 'run', 'preview:app'], { cwd: profile.commandRunner.workspaceRoot }]
+  : ['npm', ['run', 'prod:app'], {}]
+
+console.log(`\n> ${previewCommand[0]} ${previewCommand[1].join(' ')}`)
+const server = spawn(previewCommand[0], previewCommand[1], {
   stdio: ['ignore', 'pipe', 'pipe'],
+  ...previewCommand[2],
 })
 
 server.stdout.on('data', (chunk) => process.stdout.write(chunk))

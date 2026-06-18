@@ -12,7 +12,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Vue/Vite app with a newsroom triage interface.
 - Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/` with resident Verdun shims.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under parent-owned `apps/garbage/src/app/composables/`.
-- Garbage-specific newsletter app components, publishing/ontology/source-gap styles, and browser composables live under parent-owned `apps/garbage/src/app/`; root `src/style.css` now keeps shared shell/workbench layout and resident Garbage frontend files are shims.
+- Garbage-specific newsletter app components, publishing/ontology/source-gap styles, browser composables, and app entrypoint live under parent-owned `apps/garbage/src/`; root `src/style.css` now keeps shared shell/workbench layout and Verdun no longer loads the Garbage frontend.
 - Vite and generated Vercel routing use registered deploy profiles; Garbage remains the default `/rbage/` public path and Greathouse is routable at `/greathouse/`.
 - Vercel has `collected.ga` attached to the `garbage` project and aliased to the latest production deployment; `npm run check:deployed` is the public DNS/route check, while `npx vercel domains inspect collected.ga` and `npx vercel alias ls` verify Vercel-side domain state during DNS propagation.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.
@@ -31,7 +31,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - News cards expose stable item anchors/permalinks and source domains for sharing and review.
 - `apps/garbage/src/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
 - Garbage publishing readiness checks in `apps/garbage/src/newsletter.ts` gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
-- App and instance registration exports are neutral inside each instance module, and the shared frontend registries discover `app.ts` and `instance.ts` entries by convention instead of statically importing Garbage or Greathouse.
+- App and instance registration exports are neutral inside bundled instance modules, and the shared Verdun frontend registries discover bundled `app.ts` / `instance.ts` entries by convention without registering Garbage.
 - Vercel API routes:
   - `GET /api/workbench/records?instance=garbage|greathouse`
   - `GET /api/workbench/status?instance=garbage|greathouse`
@@ -58,14 +58,13 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Verdun's resident legacy newsletter SQL apply/deploy helpers and loader smoke now only shim to the parent package, which owns the compatibility migrations.
 - Verdun's resident newsletter snapshot composable and view-model smokes now only shim to the parent package while the bundled UI modules remain in Verdun.
 - Verdun's resident workbench compatibility smoke now only shims to the parent package while the generic workbench API modules remain bundled in Verdun.
-- Verdun's resident Garbage browser app and responsive UI smokes now only shim to the parent package while the bundled Garbage UI remains in Verdun.
+- Verdun's shared browser smoke orchestration runs Garbage app and responsive UI checks through the parent package command runner; the bundled Garbage UI and registration shim files have been removed.
 - The bundled Garbage API workbench adapter and view-model smoke import `apps/garbage/src/workbench.ts`, so generic workbench fallback routes and view-model coverage now consume the parent package's Garbage projection; the duplicate resident Verdun projection file has been removed.
 - The bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module import `apps/garbage/src/config.ts`; the duplicate resident config file has been removed while legacy static/local state fallback paths remain only for the current bundled runtime.
 - The resident Garbage newsletter store imports parent-owned `apps/garbage/src/api/newsletter-store.ts`; static/database/local editorial persistence is no longer implemented in resident Verdun source while newsletter routes remain bundled.
 - The resident Garbage newsletter route handlers import parent-owned `apps/garbage/src/api/newsletter/*`; public Vercel route files still live in Verdun as route shims.
 - The resident Garbage workbench adapter imports parent-owned `apps/garbage/src/api/workbench.ts`; the bundled adapter manifest still lives in Verdun to feed the generic local adapter registry.
-- Resident Garbage browser snapshot/view composables, app component, component files, and style sheet import parent-owned `apps/garbage/src/app/*`; Verdun keeps only bundled frontend discovery shims.
-- The resident Garbage instance registration shim imports parent-owned `apps/garbage/src/instance-registration.ts`; default-instance metadata is no longer redefined in Verdun.
+- Garbage browser snapshot/view composables, app component, component files, style sheet, app entrypoint, and default-instance metadata are parent-owned; Verdun does not import them from its frontend registry.
 - Resident Garbage UI components, composables, the API draft route, and compatibility scripts import parent-owned `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; the duplicate resident newsletter and ontology files have been removed.
 - The resident Garbage snapshot composable imports parent-owned `apps/garbage/src/snapshot.ts`; the duplicate resident snapshot normalizer has been removed and the snapshot smoke guards against its return.
 - Generic Verdun workbench read routes live in `api/workbench/records.ts`, `api/workbench/status.ts`, and `api/workbench/health.ts`; their DB helper now requires an explicit `WorkbenchInstance` namespace while the public routes resolve defaults through the instance registry.
@@ -131,7 +130,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 - Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
 - Replace the parent Garbage package's remaining explicit legacy Verdun path compatibility after the crawler/output boundary moves.
-- Continue replacing resident Garbage route/API/frontend shim files with direct external package registration.
+- Continue replacing resident Garbage route/API shim files with direct external package registration.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 

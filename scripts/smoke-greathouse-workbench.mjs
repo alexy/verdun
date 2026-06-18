@@ -15,12 +15,10 @@ const { module: registryModule } = await runnerImport('./src/instances/registry.
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const [greathouseAppSource, greathouseAppRegistrationSource, garbageAppRegistrationSource, greathouseInstanceRegistrationSource, garbageInstanceRegistrationSource, instanceRegistrationsSource, appSource, appComponentsSource, appRegistrySource, registrySource] = await Promise.all([
+const [greathouseAppSource, greathouseAppRegistrationSource, greathouseInstanceRegistrationSource, instanceRegistrationsSource, appSource, appComponentsSource, appRegistrySource, registrySource] = await Promise.all([
   readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
   readFile('src/instances/greathouse/app.ts', 'utf8'),
-  readFile('src/instances/garbage/app.ts', 'utf8'),
   readFile('src/instances/greathouse/instance.ts', 'utf8'),
-  readFile('src/instances/garbage/instance.ts', 'utf8'),
   readFile('src/instances/instances.ts', 'utf8'),
   readFile('src/App.vue', 'utf8'),
   readFile('src/instances/app-components.ts', 'utf8'),
@@ -68,28 +66,30 @@ if (!greathouseAppSource.includes('greathousePilotSnapshot') || !greathouseAppSo
 if (!greathouseAppRegistrationSource.includes('GreathouseApp') || !greathouseAppRegistrationSource.includes('greathouseInstance.id')) {
   throw new Error('Greathouse app component is not registered from its instance boundary')
 }
-if (!garbageAppRegistrationSource.includes('GarbageApp') || !garbageAppRegistrationSource.includes('garbageInstance.id')) {
-  throw new Error('Garbage app component is not registered from its instance boundary')
-}
-if (!garbageAppRegistrationSource.includes('apps/garbage/src/config.ts')) {
-  throw new Error('Garbage app registration should consume the parent-owned Garbage config')
-}
 if (!greathouseInstanceRegistrationSource.includes('greathouseInstance') || !greathouseInstanceRegistrationSource.includes('greathousePilotSnapshot')) {
   throw new Error('Greathouse instance metadata is not registered from its instance boundary')
 }
-if (!garbageInstanceRegistrationSource.includes('apps/garbage/src/instance-registration.ts')) {
-  throw new Error('Garbage default instance metadata should be imported from the parent package')
-}
-if (garbageInstanceRegistrationSource.includes('garbageInstance') || garbageInstanceRegistrationSource.includes('default: true')) {
-  throw new Error('Garbage default instance metadata should not be redefined in resident Verdun source')
-}
-if (existsSync('src/instances/garbage/config.ts')) {
-  throw new Error('Garbage instance config should live in the parent package, not resident Verdun source')
+for (const removedGarbageFrontendPath of [
+  'src/instances/garbage/app.ts',
+  'src/instances/garbage/instance.ts',
+  'src/instances/garbage/GarbageApp.vue',
+  'src/instances/garbage/style.css',
+  'src/instances/garbage/components',
+  'src/instances/garbage/composables',
+  'src/instances/garbage/config.ts',
+  'src/instances/external-app-components.ts',
+  'src/instances/external-instances.ts',
+]) {
+  if (existsSync(removedGarbageFrontendPath)) {
+    throw new Error(`${removedGarbageFrontendPath} should not exist; Garbage should own its app entrypoint outside Verdun`)
+  }
 }
 if (
   !instanceRegistrationsSource.includes('workbenchInstanceRegistration') ||
   instanceRegistrationsSource.includes('garbageWorkbenchInstance') ||
   instanceRegistrationsSource.includes('greathouseWorkbenchInstance') ||
+  instanceRegistrationsSource.includes('externalWorkbenchInstances') ||
+  instanceRegistrationsSource.includes('apps/garbage') ||
   instanceRegistrationsSource.includes('./garbage/') ||
   instanceRegistrationsSource.includes('./greathouse/')
 ) {
@@ -105,6 +105,8 @@ if (
   !appComponentsSource.includes('workbenchAppRegistration') ||
   appComponentsSource.includes('garbageWorkbenchApp') ||
   appComponentsSource.includes('greathouseWorkbenchApp') ||
+  appComponentsSource.includes('externalWorkbenchApps') ||
+  appComponentsSource.includes('apps/garbage') ||
   appComponentsSource.includes('./garbage/') ||
   appComponentsSource.includes('./greathouse/')
 ) {
@@ -116,7 +118,7 @@ if (
 ) {
   throw new Error('instance app registry is not wired to metadata-backed route selection')
 }
-if (appRegistrySource.includes('GreathouseApp') || appRegistrySource.includes('GarbageApp')) {
+if (appRegistrySource.includes('GreathouseApp') || appRegistrySource.includes('GarbageApp') || appRegistrySource.includes('apps/garbage')) {
   throw new Error('instance app registry imports concrete instance apps instead of app registrations')
 }
 if (appRegistrySource.includes('?? GarbageApp')) {
@@ -129,6 +131,7 @@ if (
   registrySource.includes('garbageInstance') ||
   registrySource.includes('greathouseInstance') ||
   registrySource.includes('greathousePilotSnapshot') ||
+  registrySource.includes('apps/garbage') ||
   registrySource.includes('return garbageInstance') ||
   registrySource.includes('instance.id === greathouseInstance.id')
 ) {
@@ -137,11 +140,11 @@ if (
 if (registryModule.resolveWorkbenchInstanceForPath('/greathouse/').id !== 'greathouse') {
   throw new Error('registry did not resolve /greathouse/ to the Greathouse instance')
 }
-if (registryModule.resolveWorkbenchInstanceForPath('/rbage/').id !== 'garbage') {
-  throw new Error('registry did not resolve /rbage/ to the Garbage instance')
+if (registryModule.resolveWorkbenchInstanceForPath('/rbage/').id !== 'greathouse') {
+  throw new Error('Verdun registry should not resolve /rbage/ to Garbage; Garbage owns its app entrypoint')
 }
-if (registryModule.defaultWorkbenchInstance().id !== 'garbage') {
-  throw new Error('registry did not expose the configured default workbench instance')
+if (registryModule.defaultWorkbenchInstance().id !== 'greathouse') {
+  throw new Error('Verdun registry should default to its bundled Greathouse proof instance after Garbage is decoupled')
 }
 if (registryModule.staticWorkbenchSnapshot(registryModule.resolveWorkbenchInstance('greathouse'))?.instance?.id !== 'greathouse') {
   throw new Error('registry did not expose the Greathouse static snapshot from registration metadata')

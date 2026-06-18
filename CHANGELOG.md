@@ -2,6 +2,9 @@
 
 ## 2026-06-18
 
+- Removed resident Verdun Garbage frontend shim files under `src/instances/garbage` and removed the external frontend registration modules, so Garbage owns its app entrypoint outside Verdun.
+- Kept shared Verdun frontend app and instance registries convention-based for bundled generic proof instances only.
+- Updated Greathouse/frontend smoke coverage and the parent Garbage manifest verifier to reject resident Garbage frontend shim or registration files returning.
 - Added deploy-profile command-runner metadata for the parent Garbage package, so shared Verdun smoke orchestration can execute profile-declared Garbage commands through the external `@garbage/instance` workspace.
 - Removed Verdun-local `garbage:*` package scripts; Garbage commands are now parent/package-owned through external package registration.
 - Changed `smoke:all` and `smoke:browser` to route instance-owned commands through deploy-profile command-runner metadata instead of assuming every profile command is a Verdun package script.
@@ -9,7 +12,7 @@
 - Added an external deploy-profile module registry and removed the resident Garbage deploy-profile, deployed-check fixture, and deployed-draft/readiness hook shims; Garbage deploy hooks now load directly from `apps/garbage/scripts/`.
 - Removed the remaining resident Garbage publishing/smoke script shims under `scripts/instances/garbage/`; shared smokes now validate parent-owned `apps/garbage/scripts/` implementations directly.
 - Added an external crawler registration module and removed the resident Garbage crawler module; Verdun now compiles the parent-owned Garbage crawler through `crawler/src/instances/external.rs`.
-- Added the parent `apps/garbage/` instance-package anchor with `verdun.instance.json`, documenting the current bundled Garbage frontend, API, crawler, SQL, and publishing paths that must move out of Verdun or become external package imports.
+- Added the parent `apps/garbage/` instance-package anchor with `verdun.instance.json`, documenting the temporary bundled Garbage API, crawler, SQL, and publishing paths that must move out of Verdun or become external package imports.
 - Documented the parent Garbage `@garbage/instance` command facade as the temporary external package surface that delegates declared commands into Verdun until those implementations move out.
 - Documented the next facade step: Garbage publishing entrypoints now live in the parent package while still importing bundled Verdun newsletter modules, and only operational compatibility smokes remain delegated.
 - Documented that the Garbage newsletter draft builder and ontology copy have moved into the parent package publishing surface, leaving runtime/data assumptions as the remaining publishing boundary.
