@@ -10,7 +10,7 @@ The first reusable boundary is now explicit:
 - Garbage instance configuration lives in `src/instances/garbage/config.ts`.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
 - A Greathouse pilot instance lives in `src/instances/greathouse/` and exercises property listing and blocked-source diagnostic records through the same `WorkbenchSnapshot` and generic view model.
-- Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
+- Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`; Garbage newsletter table/view compatibility migrations live under `db/instances/garbage/migrations/` and are selected by the Garbage deploy profile.
 - Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly from local JSON, HTTP JSON, HTTP status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
 - Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Garbage remains the default `/rbage/` app path and Greathouse has a reusable `/greathouse/` path.
@@ -72,7 +72,7 @@ That checks `https://collected.ga/rbage/`, the `/rbage/` asset base path, the st
 
 ## Database
 
-Apply the sorted migrations in `db/migrations/` to the external Postgres database used by Vercel. `0001_newsletter.sql` creates the current Garbage/newsletter tables, `0002_workbench_views.sql` exposes generic `workbench_*` views over those tables, and `0003_generic_workbench_tables.sql` creates Verdun's reusable database contract (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) while keeping the `workbench_*` views compatible with either generic rows or the current newsletter fallback.
+Apply migrations through the guarded helpers rather than applying every SQL file by directory. Verdun's reusable database contract lives in `db/migrations/0003_generic_workbench_tables.sql`; Garbage's legacy newsletter tables and fallback `workbench_*` view overlay live under `db/instances/garbage/migrations/` and are selected by the Garbage deploy profile.
 
 Use the guarded deployment helper when moving a crawler snapshot into the external database:
 

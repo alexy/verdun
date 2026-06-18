@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved Garbage newsletter database migrations under `db/instances/garbage/migrations/`, made `db/migrations/0003_generic_workbench_tables.sql` define only generic workbench tables/views, and changed database apply/deploy helpers to resolve profile-declared migration paths so Greathouse preflights do not load Garbage compatibility SQL.
 - Moved Garbage deployed draft API validation and publishing-readiness checks into `scripts/instances/garbage/deployed-draft-checks.mjs`; shared `scripts/check-deployed.mjs` now invokes deploy-profile hooks instead of embedding newsletter throughline, upvote, and draft-manifest assumptions.
 - Split workbench API smoke coverage so shared `smoke:workbench` uses neutral generic database fixtures plus Greathouse route checks, while Garbage default fallback and compatibility-table assertions now run through `garbage:smoke:workbench-compat`.
 - Moved Garbage crawler dedupe, provenance, and query-plan smokes under `scripts/instances/garbage/`, exposed them as `garbage:smoke:crawler-dedupe`, `garbage:smoke:crawler-provenance`, and `garbage:smoke:queries`, and removed the old shared crawler smoke commands from `smoke:all`.

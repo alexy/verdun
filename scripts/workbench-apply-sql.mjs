@@ -15,7 +15,7 @@ export async function runApplyWorkbenchSqlCli(args, env = process.env) {
   const profile = deployCheckProfile(instance)
   const snapshotPath = optionValue(args, '--snapshot') ?? env.WORKBENCH_SNAPSHOT_FILE ?? env.VERDUN_SNAPSHOT_FILE ?? profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
   const explicitMigrationPath = optionValue(args, '--migration') ?? env.WORKBENCH_MIGRATION_FILE ?? env.VERDUN_MIGRATION_FILE
-  const migrationPaths = explicitMigrationPath ? [explicitMigrationPath] : defaultMigrationPaths()
+  const migrationPaths = explicitMigrationPath ? [explicitMigrationPath] : profile?.migrationPaths ?? defaultMigrationPaths()
   const databaseUrl = optionValue(args, '--database-url') ?? env.POSTGRES_URL ?? env.DATABASE_URL ?? env.NEON_DATABASE_URL
   const loaderArgs = [
     sqlPath,

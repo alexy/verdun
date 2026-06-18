@@ -7,6 +7,11 @@ export const garbageDeployCheckProfile = {
   devAppBaseUrl: 'http://127.0.0.1:5176/rbage/',
   sourceSnapshotPath: 'public/data/newsletter-snapshot.json',
   staticSnapshotPath: 'data/newsletter-snapshot.json',
+  migrationPaths: [
+    'db/instances/garbage/migrations/0001_newsletter.sql',
+    'db/migrations/0003_generic_workbench_tables.sql',
+    'db/instances/garbage/migrations/0002_workbench_views.sql',
+  ],
   smokeFixtureModule: './instances/garbage/deployed-check-smoke-fixture.mjs',
   readinessCheckModule: './instances/garbage/deployed-draft-checks.mjs',
   smokeCommands: [

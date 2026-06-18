@@ -59,6 +59,8 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
 
   run('node', [
     'scripts/workbench-apply-sql.mjs',
+    '--instance',
+    instance,
     '--sql',
     sqlPath,
     '--snapshot',

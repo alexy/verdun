@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
+import { garbageDeployCheckProfile } from './deploy-checks.mjs'
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await runApplyNewsletterSqlCli(process.argv.slice(2), process.env)
@@ -52,11 +52,7 @@ function assertFile(path, label) {
 }
 
 function defaultMigrationPaths() {
-  const migrationDir = 'db/migrations'
-  return readdirSync(migrationDir)
-    .filter((name) => name.endsWith('.sql'))
-    .sort((left, right) => left.localeCompare(right))
-    .map((name) => join(migrationDir, name))
+  return garbageDeployCheckProfile.migrationPaths
 }
 
 function run(command, commandArgs) {

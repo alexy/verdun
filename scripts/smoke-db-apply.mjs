@@ -13,6 +13,7 @@ const genericLoaderSource = readFileSync('scripts/smoke-generic-loader-sql.mjs',
 const smokeBrowserSource = readFileSync('scripts/smoke-browser.mjs', 'utf8')
 const smokeResponsiveSource = readFileSync('scripts/instances/garbage/smoke-responsive.mjs', 'utf8')
 const smokeAppSource = readFileSync('scripts/instances/garbage/smoke-app.mjs', 'utf8')
+const coreMigrationSource = readFileSync('db/migrations/0003_generic_workbench_tables.sql', 'utf8')
 
 if (applySource.includes('public/data/newsletter-snapshot.json')) {
   throw new Error('generic workbench apply script still embeds the Garbage newsletter snapshot default')
@@ -46,6 +47,9 @@ for (const [label, source] of [
 if (smokeBrowserSource.includes('smoke:app') || smokeBrowserSource.includes('smoke:responsive')) {
   throw new Error('smoke-browser should run UI checks from deploy-profile metadata instead of generic Garbage UI command names')
 }
+if (coreMigrationSource.includes('newsletter_') || coreMigrationSource.includes("'garbage'") || coreMigrationSource.includes('/rbage/')) {
+  throw new Error('generic workbench migration still embeds Garbage newsletter compatibility')
+}
 
 const dryRun = spawnSync('node', [
   'scripts/workbench-apply-sql.mjs',
@@ -61,7 +65,7 @@ if (dryRun.status !== 0) {
 if (!dryRun.stdout.includes('dry run only')) {
   throw new Error('workbench database apply dry run did not report that it skipped external Postgres')
 }
-for (const migration of ['0001_newsletter.sql', '0002_workbench_views.sql', '0003_generic_workbench_tables.sql']) {
+for (const migration of profile?.migrationPaths ?? ['db/migrations/0003_generic_workbench_tables.sql']) {
   if (!dryRun.stdout.includes(migration)) {
     throw new Error(`workbench database apply dry run did not include ${migration}`)
   }
