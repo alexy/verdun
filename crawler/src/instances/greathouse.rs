@@ -6,8 +6,8 @@ use std::collections::BTreeMap;
 use std::{path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
-    CrawlerConfig, EditorialFocus, NormalizedCollectionPlan, ReviewTarget, SourceConfig, SourceRun,
-    SourceRunStatus, stable_id,
+    CrawlerCollection, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
+    NormalizedRecord, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
 };
 use crate::instances::CrawlerInstance;
 use crate::instances::garbage::NewsItem;
@@ -71,47 +71,64 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
             .collect()
     }
 
-    fn seed_items(&self, config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
-        greathouse_items(config)
-    }
-
-    fn seed_source_runs(&self, config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
-        if live {
-            return Vec::new();
-        }
-        config
-            .sources
-            .iter()
-            .map(|source| SourceRun {
-                source: source.name.clone(),
-                kind: source.kind.clone(),
-                status: SourceRunStatus::Skipped,
-                item_count: 0,
-                message: "run with --live to refresh this Greathouse source".to_string(),
-                project_counts: Default::default(),
-            })
-            .collect()
-    }
-
-    fn collect_live_items(
+    fn collect(
         &self,
         config: &CrawlerConfig,
+        live: bool,
         _max_per_project: usize,
         _since: DateTime<Utc>,
-        _editorial_focuses: &[EditorialFocus],
-    ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
-        let items = greathouse_items(config)?;
-        let source_runs = source_runs_from_items(config, &items);
-        Ok((items, source_runs))
+        editorial_focuses: &[EditorialFocus],
+    ) -> Result<CrawlerCollection> {
+        let items = if live {
+            greathouse_items(config)?
+        } else {
+            Vec::new()
+        };
+        let source_runs = if live {
+            source_runs_from_items(config, &items)
+        } else {
+            skipped_source_runs(config)
+        };
+        let records = dedupe_items(items)
+            .iter()
+            .map(greathouse_record)
+            .collect::<Vec<_>>();
+        let snapshot = CrawlerSnapshot {
+            generated_at: Utc::now(),
+            theme: config.theme.clone(),
+            records,
+            source_runs,
+            collection_plans: self.collection_plans(config, editorial_focuses),
+        };
+        Ok(CrawlerCollection {
+            item_payload: serde_json::to_value(&snapshot.records)?,
+            public_payload: serde_json::to_value(&snapshot)?,
+            snapshot,
+        })
     }
+}
 
-    fn dedupe_items(&self, items: Vec<NewsItem>) -> Vec<NewsItem> {
-        let mut by_id = std::collections::BTreeMap::new();
-        for item in items {
-            by_id.entry(item.id.clone()).or_insert(item);
-        }
-        by_id.into_values().collect()
+fn dedupe_items(items: Vec<NewsItem>) -> Vec<NewsItem> {
+    let mut by_id = std::collections::BTreeMap::new();
+    for item in items {
+        by_id.entry(item.id.clone()).or_insert(item);
     }
+    by_id.into_values().collect()
+}
+
+fn skipped_source_runs(config: &CrawlerConfig) -> Vec<SourceRun> {
+    config
+        .sources
+        .iter()
+        .map(|source| SourceRun {
+            source: source.name.clone(),
+            kind: source.kind.clone(),
+            status: SourceRunStatus::Skipped,
+            item_count: 0,
+            message: "run with --live to refresh this Greathouse source".to_string(),
+            project_counts: Default::default(),
+        })
+        .collect()
 }
 
 fn verify_config(config: &CrawlerConfig) -> Result<()> {
@@ -265,6 +282,35 @@ fn greathouse_item(
             },
             "instance": "greathouse"
         }),
+    }
+}
+
+fn greathouse_record(item: &NewsItem) -> NormalizedRecord {
+    let provenance_json = item
+        .raw_json
+        .get("provenance")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    NormalizedRecord {
+        id: item.id.clone(),
+        title: item.title.clone(),
+        url: item.url.clone(),
+        source: item.source.clone(),
+        source_kind: item.source_kind.clone(),
+        observed_at: item.published_at,
+        subject: item.project.clone(),
+        topic: item.topic.clone(),
+        summary: item.summary.clone(),
+        tags: item.tags.clone(),
+        score: item.score,
+        status: "active".to_string(),
+        dedupe_key: format!("{}:{}", item.source_kind, item.url),
+        provenance_json,
+        normalized_json: serde_json::json!({
+            "subject": item.project,
+            "why_it_matters": item.why_it_matters
+        }),
+        raw_json: item.raw_json.clone(),
     }
 }
 

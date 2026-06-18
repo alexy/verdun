@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-06-18
+
+- Changed the crawler instance trait to return core `CrawlerCollection` output instead of exposing Garbage `NewsItem` vectors; the shared CLI now writes generic snapshots from instance collection output, and Greathouse public collection snapshots use the generic `records`/`collection_plans` shape.
+- Updated Verdun app/operator docs to reflect the current generic-default SQL export, core crawler collection output, and instance-owned Garbage compatibility paths.
+
 ## 2026-06-17
 
 - Added `verdun-crawler collect --generic-out` so collection can write a core `CrawlerSnapshot` artifact with `records`, `source_runs`, and `collection_plans` alongside the existing legacy public snapshot; Greathouse smoke coverage now exports SQL and validates the generic loader from that core artifact directly.

@@ -116,6 +116,12 @@ pub struct CrawlerSnapshot {
     pub collection_plans: Vec<NormalizedCollectionPlan>,
 }
 
+pub struct CrawlerCollection {
+    pub snapshot: CrawlerSnapshot,
+    pub item_payload: serde_json::Value,
+    pub public_payload: serde_json::Value,
+}
+
 pub fn stable_id(subject: &str, url: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(subject.as_bytes());

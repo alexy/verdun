@@ -156,73 +156,49 @@ fn collect(
     let config = read_crawler_config(&config)?;
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
-    let mut items = crawler_instance.seed_items(&config)?;
-    let mut source_runs = crawler_instance.seed_source_runs(&config, live);
-    if live {
-        let since = Utc::now() - Duration::days(since_days);
-        match crawler_instance.collect_live_items(
-            &config,
-            max_live_per_project,
-            since,
-            &editorial_focuses,
-        ) {
-            Ok((live_items, live_source_runs)) => {
-                items.extend(live_items);
-                source_runs.extend(live_source_runs);
-            }
-            Err(error) => eprintln!("live collection skipped after error: {error:#}"),
-        }
-    }
-    let items = crawler_instance.dedupe_items(items);
-    let item_count = items.len();
+    let since = Utc::now() - Duration::days(since_days);
+    let collection = crawler_instance.collect(
+        &config,
+        live,
+        max_live_per_project,
+        since,
+        &editorial_focuses,
+    )?;
+    let record_count = collection.snapshot.records.len();
     if let Some(parent) = out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let payload = serde_json::to_string_pretty(&items)?;
+    let payload = serde_json::to_string_pretty(&collection.item_payload)?;
     fs::write(&out, &payload).with_context(|| format!("writing {}", out.display()))?;
     if let Some(parent) = source_runs_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
     fs::write(
         &source_runs_out,
-        serde_json::to_string_pretty(&source_runs)?,
+        serde_json::to_string_pretty(&collection.snapshot.source_runs)?,
     )
     .with_context(|| format!("writing {}", source_runs_out.display()))?;
-    let generated_at = Utc::now();
-    let collection_plans = crawler_instance.collection_plans(&config, &editorial_focuses);
     if let Some(generic_out) = generic_out {
         if let Some(parent) = generic_out.parent() {
             fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
         }
-        let generic_snapshot = CrawlerSnapshot {
-            generated_at,
-            theme: config.theme.clone(),
-            records: items.iter().map(garbage::news_item_record).collect(),
-            source_runs: source_runs.clone(),
-            collection_plans: collection_plans.clone(),
-        };
         fs::write(
             &generic_out,
-            serde_json::to_string_pretty(&generic_snapshot)?,
+            serde_json::to_string_pretty(&collection.snapshot)?,
         )
         .with_context(|| format!("writing {}", generic_out.display()))?;
     }
     if let Some(parent) = public_out.parent() {
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
-    let query_plans = legacy_query_plans(collection_plans);
-    let public_snapshot = PublicSnapshot {
-        generated_at,
-        theme: config.theme,
-        items,
-        source_runs,
-        query_plans,
-    };
-    fs::write(&public_out, serde_json::to_string_pretty(&public_snapshot)?)
-        .with_context(|| format!("writing {}", public_out.display()))?;
+    fs::write(
+        &public_out,
+        serde_json::to_string_pretty(&collection.public_payload)?,
+    )
+    .with_context(|| format!("writing {}", public_out.display()))?;
     println!(
         "wrote {} records to {}, {}, and {}",
-        item_count,
+        record_count,
         out.display(),
         source_runs_out.display(),
         public_out.display()

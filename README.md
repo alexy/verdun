@@ -1,6 +1,6 @@
 # Verdun
 
-Verdun is being extracted into the reusable core for database-backed collection/review workbenches. The current checked-in instance is Garbage: the editorial desk for `collected.ga/rbage/`, with a Vercel/Vue app plus a Rust crawler/loader for weekly strongly typed and functional AI/data news.
+Verdun is being extracted into the reusable core for database-backed collection/review workbenches. The current repository still carries the Garbage and Greathouse pilot instances while that extraction is underway, but the intended Verdun core is the generic Vercel app shell, API/database contract, and Rust crawler/reloader boundary.
 
 The first reusable boundary is now explicit:
 
@@ -11,9 +11,9 @@ The first reusable boundary is now explicit:
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
 - A small Greathouse pilot instance lives in `src/instances/greathouse/` and exercises listing/diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
-- Generic crawler structs live in `crawler/src/core.rs`; Garbage snapshots are adapted into `CrawlerSnapshot`, `NormalizedRecord`, and `NormalizedCollectionPlan` before reusable SQL export.
+- Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
-- Existing newsletter routes, scripts, and database tables still use their current names while the boundary is extracted incrementally.
+- Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
 
 The first slice mirrors the useful Greathouse shape without touching Greathouse:
 
@@ -35,8 +35,8 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Publishing readiness checks show whether the queue has explicit editorial picks, live source/project coverage, project spread, saved focus, healthy watched sources, and a fresh collection snapshot before local Ulysses export.
 - Source health calls out watched projects from the crawler query plan that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.
 - The maintained Garbage ontology lives in `src/instances/garbage/ontology.json` and is reused by the app and local Markdown draft generation.
-- The first Greathouse-style reusable Vue pieces live in `src/components/`: `AppHeader.vue`, `EditorialSidebar.vue`, `InboxControls.vue`, `NewsletterDraftPreview.vue`, `NewsletterHero.vue`, `SourceHealthPanel.vue`, and `NewsItemCard.vue`.
-- Frontend snapshot loading and optimistic vote/focus persistence live in `src/composables/useNewsletterSnapshot.ts`, while filtering, counts, draft state, and readiness derivation live in `src/composables/useNewsletterView.ts`.
+- The reusable Vue pieces live under `src/components/workbench/`; Garbage-specific panels and newsletter controls live under `src/instances/garbage/components/`.
+- Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under `src/instances/garbage/composables/`.
 - Generic backend route mechanics live in `api/core/http.ts`, while Garbage data access and local fallback state stay under `api/instances/garbage/`.
 - The app's editorial-state import posts `{ votes, focuses }` to `POST /api/garbage/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.
 
@@ -76,11 +76,11 @@ npm run db:deploy
 npm run db:deploy -- --apply
 ```
 
-Without `--apply`, the helper regenerates `/tmp/verdun-newsletter-load.sql` from `public/data/newsletter-snapshot.json`, validates it against the paired snapshot, and stops before touching Postgres. With `--apply`, it also verifies Vercel production has `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL` configured, applies the migration and SQL load through `psql`, and runs `npm run check:deployed -- --require-database` to prove the public API is backed by the external database. Add `--require-ready` to require the deployed database snapshot to pass the publishing-readiness gate after editorial review. Use `--skip-vercel-env` or `--skip-deployed-check` only for local database drills.
+Without `--apply`, the helper regenerates `/tmp/verdun-workbench-load.sql` from the default deploy profile snapshot, validates it against the paired snapshot, and stops before touching Postgres. With `--apply`, it also verifies Vercel production has `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL` configured, applies the migration and SQL load through `psql`, and runs `npm run check:deployed -- --require-database` to prove the public API is backed by the external database. Add `--require-ready` for Garbage after editorial review. Use `--skip-vercel-env` or `--skip-deployed-check` only for local database drills.
 
 ## Crawler
 
-The reusable crawler core lives under `crawler/src/`; the current Garbage crawler instance owns its crawler config at `crawler/instances/garbage/config.toml` and manual social review files under `crawler/instances/garbage/manual/`. Generic SQL export now runs through the core `CrawlerSnapshot` shape instead of writing directly from Garbage-specific newsletter items.
+The reusable crawler core lives under `crawler/src/`; crawler instances own domain adapters and return a core `CrawlerCollection`. The current Garbage crawler instance owns its crawler config at `crawler/instances/garbage/config.toml` and manual social review files under `crawler/instances/garbage/manual/`. Greathouse owns its property/listing fixtures and adapters under `crawler/instances/greathouse/`. Generic SQL export runs through the core `CrawlerSnapshot` shape instead of writing directly from Garbage-specific newsletter items.
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json
@@ -88,8 +88,8 @@ cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/dat
 npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot public/data/newsletter-snapshot.json
 ```
 
-`collect` writes `crawler/data/items.json` for item loader work, `crawler/data/source-runs.json` for source-health loader work, and `public/data/newsletter-snapshot.json` as the app's static fallback when no external database is configured. The public snapshot includes item rows, source-health metadata, and crawler query plans with source-specific review targets for HN, Lobste.rs, dev.to, Medium, Substack, LinkedIn, and X/Twitter. `collect` and `queries` read `crawler/data/editorial-state.json` by default when it exists, so saved this-week focus requests can add `focus_terms` to matching project query plans; use `--editorial-state path/to/state.json` to point at an exported editorial state file.
-`export-sql --snapshot` loads that cohesive public snapshot into SQL for external Postgres, keeping item rows, source-health rows, query-plan rows, and the snapshot `generated_at` collection timestamp from the same crawler run. By default it emits the legacy Garbage/newsletter load for compatibility; add `--target generic` to emit the reusable Verdun contract load into `instances`, `records`, `source_runs`, and `collection_plans`. The generic export defaults to the Garbage namespace and can be pointed at another instance with `--instance`, `--instance-name`, and `--base-path`. The older `--input` plus `--source-runs` path remains available for debugging split files. `npm run db:apply` validates the SQL against the paired snapshot and stops as a dry run by default; pass `--apply` with `POSTGRES_URL`, `DATABASE_URL`, `NEON_DATABASE_URL`, or `--database-url` to apply sorted migrations and then the generated load through `psql`.
+`collect` writes an instance-owned item payload to `crawler/data/items.json`, source-health rows to `crawler/data/source-runs.json`, and the instance public snapshot to the instance default static fallback path. For Garbage, the public snapshot remains the legacy newsletter shape. For Greathouse, the public snapshot is the generic `CrawlerSnapshot` shape. Add `--generic-out path/to/snapshot.json` to always write the core `CrawlerSnapshot` beside any compatibility payload. `collect` and `queries` read `crawler/data/editorial-state.json` by default when it exists, so saved focus requests can add `focus_terms` to matching collection plans; use `--editorial-state path/to/state.json` to point at an exported editorial state file.
+`export-sql --snapshot` loads a cohesive public or generic snapshot into SQL for external Postgres, keeping records, source-health rows, collection-plan rows, and the snapshot `generated_at` collection timestamp from the same crawler run. By default it emits the reusable Verdun contract load into `instances`, `records`, `source_runs`, and `collection_plans`. Use `--target newsletter` only for explicit Garbage/newsletter compatibility table loads. The generic export defaults to the selected instance namespace and can be pointed at another namespace with `--instance`, `--instance-name`, and `--base-path`. The older `--input` plus `--source-runs` path remains available for debugging split files. `npm run db:apply` validates the SQL against the paired snapshot and stops as a dry run by default; pass `--apply` with `POSTGRES_URL`, `DATABASE_URL`, `NEON_DATABASE_URL`, or `--database-url` to apply sorted migrations and then the generated load through `psql`.
 Database-backed API snapshots and status responses derive `generatedAt` from the newest `newsletter_source_runs.collected_at` value, falling back to item `updated_at`, so deployed draft issue dates track the crawler/load run instead of the moment a serverless route is called.
 
 `npm run audit:grust` reads the local Grust workspace, derives the backend and typed-validation projects it exposes through crates, dependencies, and docs, and writes an ignored `crawler/data/grust-watchlist-audit.md`. The command fails if Verdun stops watching a Grust-derived project such as HelixDB, SurrealDB, pgGraph, FalkorDB, LadybugDB, LanceDB, Grust Sail, CocoIndex, Garde, zod-rs, Apache Arrow, or Delta Lake. Use `-- --grust-root /path/to/grust` when auditing a different checkout.
@@ -101,7 +101,7 @@ cargo run --manifest-path crawler/Cargo.toml -- verify
 cargo run --manifest-path crawler/Cargo.toml -- queries
 npm run audit:grust
 cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2
-cargo run --manifest-path crawler/Cargo.toml -- export-sql --target generic --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-generic-load.sql
+cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-generic-load.sql
 npm run smoke:generic-loader -- /tmp/verdun-generic-load.sql public/data/newsletter-snapshot.json
 npm run db:apply -- --sql /tmp/verdun-generic-load.sql --snapshot public/data/newsletter-snapshot.json
 npm run db:deploy -- --sql /tmp/verdun-generic-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate
@@ -126,7 +126,7 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 
 1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify`, `cargo run --manifest-path crawler/Cargo.toml -- queries`, and `npm run audit:grust` before network collection to confirm the watchlist, Grust alignment, source adapters, and search terms.
 2. Run `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2` to refresh `public/data/newsletter-snapshot.json`.
-3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --target generic --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-generic-load.sql`.
+3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-generic-load.sql`.
 4. Run `npm run db:deploy -- --sql /tmp/verdun-generic-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, the preserved snapshot collection timestamp, collection plans, required subjects, tags, URLs, and provenance JSON.
 5. Run `npm run db:deploy -- --sql /tmp/verdun-generic-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate --apply` with the external Postgres URL set and Vercel production env configured, then open the app at `collected.ga/rbage/` to upvote/downvote items and save this-week or ongoing focus notes. For legacy Garbage newsletter tables, export with `--target newsletter` and use `npm run garbage:db:deploy:newsletter -- --sql /tmp/verdun-newsletter-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate`.
 6. Run `npm run garbage:review:gaps` to write `crawler/data/source-gap-review.md`, then work the uncovered-project checklist before final editorial picks.

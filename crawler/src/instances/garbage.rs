@@ -6,8 +6,9 @@ use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
-    CollectionTarget, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
-    NormalizedRecord, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, slug, stable_id,
+    CollectionTarget, CrawlerCollection, CrawlerConfig, CrawlerSnapshot, EditorialFocus,
+    NormalizedCollectionPlan, NormalizedRecord, ReviewTarget, SourceConfig, SourceRun,
+    SourceRunStatus, slug, stable_id,
 };
 use crate::instances::CrawlerInstance;
 
@@ -55,30 +56,51 @@ impl CrawlerInstance for GarbageCrawlerInstance {
             .collect()
     }
 
-    fn seed_items(&self, config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
-        Ok(seed_items(config))
-    }
-
-    fn seed_source_runs(&self, config: &CrawlerConfig, live: bool) -> Vec<SourceRun> {
-        seed_source_runs(config, live)
-    }
-
-    fn collect_live_items(
+    fn collect(
         &self,
         config: &CrawlerConfig,
+        live: bool,
         max_per_project: usize,
         since: DateTime<Utc>,
         editorial_focuses: &[EditorialFocus],
-    ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)> {
-        live_items(config, max_per_project, since, editorial_focuses)
-    }
-
-    fn dedupe_items(&self, items: Vec<NewsItem>) -> Vec<NewsItem> {
-        dedupe_items(items)
+    ) -> Result<CrawlerCollection> {
+        let mut items = seed_items(config);
+        let mut source_runs = seed_source_runs(config, live);
+        if live {
+            match live_items(config, max_per_project, since, editorial_focuses) {
+                Ok((live_items, live_source_runs)) => {
+                    items.extend(live_items);
+                    source_runs.extend(live_source_runs);
+                }
+                Err(error) => eprintln!("live collection skipped after error: {error:#}"),
+            }
+        }
+        let items = dedupe_items(items);
+        let query_plans = query_plans(config, editorial_focuses);
+        let generated_at = Utc::now();
+        let public_snapshot = PublicSnapshot {
+            generated_at,
+            theme: config.theme.clone(),
+            items,
+            source_runs,
+            query_plans,
+        };
+        let export_payload = ExportPayload {
+            theme: public_snapshot.theme.clone(),
+            items: public_snapshot.items.clone(),
+            source_runs: public_snapshot.source_runs.clone(),
+            query_plans: public_snapshot.query_plans.clone(),
+            generated_at: public_snapshot.generated_at,
+        };
+        Ok(CrawlerCollection {
+            snapshot: export_payload.normalized_snapshot(),
+            item_payload: serde_json::to_value(&public_snapshot.items)?,
+            public_payload: serde_json::to_value(public_snapshot)?,
+        })
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewsItem {
     pub id: String,
     pub title: String,
@@ -95,7 +117,7 @@ pub struct NewsItem {
     pub raw_json: serde_json::Value,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PublicSnapshot {
     pub generated_at: DateTime<Utc>,
     pub theme: String,
@@ -105,7 +127,7 @@ pub struct PublicSnapshot {
     pub query_plans: Vec<ProjectQueryPlan>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectQueryPlan {
     pub project: String,
     pub topic: String,

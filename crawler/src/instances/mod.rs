@@ -5,8 +5,7 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use std::path::PathBuf;
 
-use crate::core::{CrawlerConfig, EditorialFocus, NormalizedCollectionPlan, SourceRun};
-use garbage::NewsItem;
+use crate::core::{CrawlerCollection, CrawlerConfig, EditorialFocus, NormalizedCollectionPlan};
 
 pub trait CrawlerInstance {
     fn id(&self) -> &'static str;
@@ -21,16 +20,14 @@ pub trait CrawlerInstance {
         config: &CrawlerConfig,
         editorial_focuses: &[EditorialFocus],
     ) -> Vec<NormalizedCollectionPlan>;
-    fn seed_items(&self, config: &CrawlerConfig) -> Result<Vec<NewsItem>>;
-    fn seed_source_runs(&self, config: &CrawlerConfig, live: bool) -> Vec<SourceRun>;
-    fn collect_live_items(
+    fn collect(
         &self,
         config: &CrawlerConfig,
+        live: bool,
         max_per_project: usize,
         since: DateTime<Utc>,
         editorial_focuses: &[EditorialFocus],
-    ) -> Result<(Vec<NewsItem>, Vec<SourceRun>)>;
-    fn dedupe_items(&self, items: Vec<NewsItem>) -> Vec<NewsItem>;
+    ) -> Result<CrawlerCollection>;
 }
 
 pub fn default_crawler_instance() -> &'static dyn CrawlerInstance {

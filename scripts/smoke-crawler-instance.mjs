@@ -35,8 +35,11 @@ if (!garbageInstanceSource.includes('pub fn news_item_record') || !garbageInstan
 if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.includes('Vec<NormalizedCollectionPlan>')) {
   throw new Error('crawler instance trait still exposes Garbage query-plan types instead of core collection plans')
 }
-if (instanceTraitSource.includes('EditorialFocus, NewsItem') || !instanceTraitSource.includes('use crate::core::{CrawlerConfig, EditorialFocus')) {
+if (!instanceTraitSource.includes('EditorialFocus') || !instanceTraitSource.includes('CrawlerCollection')) {
   throw new Error('crawler instance trait still imports editorial focus state from Garbage instead of core')
+}
+if (instanceTraitSource.includes('use garbage::NewsItem') || instanceTraitSource.includes('Vec<NewsItem>')) {
+  throw new Error('crawler instance trait still exposes Garbage NewsItem instead of core collection output')
 }
 
 const verifyGarbage = spawnSync('cargo', [
@@ -133,14 +136,19 @@ try {
   if (snapshot.theme !== 'Property intelligence and source diagnostics') {
     throw new Error(`greathouse snapshot had wrong theme: ${snapshot.theme}`)
   }
-  const listing = snapshot.items?.find((item) => item.source_kind === 'listing' && item.project === 'Berkeley 2BR')
+  const snapshotRecords = snapshot.records ?? snapshot.items ?? []
+  const snapshotPlans = snapshot.collection_plans ?? snapshot.query_plans ?? []
+  if (!Array.isArray(snapshot.records) || snapshot.items) {
+    throw new Error('greathouse public snapshot did not use the generic records shape')
+  }
+  const listing = snapshotRecords.find((item) => item.source_kind === 'listing' && subjectOf(item) === 'Berkeley 2BR')
   if (!listing) {
     throw new Error('greathouse snapshot did not contain a listing-shaped record')
   }
   if (listing.raw_json?.provenance?.adapter !== 'local-listing-json') {
     throw new Error(`listing record used wrong adapter provenance: ${listing.raw_json?.provenance?.adapter}`)
   }
-  const redfinListing = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'redfin-listing-json')
+  const redfinListing = snapshotRecords.find((item) => item.raw_json?.provenance?.adapter === 'redfin-listing-json')
   if (!redfinListing) {
     throw new Error('greathouse snapshot did not contain a Redfin adapter listing record')
   }
@@ -153,7 +161,7 @@ try {
   if (!redfinListing.summary.includes('$875,000 Redfin listing') || !redfinListing.summary.includes('4 comparable signals')) {
     throw new Error(`Redfin listing summary was not property-shaped: ${redfinListing.summary}`)
   }
-  const zillowListing = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'zillow-listing-json')
+  const zillowListing = snapshotRecords.find((item) => item.raw_json?.provenance?.adapter === 'zillow-listing-json')
   if (!zillowListing) {
     throw new Error('greathouse snapshot did not contain a Zillow adapter listing record')
   }
@@ -166,14 +174,14 @@ try {
   if (!zillowListing.summary.includes('$842,000 Zillow listing') || !zillowListing.summary.includes('238 page views') || !zillowListing.summary.includes('17 saves')) {
     throw new Error(`Zillow listing summary was not property-shaped: ${zillowListing.summary}`)
   }
-  const diagnostic = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'local-diagnostic-json' && item.project === 'Oakland blocked source')
+  const diagnostic = snapshotRecords.find((item) => item.raw_json?.provenance?.adapter === 'local-diagnostic-json' && subjectOf(item) === 'Oakland blocked source')
   if (!diagnostic) {
     throw new Error('greathouse snapshot did not contain a diagnostic-shaped record')
   }
   if (diagnostic.raw_json?.provenance?.adapter !== 'local-diagnostic-json') {
     throw new Error(`diagnostic record used wrong adapter provenance: ${diagnostic.raw_json?.provenance?.adapter}`)
   }
-  const browserDiagnostic = snapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'browser-diagnostic-json')
+  const browserDiagnostic = snapshotRecords.find((item) => item.raw_json?.provenance?.adapter === 'browser-diagnostic-json')
   if (!browserDiagnostic) {
     throw new Error('greathouse snapshot did not contain a browser diagnostic record')
   }
@@ -184,7 +192,7 @@ try {
     throw new Error(`browser diagnostic did not preserve rendered-page evidence: ${JSON.stringify(browserDiagnostic.raw_json?.property)}`)
   }
   const reviewAdapters = new Set(
-    snapshot.query_plans?.flatMap((plan) => plan.review_targets?.map((target) => target.adapter) ?? []) ?? [],
+    snapshotPlans.flatMap((plan) => plan.review_targets?.map((target) => target.adapter) ?? []),
   )
   if (!reviewAdapters.has('local-listing-json') || !reviewAdapters.has('redfin-listing-json') || !reviewAdapters.has('zillow-listing-json') || !reviewAdapters.has('local-diagnostic-json') || !reviewAdapters.has('browser-diagnostic-json')) {
     throw new Error(`greathouse review targets did not expose local JSON adapters: ${[...reviewAdapters].join(', ')}`)
@@ -386,21 +394,22 @@ adapter = "http-status-diagnostic"
       throw new Error(`greathouse HTTP collection failed\n${collectHttp.stdout}\n${collectHttp.stderr}`)
     }
     const httpSnapshot = JSON.parse(await readFile(httpSnapshotPath, 'utf8'))
-    const httpAdapters = new Set(httpSnapshot.items?.map((item) => item.raw_json?.provenance?.adapter) ?? [])
+    const httpRecords = httpSnapshot.records ?? httpSnapshot.items ?? []
+    const httpAdapters = new Set(httpRecords.map((item) => item.raw_json?.provenance?.adapter))
     if (!httpAdapters.has('http-listing-json') || !httpAdapters.has('http-diagnostic-json') || !httpAdapters.has('http-status-diagnostic')) {
       throw new Error(`greathouse HTTP adapters were not preserved in provenance: ${[...httpAdapters].join(', ')}`)
     }
-    const blockedProbe = httpSnapshot.items?.find((item) => item.raw_json?.provenance?.adapter === 'http-status-diagnostic')
+    const blockedProbe = httpRecords.find((item) => item.raw_json?.provenance?.adapter === 'http-status-diagnostic')
     if (!blockedProbe) {
       throw new Error('greathouse HTTP status diagnostic adapter did not emit a diagnostic record')
     }
     if (blockedProbe.raw_json?.provenance?.stage !== 'blocked_http') {
       throw new Error(`HTTP status diagnostic record used wrong stage: ${blockedProbe.raw_json?.provenance?.stage}`)
     }
-    if (blockedProbe.project !== 'Oakland blocked source') {
-      throw new Error(`HTTP status diagnostic record used wrong project: ${blockedProbe.project}`)
+    if (subjectOf(blockedProbe) !== 'Oakland blocked source') {
+      throw new Error(`HTTP status diagnostic record used wrong subject: ${subjectOf(blockedProbe)}`)
     }
-    const liveHttpRecords = httpSnapshot.items?.filter((item) => item.raw_json?.provenance?.adapter !== 'http-status-diagnostic') ?? []
+    const liveHttpRecords = httpRecords.filter((item) => item.raw_json?.provenance?.adapter !== 'http-status-diagnostic')
     if (!liveHttpRecords.every((item) => item.raw_json?.provenance?.stage === 'live_http')) {
       throw new Error('greathouse HTTP JSON adapter records did not default to live_http provenance stage')
     }
@@ -435,4 +444,8 @@ function runCommand(command, args) {
       resolve({ status, stdout, stderr })
     })
   })
+}
+
+function subjectOf(item) {
+  return item.subject ?? item.project
 }
