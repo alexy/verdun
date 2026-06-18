@@ -22,7 +22,7 @@ The first slice mirrors the useful Greathouse shape without touching Greathouse:
 - Vite is built from deploy profile metadata; the default Garbage profile uses `/rbage/` for `collected.ga/rbage/`, and profile selection can build the same shell for `/greathouse/`.
 - Vercel serverless API routes reading an external Postgres database.
 - Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
-- Grust watchlist audit that checks Verdun still tracks the backend and typed-validation projects surfaced by the local `/Users/alexy/src/grust` workspace.
+- Garbage Grust watchlist audit that checks the Garbage crawler still tracks the backend and typed-validation projects surfaced by the local `/Users/alexy/src/grust` workspace.
 - Crawler output keeps normalized provenance inside each item's `raw_json`, including source adapter, evidence URL, matched project, and matched keywords.
 - Crawler output deduplicates live/manual items by canonical URL, preferring stronger reviewed evidence while retaining duplicate source records in `raw_json.duplicates`.
 - Editorial/public UI for upvoting/downvoting news items and writing this-week or ongoing focus requests.
@@ -93,14 +93,14 @@ npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot public/data/newsletter
 `export-sql --snapshot` loads a cohesive public or generic snapshot into SQL for external Postgres, keeping records, source-health rows, collection-plan rows, and the snapshot `generated_at` collection timestamp from the same crawler run. By default it emits the reusable Verdun contract load into `instances`, `records`, `source_runs`, and `collection_plans`. Use `--target newsletter` only for explicit Garbage/newsletter compatibility table loads; legacy Garbage snapshot and split-file payload parsing is owned by the Garbage crawler instance rather than shared CLI code. The generic export defaults to the selected instance namespace and can be pointed at another namespace with `--instance`, `--instance-name`, and `--base-path`. The older `--input` plus `--source-runs` path remains available for debugging split files. `npm run db:apply` validates the SQL against the paired snapshot and stops as a dry run by default; pass `--apply` with `POSTGRES_URL`, `DATABASE_URL`, `NEON_DATABASE_URL`, or `--database-url` to apply sorted migrations and then the generated load through `psql`.
 Database-backed API snapshots and status responses derive `generatedAt` from the newest `newsletter_source_runs.collected_at` value, falling back to item `updated_at`, so deployed draft issue dates track the crawler/load run instead of the moment a serverless route is called.
 
-`npm run audit:grust` reads the local Grust workspace, derives the backend and typed-validation projects it exposes through crates, dependencies, and docs, and writes an ignored `crawler/data/grust-watchlist-audit.md`. The command fails if Verdun stops watching a Grust-derived project such as HelixDB, SurrealDB, pgGraph, FalkorDB, LadybugDB, LanceDB, Grust Sail, CocoIndex, Garde, zod-rs, Apache Arrow, or Delta Lake. Use `-- --grust-root /path/to/grust` when auditing a different checkout.
+`npm run garbage:audit:grust` reads the local Grust workspace, derives the backend and typed-validation projects it exposes through crates, dependencies, and docs, and writes an ignored `crawler/data/grust-watchlist-audit.md`. The command fails if the Garbage crawler stops watching a Grust-derived project such as HelixDB, SurrealDB, pgGraph, FalkorDB, LadybugDB, LanceDB, Grust Sail, CocoIndex, Garde, zod-rs, Apache Arrow, or Delta Lake. Use `-- --grust-root /path/to/grust` when auditing a different checkout.
 
 For a weekly public-source pass:
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- verify
 cargo run --manifest-path crawler/Cargo.toml -- queries
-npm run audit:grust
+npm run garbage:audit:grust
 cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2
 cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-generic-load.sql
 npm run smoke:generic-loader -- /tmp/verdun-generic-load.sql public/data/newsletter-snapshot.json
@@ -125,7 +125,7 @@ Use those files for exported, saved, or explicitly reviewed posts rather than un
 
 ## Weekly Operating Sequence
 
-1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify`, `cargo run --manifest-path crawler/Cargo.toml -- queries`, and `npm run audit:grust` before network collection to confirm the watchlist, Grust alignment, source adapters, and search terms.
+1. Run `cargo run --manifest-path crawler/Cargo.toml -- verify`, `cargo run --manifest-path crawler/Cargo.toml -- queries`, and `npm run garbage:audit:grust` before network collection to confirm the Garbage watchlist, Grust alignment, source adapters, and search terms.
 2. Run `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2` to refresh `public/data/newsletter-snapshot.json`.
 3. Run `cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot public/data/newsletter-snapshot.json --out /tmp/verdun-generic-load.sql`.
 4. Run `npm run db:deploy -- --sql /tmp/verdun-generic-load.sql --snapshot public/data/newsletter-snapshot.json --no-generate` as a dry run before applying SQL to the external database; it checks row counts, source-run metadata, the preserved snapshot collection timestamp, collection plans, required subjects, tags, URLs, and provenance JSON.

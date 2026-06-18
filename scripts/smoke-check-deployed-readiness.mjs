@@ -28,12 +28,12 @@ if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs')
 if (packageJson.scripts?.['vercel:config'] !== 'node scripts/generate-vercel-config.mjs' || packageJson.scripts?.['smoke:vercel-config'] !== 'node scripts/generate-vercel-config.mjs --check') {
   throw new Error('Vercel config scripts should use the deploy-profile-backed generator')
 }
-for (const scriptName of ['smoke:draft-api', 'smoke:draft', 'smoke:draft-url', 'smoke:ghost', 'smoke:health', 'smoke:public-snapshot', 'smoke:readiness', 'smoke:recency', 'smoke:source-gap-review', 'smoke:ulysses']) {
+for (const scriptName of ['smoke:draft-api', 'smoke:draft', 'smoke:draft-url', 'smoke:ghost', 'smoke:grust-watchlist', 'smoke:health', 'smoke:public-snapshot', 'smoke:readiness', 'smoke:recency', 'smoke:source-gap-review', 'smoke:ulysses', 'audit:grust']) {
   if (packageJson.scripts?.[scriptName]) {
     throw new Error(`${scriptName} should be named as an explicit Garbage smoke command`)
   }
 }
-for (const scriptName of ['garbage:smoke:draft-api', 'garbage:smoke:draft', 'garbage:smoke:draft-url', 'garbage:smoke:ghost', 'garbage:smoke:health', 'garbage:smoke:public-snapshot', 'garbage:smoke:readiness', 'garbage:smoke:recency', 'garbage:smoke:source-gap-review', 'garbage:smoke:ulysses']) {
+for (const scriptName of ['garbage:smoke:draft-api', 'garbage:smoke:draft', 'garbage:smoke:draft-url', 'garbage:smoke:ghost', 'garbage:smoke:grust-watchlist', 'garbage:smoke:health', 'garbage:smoke:public-snapshot', 'garbage:smoke:readiness', 'garbage:smoke:recency', 'garbage:smoke:source-gap-review', 'garbage:smoke:ulysses', 'garbage:audit:grust']) {
   if (!packageJson.scripts?.[scriptName]) {
     throw new Error(`${scriptName} should exist as an explicit Garbage smoke command`)
   }

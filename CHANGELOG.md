@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved the Grust watchlist audit and its smoke test under `scripts/instances/garbage/`, with package commands renamed to `garbage:audit:grust` and `garbage:smoke:grust-watchlist`.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
 - Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
 - Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.

@@ -36,7 +36,7 @@ const steps = [
   ['npm', ['run', 'garbage:smoke:draft']],
   ['npm', ['run', 'garbage:smoke:draft-url']],
   ['npm', ['run', 'garbage:smoke:ghost']],
-  ['npm', ['run', 'smoke:grust-watchlist']],
+  ['npm', ['run', 'garbage:smoke:grust-watchlist']],
   ['npm', ['run', 'garbage:smoke:public-snapshot']],
   ['npm', ['run', 'smoke:queries']],
   ['npm', ['run', 'garbage:smoke:readiness']],

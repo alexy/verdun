@@ -81,7 +81,7 @@ zod-rs = "1.0.1"
 
 function runAudit({ grustRoot, watchlistPath, outPath }) {
   return spawnSync('node', [
-    'scripts/grust-watchlist-audit.mjs',
+    'scripts/instances/garbage/grust-watchlist-audit.mjs',
     '--grust-root',
     grustRoot,
     '--watchlist',
