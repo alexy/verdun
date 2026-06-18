@@ -25,7 +25,6 @@ const steps = [
   ['npm', ['run', 'smoke:crawler-provenance']],
   ['npm', ['run', 'smoke:queries']],
   ['npm', ['run', 'smoke:snapshot']],
-  ['npm', ['run', 'smoke:view']],
   ['npm', ['run', 'smoke:workbench']],
 ]
 

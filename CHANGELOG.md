@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved the Garbage newsletter view-model smoke under `scripts/instances/garbage/` and exposed it as `garbage:smoke:view`, with `smoke:all` picking it up from Garbage deploy-profile metadata instead of a shared `smoke:view` command.
 - Generalized `scripts/smoke-check-deployed-readiness.mjs` around default and secondary deploy profiles, so the shared deployed-check smoke harness no longer names Garbage/Greathouse profile variables or reads their profile source files directly.
 - Changed `npm run smoke:all` to compose instance-specific compatibility SQL, custom generic SQL collection/export, and app smoke commands from deploy-profile metadata instead of hard-coding Garbage newsletter and Greathouse workbench checks in the shared smoke runner.
 - Moved Garbage smoke, removed generic alias, and publishing command expectations into the Garbage deploy profile so shared deployed-check smoke coverage validates command ownership from instance metadata instead of inline command lists.

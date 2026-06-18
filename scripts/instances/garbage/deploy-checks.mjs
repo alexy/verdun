@@ -20,6 +20,7 @@ export const garbageDeployCheckProfile = {
     'garbage:smoke:recency',
     'garbage:smoke:source-gap-review',
     'garbage:smoke:ulysses',
+    'garbage:smoke:view',
     'garbage:audit:grust',
   ],
   removedGenericCommands: [
@@ -34,6 +35,7 @@ export const garbageDeployCheckProfile = {
     'smoke:recency',
     'smoke:source-gap-review',
     'smoke:ulysses',
+    'smoke:view',
     'audit:grust',
   ],
   publishingCommands: [
@@ -62,6 +64,7 @@ export const garbageDeployCheckProfile = {
     'garbage:smoke:recency',
     'garbage:smoke:source-gap-review',
     'garbage:smoke:ulysses',
+    'garbage:smoke:view',
   ],
   minRecords: 23,
   minCollectionPlans: 23,
