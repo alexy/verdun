@@ -37,7 +37,14 @@ const instance = optionValue(extraArgs, '--instance')
 if (instance && !dryRun.stdout.includes(`--instance ${instance}`)) {
   throw new Error(`workbench database deployment dry run did not preserve instance in deployed-check target\n${dryRun.stdout}`)
 }
-if (instance && instance !== defaultDeployCheckProfileId() && dryRun.stdout.includes('db/instances/garbage/migrations')) {
+if (
+  instance
+  && instance !== defaultDeployCheckProfileId()
+  && (
+    dryRun.stdout.includes('db/instances/garbage/migrations')
+    || dryRun.stdout.includes('apps/garbage/db/instances/garbage/migrations')
+  )
+) {
   throw new Error(`non-default workbench deployment dry run should not include Garbage migrations\n${dryRun.stdout}`)
 }
 const instanceProfile = deployCheckProfile(instance)

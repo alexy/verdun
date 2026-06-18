@@ -53,7 +53,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Verdun's resident Garbage draft, URL draft, publishing-readiness, and snapshot-recency smokes now only shim to the parent package.
 - Verdun's resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ulysses export smoke now only shim to the parent package.
 - Verdun's resident newsletter draft CLI, Ghost CLI/smoke, and local/draft/health API smokes now only shim to the parent package.
-- Verdun's resident legacy newsletter SQL apply/deploy helpers and loader smoke now only shim to the parent package while the compatibility migrations remain bundled.
+- Verdun's resident legacy newsletter SQL apply/deploy helpers and loader smoke now only shim to the parent package, which owns the compatibility migrations.
 - Verdun's resident newsletter snapshot composable and view-model smokes now only shim to the parent package while the bundled UI modules remain in Verdun.
 - Verdun's resident workbench compatibility smoke now only shims to the parent package while the generic workbench API modules remain bundled in Verdun.
 - Verdun's resident Garbage browser app and responsive UI smokes now only shim to the parent package while the bundled Garbage UI remains in Verdun.
@@ -72,7 +72,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Static no-database API fallback can read `VERDUN_STATIC_SNAPSHOT_FILE`, which lets the parent Garbage package exercise bundled API modules against package-owned snapshot data without running from Verdun's cwd.
 - The app can import exported `{ votes, focuses }` editorial-state JSON into writable API modes, so a browser-local review session can be promoted into durable Postgres-backed state after the external database is configured.
 - Generic database tables and views live in `db/migrations/0003_generic_workbench_tables.sql` (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`).
-- Garbage newsletter compatibility migrations live under `db/instances/garbage/migrations/` and are selected through the Garbage deploy profile when the current newsletter fallback tables are needed.
+- Garbage newsletter compatibility migrations live under parent-owned `apps/garbage/db/instances/garbage/migrations/` and are selected through the Garbage deploy profile when the current newsletter fallback tables are needed.
 - Local no-database mode persists votes and focus notes to ignored `crawler/data/editorial-state.json`, with `VERDUN_LOCAL_STATE_FILE` available for tests or alternate local state.
 - Rust crawler/loader scaffold under `crawler/`.
 - Garbage crawler instance config lives at `crawler/instances/garbage/config.toml`, manual social imports live under `crawler/instances/garbage/manual/`, and reusable crawler structs live in `crawler/src/core.rs`.
