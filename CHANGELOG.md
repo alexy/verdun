@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
 - Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.
 - Changed Rust crawler instance resolution to use a `REGISTERED_CRAWLER_INSTANCES` table with default metadata instead of hard-coded `garbage`/`greathouse` resolver branches.
 - Moved legacy Garbage newsletter snapshot and split-file payload loading out of `crawler/src/main.rs` and into the Garbage crawler instance module, leaving shared CLI code to route through an explicit instance-owned compatibility function.

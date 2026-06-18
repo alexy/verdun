@@ -105,7 +105,7 @@ Current local checks:
 
 - `npm run smoke:all`
 - `npm run smoke:browser`
-- `npm run smoke:ulysses`
+- `npm run garbage:smoke:ulysses`
 - `npm run prod:build`
 - `npm run check:deployed`
 - `npm run check:preview`
