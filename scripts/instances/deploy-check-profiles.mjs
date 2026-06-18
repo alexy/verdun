@@ -22,7 +22,7 @@ async function discoverDeployCheckProfiles() {
   const profiles = await Promise.all(entries
     .filter((entry) => entry.isDirectory())
     .map(async (entry) => {
-      const module = await import(`./${entry.name}/deploy-checks.mjs`)
+      const module = await import(new URL(`${entry.name}/deploy-checks.mjs`, instanceDirectory).href)
       return module.deployCheckProfile ?? null
     }))
   return profiles

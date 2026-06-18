@@ -48,12 +48,13 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, garbageAdapterSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
     readFile('api/workbench/local-adapter-types.ts', 'utf8'),
     readFile('api/instances/workbench-adapters.ts', 'utf8'),
+    readFile('api/instances/bundled-workbench-adapters.ts', 'utf8'),
     readFile('api/instances/garbage/workbench.ts', 'utf8'),
   ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
@@ -74,6 +75,12 @@ try {
   }
   if (registeredAdaptersSource.includes('garbageLocalWorkbenchAdapter')) {
     throw new Error('local workbench adapter registry still consumes a Garbage-named adapter export instead of a neutral registration')
+  }
+  if (registeredAdaptersSource.includes('./garbage/')) {
+    throw new Error('local workbench adapter registry still imports a resident instance directly instead of the bundled adapter manifest')
+  }
+  if (!bundledAdaptersSource.includes('./garbage/workbench.js') || !bundledAdaptersSource.includes('bundledLocalWorkbenchAdapterRegistrations')) {
+    throw new Error('bundled API adapter manifest no longer owns the resident Garbage adapter import')
   }
   if (!garbageAdapterSource.includes('localWorkbenchAdapterRegistration') || !garbageAdapterSource.includes('compatibilityTables')) {
     throw new Error('Garbage local workbench adapter no longer exposes instance-owned registration metadata')
