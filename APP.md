@@ -12,6 +12,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Vue/Vite app with a newsroom triage interface.
 - Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under `src/instances/garbage/components/`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under `src/instances/garbage/composables/`.
+- Garbage-specific newsletter, publishing, ontology, and source-gap styles live in `src/instances/garbage/style.css`; root `src/style.css` now keeps shared shell/workbench layout.
 - Vite and generated Vercel routing use registered deploy profiles; Garbage remains the default `/rbage/` public path and Greathouse is routable at `/greathouse/`.
 - Vercel has `collected.ga` attached to the `garbage` project and aliased to the latest production deployment; `npm run check:deployed` is the public DNS/route check, while `npx vercel domains inspect collected.ga` and `npx vercel alias ls` verify Vercel-side domain state during DNS propagation.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.

@@ -9,6 +9,7 @@ import NewsletterHero from './components/NewsletterHero.vue'
 import { useNewsletterSnapshot } from './composables/useNewsletterSnapshot'
 import { useNewsletterView } from './composables/useNewsletterView'
 import { ontologyNodes } from './ontology'
+import './style.css'
 
 const { editorialPersistence, error, importEditorialState, loadSnapshot, loading, saveFocus, setVote, snapshot } = useNewsletterSnapshot()
 const editorialStateImportSummary = ref('')

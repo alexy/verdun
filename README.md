@@ -39,6 +39,7 @@ The current proof points are:
 - Source health calls out watched projects from the crawler query plan that lack live/manual source coverage, shows crawler query hints and source-specific review links for those gaps, and lets the editor save a this-week collection request from a gap with one click.
 - The maintained Garbage ontology lives in `src/instances/garbage/ontology.json` and is reused by the app and local Markdown draft generation.
 - The reusable Vue pieces live under `src/components/workbench/`; Garbage-specific panels and newsletter controls live under `src/instances/garbage/components/`.
+- Garbage-specific newsletter, publishing, ontology, and source-gap CSS lives in `src/instances/garbage/style.css`; shared shell/workbench CSS remains in `src/style.css`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under `src/instances/garbage/composables/`.
 - Generic backend route mechanics live in `api/core/http.ts`, while Garbage data access and local fallback state stay under `api/instances/garbage/`.
 - The app's editorial-state import posts `{ votes, focuses }` to `POST /api/garbage/newsletter/editorial-state` when the API is writable, so browser-local review work can be promoted into durable Postgres state after external database setup.
