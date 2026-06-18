@@ -9,6 +9,7 @@
 - Documented that parent publishing scripts no longer change cwd into Verdun and now use explicit Verdun data fallbacks during extraction.
 - Documented that parent publishing scripts import package-owned TypeScript directly with Node instead of using Verdun's Vite runner.
 - Documented that parent Garbage publishing defaults now use package-owned data under `apps/garbage/data/`.
+- Documented that parent Garbage now owns the newsletter-to-generic-workbench projection and workbench projection smoke coverage.
 - Documented that parent Garbage Ulysses export smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage Grust watchlist audit commands now live in the parent package while the crawler config remains bundled during extraction.
 - Documented that parent Garbage crawler dedupe and provenance smoke commands now live in the parent package while the Rust crawler remains bundled during extraction.
