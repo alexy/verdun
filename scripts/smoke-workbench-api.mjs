@@ -49,7 +49,7 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterSource, garbageStoreSource, garbageViewSmokeSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterSource, garbageStoreShimSource, garbageStoreSource, garbageViewSmokeShimSource, garbageViewSmokeSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
@@ -58,7 +58,9 @@ try {
     readFile('api/instances/bundled-workbench-adapters.ts', 'utf8'),
     readFile('api/instances/garbage/workbench.ts', 'utf8'),
     readFile('api/instances/garbage/newsletter-store.ts', 'utf8'),
+    readFile('../apps/garbage/src/api/newsletter-store.ts', 'utf8'),
     readFile('scripts/instances/garbage/smoke-view-model.mjs', 'utf8'),
+    readFile('../apps/garbage/scripts/smoke-view-model.mjs', 'utf8'),
   ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
     throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
@@ -94,13 +96,19 @@ try {
   if (!garbageAdapterSource.includes('apps/garbage/src/config.ts')) {
     throw new Error('Garbage local workbench adapter should consume the parent-owned Garbage config')
   }
-  if (!garbageStoreSource.includes('apps/garbage/src/config.ts')) {
-    throw new Error('Garbage newsletter store should consume the parent-owned Garbage config')
+  if (!garbageStoreShimSource.includes('apps/garbage/src/api/newsletter-store.ts')) {
+    throw new Error('resident Garbage newsletter store should only shim to the parent package')
+  }
+  if (!garbageStoreSource.includes("from '../config.ts'")) {
+    throw new Error('Garbage newsletter store should consume the parent-owned Garbage config locally')
   }
   if (!garbageStoreSource.includes("'public', 'data', 'newsletter-snapshot.json'")) {
     throw new Error('Garbage newsletter store should retain legacy static snapshot fallback while bundled in Verdun')
   }
-  if (!garbageViewSmokeSource.includes('../apps/garbage/src/workbench.ts')) {
+  if (!garbageViewSmokeShimSource.includes('apps/garbage/scripts/smoke-view-model.mjs')) {
+    throw new Error('resident Garbage view-model smoke should only shim to the parent package')
+  }
+  if (!garbageViewSmokeSource.includes('../src/workbench.ts')) {
     throw new Error('Garbage view-model smoke should exercise the parent-owned workbench projection')
   }
   if (existsSync('src/instances/garbage/workbench.ts')) {
