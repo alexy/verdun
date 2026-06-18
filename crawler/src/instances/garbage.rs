@@ -30,7 +30,8 @@ impl CrawlerInstance for GarbageCrawlerInstance {
     }
 
     fn default_config_path(&self) -> PathBuf {
-        PathBuf::from("crawler/instances/garbage/config.toml")
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../apps/garbage/crawler/instances/garbage/config.toml")
     }
 
     fn default_item_payload_path(&self) -> PathBuf {

@@ -4,7 +4,10 @@ use clap::{Parser, Subcommand};
 mod core;
 mod instances;
 use crate::core::{CrawlerConfig, CrawlerSnapshot};
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 const GENERIC_SQL_TARGET: &str = "generic";
 
@@ -472,7 +475,28 @@ fn resolve_crawler_instance(
 
 fn read_crawler_config(path: &PathBuf) -> Result<CrawlerConfig> {
     let text = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
-    toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
+    let mut config: CrawlerConfig =
+        toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))?;
+    resolve_source_paths(&mut config, path);
+    Ok(config)
+}
+
+fn resolve_source_paths(config: &mut CrawlerConfig, path: &Path) {
+    let Some(config_dir) = path.parent() else {
+        return;
+    };
+    for source in &mut config.sources {
+        if let Some(manual_path) = &mut source.manual_path {
+            if manual_path.is_relative() && !manual_path.exists() {
+                *manual_path = config_dir.join(&manual_path);
+            }
+        }
+        if let Some(fixture_path) = &mut source.fixture_path {
+            if fixture_path.is_relative() && !fixture_path.exists() {
+                *fixture_path = config_dir.join(&fixture_path);
+            }
+        }
+    }
 }
 
 fn sql_string(value: &str) -> String {
