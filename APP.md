@@ -54,6 +54,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Verdun's resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ulysses export smoke now only shim to the parent package.
 - Verdun's resident newsletter draft CLI, Ghost CLI/smoke, and local/draft/health API smokes now only shim to the parent package.
 - Verdun's resident legacy newsletter SQL apply/deploy helpers and loader smoke now only shim to the parent package while the compatibility migrations remain bundled.
+- Verdun's resident newsletter snapshot composable and view-model smokes now only shim to the parent package while the bundled UI modules remain in Verdun.
 - The bundled Garbage API workbench adapter and view-model smoke import `apps/garbage/src/workbench.ts`, so generic workbench fallback routes and view-model coverage now consume the parent package's Garbage projection; the duplicate resident Verdun projection file has been removed.
 - The bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module import `apps/garbage/src/config.ts`; the duplicate resident config file has been removed while legacy static/local state fallback paths remain only for the current bundled runtime.
 - The resident Garbage instance registration shim imports parent-owned `apps/garbage/src/instance-registration.ts`; default-instance metadata is no longer redefined in Verdun.
