@@ -79,9 +79,11 @@ if (!garbageInstanceRegistrationSource.includes('garbageInstance') || !garbageIn
 if (
   !instanceRegistrationsSource.includes('workbenchInstanceRegistration') ||
   instanceRegistrationsSource.includes('garbageWorkbenchInstance') ||
-  instanceRegistrationsSource.includes('greathouseWorkbenchInstance')
+  instanceRegistrationsSource.includes('greathouseWorkbenchInstance') ||
+  instanceRegistrationsSource.includes('./garbage/') ||
+  instanceRegistrationsSource.includes('./greathouse/')
 ) {
-  throw new Error('registered instance list is not consuming neutral instance metadata registrations')
+  throw new Error('registered instance list is not discovering neutral instance metadata registrations')
 }
 if (!appSource.includes('resolveWorkbenchAppForPath')) {
   throw new Error('root app shell is not wired through the instance app resolver')
@@ -92,9 +94,11 @@ if (appSource.includes('GreathouseApp') || appSource.includes('GarbageApp')) {
 if (
   !appComponentsSource.includes('workbenchAppRegistration') ||
   appComponentsSource.includes('garbageWorkbenchApp') ||
-  appComponentsSource.includes('greathouseWorkbenchApp')
+  appComponentsSource.includes('greathouseWorkbenchApp') ||
+  appComponentsSource.includes('./garbage/') ||
+  appComponentsSource.includes('./greathouse/')
 ) {
-  throw new Error('registered app component list is not consuming neutral app registrations')
+  throw new Error('registered app component list is not discovering neutral app registrations')
 }
 if (
   !appRegistrySource.includes('resolveWorkbenchInstanceForPath') ||

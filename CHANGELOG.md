@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Changed frontend app and instance registries to discover bundled `src/instances/*/app.ts` and `src/instances/*/instance.ts` registration modules by convention, removing explicit Garbage/Greathouse imports from the shared frontend registries.
 - Moved crawler item payload, source-run, and editorial-state default paths onto the `CrawlerInstance` trait so Greathouse and future instances do not share Garbage's `crawler/data/*` CLI defaults.
 - Removed default-instance resolution from `api/workbench/_db.ts`; generic workbench database helpers now require explicit `WorkbenchInstance` arguments, leaving default app selection to the route/registry layer.
 - Renamed Rust crawler instance statics to neutral per-module `CRAWLER_INSTANCE` exports, so the shared crawler registry no longer consumes Garbage/Greathouse-named static symbols.
