@@ -29,6 +29,7 @@ export const garbageDeployCheckProfile = {
     'garbage:smoke:source-gap-review',
     'garbage:smoke:ulysses',
     'garbage:smoke:view',
+    'garbage:smoke:workbench-compat',
     'garbage:audit:grust',
   ],
   removedGenericCommands: [
@@ -87,6 +88,7 @@ export const garbageDeployCheckProfile = {
     'garbage:smoke:source-gap-review',
     'garbage:smoke:ulysses',
     'garbage:smoke:view',
+    'garbage:smoke:workbench-compat',
   ],
   uiSmokeCommands: [
     'garbage:smoke:app',

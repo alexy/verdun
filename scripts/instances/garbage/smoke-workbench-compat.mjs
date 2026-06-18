@@ -3,17 +3,6 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runnerImport } from 'vite'
 
-const demoInstance = {
-  id: 'demo',
-  name: 'Demo',
-  basePath: '/demo/',
-  theme: 'Generic workbench smoke',
-  databaseTablePrefix: 'workbench',
-  staticSnapshotPath: 'public/data/demo-snapshot.json',
-  localStatePath: 'crawler/data/demo-editorial-state.json',
-  readOnlyMessage: 'Demo instance is read-only without an adapter.',
-}
-
 function responseRecorder() {
   return {
     body: undefined,
@@ -66,7 +55,6 @@ try {
   ) {
     throw new Error('generic workbench instance-adapter registry still embeds Garbage config or newsletter compatibility metadata')
   }
-
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
@@ -100,43 +88,61 @@ try {
     optimizeDeps: { noDiscovery: true },
   })
 
-  const databaseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql('demo'), demoInstance)
+  const snapshot = await dbModule.readWorkbenchSnapshot()
+  if (snapshot.instance.id !== 'garbage' || snapshot.instance.basePath !== '/rbage/') {
+    throw new Error(`workbench snapshot did not expose the Garbage instance: ${JSON.stringify(snapshot.instance)}`)
+  }
+  if (snapshot.records.length < 23 || !snapshot.records.some((record) => record.subject === 'Pydantic')) {
+    throw new Error('workbench snapshot did not expose generic records')
+  }
+  if (!snapshot.collectionPlans.some((plan) => plan.subject === 'Pydantic' && plan.query.includes('Pydantic'))) {
+    throw new Error('workbench snapshot did not expose generic collection plans')
+  }
+  if (!snapshot.sourceRuns.some((run) => run.subjectCounts && typeof run.subjectCounts === 'object')) {
+    throw new Error('workbench snapshot did not expose generic source-run subject counts')
+  }
+
+  const status = await dbModule.readWorkbenchStatus()
+  if (status.recordCount !== snapshot.records.length || status.collectionPlanCount !== snapshot.collectionPlans.length) {
+    throw new Error(`workbench status counts did not match snapshot: ${JSON.stringify(status)}`)
+  }
+
+  const databaseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql())
   if (
-    databaseSnapshot.instance.id !== 'demo'
-    || databaseSnapshot.editorialPersistence !== 'database'
-    || databaseSnapshot.records[0]?.subject !== 'Demo Subject'
-    || databaseSnapshot.records[0]?.provenance?.subject !== 'Demo Subject'
-    || databaseSnapshot.sourceRuns[0]?.subjectCounts?.['Demo Subject'] !== 1
-    || databaseSnapshot.collectionPlans[0]?.query !== 'demo subject query'
+    databaseSnapshot.editorialPersistence !== 'database'
+    || databaseSnapshot.records[0]?.subject !== 'Pydantic'
+    || databaseSnapshot.records[0]?.provenance?.subject !== 'Pydantic'
+    || databaseSnapshot.sourceRuns[0]?.subjectCounts?.Pydantic !== 1
+    || databaseSnapshot.collectionPlans[0]?.query !== 'Pydantic pydantic'
   ) {
     throw new Error(`workbench database-view reader did not map generic rows: ${JSON.stringify(databaseSnapshot)}`)
   }
-  const databaseStatus = await dbModule.readDatabaseWorkbenchStatus(fakeWorkbenchSql('demo'), demoInstance)
-  if (databaseStatus.instance.id !== 'demo' || databaseStatus.recordCount !== 1 || databaseStatus.collectionPlanCount !== 1 || databaseStatus.editorialPersistence !== 'database') {
+  const databaseStatus = await dbModule.readDatabaseWorkbenchStatus(fakeWorkbenchSql())
+  if (databaseStatus.recordCount !== 1 || databaseStatus.collectionPlanCount !== 1 || databaseStatus.editorialPersistence !== 'database') {
     throw new Error(`workbench database-view status did not map generic counts: ${JSON.stringify(databaseStatus)}`)
   }
   const writeSql = fakeWorkbenchWriteSql()
-  await dbModule.writeDatabaseWorkbenchReview(writeSql, 'db-demo', 1, demoInstance)
-  const focus = await dbModule.writeDatabaseWorkbenchFocus(writeSql, 'Database focus write.', 'this_week', demoInstance)
+  await dbModule.writeDatabaseWorkbenchReview(writeSql, 'db-pydantic', 1)
+  const focus = await dbModule.writeDatabaseWorkbenchFocus(writeSql, 'Database focus write.', 'this_week')
   const stateImport = await dbModule.writeDatabaseWorkbenchState(writeSql, {
-    reviews: { 'db-demo': -1 },
+    reviews: { 'db-pydantic': -1 },
     focuses: [{
       id: 'focus-state-db',
       text: 'Database state focus.',
       scope: 'ongoing',
       created_at: '2026-06-16T12:30:00.000Z',
     }],
-  }, demoInstance)
-  if (!writeSql.reviewWrites.some((write) => write.instance === 'demo' && write.recordId === 'db-demo' && write.review === 1)) {
+  })
+  if (!writeSql.reviewWrites.some((write) => write.recordId === 'db-pydantic' && write.review === 1)) {
     throw new Error(`workbench generic review write did not target review_state: ${JSON.stringify(writeSql.reviewWrites)}`)
   }
-  if (!writeSql.reviewWrites.some((write) => write.instance === 'demo' && write.recordId === 'db-demo' && write.review === -1)) {
+  if (!writeSql.reviewWrites.some((write) => write.recordId === 'db-pydantic' && write.review === -1)) {
     throw new Error(`workbench generic state import did not target review_state: ${JSON.stringify(writeSql.reviewWrites)}`)
   }
-  if (!writeSql.focusWrites.some((write) => write.instance === 'demo' && write.text === 'Database focus write.' && write.scope === 'this_week')) {
+  if (!writeSql.focusWrites.some((write) => write.text === 'Database focus write.' && write.scope === 'this_week')) {
     throw new Error(`workbench generic focus write did not target focuses: ${JSON.stringify(writeSql.focusWrites)}`)
   }
-  if (!writeSql.focusWrites.some((write) => write.instance === 'demo' && write.id === 'focus-state-db' && write.scope === 'ongoing')) {
+  if (!writeSql.focusWrites.some((write) => write.id === 'focus-state-db' && write.scope === 'ongoing')) {
     throw new Error(`workbench generic state import did not target focuses: ${JSON.stringify(writeSql.focusWrites)}`)
   }
   if (stateImport.importedReviews !== 1 || stateImport.importedFocuses !== 1) {
@@ -145,7 +151,6 @@ try {
   if (focus?.text !== 'Database focus write.' || focus?.scope !== 'this_week') {
     throw new Error(`workbench generic focus write did not return a focus: ${JSON.stringify(focus)}`)
   }
-
   const greathouseInstance = greathouseConfigModule.greathouseInstance
   const greathouseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql('greathouse'), greathouseInstance)
   if (greathouseSnapshot.instance.id !== 'greathouse' || greathouseSnapshot.records[0]?.subject !== 'Berkeley 2BR') {
@@ -163,6 +168,16 @@ try {
   }
   if (!greathouseWriteSql.focusWrites.some((write) => write.instance === 'greathouse' && write.text === 'Greathouse database focus.')) {
     throw new Error(`workbench generic focus write did not honor Greathouse instance: ${JSON.stringify(greathouseWriteSql.focusWrites)}`)
+  }
+
+  const recordsResponse = await call(recordsModule.default)
+  if (recordsResponse.code !== 200 || recordsResponse.body?.records?.length !== snapshot.records.length) {
+    throw new Error('workbench records route did not return the generic snapshot')
+  }
+
+  const statusResponse = await call(statusModule.default)
+  if (statusResponse.code !== 200 || statusResponse.body?.instance?.id !== 'garbage' || statusResponse.body?.recordCount !== snapshot.records.length) {
+    throw new Error(`workbench status route did not return generic status: ${JSON.stringify(statusResponse.body)}`)
   }
 
   const greathouseRecordsResponse = await call(recordsModule.default, 'GET', undefined, { instance: 'greathouse' })
@@ -189,37 +204,63 @@ try {
     || greathouseHealthResponse.body?.instance?.id !== 'greathouse'
     || greathouseHealthResponse.body?.databaseContract?.compatibilityTables?.length !== 0
   ) {
-    throw new Error(`workbench health route did not keep Greathouse free of compatibility tables: ${JSON.stringify(greathouseHealthResponse.body)}`)
+    throw new Error(`workbench health route did not keep Greathouse free of Garbage compatibility tables: ${JSON.stringify(greathouseHealthResponse.body)}`)
   }
-  if (!greathouseHealthResponse.body?.supportedInstances?.some((instance) => instance.id === 'greathouse' && instance.basePath === '/greathouse/')) {
-    throw new Error(`workbench health route did not expose supported instances: ${JSON.stringify(greathouseHealthResponse.body?.supportedInstances)}`)
+
+  const healthResponse = await call(healthModule.default)
+  if (healthResponse.code !== 200 || healthResponse.body?.service !== 'workbench') {
+    throw new Error('workbench health route did not identify the generic workbench service')
   }
-  if (!greathouseHealthResponse.body?.databaseContract?.reusableViews?.includes('workbench_records')) {
+  if (!healthResponse.body?.supportedInstances?.some((instance) => instance.id === 'greathouse' && instance.basePath === '/greathouse/')) {
+    throw new Error(`workbench health route did not expose supported instances: ${JSON.stringify(healthResponse.body?.supportedInstances)}`)
+  }
+  if (!healthResponse.body?.databaseContract?.reusableViews?.includes('workbench_records')) {
     throw new Error('workbench health route did not expose reusable database views')
   }
-  if (!greathouseHealthResponse.body?.readSurfaces?.includes('records')) {
+  if (!healthResponse.body?.databaseContract?.compatibilityTables?.includes('newsletter_items')) {
+    throw new Error('workbench health route did not expose Garbage compatibility tables through instance metadata')
+  }
+  if (!healthResponse.body?.readSurfaces?.includes('records')) {
     throw new Error('workbench health route did not expose generic read surfaces')
   }
-  if (!greathouseHealthResponse.body?.writeSurfaces?.includes('review') || !greathouseHealthResponse.body?.writeSurfaces?.includes('focus') || !greathouseHealthResponse.body?.writeSurfaces?.includes('state')) {
+  if (!healthResponse.body?.writeSurfaces?.includes('review') || !healthResponse.body?.writeSurfaces?.includes('focus') || !healthResponse.body?.writeSurfaces?.includes('state')) {
     throw new Error('workbench health route did not expose generic write surfaces')
   }
 
-  const blocked = await call(recordsModule.default, 'DELETE', undefined, { instance: 'greathouse' })
+  const blocked = await call(recordsModule.default, 'DELETE')
   if (blocked.code !== 405) throw new Error('workbench records route did not reject DELETE')
 
+  const recordId = snapshot.records[0]?.id
+  if (!recordId) throw new Error('workbench smoke could not find a record to review')
+  const reviewResponse = await call(reviewModule.default, 'POST', { recordId, review: 1 })
+  if (reviewResponse.code !== 200 || reviewResponse.body?.review !== 1) {
+    throw new Error(`workbench review route did not accept a generic review: ${JSON.stringify(reviewResponse.body)}`)
+  }
+  const focusResponse = await call(focusModule.default, 'POST', {
+    text: 'Workbench focus smoke note.',
+    scope: 'this_week',
+  })
+  if (focusResponse.code !== 200 || focusResponse.body?.focus?.text !== 'Workbench focus smoke note.') {
+    throw new Error(`workbench focus route did not accept a generic focus: ${JSON.stringify(focusResponse.body)}`)
+  }
+  const stateResponse = await call(stateModule.default, 'POST', {
+    reviews: { [recordId]: -1 },
+    focuses: [{
+      id: 'focus-state-route',
+      text: 'Workbench state route focus.',
+      scope: 'ongoing',
+      created_at: '2026-06-16T13:00:00.000Z',
+    }],
+  })
+  if (stateResponse.code !== 200 || stateResponse.body?.importedReviews !== 1 || stateResponse.body?.importedFocuses !== 1) {
+    throw new Error(`workbench state route did not accept generic state import: ${JSON.stringify(stateResponse.body)}`)
+  }
   const greathouseReviewResponse = await call(reviewModule.default, 'POST', {
     recordId: 'listing-redfin-berkeley-01',
     review: 1,
   }, { instance: 'greathouse' })
   if (greathouseReviewResponse.code !== 403 || greathouseReviewResponse.body?.error !== 'workbench_instance_read_only') {
     throw new Error(`workbench review route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseReviewResponse.body)}`)
-  }
-  const greathouseFocusResponse = await call(focusModule.default, 'POST', {
-    text: 'Greathouse route focus.',
-    scope: 'this_week',
-  }, { instance: 'greathouse' })
-  if (greathouseFocusResponse.code !== 403 || greathouseFocusResponse.body?.error !== 'workbench_instance_read_only') {
-    throw new Error(`workbench focus route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseFocusResponse.body)}`)
   }
   const greathouseStateResponse = await call(stateModule.default, 'POST', {
     reviews: { 'listing-redfin-berkeley-01': 1 },
@@ -231,6 +272,19 @@ try {
   if (unknownInstanceResponse.code !== 400 || unknownInstanceResponse.body?.error !== 'unknown_workbench_instance') {
     throw new Error(`workbench records route did not reject unknown instances: ${JSON.stringify(unknownInstanceResponse.body)}`)
   }
+  const updatedSnapshot = await dbModule.readWorkbenchSnapshot()
+  if (!updatedSnapshot.records.some((record) => record.id === recordId && record.review === -1)) {
+    throw new Error('workbench state route did not persist imported reviews into projected records')
+  }
+  if (!updatedSnapshot.focuses.some((focus) => focus.text === 'Workbench focus smoke note.')) {
+    throw new Error('workbench focus route did not persist into projected focuses')
+  }
+  if (!updatedSnapshot.focuses.some((focus) => focus.text === 'Workbench state route focus.')) {
+    throw new Error('workbench state route did not persist imported focuses into projected focuses')
+  }
+
+  const invalidReview = await call(reviewModule.default, 'POST', { recordId, review: 4 })
+  if (invalidReview.code !== 400) throw new Error('workbench review route did not reject invalid review values')
 } finally {
   delete process.env.VERCEL
   delete process.env.POSTGRES_URL
@@ -239,7 +293,7 @@ try {
   await rm(stateDir, { recursive: true, force: true })
 }
 
-function fakeWorkbenchSql(expectedInstance = 'demo') {
+function fakeWorkbenchSql(expectedInstance = 'garbage') {
   return {
     async query(sql, params = []) {
       if (params[0] && params[0] !== expectedInstance) {
@@ -286,27 +340,27 @@ function fakeWorkbenchSql(expectedInstance = 'demo') {
           }]
         }
         return [{
-          id: 'db-demo',
-          title: 'Demo database record',
-          source: 'Demo Source',
-          source_kind: 'fixture',
-          url: 'https://example.com/demo',
+          id: 'db-pydantic',
+          title: 'Pydantic database record',
+          source: 'Hacker News',
+          source_kind: 'community',
+          url: 'https://example.com/pydantic',
           observed_at: '2026-06-16T12:00:00.000Z',
-          subject: 'Demo Subject',
-          topic: 'generic records',
+          subject: 'Pydantic',
+          topic: 'typed AI',
           summary: 'Generic workbench database record.',
-          tags: ['demo', 'generic'],
+          tags: ['pydantic', 'typed-agents'],
           score: 91,
           review: 1,
           provenance_json: {
-            stage: 'fixture',
-            adapter: 'fixture-adapter',
-            source: 'Demo Source',
-            source_kind: 'fixture',
-            source_url: 'https://example.com/source',
-            evidence_url: 'https://example.com/demo',
-            subject: 'Demo Subject',
-            matched_keywords: ['demo'],
+            stage: 'live',
+            adapter: 'hn-algolia',
+            source: 'Hacker News',
+            source_kind: 'community',
+            source_url: 'https://hn.algolia.com',
+            evidence_url: 'https://example.com/pydantic',
+            project: 'Pydantic',
+            matched_keywords: ['pydantic'],
           },
         }]
       }
@@ -330,12 +384,12 @@ function fakeWorkbenchSql(expectedInstance = 'demo') {
           }]
         }
         return [{
-          source: 'Demo Source',
-          kind: 'fixture',
+          source: 'Hacker News',
+          kind: 'community',
           status: 'ok',
           item_count: 1,
           message: 'database source run',
-          subject_counts: { 'Demo Subject': 1 },
+          subject_counts: { Pydantic: 1 },
         }]
       }
       if (sql.includes('from workbench_collection_plans')) {
@@ -356,16 +410,16 @@ function fakeWorkbenchSql(expectedInstance = 'demo') {
           }]
         }
         return [{
-          subject: 'Demo Subject',
-          topic: 'generic records',
-          query: 'demo subject query',
-          live_terms: ['demo'],
-          tags: ['demo'],
+          subject: 'Pydantic',
+          topic: 'typed AI',
+          query: 'Pydantic pydantic',
+          live_terms: ['pydantic'],
+          tags: ['pydantic'],
           review_targets: [{
-            source: 'Demo Source',
-            label: 'Demo review target',
-            url: 'https://example.com/demo-review',
-            adapter: 'fixture-adapter',
+            source: 'Hacker News',
+            label: 'HN: Pydantic',
+            url: 'https://hn.algolia.com/?query=Pydantic',
+            adapter: 'hn-algolia',
           }],
           focus_terms: [],
         }]

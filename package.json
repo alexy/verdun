@@ -49,6 +49,7 @@
     "garbage:smoke:source-gap-review": "node scripts/instances/garbage/smoke-source-gap-review.mjs",
     "garbage:smoke:ulysses": "node scripts/instances/garbage/smoke-ulysses-export.mjs",
     "garbage:smoke:view": "node scripts/instances/garbage/smoke-view-model.mjs",
+    "garbage:smoke:workbench-compat": "node scripts/instances/garbage/smoke-workbench-compat.mjs",
     "smoke:workbench": "node scripts/smoke-workbench-api.mjs",
     "garbage:draft": "node scripts/instances/garbage/newsletter-draft.mjs",
     "garbage:review:gaps": "node scripts/instances/garbage/source-gap-review.mjs",

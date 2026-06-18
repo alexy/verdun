@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Split workbench API smoke coverage so shared `smoke:workbench` uses neutral generic database fixtures plus Greathouse route checks, while Garbage default fallback and compatibility-table assertions now run through `garbage:smoke:workbench-compat`.
 - Moved Garbage crawler dedupe, provenance, and query-plan smokes under `scripts/instances/garbage/`, exposed them as `garbage:smoke:crawler-dedupe`, `garbage:smoke:crawler-provenance`, and `garbage:smoke:queries`, and removed the old shared crawler smoke commands from `smoke:all`.
 - Moved the Garbage browser app and responsive UI smokes under `scripts/instances/garbage/`, exposed them as `garbage:smoke:app` and `garbage:smoke:responsive`, and changed `smoke:browser` to invoke UI smoke commands from deploy-profile metadata.
 - Moved the Garbage local newsletter API smoke and manual-source freshness smoke under `scripts/instances/garbage/`, exposed them as `garbage:smoke:api` and `garbage:smoke:manual-source`, and removed the old shared `smoke:api` / `smoke:manual-source` commands from `smoke:all`.
