@@ -65,7 +65,7 @@ if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployPro
 if (!profileModulePathMatchesInstance(defaultProfile)) {
   throw new Error('default deployed-check smoke fixture should be instance-owned profile metadata')
 }
-for (const metadataKey of ['smokeCommands', 'removedGenericCommands', 'publishingCommands', 'compatibilitySqlSmoke', 'smokeAllCommands']) {
+for (const metadataKey of ['smokeCommands', 'removedGenericCommands', 'publishingCommands', 'compatibilitySqlSmoke', 'smokeAllCommands', 'uiSmokeCommands']) {
   if (!(metadataKey in defaultProfile)) {
     throw new Error(`default deploy profile is missing ${metadataKey} metadata`)
   }

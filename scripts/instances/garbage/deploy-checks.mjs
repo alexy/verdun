@@ -10,6 +10,7 @@ export const garbageDeployCheckProfile = {
   smokeFixtureModule: './instances/garbage/deployed-check-smoke-fixture.mjs',
   smokeCommands: [
     'garbage:smoke:api',
+    'garbage:smoke:app',
     'garbage:smoke:draft-api',
     'garbage:smoke:draft',
     'garbage:smoke:draft-url',
@@ -20,6 +21,7 @@ export const garbageDeployCheckProfile = {
     'garbage:smoke:public-snapshot',
     'garbage:smoke:readiness',
     'garbage:smoke:recency',
+    'garbage:smoke:responsive',
     'garbage:smoke:snapshot',
     'garbage:smoke:source-gap-review',
     'garbage:smoke:ulysses',
@@ -28,6 +30,7 @@ export const garbageDeployCheckProfile = {
   ],
   removedGenericCommands: [
     'smoke:api',
+    'smoke:app',
     'smoke:draft-api',
     'smoke:draft',
     'smoke:draft-url',
@@ -38,6 +41,7 @@ export const garbageDeployCheckProfile = {
     'smoke:public-snapshot',
     'smoke:readiness',
     'smoke:recency',
+    'smoke:responsive',
     'smoke:snapshot',
     'smoke:source-gap-review',
     'smoke:ulysses',
@@ -74,6 +78,10 @@ export const garbageDeployCheckProfile = {
     'garbage:smoke:source-gap-review',
     'garbage:smoke:ulysses',
     'garbage:smoke:view',
+  ],
+  uiSmokeCommands: [
+    'garbage:smoke:app',
+    'garbage:smoke:responsive',
   ],
   minRecords: 23,
   minCollectionPlans: 23,

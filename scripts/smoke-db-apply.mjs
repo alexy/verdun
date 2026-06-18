@@ -11,8 +11,8 @@ const smokeDbApplySource = readFileSync('scripts/smoke-db-apply.mjs', 'utf8')
 const smokeDbDeploySource = readFileSync('scripts/smoke-db-deploy.mjs', 'utf8')
 const genericLoaderSource = readFileSync('scripts/smoke-generic-loader-sql.mjs', 'utf8')
 const smokeBrowserSource = readFileSync('scripts/smoke-browser.mjs', 'utf8')
-const smokeResponsiveSource = readFileSync('scripts/smoke-responsive.mjs', 'utf8')
-const smokeAppSource = readFileSync('scripts/smoke-app.mjs', 'utf8')
+const smokeResponsiveSource = readFileSync('scripts/instances/garbage/smoke-responsive.mjs', 'utf8')
+const smokeAppSource = readFileSync('scripts/instances/garbage/smoke-app.mjs', 'utf8')
 
 if (applySource.includes('public/data/newsletter-snapshot.json')) {
   throw new Error('generic workbench apply script still embeds the Garbage newsletter snapshot default')
@@ -36,12 +36,15 @@ for (const marker of ['public/data/newsletter-snapshot.json', "'garbage'", "'/rb
 }
 for (const [label, source] of [
   ['smoke-browser', smokeBrowserSource],
-  ['smoke-responsive', smokeResponsiveSource],
-  ['smoke-app', smokeAppSource],
+  ['garbage-smoke-responsive', smokeResponsiveSource],
+  ['garbage-smoke-app', smokeAppSource],
 ]) {
   if (source.includes('/rbage/')) {
     throw new Error(`${label} still embeds the Garbage preview base path instead of using profile metadata`)
   }
+}
+if (smokeBrowserSource.includes('smoke:app') || smokeBrowserSource.includes('smoke:responsive')) {
+  throw new Error('smoke-browser should run UI checks from deploy-profile metadata instead of generic Garbage UI command names')
 }
 
 const dryRun = spawnSync('node', [

@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
+import { defaultDeployCheckProfileId, deployCheckProfile } from '../deploy-check-profiles.mjs'
 
 const profile = deployCheckProfile(defaultDeployCheckProfileId())
 const baseUrl = process.argv[2] ?? profile?.devAppBaseUrl ?? 'http://127.0.0.1:5176/'

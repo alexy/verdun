@@ -1,6 +1,6 @@
 import { chromium } from '@playwright/test'
 import { existsSync } from 'node:fs'
-import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
+import { defaultDeployCheckProfileId, deployCheckProfile } from '../deploy-check-profiles.mjs'
 
 const profile = deployCheckProfile(defaultDeployCheckProfileId())
 const baseUrl = process.argv[2] ?? profile?.previewBaseUrl ?? 'http://127.0.0.1:5174/'

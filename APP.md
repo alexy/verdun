@@ -114,4 +114,4 @@ Current local checks:
 - `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2`
 - `cargo run --manifest-path crawler/Cargo.toml -- queries`
 - `npm run garbage:draft`
-- `npm run smoke:app -- http://127.0.0.1:5174/rbage/`
+- `npm run garbage:smoke:app -- http://127.0.0.1:5174/rbage/`
