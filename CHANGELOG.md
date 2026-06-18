@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Removed the remaining root `scripts/garbage-*.mjs` publishing wrappers; `garbage:*` package commands now call instance-owned publishing scripts under `scripts/instances/garbage/` directly.
 - Moved the Grust watchlist audit and its smoke test under `scripts/instances/garbage/`, with package commands renamed to `garbage:audit:grust` and `garbage:smoke:grust-watchlist`.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
 - Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
@@ -27,7 +28,7 @@
 - Changed deployed-check smoke coverage to derive local app URLs, static snapshot paths, source snapshot input, and draft API paths from deploy profiles instead of duplicating Garbage route defaults.
 - Moved the legacy newsletter SQL loader smoke under `scripts/instances/garbage/` and exposed it as `garbage:smoke:loader`; `smoke:generic-loader` remains the reusable workbench SQL validator.
 - Removed the generic Garbage publishing package aliases (`draft`, `review:gaps`, `ulysses:*`, and `ghost:*`); publishing commands now use explicit `garbage:*` package names.
-- Removed the unused generic publishing wrapper scripts (`scripts/newsletter-draft.mjs`, `scripts/publish-ghost.mjs`, and `scripts/source-gap-review.mjs`); Garbage publishing remains available through explicit `scripts/garbage-*.mjs` wrappers and `garbage:*` package commands.
+- Removed the unused generic publishing wrapper scripts (`scripts/newsletter-draft.mjs`, `scripts/publish-ghost.mjs`, and `scripts/source-gap-review.mjs`); Garbage publishing remains available through explicit `garbage:*` package commands.
 - Removed unused generic `src/lib/newsletter.ts`, `src/lib/ontology.ts`, and `src/lib/snapshot.ts` compatibility re-exports so Garbage newsletter, ontology, and snapshot logic are only exposed from the Garbage instance namespace.
 - Added a Greathouse deploy-check profile with preview URL, static snapshot, count gates, and required subject/plan metadata; Greathouse deployed checks can now run from profile metadata instead of explicit CLI gates.
 - Changed deploy-check profile selection to use registered profile metadata with an explicit default flag instead of returning the Garbage profile directly.

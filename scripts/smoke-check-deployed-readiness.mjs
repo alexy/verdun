@@ -41,6 +41,11 @@ for (const scriptName of ['garbage:smoke:draft-api', 'garbage:smoke:draft', 'gar
     throw new Error(`${scriptName} should run an instance-owned Garbage smoke script`)
   }
 }
+for (const scriptName of ['garbage:draft', 'garbage:review:gaps', 'garbage:ulysses:draft', 'garbage:ulysses:ready', 'garbage:ghost:draft', 'garbage:ghost:dry-run', 'garbage:ghost:ready']) {
+  if (!packageJson.scripts?.[scriptName]?.includes('scripts/instances/garbage/')) {
+    throw new Error(`${scriptName} should run an instance-owned Garbage publishing script`)
+  }
+}
 if (vercelConfigSource.includes('/rbage/') || vercelConfigSource.includes('/greathouse/')) {
   throw new Error('Vercel config generator should derive app paths from deploy profiles')
 }

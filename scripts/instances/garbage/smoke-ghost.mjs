@@ -140,7 +140,7 @@ async function runGhostDryRun() {
   }))
   return await new Promise((resolve, reject) => {
     const child = spawn('node', [
-      'scripts/garbage-publish-ghost.mjs',
+      'scripts/instances/garbage/publish-ghost.mjs',
       '--dry-run',
       '--require-upvotes',
       '--require-ready',
