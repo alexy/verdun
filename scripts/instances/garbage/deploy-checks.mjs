@@ -8,6 +8,7 @@ export const garbageDeployCheckProfile = {
   sourceSnapshotPath: 'public/data/newsletter-snapshot.json',
   staticSnapshotPath: 'data/newsletter-snapshot.json',
   smokeFixtureModule: './instances/garbage/deployed-check-smoke-fixture.mjs',
+  readinessCheckModule: './instances/garbage/deployed-draft-checks.mjs',
   smokeCommands: [
     'garbage:smoke:api',
     'garbage:smoke:app',
@@ -100,6 +101,7 @@ export const garbageDeployCheckProfile = {
   requiredPlans: ['BAML', 'DSPy', 'Apache Arrow', 'DataFusion', 'Delta Lake', 'Ibis', 'Dagster', 'Garde', 'zod-rs'],
   draft: {
     apiPath: '/api/garbage/newsletter/draft',
+    checkModule: './instances/garbage/deployed-draft-checks.mjs',
     markdownIncludes: ['Strongly Typed AI/Data Notes', '## Sources watched'],
     manifestSnapshotInput: 'api/garbage/newsletter/items',
   },

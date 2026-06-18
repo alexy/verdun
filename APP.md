@@ -18,6 +18,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - `npm run check:deployed -- --require-database` verifies the deployed API is backed by writable external database persistence rather than browser-local fallback.
 - `npm run vercel:config` regenerates `vercel.json` from deploy profiles so app rewrites stay instance-owned rather than hand-coded in the root Vercel config.
 - Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/garbage/newsletter/items --deployment <deployment-url>`.
+- Deployed draft API and publishing-readiness validation is instance-owned: the generic deployed checker loads Garbage's validator from `scripts/instances/garbage/deployed-draft-checks.mjs` through deploy-profile metadata.
 - Inbox filtering by search text, vote state, project, source, and evidence stage so editors can prioritize live/manual collected items before watchlist seed placeholders.
 - News cards expose labeled Include/Skip controls with pressed-state feedback, and `npm run smoke:browser` now includes a narrow-viewport clickability smoke for mobile-sized layouts.
 - News cards use public HN-style upvote/downvote labels, credo-fit blurbs, and links into the maintained Strongly Typed AI ontology panel.

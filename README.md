@@ -14,6 +14,7 @@ The first reusable boundary is now explicit:
 - Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly from local JSON, HTTP JSON, HTTP status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
 - Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Garbage remains the default `/rbage/` app path and Greathouse has a reusable `/greathouse/` path.
+- Deployed draft/readiness checks are deploy-profile hooks; Garbage owns newsletter draft validation under `scripts/instances/garbage/`, while the shared deployment checker validates only generic route, snapshot, status, and health mechanics.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
 
 The current proof points are:

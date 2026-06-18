@@ -16,10 +16,13 @@ const deployProfilesSource = await readFile('scripts/instances/deploy-check-prof
 const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
-for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json']) {
+for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json', 'Weekly throughline', 'upvoted items will lead the draft']) {
   if (checkDeployedSource.includes(marker)) {
     throw new Error(`generic deployed checker still embeds Garbage deploy marker: ${marker}`)
   }
+}
+if (!defaultProfile.readinessCheckModule?.includes(`instances/${defaultProfile.id}/`) || !defaultProfile.draft?.checkModule?.includes(`instances/${defaultProfile.id}/`)) {
+  throw new Error('default deploy profile should own readiness and draft validators from its instance boundary')
 }
 if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs') {
   throw new Error('check:preview should use the profile-backed preview checker')
