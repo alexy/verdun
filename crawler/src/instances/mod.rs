@@ -1,5 +1,4 @@
-pub mod garbage;
-pub mod greathouse;
+mod bundled;
 
 use anyhow::Result;
 use chrono::{DateTime, Utc};
@@ -70,16 +69,8 @@ pub trait CrawlerInstance: Sync {
     }
 }
 
-pub static REGISTERED_CRAWLER_INSTANCES: &[CrawlerInstanceRegistration] = &[
-    CrawlerInstanceRegistration {
-        instance: &garbage::CRAWLER_INSTANCE,
-        default: true,
-    },
-    CrawlerInstanceRegistration {
-        instance: &greathouse::CRAWLER_INSTANCE,
-        default: false,
-    },
-];
+pub static REGISTERED_CRAWLER_INSTANCES: &[CrawlerInstanceRegistration] =
+    bundled::BUNDLED_CRAWLER_INSTANCE_REGISTRATIONS;
 
 pub fn default_crawler_instance() -> &'static dyn CrawlerInstance {
     REGISTERED_CRAWLER_INSTANCES

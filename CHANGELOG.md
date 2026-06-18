@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added `crawler/src/instances/bundled.rs` as the bundled Rust crawler registration manifest, so the generic crawler resolver no longer declares or references resident Garbage/Greathouse modules directly.
 - Added `api/instances/bundled-workbench-adapters.ts` as the bundled API fallback adapter manifest, so the generic local workbench adapter registry no longer imports the resident Garbage adapter directly.
 - Changed deploy-profile discovery to import profile modules by absolute file URL, preserving convention-based discovery when Vite temp-loads config modules during builds.
 - Changed deploy-check profile registration to discover `scripts/instances/*/deploy-checks.mjs` modules by convention, removing explicit Garbage/Greathouse imports from shared deployment tooling.

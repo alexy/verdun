@@ -4,11 +4,12 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const [crawlerMainSource, garbageInstanceSource, greathouseInstanceSource, instanceTraitSource] = await Promise.all([
+const [crawlerMainSource, garbageInstanceSource, greathouseInstanceSource, instanceTraitSource, bundledInstancesSource] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/garbage.rs', 'utf8'),
   readFile('crawler/src/instances/greathouse.rs', 'utf8'),
   readFile('crawler/src/instances/mod.rs', 'utf8'),
+  readFile('crawler/src/instances/bundled.rs', 'utf8'),
 ])
 if (crawlerMainSource.includes('insert into newsletter_')) {
   throw new Error('crawler main still embeds legacy newsletter SQL table exports')
@@ -86,12 +87,19 @@ if (!instanceTraitSource.includes('REGISTERED_CRAWLER_INSTANCES') || !instanceTr
   throw new Error('crawler instances are not resolved through a registration table')
 }
 if (
+  instanceTraitSource.includes('pub mod garbage') ||
+  instanceTraitSource.includes('pub mod greathouse') ||
+  instanceTraitSource.includes('garbage::CRAWLER_INSTANCE') ||
+  instanceTraitSource.includes('greathouse::CRAWLER_INSTANCE') ||
   instanceTraitSource.includes('GARBAGE_CRAWLER_INSTANCE') ||
   instanceTraitSource.includes('GREATHOUSE_CRAWLER_INSTANCE') ||
   !garbageInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
-  !greathouseInstanceSource.includes('pub static CRAWLER_INSTANCE')
+  !greathouseInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
+  !bundledInstancesSource.includes('BUNDLED_CRAWLER_INSTANCE_REGISTRATIONS') ||
+  !bundledInstancesSource.includes('garbage::CRAWLER_INSTANCE') ||
+  !bundledInstancesSource.includes('greathouse::CRAWLER_INSTANCE')
 ) {
-  throw new Error('crawler instance modules should expose neutral CRAWLER_INSTANCE registrations')
+  throw new Error('resident crawler instance modules should be isolated behind the bundled crawler registration manifest')
 }
 if (instanceTraitSource.includes('match instance') || instanceTraitSource.includes('supported instances: garbage, greathouse')) {
   throw new Error('crawler instance resolver still hard-codes supported instances instead of using registrations')
