@@ -29,22 +29,22 @@ if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs')
 if (packageJson.scripts?.['vercel:config'] !== 'node scripts/generate-vercel-config.mjs' || packageJson.scripts?.['smoke:vercel-config'] !== 'node scripts/generate-vercel-config.mjs --check') {
   throw new Error('Vercel config scripts should use the deploy-profile-backed generator')
 }
-for (const scriptName of ['smoke:draft-api', 'smoke:draft', 'smoke:draft-url', 'smoke:ghost', 'smoke:grust-watchlist', 'smoke:health', 'smoke:public-snapshot', 'smoke:readiness', 'smoke:recency', 'smoke:source-gap-review', 'smoke:ulysses', 'audit:grust']) {
+for (const scriptName of garbageProfile.removedGenericCommands ?? []) {
   if (packageJson.scripts?.[scriptName]) {
-    throw new Error(`${scriptName} should be named as an explicit Garbage smoke command`)
+    throw new Error(`${scriptName} should be named as an explicit instance command`)
   }
 }
-for (const scriptName of ['garbage:smoke:draft-api', 'garbage:smoke:draft', 'garbage:smoke:draft-url', 'garbage:smoke:ghost', 'garbage:smoke:grust-watchlist', 'garbage:smoke:health', 'garbage:smoke:public-snapshot', 'garbage:smoke:readiness', 'garbage:smoke:recency', 'garbage:smoke:source-gap-review', 'garbage:smoke:ulysses', 'garbage:audit:grust']) {
+for (const scriptName of garbageProfile.smokeCommands ?? []) {
   if (!packageJson.scripts?.[scriptName]) {
-    throw new Error(`${scriptName} should exist as an explicit Garbage smoke command`)
+    throw new Error(`${scriptName} should exist as an explicit instance smoke command`)
   }
   if (!packageJson.scripts[scriptName].includes('scripts/instances/garbage/')) {
-    throw new Error(`${scriptName} should run an instance-owned Garbage smoke script`)
+    throw new Error(`${scriptName} should run an instance-owned smoke script`)
   }
 }
-for (const scriptName of ['garbage:draft', 'garbage:review:gaps', 'garbage:ulysses:draft', 'garbage:ulysses:ready', 'garbage:ghost:draft', 'garbage:ghost:dry-run', 'garbage:ghost:ready']) {
+for (const scriptName of garbageProfile.publishingCommands ?? []) {
   if (!packageJson.scripts?.[scriptName]?.includes('scripts/instances/garbage/')) {
-    throw new Error(`${scriptName} should run an instance-owned Garbage publishing script`)
+    throw new Error(`${scriptName} should run an instance-owned publishing script`)
   }
 }
 if (vercelConfigSource.includes('/rbage/') || vercelConfigSource.includes('/greathouse/')) {
@@ -66,6 +66,11 @@ if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployPro
 }
 if (!garbageProfile.smokeFixtureModule.includes('/garbage/') || !garbageDeployProfileSource.includes('smokeFixtureModule')) {
   throw new Error('Garbage deployed-check smoke fixture should be instance-owned profile metadata')
+}
+for (const metadataKey of ['smokeCommands', 'removedGenericCommands', 'publishingCommands']) {
+  if (!garbageDeployProfileSource.includes(metadataKey)) {
+    throw new Error(`Garbage deploy profile is missing ${metadataKey} metadata`)
+  }
 }
 if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDeployProfileSource.includes("staticSnapshotPath: 'data/greathouse-snapshot.json'") || !greathouseDeployProfileSource.includes('smokeFixtureModule')) {
   throw new Error('Greathouse deploy profile is missing static snapshot metadata')
