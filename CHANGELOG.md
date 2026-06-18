@@ -12,6 +12,7 @@
 - Documented that parent Garbage now owns the newsletter-to-generic-workbench projection and workbench projection smoke coverage.
 - Changed the bundled Garbage API workbench adapter to import the parent-owned `apps/garbage/src/workbench.ts` projection instead of the resident Verdun projection.
 - Changed the Garbage view-model smoke to exercise the parent-owned `apps/garbage/src/workbench.ts` projection, with generic workbench smoke coverage guarding that import.
+- Removed the duplicate resident `src/instances/garbage/workbench.ts` projection file and added smoke coverage that fails if it reappears.
 - Documented that parent Garbage Ulysses export smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage Grust watchlist audit commands now live in the parent package while the crawler config remains bundled during extraction.
 - Documented that parent Garbage crawler dedupe and provenance smoke commands now live in the parent package while the Rust crawler remains bundled during extraction.

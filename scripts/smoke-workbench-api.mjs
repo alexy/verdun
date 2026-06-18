@@ -1,4 +1,5 @@
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runnerImport } from 'vite'
@@ -91,6 +92,9 @@ try {
   }
   if (!garbageViewSmokeSource.includes('../apps/garbage/src/workbench.ts')) {
     throw new Error('Garbage view-model smoke should exercise the parent-owned workbench projection')
+  }
+  if (existsSync('src/instances/garbage/workbench.ts')) {
+    throw new Error('Garbage workbench projection should live in the parent package, not resident Verdun source')
   }
 
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
