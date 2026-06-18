@@ -1,6 +1,6 @@
 import { readSnapshot, readStatus, writeEditorialState, writeFocus, writeVote } from './newsletter-store.js'
 import { garbageSnapshotToWorkbench } from '../../../../apps/garbage/src/workbench.ts'
-import { garbageInstance } from '../../../src/instances/garbage/config'
+import { garbageInstance } from '../../../../apps/garbage/src/config.ts'
 import type { LocalWorkbenchAdapterRegistration } from '../../workbench/local-adapter-types'
 import type { ReviewValue, WorkbenchFocus, WorkbenchSnapshot } from '../../../src/core/workbench'
 import type { WorkbenchStateExport, WorkbenchStateImportResult } from '../../../src/core/workbench'

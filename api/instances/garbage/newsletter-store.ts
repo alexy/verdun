@@ -4,7 +4,7 @@ import { neon } from '@neondatabase/serverless'
 import { randomUUID } from 'crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, join } from 'path'
-import { garbageInstance, garbageSeedFocuses } from '../../../src/instances/garbage/config'
+import { garbageInstance, garbageSeedFocuses } from '../../../../apps/garbage/src/config.ts'
 import type { SourceRunStatus } from '../../../src/core/workbench'
 
 declare const process: {
@@ -328,8 +328,11 @@ async function readDatabaseGeneratedAt(sql: SqlClient): Promise<string> {
 }
 
 function readStaticSnapshot(): NewsletterSnapshot | null {
-  const snapshotPath = process.env.VERDUN_STATIC_SNAPSHOT_FILE
-    ?? join(process.cwd(), ...garbageInstance.staticSnapshotPath.split('/'))
+  const snapshotPath = firstExistingPath([
+    process.env.VERDUN_STATIC_SNAPSHOT_FILE,
+    join(process.cwd(), ...garbageInstance.staticSnapshotPath.split('/')),
+    join(process.cwd(), 'public', 'data', 'newsletter-snapshot.json'),
+  ])
   if (existsSync(snapshotPath)) {
     const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf8')) as StaticSnapshot
     return {
@@ -516,11 +519,24 @@ function writeLocalEditorialState(state: LocalEditorialState): void {
 }
 
 function localEditorialStatePath(): string {
-  return process.env.VERDUN_LOCAL_STATE_FILE ?? join(process.cwd(), ...garbageInstance.localStatePath.split('/'))
+  return process.env.VERDUN_LOCAL_STATE_FILE
+    ?? firstExistingPath([
+      join(process.cwd(), ...garbageInstance.localStatePath.split('/')),
+      join(process.cwd(), 'crawler', 'data', 'editorial-state.json'),
+    ])
 }
 
 function emptyLocalEditorialState(): LocalEditorialState {
   return { votes: {}, focuses: [] }
+}
+
+function firstExistingPath(candidates: Array<string | undefined>): string {
+  for (const candidate of candidates) {
+    if (candidate && existsSync(candidate)) return candidate
+  }
+  const fallback = candidates.find((candidate): candidate is string => Boolean(candidate))
+  if (!fallback) throw new Error('no candidate path configured')
+  return fallback
 }
 
 function normalizeVotes(votes: unknown): Record<string, VoteValue> {
