@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
+import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { defaultDeployCheckProfileId, deployCheckProfile, supportedDeployCheckProfiles } from './instances/deploy-check-profiles.mjs'
 
@@ -16,9 +17,7 @@ const secondaryBasePath = secondaryProfile.basePath
 const rawSnapshot = JSON.parse(await readFile(defaultProfile.sourceSnapshotPath, 'utf8'))
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
 const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
-const garbageDeployProfileSource = await readFile('scripts/instances/garbage/deploy-checks.mjs', 'utf8')
-const garbageDeployFixtureSource = await readFile('scripts/instances/garbage/deployed-check-smoke-fixture.mjs', 'utf8')
-const garbageDraftChecksSource = await readFile('scripts/instances/garbage/deployed-draft-checks.mjs', 'utf8')
+const externalProfilesSource = await readFile('scripts/instances/external-deploy-check-profile-modules.mjs', 'utf8')
 const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
@@ -27,8 +26,8 @@ for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft'
     throw new Error(`generic deployed checker still embeds Garbage deploy marker: ${marker}`)
   }
 }
-if (!defaultProfile.readinessCheckModule?.includes(`instances/${defaultProfile.id}/`) || !defaultProfile.draft?.checkModule?.includes(`instances/${defaultProfile.id}/`)) {
-  throw new Error('default deploy profile should own readiness and draft validators from its instance boundary')
+if (!profileModulePathMatchesInstance(defaultProfile)) {
+  throw new Error('default deploy profile should load hooks from the external Garbage package boundary')
 }
 if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs') {
   throw new Error('check:preview should use the profile-backed preview checker')
@@ -67,6 +66,7 @@ if (vercelConfig.redirects?.[0]?.destination !== defaultProfile.basePath) {
 }
 if (
   !deployProfilesSource.includes('registeredDeployCheckProfiles') ||
+  !deployProfilesSource.includes('externalDeployCheckProfileModules') ||
   deployProfilesSource.includes('garbageDeployCheckProfile') ||
   deployProfilesSource.includes('greathouseDeployCheckProfile') ||
   deployProfilesSource.includes('./garbage/') ||
@@ -75,17 +75,22 @@ if (
 ) {
   throw new Error('deploy check profiles are not discovered from instance profile modules')
 }
-if (!garbageDeployProfileSource.includes('apps/garbage/scripts/deploy-checks.mjs') || garbageDeployProfileSource.includes('defaultBaseUrl')) {
-  throw new Error('Garbage deploy-check profile metadata should live in the parent package with only a resident discovery shim in Verdun')
+if (!externalProfilesSource.includes('apps/garbage/scripts/deploy-checks.mjs')) {
+  throw new Error('external deploy-profile registry should include the parent Garbage profile module')
 }
-if (!garbageDeployFixtureSource.includes('apps/garbage/scripts/deployed-check-smoke-fixture.mjs') || garbageDeployFixtureSource.includes('draftMarkdown')) {
-  throw new Error('Garbage deployed-check smoke fixture should live in the parent package with only a resident hook shim in Verdun')
+for (const removedShim of [
+  'scripts/instances/garbage/deploy-checks.mjs',
+  'scripts/instances/garbage/deployed-check-smoke-fixture.mjs',
+  'scripts/instances/garbage/deployed-draft-checks.mjs',
+]) {
+  if (existsSync(removedShim)) {
+    throw new Error(`${removedShim} should not exist; Garbage deploy hooks should load from the external package`)
+  }
 }
-if (!garbageDraftChecksSource.includes('apps/garbage/scripts/deployed-draft-checks.mjs') || garbageDraftChecksSource.includes('function draftSelection')) {
-  throw new Error('Garbage deployed draft/readiness checks should live in the parent package with only a resident hook shim in Verdun')
-}
-if (!profileModulePathMatchesInstance(defaultProfile)) {
-  throw new Error('default deployed-check smoke fixture should be instance-owned profile metadata')
+for (const moduleUrl of [defaultProfile.smokeFixtureModule, defaultProfile.readinessCheckModule, defaultProfile.draft?.checkModule]) {
+  if (!moduleUrl?.includes('apps/garbage/scripts/')) {
+    throw new Error(`Garbage deploy hook should load from apps/garbage/scripts, got ${moduleUrl}`)
+  }
 }
 for (const metadataKey of ['commandRunner', 'smokeCommands', 'removedGenericCommands', 'publishingCommands', 'compatibilitySqlSmoke', 'smokeAllCommands', 'uiSmokeCommands']) {
   if (!(metadataKey in defaultProfile)) {
@@ -247,6 +252,9 @@ function profileStaticPath(profile) {
 }
 
 function profileModulePathMatchesInstance(profile) {
+  if (profile.commandRunner?.workspace === '@garbage/instance') {
+    return profile.smokeFixtureModule?.includes('apps/garbage/scripts/')
+  }
   return profile.smokeFixtureModule?.includes(`instances/${profile.id}/`)
 }
 
