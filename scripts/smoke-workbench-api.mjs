@@ -49,20 +49,13 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, garbageAdapterShimSource, garbageAdapterSource, garbageStoreShimSource, garbageStoreSource, garbageNewsletterDraftShimSource, garbageNewsletterDraftSource, garbageViewSmokeSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
     readFile('api/workbench/local-adapter-types.ts', 'utf8'),
     readFile('api/instances/workbench-adapters.ts', 'utf8'),
     readFile('api/instances/bundled-workbench-adapters.ts', 'utf8'),
-    readFile('api/instances/garbage/workbench.ts', 'utf8'),
-    readFile('../apps/garbage/src/api/workbench.ts', 'utf8'),
-    readFile('api/instances/garbage/newsletter-store.ts', 'utf8'),
-    readFile('../apps/garbage/src/api/newsletter-store.ts', 'utf8'),
-    readFile('api/instances/garbage/newsletter/draft.ts', 'utf8'),
-    readFile('../apps/garbage/src/api/newsletter/draft.ts', 'utf8'),
-    readFile('../apps/garbage/scripts/smoke-view-model.mjs', 'utf8'),
   ])
   if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
     throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
@@ -86,38 +79,8 @@ try {
   if (registeredAdaptersSource.includes('./garbage/')) {
     throw new Error('local workbench adapter registry still imports a resident instance directly instead of the bundled adapter manifest')
   }
-  if (!bundledAdaptersSource.includes('./garbage/workbench.js') || !bundledAdaptersSource.includes('bundledLocalWorkbenchAdapterRegistrations')) {
-    throw new Error('bundled API adapter manifest no longer owns the resident Garbage adapter import')
-  }
-  if (!garbageAdapterShimSource.includes('apps/garbage/src/api/workbench.ts')) {
-    throw new Error('resident Garbage local workbench adapter should only shim to the parent package')
-  }
-  if (!garbageAdapterSource.includes('localWorkbenchAdapterRegistration') || !garbageAdapterSource.includes('compatibilityTables')) {
-    throw new Error('Garbage local workbench adapter no longer exposes instance-owned registration metadata')
-  }
-  if (!garbageAdapterSource.includes("from '../workbench.ts'")) {
-    throw new Error('parent Garbage local workbench adapter should consume the parent-owned workbench projection')
-  }
-  if (!garbageAdapterSource.includes("from '../config.ts'")) {
-    throw new Error('parent Garbage local workbench adapter should consume the parent-owned Garbage config')
-  }
-  if (!garbageStoreShimSource.includes('apps/garbage/src/api/newsletter-store.ts')) {
-    throw new Error('resident Garbage newsletter store should only shim to the parent package')
-  }
-  if (!garbageStoreSource.includes("from '../config.ts'")) {
-    throw new Error('Garbage newsletter store should consume the parent-owned Garbage config locally')
-  }
-  if (!garbageStoreSource.includes("'public', 'data', 'newsletter-snapshot.json'")) {
-    throw new Error('Garbage newsletter store should retain legacy static snapshot fallback while bundled in Verdun')
-  }
-  if (!garbageNewsletterDraftShimSource.includes('apps/garbage/src/api/newsletter/draft.ts')) {
-    throw new Error('resident Garbage newsletter draft route should only shim to the parent package')
-  }
-  if (!garbageNewsletterDraftSource.includes("from '../../newsletter.ts'")) {
-    throw new Error('parent Garbage newsletter draft route should use the parent-owned newsletter module')
-  }
-  if (!garbageViewSmokeSource.includes('../src/workbench.ts')) {
-    throw new Error('Garbage view-model smoke should exercise the parent-owned workbench projection')
+  if (bundledAdaptersSource.includes('./garbage/') || bundledAdaptersSource.includes('apps/garbage')) {
+    throw new Error('bundled API adapter manifest should not import Garbage adapters')
   }
   if (existsSync('scripts/instances/garbage/smoke-view-model.mjs')) {
     throw new Error('Garbage view-model smoke should live in the external package, not a resident Verdun script shim')
@@ -130,6 +93,14 @@ try {
   }
   if (existsSync('src/instances/garbage/newsletter.ts') || existsSync('src/instances/garbage/ontology.ts') || existsSync('src/instances/garbage/ontology.json')) {
     throw new Error('Garbage newsletter and ontology modules should live in the parent package, not resident Verdun source')
+  }
+  for (const removedGarbageApiPath of [
+    'api/garbage',
+    'api/instances/garbage',
+  ]) {
+    if (existsSync(removedGarbageApiPath)) {
+      throw new Error(`${removedGarbageApiPath} should not exist; Garbage owns app-specific API routes`)
+    }
   }
 
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {

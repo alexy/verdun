@@ -2,6 +2,9 @@
 
 ## 2026-06-18
 
+- Removed resident Verdun Garbage API route and local-adapter shims under `api/garbage` and `api/instances/garbage`; Garbage now owns its Vercel newsletter API route files under `apps/garbage/api/garbage/newsletter/`.
+- Changed the bundled workbench adapter manifest to stop importing a Garbage local adapter, leaving Verdun generic workbench fallback behavior to bundled generic proof instances.
+- Updated Garbage API smokes to exercise package-owned route/store modules instead of Verdun API shims.
 - Removed resident Verdun Garbage frontend shim files under `src/instances/garbage` and removed the external frontend registration modules, so Garbage owns its app entrypoint outside Verdun.
 - Kept shared Verdun frontend app and instance registries convention-based for bundled generic proof instances only.
 - Updated Greathouse/frontend smoke coverage and the parent Garbage manifest verifier to reject resident Garbage frontend shim or registration files returning.

@@ -46,7 +46,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
   - `POST /api/garbage/newsletter/vote`
   - `POST /api/garbage/newsletter/focus`
   - `POST /api/garbage/newsletter/editorial-state`
-- Generic backend route helpers live in `api/core/http.ts`, while Garbage data access and local fallback state live under `api/instances/garbage/`.
+- Generic backend route helpers live in `api/core/http.ts`; Garbage data access and local fallback state live under parent-owned `apps/garbage/src/api/`.
 - Generic local workbench adapter types live in `api/workbench/local-adapter-types.ts`; Garbage fallback behavior is now an instance-owned registration rather than a Garbage-named adapter contract in the shared resolver.
 - Bundled API fallback adapters are isolated in `api/instances/bundled-workbench-adapters.ts`, so the generic adapter registry does not directly import Garbage.
 - The parent Garbage repo now exposes `@garbage/instance` package commands as the temporary stable command surface while Garbage implementation moves out of Verdun. Publishing entrypoints, the newsletter draft builder, workbench projection, default publishing data, draft/URL-draft/readiness/source-gap/Ulysses/Ghost/public-snapshot/recency/API smoke coverage, and Grust watchlist/dedupe/provenance/manual-source/query-plan crawler smoke commands now live in the parent package, import package TypeScript directly with Node, and no longer change cwd into Verdun; local API smoke is parent-owned while it still loads bundled API modules, and operational compatibility smokes still delegate through the external instance manifest into declared Verdun scripts.
@@ -54,15 +54,12 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Verdun's resident Garbage crawler dedupe, provenance, query-plan, and manual-source freshness smokes now only shim to the parent package.
 - Verdun's resident Garbage draft, URL draft, publishing-readiness, and snapshot-recency smokes now only shim to the parent package.
 - Verdun's resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ulysses export smoke now only shim to the parent package.
-- Verdun's resident newsletter draft CLI, Ghost CLI/smoke, and local/draft/health API smokes now only shim to the parent package.
+- Verdun's resident newsletter draft CLI and Ghost CLI/smoke paths have been removed from Verdun's package surface; local/draft/health API smokes run from the parent Garbage package against app-owned route modules.
 - Verdun's resident legacy newsletter SQL apply/deploy helpers and loader smoke now only shim to the parent package, which owns the compatibility migrations.
 - Verdun's resident newsletter snapshot composable and view-model smokes now only shim to the parent package while the bundled UI modules remain in Verdun.
 - Verdun's resident workbench compatibility smoke now only shims to the parent package while the generic workbench API modules remain bundled in Verdun.
 - Verdun's shared browser smoke orchestration runs Garbage app and responsive UI checks through the parent package command runner; the bundled Garbage UI and registration shim files have been removed.
-- The bundled Garbage API workbench adapter and view-model smoke import `apps/garbage/src/workbench.ts`, so generic workbench fallback routes and view-model coverage now consume the parent package's Garbage projection; the duplicate resident Verdun projection file has been removed.
-- The bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module import `apps/garbage/src/config.ts`; the duplicate resident config file has been removed while legacy static/local state fallback paths remain only for the current bundled runtime.
-- The resident Garbage newsletter store imports parent-owned `apps/garbage/src/api/newsletter-store.ts`; static/database/local editorial persistence is no longer implemented in resident Verdun source while newsletter routes remain bundled.
-- The resident Garbage newsletter route handlers import parent-owned `apps/garbage/src/api/newsletter/*`; public Vercel route files still live in Verdun as route shims.
+- Garbage's API workbench adapter, newsletter store, and newsletter route handlers live under parent-owned `apps/garbage/src/api/`, with app-owned Vercel route files under `apps/garbage/api/garbage/newsletter/`.
 - The resident Garbage workbench adapter imports parent-owned `apps/garbage/src/api/workbench.ts`; the bundled adapter manifest still lives in Verdun to feed the generic local adapter registry.
 - Garbage browser snapshot/view composables, app component, component files, style sheet, app entrypoint, and default-instance metadata are parent-owned; Verdun does not import them from its frontend registry.
 - Resident Garbage UI components, composables, the API draft route, and compatibility scripts import parent-owned `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; the duplicate resident newsletter and ontology files have been removed.
@@ -130,7 +127,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 - Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
 - Replace the parent Garbage package's remaining explicit legacy Verdun path compatibility after the crawler/output boundary moves.
-- Continue replacing resident Garbage route/API shim files with direct external package registration.
+- Continue replacing remaining crawler and deploy-profile Verdun-to-Garbage imports with package-owned entrypoints.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 
