@@ -8,6 +8,8 @@
     "dev:app": "vite --host 127.0.0.1 --port 5176 --strictPort",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
+    "vercel:config": "node scripts/generate-vercel-config.mjs",
+    "smoke:vercel-config": "node scripts/generate-vercel-config.mjs --check",
     "prod:build": "vue-tsc -b && vite build --outDir dist-prod",
     "prod:app": "vite preview --host 127.0.0.1 --port 5174 --strictPort --outDir dist-prod",
     "check:deployed": "node scripts/check-deployed.mjs",

@@ -14,6 +14,8 @@ const rawSnapshot = JSON.parse(await readFile(garbageProfile.sourceSnapshotPath,
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
 const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
 const greathouseDeployProfileSource = await readFile('scripts/instances/greathouse/deploy-checks.mjs', 'utf8')
+const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
+const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
 for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json']) {
   if (checkDeployedSource.includes(marker)) {
@@ -22,6 +24,23 @@ for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft'
 }
 if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs') {
   throw new Error('check:preview should use the profile-backed preview checker')
+}
+if (packageJson.scripts?.['vercel:config'] !== 'node scripts/generate-vercel-config.mjs' || packageJson.scripts?.['smoke:vercel-config'] !== 'node scripts/generate-vercel-config.mjs --check') {
+  throw new Error('Vercel config scripts should use the deploy-profile-backed generator')
+}
+if (vercelConfigSource.includes('/rbage/') || vercelConfigSource.includes('/greathouse/')) {
+  throw new Error('Vercel config generator should derive app paths from deploy profiles')
+}
+for (const profile of [garbageProfile, greathouseProfile]) {
+  const basePath = profile.basePath
+  for (const source of [`${basePath}assets/(.*)`, `${basePath}data/(.*)`, `${basePath}(.*)`]) {
+    if (!vercelConfig.rewrites?.some((rewrite) => rewrite.source === source)) {
+      throw new Error(`generated vercel.json is missing rewrite ${source}`)
+    }
+  }
+}
+if (vercelConfig.redirects?.[0]?.destination !== garbageProfile.basePath) {
+  throw new Error('generated vercel.json root redirect should point at the default deploy profile')
 }
 if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployProfilesSource.includes('return garbageDeployCheckProfile.id')) {
   throw new Error('deploy check profiles are not resolved from profile registration metadata')

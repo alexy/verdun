@@ -8,6 +8,7 @@ const profile = deployCheckProfile(defaultDeployCheckProfileId())
 const snapshotPath = profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
 
 const steps = [
+  ['npm', ['run', 'smoke:vercel-config']],
   ['npm', ['run', 'build']],
   ['cargo', ['check', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['test', '--manifest-path', 'crawler/Cargo.toml']],

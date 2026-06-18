@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.
 - Changed Rust crawler instance resolution to use a `REGISTERED_CRAWLER_INSTANCES` table with default metadata instead of hard-coded `garbage`/`greathouse` resolver branches.
 - Moved legacy Garbage newsletter snapshot and split-file payload loading out of `crawler/src/main.rs` and into the Garbage crawler instance module, leaving shared CLI code to route through an explicit instance-owned compatibility function.
 - Changed `verdun-crawler queries` to print generic `NormalizedCollectionPlan` JSON and renamed the crawler CLI snapshot loaders so generic snapshot loading and Garbage newsletter compatibility loading are explicit.

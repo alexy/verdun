@@ -13,12 +13,13 @@ The first reusable boundary is now explicit:
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
 - Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
+- Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Garbage remains the default `/rbage/` app path and Greathouse has a reusable `/greathouse/` path.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
 
 The first slice mirrors the useful Greathouse shape without touching Greathouse:
 
 - Vue/Vite app deployed by Vercel.
-- Vite is built with `/rbage/` as the public base path for `collected.ga/rbage/`.
+- Vite is built from deploy profile metadata; the default Garbage profile uses `/rbage/` for `collected.ga/rbage/`, and profile selection can build the same shell for `/greathouse/`.
 - Vercel serverless API routes reading an external Postgres database.
 - Rust crawler/loader crate that collects watchlist items and exports SQL for the database.
 - Grust watchlist audit that checks Verdun still tracks the backend and typed-validation projects surfaced by the local `/Users/alexy/src/grust` workspace.
@@ -51,7 +52,7 @@ Open `http://127.0.0.1:5176`.
 
 Without `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL`, the API uses the checked-in static crawler snapshot. On Vercel this is a read-only API snapshot, so the app reports `Browser-local edits` and persists votes/focus notes to browser storage for refresh-safe review, editorial-state export/import, and Ulysses handoff. In local development without a database, votes and focus notes are persisted to ignored `crawler/data/editorial-state.json`; set `VERDUN_LOCAL_STATE_FILE` to use a different local state file. In browser-only preview, the app also tries `/rbage/data/newsletter-snapshot.json` before falling back to the embedded seed snapshot.
 
-Run the deterministic local checks with `npm run smoke:all`. Browser coverage for the production `/rbage/` path runs with `npm run smoke:browser`, which builds, starts a local preview server, runs Playwright against `http://127.0.0.1:5174/rbage/`, and then stops the server.
+Run `npm run vercel:config` after changing deploy profiles; it regenerates `vercel.json` routes for every registered app path. Run the deterministic local checks with `npm run smoke:all`. Browser coverage for the production `/rbage/` path runs with `npm run smoke:browser`, which builds, starts a local preview server, runs Playwright against `http://127.0.0.1:5174/rbage/`, and then stops the server.
 
 After deployment, verify the public Collected route and data endpoints with:
 

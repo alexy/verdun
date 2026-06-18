@@ -11,6 +11,18 @@
   ],
   "rewrites": [
     {
+      "source": "/greathouse/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/greathouse/data/(.*)",
+      "destination": "/data/$1"
+    },
+    {
+      "source": "/greathouse/(.*)",
+      "destination": "/index.html"
+    },
+    {
       "source": "/rbage/assets/(.*)",
       "destination": "/assets/$1"
     },
