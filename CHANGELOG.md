@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved crawler item payload, source-run, and editorial-state default paths onto the `CrawlerInstance` trait so Greathouse and future instances do not share Garbage's `crawler/data/*` CLI defaults.
 - Removed default-instance resolution from `api/workbench/_db.ts`; generic workbench database helpers now require explicit `WorkbenchInstance` arguments, leaving default app selection to the route/registry layer.
 - Renamed Rust crawler instance statics to neutral per-module `CRAWLER_INSTANCE` exports, so the shared crawler registry no longer consumes Garbage/Greathouse-named static symbols.
 - Renamed instance-owned deployment profile exports to neutral `deployCheckProfile` symbols, so shared Vercel/deployment tooling no longer consumes Garbage/Greathouse-named deploy profile exports.

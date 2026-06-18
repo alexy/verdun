@@ -22,10 +22,10 @@ enum CommandKind {
         instance: Option<String>,
         #[arg(long)]
         config: Option<PathBuf>,
-        #[arg(long, default_value = "crawler/data/items.json")]
-        out: PathBuf,
-        #[arg(long, default_value = "crawler/data/source-runs.json")]
-        source_runs_out: PathBuf,
+        #[arg(long)]
+        out: Option<PathBuf>,
+        #[arg(long)]
+        source_runs_out: Option<PathBuf>,
         #[arg(long)]
         public_out: Option<PathBuf>,
         #[arg(long)]
@@ -36,8 +36,8 @@ enum CommandKind {
         max_live_per_project: usize,
         #[arg(long, default_value_t = 45)]
         since_days: i64,
-        #[arg(long, default_value = "crawler/data/editorial-state.json")]
-        editorial_state: PathBuf,
+        #[arg(long)]
+        editorial_state: Option<PathBuf>,
     },
     ExportSql {
         #[arg(long)]
@@ -50,10 +50,10 @@ enum CommandKind {
         instance_name: Option<String>,
         #[arg(long)]
         base_path: Option<String>,
-        #[arg(long, default_value = "crawler/data/items.json")]
-        input: PathBuf,
-        #[arg(long, default_value = "crawler/data/source-runs.json")]
-        source_runs: PathBuf,
+        #[arg(long)]
+        input: Option<PathBuf>,
+        #[arg(long)]
+        source_runs: Option<PathBuf>,
         #[arg(long, default_value = "/tmp/verdun-workbench-load.sql")]
         out: PathBuf,
     },
@@ -68,8 +68,8 @@ enum CommandKind {
         instance: Option<String>,
         #[arg(long)]
         config: Option<PathBuf>,
-        #[arg(long, default_value = "crawler/data/editorial-state.json")]
-        editorial_state: PathBuf,
+        #[arg(long)]
+        editorial_state: Option<PathBuf>,
     },
 }
 
@@ -136,19 +136,24 @@ struct ExportInstance {
 fn collect(
     instance: Option<String>,
     config: Option<PathBuf>,
-    out: PathBuf,
-    source_runs_out: PathBuf,
+    out: Option<PathBuf>,
+    source_runs_out: Option<PathBuf>,
     public_out: Option<PathBuf>,
     generic_out: Option<PathBuf>,
     live: bool,
     max_live_per_project: usize,
     since_days: i64,
-    editorial_state: PathBuf,
+    editorial_state: Option<PathBuf>,
 ) -> Result<()> {
     let crawler_instance = resolve_crawler_instance(instance.as_deref())?;
     let config = config.unwrap_or_else(|| crawler_instance.default_config_path());
+    let out = out.unwrap_or_else(|| crawler_instance.default_item_payload_path());
+    let source_runs_out =
+        source_runs_out.unwrap_or_else(|| crawler_instance.default_source_runs_path());
     let public_out = public_out.unwrap_or_else(|| crawler_instance.default_public_snapshot_path());
     let config = read_crawler_config(&config)?;
+    let editorial_state =
+        editorial_state.unwrap_or_else(|| crawler_instance.default_editorial_state_path());
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
     let since = Utc::now() - Duration::days(since_days);
@@ -203,8 +208,8 @@ fn collect(
 
 fn export_sql(
     snapshot: Option<PathBuf>,
-    input: PathBuf,
-    source_runs: PathBuf,
+    input: Option<PathBuf>,
+    source_runs: Option<PathBuf>,
     out: PathBuf,
     target: String,
     instance: Option<String>,
@@ -212,6 +217,8 @@ fn export_sql(
     base_path: Option<String>,
 ) -> Result<()> {
     let crawler_instance = resolve_crawler_instance(instance.as_deref())?;
+    let input = input.unwrap_or_else(|| crawler_instance.default_item_payload_path());
+    let source_runs = source_runs.unwrap_or_else(|| crawler_instance.default_source_runs_path());
     let instance = ExportInstance {
         id: crawler_instance.id().to_string(),
         name: instance_name.unwrap_or_else(|| crawler_instance.display_name().to_string()),
@@ -437,11 +444,13 @@ fn verify(instance: Option<String>, config: Option<PathBuf>) -> Result<()> {
 fn queries(
     instance: Option<String>,
     config: Option<PathBuf>,
-    editorial_state: PathBuf,
+    editorial_state: Option<PathBuf>,
 ) -> Result<()> {
     let crawler_instance = resolve_crawler_instance(instance.as_deref())?;
     let config = config.unwrap_or_else(|| crawler_instance.default_config_path());
     let config = read_crawler_config(&config)?;
+    let editorial_state =
+        editorial_state.unwrap_or_else(|| crawler_instance.default_editorial_state_path());
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     println!(
         "{}",

@@ -56,9 +56,21 @@ for (const marker of [
   'default_value = "/rbage/"',
   'crawler/instances/garbage/config.toml',
   'public/data/newsletter-snapshot.json',
+  'crawler/data/items.json',
+  'crawler/data/source-runs.json',
+  'crawler/data/editorial-state.json',
 ]) {
   if (crawlerMainSource.includes(marker)) {
     throw new Error(`crawler main still embeds Garbage CLI default: ${marker}`)
+  }
+}
+for (const marker of [
+  'default_item_payload_path',
+  'default_source_runs_path',
+  'default_editorial_state_path',
+]) {
+  if (!instanceTraitSource.includes(marker)) {
+    throw new Error(`crawler instance trait is missing instance-owned path metadata: ${marker}`)
   }
 }
 if (!garbageInstanceSource.includes('pub fn newsletter_export_sql') || !garbageInstanceSource.includes('insert into newsletter_items')) {

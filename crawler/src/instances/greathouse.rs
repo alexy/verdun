@@ -32,8 +32,20 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
         PathBuf::from("crawler/instances/greathouse/config.toml")
     }
 
+    fn default_item_payload_path(&self) -> PathBuf {
+        PathBuf::from("crawler/instances/greathouse/data/items.json")
+    }
+
+    fn default_source_runs_path(&self) -> PathBuf {
+        PathBuf::from("crawler/instances/greathouse/data/source-runs.json")
+    }
+
     fn default_public_snapshot_path(&self) -> PathBuf {
         PathBuf::from("public/data/greathouse-snapshot.json")
+    }
+
+    fn default_editorial_state_path(&self) -> PathBuf {
+        PathBuf::from("crawler/instances/greathouse/data/editorial-state.json")
     }
 
     fn verify_config(&self, config: &CrawlerConfig) -> Result<()> {

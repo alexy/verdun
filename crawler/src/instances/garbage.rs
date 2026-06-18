@@ -33,8 +33,20 @@ impl CrawlerInstance for GarbageCrawlerInstance {
         PathBuf::from("crawler/instances/garbage/config.toml")
     }
 
+    fn default_item_payload_path(&self) -> PathBuf {
+        PathBuf::from("crawler/data/items.json")
+    }
+
+    fn default_source_runs_path(&self) -> PathBuf {
+        PathBuf::from("crawler/data/source-runs.json")
+    }
+
     fn default_public_snapshot_path(&self) -> PathBuf {
         PathBuf::from("public/data/newsletter-snapshot.json")
+    }
+
+    fn default_editorial_state_path(&self) -> PathBuf {
+        PathBuf::from("crawler/data/editorial-state.json")
     }
 
     fn verify_config(&self, config: &CrawlerConfig) -> Result<()> {

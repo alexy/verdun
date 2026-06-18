@@ -26,7 +26,10 @@ pub trait CrawlerInstance: Sync {
     fn display_name(&self) -> &'static str;
     fn base_path(&self) -> &'static str;
     fn default_config_path(&self) -> PathBuf;
+    fn default_item_payload_path(&self) -> PathBuf;
+    fn default_source_runs_path(&self) -> PathBuf;
     fn default_public_snapshot_path(&self) -> PathBuf;
+    fn default_editorial_state_path(&self) -> PathBuf;
     fn verify_config(&self, config: &CrawlerConfig) -> Result<()>;
     fn read_editorial_focuses(&self, path: &PathBuf) -> Result<Vec<EditorialFocus>>;
     fn collection_plans(
