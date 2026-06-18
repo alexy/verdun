@@ -77,11 +77,11 @@ if (!garbageAppRegistrationSource.includes('apps/garbage/src/config.ts')) {
 if (!greathouseInstanceRegistrationSource.includes('greathouseInstance') || !greathouseInstanceRegistrationSource.includes('greathousePilotSnapshot')) {
   throw new Error('Greathouse instance metadata is not registered from its instance boundary')
 }
-if (!garbageInstanceRegistrationSource.includes('garbageInstance') || !garbageInstanceRegistrationSource.includes('default: true')) {
-  throw new Error('Garbage default instance metadata is not registered from its instance boundary')
+if (!garbageInstanceRegistrationSource.includes('apps/garbage/src/instance-registration.ts')) {
+  throw new Error('Garbage default instance metadata should be imported from the parent package')
 }
-if (!garbageInstanceRegistrationSource.includes('apps/garbage/src/config.ts')) {
-  throw new Error('Garbage instance registration should consume the parent-owned Garbage config')
+if (garbageInstanceRegistrationSource.includes('garbageInstance') || garbageInstanceRegistrationSource.includes('default: true')) {
+  throw new Error('Garbage default instance metadata should not be redefined in resident Verdun source')
 }
 if (existsSync('src/instances/garbage/config.ts')) {
   throw new Error('Garbage instance config should live in the parent package, not resident Verdun source')

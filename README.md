@@ -7,7 +7,7 @@ The first reusable boundary is now explicit:
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
 - Generic reusable Vue controls live under `src/components/workbench/` and currently back both the Garbage newsletter app and the Greathouse pilot workbench.
-- Garbage instance configuration lives in the parent package at `apps/garbage/src/config.ts`; resident Verdun code imports it during extraction.
+- Garbage instance configuration and default workbench instance registration live in the parent package at `apps/garbage/src/config.ts` and `apps/garbage/src/instance-registration.ts`; resident Verdun code imports them during extraction.
 - Garbage-specific ontology, newsletter, and browser snapshot-normalization logic live in the parent package under `apps/garbage/src/`; resident Verdun UI/API compatibility code imports those modules while the UI boundary is still bundled.
 - A Greathouse pilot instance lives in `src/instances/greathouse/` and exercises property listing and blocked-source diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`; Garbage newsletter table/view compatibility migrations live under `db/instances/garbage/migrations/` and are selected by the Garbage deploy profile.
@@ -71,6 +71,7 @@ Set `VERDUN_STATIC_SNAPSHOT_FILE` to point bundled API modules at an explicit Ga
 The bundled Garbage API workbench adapter and view-model smoke import the parent package's `apps/garbage/src/workbench.ts` projection, so API fallback/workbench routes and view-model coverage use the external Garbage package's newsletter-to-workbench mapping.
 The duplicate resident Verdun projection file has been removed; `npm run smoke:workbench` fails if `src/instances/garbage/workbench.ts` reappears.
 The bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module import `apps/garbage/src/config.ts` for instance metadata and seed focus. The duplicate resident `src/instances/garbage/config.ts` file has been removed. While API modules are still bundled in Verdun, the store keeps explicit legacy fallbacks for `public/data/newsletter-snapshot.json` and `crawler/data/editorial-state.json`.
+The resident Garbage instance registration shim re-exports `apps/garbage/src/instance-registration.ts`, so default-instance metadata is parent-owned while the Vite glob-discovery convention still works during extraction.
 Resident Garbage UI components, composables, the API draft route, and compatibility scripts import `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; the duplicate resident newsletter and ontology files have been removed.
 The resident Garbage snapshot composable imports `apps/garbage/src/snapshot.ts`; the duplicate resident `src/instances/garbage/snapshot.ts` normalizer has been removed and `npm run garbage:smoke:snapshot` fails if it reappears.
 

@@ -14,6 +14,7 @@
 - Changed the Garbage view-model smoke to exercise the parent-owned `apps/garbage/src/workbench.ts` projection, with generic workbench smoke coverage guarding that import.
 - Removed the duplicate resident `src/instances/garbage/workbench.ts` projection file and added smoke coverage that fails if it reappears.
 - Changed the bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module to import parent-owned `apps/garbage/src/config.ts`; removed the duplicate resident `src/instances/garbage/config.ts` file while keeping legacy static/local state fallback paths for the current bundled runtime.
+- Moved Garbage default workbench instance registration metadata to parent-owned `apps/garbage/src/instance-registration.ts`; resident Verdun now keeps only a glob-discovery shim and smoke coverage rejects redefining the metadata there.
 - Changed resident Garbage UI components, composables, the API draft route, and compatibility scripts to import parent-owned `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; removed duplicate resident newsletter and ontology files.
 - Moved Garbage browser snapshot normalization to parent-owned `apps/garbage/src/snapshot.ts`, changed the resident snapshot composable to import it, removed duplicate resident `src/instances/garbage/snapshot.ts`, and added smoke coverage that fails if it reappears.
 - Documented that parent Garbage Ulysses export smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
