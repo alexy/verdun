@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved the Garbage local newsletter API smoke and manual-source freshness smoke under `scripts/instances/garbage/`, exposed them as `garbage:smoke:api` and `garbage:smoke:manual-source`, and removed the old shared `smoke:api` / `smoke:manual-source` commands from `smoke:all`.
 - Moved the Garbage newsletter snapshot composable smoke under `scripts/instances/garbage/` and exposed it as `garbage:smoke:snapshot`, with the shared `smoke:all` runner picking it up from Garbage deploy-profile metadata instead of a shared `smoke:snapshot` command.
 - Moved the Garbage newsletter view-model smoke under `scripts/instances/garbage/` and exposed it as `garbage:smoke:view`, with `smoke:all` picking it up from Garbage deploy-profile metadata instead of a shared `smoke:view` command.
 - Generalized `scripts/smoke-check-deployed-readiness.mjs` around default and secondary deploy profiles, so the shared deployed-check smoke harness no longer names Garbage/Greathouse profile variables or reads their profile source files directly.
