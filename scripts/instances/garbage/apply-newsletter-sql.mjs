@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
-import { garbageDeployCheckProfile } from './deploy-checks.mjs'
+import { deployCheckProfile } from './deploy-checks.mjs'
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await runApplyNewsletterSqlCli(process.argv.slice(2), process.env)
@@ -52,7 +52,7 @@ function assertFile(path, label) {
 }
 
 function defaultMigrationPaths() {
-  return garbageDeployCheckProfile.migrationPaths
+  return deployCheckProfile.migrationPaths
 }
 
 function run(command, commandArgs) {

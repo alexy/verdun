@@ -62,7 +62,11 @@ for (const profile of [defaultProfile, secondaryProfile]) {
 if (vercelConfig.redirects?.[0]?.destination !== defaultProfile.basePath) {
   throw new Error('generated vercel.json root redirect should point at the default deploy profile')
 }
-if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployProfilesSource.includes('return garbageDeployCheckProfile.id')) {
+if (
+  !deployProfilesSource.includes('registeredDeployCheckProfiles') ||
+  deployProfilesSource.includes('garbageDeployCheckProfile') ||
+  deployProfilesSource.includes('greathouseDeployCheckProfile')
+) {
   throw new Error('deploy check profiles are not resolved from profile registration metadata')
 }
 if (!profileModulePathMatchesInstance(defaultProfile)) {

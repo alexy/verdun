@@ -1,9 +1,9 @@
-import { garbageDeployCheckProfile } from './garbage/deploy-checks.mjs'
-import { greathouseDeployCheckProfile } from './greathouse/deploy-checks.mjs'
+import * as garbageProfile from './garbage/deploy-checks.mjs'
+import * as greathouseProfile from './greathouse/deploy-checks.mjs'
 
 const registeredDeployCheckProfiles = [
-  garbageDeployCheckProfile,
-  greathouseDeployCheckProfile,
+  garbageProfile.deployCheckProfile,
+  greathouseProfile.deployCheckProfile,
 ]
 
 const deployCheckProfiles = new Map(registeredDeployCheckProfiles.map((profile) => [profile.id, profile]))

@@ -1,4 +1,4 @@
-export const garbageDeployCheckProfile = {
+export const deployCheckProfile = {
   id: 'garbage',
   default: true,
   defaultBaseUrl: 'https://collected.ga/rbage/',

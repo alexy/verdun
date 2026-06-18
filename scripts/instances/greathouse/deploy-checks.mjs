@@ -1,4 +1,4 @@
-export const greathouseDeployCheckProfile = {
+export const deployCheckProfile = {
   id: 'greathouse',
   basePath: '/greathouse/',
   previewBaseUrl: 'http://127.0.0.1:5174/greathouse/',
