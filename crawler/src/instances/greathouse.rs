@@ -3,14 +3,13 @@ use chrono::{DateTime, Utc};
 use reqwest::blocking::Client;
 use serde::Deserialize;
 use std::collections::BTreeMap;
-use std::{path::PathBuf, time::Duration as StdDuration};
+use std::{fs, path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
     CrawlerCollection, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
     NormalizedRecord, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
 };
 use crate::instances::CrawlerInstance;
-use crate::instances::garbage::NewsItem;
 
 pub static GREATHOUSE_CRAWLER_INSTANCE: GreathouseCrawlerInstance = GreathouseCrawlerInstance;
 
@@ -42,10 +41,7 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
     }
 
     fn read_editorial_focuses(&self, path: &PathBuf) -> Result<Vec<EditorialFocus>> {
-        if !path.exists() {
-            return Ok(Vec::new());
-        }
-        crate::instances::garbage::read_editorial_focuses(path)
+        read_editorial_focuses(path)
     }
 
     fn collection_plans(
@@ -80,19 +76,16 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
         editorial_focuses: &[EditorialFocus],
     ) -> Result<CrawlerCollection> {
         let items = if live {
-            greathouse_items(config)?
+            greathouse_records(config)?
         } else {
             Vec::new()
         };
         let source_runs = if live {
-            source_runs_from_items(config, &items)
+            source_runs_from_records(config, &items)
         } else {
             skipped_source_runs(config)
         };
-        let records = dedupe_items(items)
-            .iter()
-            .map(greathouse_record)
-            .collect::<Vec<_>>();
+        let records = dedupe_records(items);
         let snapshot = CrawlerSnapshot {
             generated_at: Utc::now(),
             theme: config.theme.clone(),
@@ -108,10 +101,27 @@ impl CrawlerInstance for GreathouseCrawlerInstance {
     }
 }
 
-fn dedupe_items(items: Vec<NewsItem>) -> Vec<NewsItem> {
+#[derive(Debug, Deserialize)]
+struct GreathouseEditorialState {
+    #[serde(default)]
+    focuses: Vec<EditorialFocus>,
+}
+
+fn read_editorial_focuses(path: &PathBuf) -> Result<Vec<EditorialFocus>> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let state: GreathouseEditorialState = serde_json::from_slice(
+        &fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )
+    .with_context(|| format!("parsing {}", path.display()))?;
+    Ok(state.focuses)
+}
+
+fn dedupe_records(records: Vec<NormalizedRecord>) -> Vec<NormalizedRecord> {
     let mut by_id = std::collections::BTreeMap::new();
-    for item in items {
-        by_id.entry(item.id.clone()).or_insert(item);
+    for record in records {
+        by_id.entry(record.id.clone()).or_insert(record);
     }
     by_id.into_values().collect()
 }
@@ -201,21 +211,21 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
     Ok(())
 }
 
-fn greathouse_items(config: &CrawlerConfig) -> Result<Vec<NewsItem>> {
-    let mut items = Vec::new();
+fn greathouse_records(config: &CrawlerConfig) -> Result<Vec<NormalizedRecord>> {
+    let mut records = Vec::new();
     for source in &config.sources {
-        items.extend(adapter_for_source(source)?.collect(config, source)?);
+        records.extend(adapter_for_source(source)?.collect(config, source)?);
     }
-    Ok(items)
+    Ok(records)
 }
 
-fn greathouse_item(
+fn greathouse_record(
     target: &crate::core::CollectionTarget,
     source: &SourceConfig,
     record: GreathouseLocalRecord,
     adapter: &str,
     index: usize,
-) -> NewsItem {
+) -> NormalizedRecord {
     let observed_at = record.observed_at.unwrap_or_else(Utc::now);
     let evidence_url = record.url.clone();
     let is_diagnostic = source.kind == "diagnostic" || target.topic.contains("diagnostic");
@@ -250,73 +260,60 @@ fn greathouse_item(
         tags = target.keywords.iter().take(4).cloned().collect();
     }
     tags.push(source.kind.clone());
-    NewsItem {
+    let why_it_matters = if is_diagnostic {
+        "Greathouse keeps blocked-source diagnostics as first-class collection records instead of hiding crawler failures."
+    } else {
+        "Greathouse needs normalized listing evidence that can be compared, reviewed, and reloaded through Verdun's generic database contract."
+    };
+    let raw_json = serde_json::json!({
+        "collection_stage": stage,
+        "property": record.property_json,
+        "provenance": {
+            "stage": stage,
+            "adapter": adapter,
+            "source": source.name,
+            "source_kind": source.kind,
+            "source_url": source.url,
+            "evidence_url": evidence_url,
+            "subject": target.name,
+            "matched_keywords": target.keywords,
+        },
+        "instance": "greathouse"
+    });
+    let provenance_json = raw_json
+        .get("provenance")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    NormalizedRecord {
         id: stable_id("greathouse", &format!("{}:{evidence_url}", target.name)),
         title,
         source: source.name.clone(),
         source_kind: source.kind.clone(),
         url: evidence_url.clone(),
-        published_at: observed_at,
-        project: target.name.clone(),
+        observed_at,
+        subject: target.name.clone(),
         topic: target.topic.clone(),
         summary,
-        why_it_matters: if is_diagnostic {
-            "Greathouse keeps blocked-source diagnostics as first-class collection records instead of hiding crawler failures.".to_string()
-        } else {
-            "Greathouse needs normalized listing evidence that can be compared, reviewed, and reloaded through Verdun's generic database contract.".to_string()
-        },
         tags,
         score: record.score.unwrap_or(70 + (index as i32 * 5).min(20)),
-        raw_json: serde_json::json!({
-            "collection_stage": stage,
-            "property": record.property_json,
-            "provenance": {
-                "stage": stage,
-                "adapter": adapter,
-                "source": source.name,
-                "source_kind": source.kind,
-                "source_url": source.url,
-                "evidence_url": evidence_url,
-                "subject": target.name,
-                "matched_keywords": target.keywords,
-            },
-            "instance": "greathouse"
-        }),
-    }
-}
-
-fn greathouse_record(item: &NewsItem) -> NormalizedRecord {
-    let provenance_json = item
-        .raw_json
-        .get("provenance")
-        .cloned()
-        .unwrap_or_else(|| serde_json::json!({}));
-    NormalizedRecord {
-        id: item.id.clone(),
-        title: item.title.clone(),
-        url: item.url.clone(),
-        source: item.source.clone(),
-        source_kind: item.source_kind.clone(),
-        observed_at: item.published_at,
-        subject: item.project.clone(),
-        topic: item.topic.clone(),
-        summary: item.summary.clone(),
-        tags: item.tags.clone(),
-        score: item.score,
         status: "active".to_string(),
-        dedupe_key: format!("{}:{}", item.source_kind, item.url),
+        dedupe_key: format!("{}:{evidence_url}", source.kind),
         provenance_json,
         normalized_json: serde_json::json!({
-            "subject": item.project,
-            "why_it_matters": item.why_it_matters
+            "subject": target.name,
+            "why_it_matters": why_it_matters
         }),
-        raw_json: item.raw_json.clone(),
+        raw_json,
     }
 }
 
 trait GreathouseSourceAdapter {
     fn adapter_name(&self) -> &'static str;
-    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>>;
+    fn collect(
+        &self,
+        config: &CrawlerConfig,
+        source: &SourceConfig,
+    ) -> Result<Vec<NormalizedRecord>>;
 }
 
 struct LocalJsonSourceAdapter {
@@ -340,7 +337,11 @@ impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
         self.adapter
     }
 
-    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+    fn collect(
+        &self,
+        config: &CrawlerConfig,
+        source: &SourceConfig,
+    ) -> Result<Vec<NormalizedRecord>> {
         let path = source
             .fixture_path
             .as_ref()
@@ -363,7 +364,7 @@ impl GreathouseSourceAdapter for LocalJsonSourceAdapter {
                             source.name, record.subject
                         )
                     })?;
-                Ok(greathouse_item(
+                Ok(greathouse_record(
                     target,
                     source,
                     record,
@@ -380,7 +381,11 @@ impl GreathouseSourceAdapter for HttpJsonSourceAdapter {
         self.adapter
     }
 
-    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+    fn collect(
+        &self,
+        config: &CrawlerConfig,
+        source: &SourceConfig,
+    ) -> Result<Vec<NormalizedRecord>> {
         let client = Client::builder()
             .user_agent("verdun-crawler/0.1 greathouse")
             .timeout(StdDuration::from_secs(15))
@@ -413,7 +418,7 @@ impl GreathouseSourceAdapter for HttpJsonSourceAdapter {
                             source.name, record.subject
                         )
                     })?;
-                Ok(greathouse_item(
+                Ok(greathouse_record(
                     target,
                     source,
                     record,
@@ -430,7 +435,11 @@ impl GreathouseSourceAdapter for HttpStatusDiagnosticAdapter {
         "http-status-diagnostic"
     }
 
-    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+    fn collect(
+        &self,
+        config: &CrawlerConfig,
+        source: &SourceConfig,
+    ) -> Result<Vec<NormalizedRecord>> {
         let client = Client::builder()
             .user_agent("verdun-crawler/0.1 greathouse")
             .timeout(StdDuration::from_secs(15))
@@ -487,7 +496,7 @@ impl GreathouseSourceAdapter for HttpStatusDiagnosticAdapter {
                 property_json: serde_json::Value::Null,
             },
         };
-        Ok(vec![greathouse_item(
+        Ok(vec![greathouse_record(
             target,
             source,
             record,
@@ -502,7 +511,11 @@ impl GreathouseSourceAdapter for RedfinListingJsonAdapter {
         "redfin-listing-json"
     }
 
-    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+    fn collect(
+        &self,
+        config: &CrawlerConfig,
+        source: &SourceConfig,
+    ) -> Result<Vec<NormalizedRecord>> {
         let path = source
             .fixture_path
             .as_ref()
@@ -526,7 +539,7 @@ impl GreathouseSourceAdapter for RedfinListingJsonAdapter {
                             source.name, subject
                         )
                     })?;
-                Ok(greathouse_item(
+                Ok(greathouse_record(
                     target,
                     source,
                     record.into_local_record(),
@@ -543,7 +556,11 @@ impl GreathouseSourceAdapter for ZillowListingJsonAdapter {
         "zillow-listing-json"
     }
 
-    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+    fn collect(
+        &self,
+        config: &CrawlerConfig,
+        source: &SourceConfig,
+    ) -> Result<Vec<NormalizedRecord>> {
         let path = source
             .fixture_path
             .as_ref()
@@ -567,7 +584,7 @@ impl GreathouseSourceAdapter for ZillowListingJsonAdapter {
                             source.name, subject
                         )
                     })?;
-                Ok(greathouse_item(
+                Ok(greathouse_record(
                     target,
                     source,
                     record.into_local_record(),
@@ -584,7 +601,11 @@ impl GreathouseSourceAdapter for BrowserDiagnosticJsonAdapter {
         "browser-diagnostic-json"
     }
 
-    fn collect(&self, config: &CrawlerConfig, source: &SourceConfig) -> Result<Vec<NewsItem>> {
+    fn collect(
+        &self,
+        config: &CrawlerConfig,
+        source: &SourceConfig,
+    ) -> Result<Vec<NormalizedRecord>> {
         let path = source
             .fixture_path
             .as_ref()
@@ -608,7 +629,7 @@ impl GreathouseSourceAdapter for BrowserDiagnosticJsonAdapter {
                             source.name, subject
                         )
                     })?;
-                Ok(greathouse_item(
+                Ok(greathouse_record(
                     target,
                     source,
                     record.into_local_record(source),
@@ -656,14 +677,17 @@ fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn GreathouseSo
     }
 }
 
-fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<SourceRun> {
+fn source_runs_from_records(
+    config: &CrawlerConfig,
+    records: &[NormalizedRecord],
+) -> Vec<SourceRun> {
     config
         .sources
         .iter()
         .map(|source| {
-            let item_count = items
+            let item_count = records
                 .iter()
-                .filter(|item| item.source == source.name)
+                .filter(|record| record.source == source.name)
                 .count();
             SourceRun {
                 source: source.name.clone(),
@@ -675,7 +699,7 @@ fn source_runs_from_items(config: &CrawlerConfig, items: &[NewsItem]) -> Vec<Sou
                 },
                 item_count,
                 message: source_run_message(source),
-                project_counts: project_counts_for_source(items, &source.name),
+                project_counts: subject_counts_for_source(records, &source.name),
             }
         })
         .collect()
@@ -703,10 +727,13 @@ fn source_run_message(source: &SourceConfig) -> String {
     }
 }
 
-fn project_counts_for_source(items: &[NewsItem], source_name: &str) -> BTreeMap<String, usize> {
+fn subject_counts_for_source(
+    records: &[NormalizedRecord],
+    source_name: &str,
+) -> BTreeMap<String, usize> {
     let mut counts = BTreeMap::new();
-    for item in items.iter().filter(|item| item.source == source_name) {
-        *counts.entry(item.project.clone()).or_insert(0) += 1;
+    for record in records.iter().filter(|record| record.source == source_name) {
+        *counts.entry(record.subject.clone()).or_insert(0) += 1;
     }
     counts
 }

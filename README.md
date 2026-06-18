@@ -11,7 +11,7 @@ The first reusable boundary is now explicit:
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
 - A small Greathouse pilot instance lives in `src/instances/greathouse/` and exercises listing/diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) live in `db/migrations/0003_generic_workbench_tables.sql`, with `workbench_*` compatibility views over generic rows and the current Garbage/newsletter fallback.
-- Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned.
+- Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
 

@@ -4,9 +4,10 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const [crawlerMainSource, garbageInstanceSource, instanceTraitSource] = await Promise.all([
+const [crawlerMainSource, garbageInstanceSource, greathouseInstanceSource, instanceTraitSource] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/garbage.rs', 'utf8'),
+  readFile('crawler/src/instances/greathouse.rs', 'utf8'),
   readFile('crawler/src/instances/mod.rs', 'utf8'),
 ])
 if (crawlerMainSource.includes('insert into newsletter_')) {
@@ -40,6 +41,12 @@ if (!instanceTraitSource.includes('EditorialFocus') || !instanceTraitSource.incl
 }
 if (instanceTraitSource.includes('use garbage::NewsItem') || instanceTraitSource.includes('Vec<NewsItem>')) {
   throw new Error('crawler instance trait still exposes Garbage NewsItem instead of core collection output')
+}
+if (greathouseInstanceSource.includes('NewsItem') || greathouseInstanceSource.includes('instances::garbage')) {
+  throw new Error('Greathouse crawler still depends on Garbage news item types')
+}
+if (!greathouseInstanceSource.includes('Result<Vec<NormalizedRecord>>')) {
+  throw new Error('Greathouse source adapters do not collect core normalized records directly')
 }
 
 const verifyGarbage = spawnSync('cargo', [
