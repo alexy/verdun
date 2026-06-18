@@ -75,6 +75,7 @@
 - Moved the Garbage newsletter API store to parent-owned `apps/garbage/src/api/newsletter-store.ts` and replaced the resident Verdun store with a shim, leaving newsletter route handlers bundled for now.
 - Moved Garbage newsletter API route implementations to parent-owned `apps/garbage/src/api/newsletter/` and replaced resident Verdun route handlers with shims.
 - Moved the Garbage local workbench adapter to parent-owned `apps/garbage/src/api/workbench.ts` and replaced the resident Verdun adapter with a shim.
+- Moved Garbage browser snapshot and view composables to parent-owned `apps/garbage/src/app/composables/` and replaced resident Verdun composables with shims.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
 - Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
 - Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.

@@ -46,7 +46,7 @@ The current proof points are:
 - The maintained Garbage ontology lives in `apps/garbage/src/ontology.json` and is reused by the app and local Markdown draft generation.
 - The reusable Vue pieces live under `src/components/workbench/`; Garbage-specific panels and newsletter controls live under `src/instances/garbage/components/`.
 - Garbage-specific newsletter, publishing, ontology, and source-gap CSS lives in `src/instances/garbage/style.css`; shared shell/workbench CSS remains in `src/style.css`.
-- Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under `src/instances/garbage/composables/`.
+- Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under parent-owned `apps/garbage/src/app/composables/`.
 - Generic backend route mechanics live in `api/core/http.ts`, while Garbage data access and local fallback state stay under `api/instances/garbage/`.
 - Generic workbench DB helpers require an explicit `WorkbenchInstance`; default-instance resolution stays in the route/registry layer instead of the database helper.
 - Bundled API fallback adapters are isolated behind `api/instances/bundled-workbench-adapters.ts`; the generic adapter registry no longer imports the Garbage adapter directly.
@@ -84,6 +84,7 @@ The bundled Garbage API store, workbench adapter, app registration, instance reg
 The resident Garbage newsletter store re-exports `apps/garbage/src/api/newsletter-store.ts`, so static/database/local editorial persistence is parent-owned while newsletter routes are still bundled.
 The resident Garbage newsletter route handlers re-export `apps/garbage/src/api/newsletter/*`, so items/status/draft/vote/focus/editorial-state/health behavior is parent-owned while the public Vercel route files remain in Verdun.
 The resident Garbage workbench adapter re-exports `apps/garbage/src/api/workbench.ts`, so newsletter-to-generic-workbench local fallback behavior is parent-owned while the bundled adapter manifest remains in Verdun.
+The resident Garbage browser snapshot and view composables re-export `apps/garbage/src/app/composables/*`, so browser-local editorial state, workbench snapshot loading, and newsletter view filtering are parent-owned while the bundled Vue component tree remains in Verdun.
 The resident Garbage instance registration shim re-exports `apps/garbage/src/instance-registration.ts`, so default-instance metadata is parent-owned while the Vite glob-discovery convention still works during extraction.
 Resident Garbage UI components, composables, the API draft route, and compatibility scripts import `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; the duplicate resident newsletter and ontology files have been removed.
 The resident Garbage snapshot composable imports `apps/garbage/src/snapshot.ts`; the duplicate resident `src/instances/garbage/snapshot.ts` normalizer has been removed and `npm run garbage:smoke:snapshot` fails if it reappears.
