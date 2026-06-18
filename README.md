@@ -62,6 +62,7 @@ The resident Garbage crawler dedupe, provenance, query-plan, and manual-source f
 The resident Garbage draft, URL draft, publishing-readiness, and snapshot-recency smokes now shim to the parent package as well.
 The resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ulysses export smoke also shim to the parent package.
 The resident newsletter draft CLI, Ghost CLI/smoke, and local/draft/health API smokes also shim to the parent package.
+The resident legacy newsletter SQL apply/deploy helpers and loader smoke also shim to the parent package while the compatibility migrations remain bundled.
 
 ## Local app
 
