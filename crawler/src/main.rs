@@ -1,10 +1,12 @@
 use anyhow::{Context, Result};
 use chrono::{Duration, Utc};
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand};
 mod core;
 mod instances;
 use crate::core::{CrawlerConfig, CrawlerSnapshot};
 use std::{fs, path::PathBuf};
+
+const GENERIC_SQL_TARGET: &str = "generic";
 
 #[derive(Parser)]
 #[command(author, version, about = "Verdun reusable crawler and database loader")]
@@ -40,8 +42,8 @@ enum CommandKind {
     ExportSql {
         #[arg(long)]
         snapshot: Option<PathBuf>,
-        #[arg(long, value_enum, default_value_t = SqlExportTarget::Generic)]
-        target: SqlExportTarget,
+        #[arg(long, default_value = GENERIC_SQL_TARGET)]
+        target: String,
         #[arg(long)]
         instance: Option<String>,
         #[arg(long)]
@@ -125,12 +127,6 @@ fn main() -> Result<()> {
     }
 }
 
-#[derive(Debug, Clone, Copy, ValueEnum)]
-enum SqlExportTarget {
-    Newsletter,
-    Generic,
-}
-
 struct ExportInstance {
     id: String,
     name: String,
@@ -210,7 +206,7 @@ fn export_sql(
     input: PathBuf,
     source_runs: PathBuf,
     out: PathBuf,
-    target: SqlExportTarget,
+    target: String,
     instance: Option<String>,
     instance_name: Option<String>,
     base_path: Option<String>,
@@ -221,54 +217,44 @@ fn export_sql(
         name: instance_name.unwrap_or_else(|| crawler_instance.display_name().to_string()),
         base_path: base_path.unwrap_or_else(|| crawler_instance.base_path().to_string()),
     };
-    let (sql, record_count, source_run_count, plan_count) = match target {
-        SqlExportTarget::Newsletter => {
-            let export = crawler_instance
-                .legacy_sql_export(target.as_str(), snapshot.as_ref(), &input, &source_runs)?
-                .ok_or_else(|| {
-                    anyhow::anyhow!(
-                        "crawler instance {:?} does not support --target {}",
-                        crawler_instance.id(),
-                        target.as_str()
-                    )
-                })?;
-            (
-                export.sql,
-                export.record_count,
-                export.source_run_count,
-                export.plan_count,
-            )
-        }
-        SqlExportTarget::Generic => {
-            let snapshot =
-                load_generic_crawler_snapshot(crawler_instance, snapshot, input, source_runs)?;
-            (
-                generic_export_sql(&snapshot, &instance)?,
-                snapshot.records.len(),
-                snapshot.source_runs.len(),
-                snapshot.collection_plans.len(),
-            )
-        }
+    let target = target.trim().to_string();
+    anyhow::ensure!(!target.is_empty(), "--target must not be empty");
+    let (sql, record_count, source_run_count, plan_count) = if target == GENERIC_SQL_TARGET {
+        let snapshot =
+            load_generic_crawler_snapshot(crawler_instance, snapshot, input, source_runs)?;
+        (
+            generic_export_sql(&snapshot, &instance)?,
+            snapshot.records.len(),
+            snapshot.source_runs.len(),
+            snapshot.collection_plans.len(),
+        )
+    } else {
+        let export = crawler_instance
+            .legacy_sql_export(&target, snapshot.as_ref(), &input, &source_runs)?
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "crawler instance {:?} does not support --target {}",
+                    crawler_instance.id(),
+                    target
+                )
+            })?;
+        (
+            export.sql,
+            export.record_count,
+            export.source_run_count,
+            export.plan_count,
+        )
     };
     fs::write(&out, sql).with_context(|| format!("writing {}", out.display()))?;
     println!(
         "wrote {} SQL load for {} items, {} source runs, and {} query plans to {}",
-        target.as_str(),
+        target,
         record_count,
         source_run_count,
         plan_count,
         out.display()
     );
     Ok(())
-}
-
-impl SqlExportTarget {
-    fn as_str(self) -> &'static str {
-        match self {
-            Self::Newsletter => "newsletter",
-            Self::Generic => "generic",
-        }
-    }
 }
 
 fn generic_export_sql(snapshot: &CrawlerSnapshot, instance: &ExportInstance) -> Result<String> {

@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Changed `verdun-crawler export-sql --target` from a shared `newsletter`/`generic` enum to a generic string target: `generic` stays built into the shared CLI, while compatibility targets such as `newsletter` are resolved by the selected crawler instance.
 - Moved legacy newsletter SQL export and compatibility snapshot loading behind optional crawler instance trait hooks, so shared crawler CLI code no longer imports the Garbage crawler module directly for those compatibility paths.
 - Refreshed `README.md` and `APP.md` to describe Verdun as the reusable core-in-extraction, Garbage as the newsletter instance, and Greathouse as an instance proof with local, HTTP, browser-diagnostic, Redfin-shaped, and Zillow-shaped crawler adapters.
 - Removed the remaining root `scripts/garbage-*.mjs` publishing wrappers; `garbage:*` package commands now call instance-owned publishing scripts under `scripts/instances/garbage/` directly.

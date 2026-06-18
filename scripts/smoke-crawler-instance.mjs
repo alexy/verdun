@@ -21,6 +21,8 @@ for (const marker of [
   'garbage::load_newsletter_export_payload',
   'garbage::newsletter_export_sql',
   'garbage::public_snapshot_value_as_crawler_snapshot',
+  'SqlExportTarget',
+  'Newsletter',
   'use crate::instances::garbage::{',
   'fn legacy_query_plans',
   'fn load_export_payload',
