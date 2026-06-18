@@ -67,12 +67,12 @@ if (!deployProfilesSource.includes('registeredDeployCheckProfiles') || deployPro
 if (!garbageProfile.smokeFixtureModule.includes('/garbage/') || !garbageDeployProfileSource.includes('smokeFixtureModule')) {
   throw new Error('Garbage deployed-check smoke fixture should be instance-owned profile metadata')
 }
-for (const metadataKey of ['smokeCommands', 'removedGenericCommands', 'publishingCommands']) {
+for (const metadataKey of ['smokeCommands', 'removedGenericCommands', 'publishingCommands', 'compatibilitySqlSmoke', 'smokeAllCommands']) {
   if (!garbageDeployProfileSource.includes(metadataKey)) {
     throw new Error(`Garbage deploy profile is missing ${metadataKey} metadata`)
   }
 }
-if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDeployProfileSource.includes("staticSnapshotPath: 'data/greathouse-snapshot.json'") || !greathouseDeployProfileSource.includes('smokeFixtureModule')) {
+if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDeployProfileSource.includes("staticSnapshotPath: 'data/greathouse-snapshot.json'") || !greathouseDeployProfileSource.includes('smokeFixtureModule') || !greathouseDeployProfileSource.includes('genericSqlSmoke') || !greathouseDeployProfileSource.includes('smokeAllCommands')) {
   throw new Error('Greathouse deploy profile is missing static snapshot metadata')
 }
 const freshGeneratedAt = new Date().toISOString()

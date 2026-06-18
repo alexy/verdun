@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Changed `npm run smoke:all` to compose instance-specific compatibility SQL, custom generic SQL collection/export, and app smoke commands from deploy-profile metadata instead of hard-coding Garbage newsletter and Greathouse workbench checks in the shared smoke runner.
 - Moved Garbage smoke, removed generic alias, and publishing command expectations into the Garbage deploy profile so shared deployed-check smoke coverage validates command ownership from instance metadata instead of inline command lists.
 - Moved the Greathouse deployed-check smoke fixture under `scripts/instances/greathouse/` and exposed it through deploy-profile metadata, so the shared deployed-check smoke harness no longer embeds Greathouse listing/diagnostic records directly.
 - Moved the Garbage-specific deployed-check smoke draft/status fixture under `scripts/instances/garbage/` and exposed it through deploy-profile metadata, leaving the shared deployed-check smoke harness to route through instance-owned fixture behavior without importing Garbage fixture paths directly.
