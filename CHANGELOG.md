@@ -2,6 +2,10 @@
 
 ## 2026-06-18
 
+- Added deploy-profile command-runner metadata for the parent Garbage package, so shared Verdun smoke orchestration can execute profile-declared Garbage commands through the external `@garbage/instance` workspace.
+- Removed Verdun-local `garbage:*` package scripts; Garbage commands are now parent/package-owned while resident Verdun script files remain only as discovery/hook shims during external package registration extraction.
+- Changed `smoke:all` and `smoke:browser` to route instance-owned commands through deploy-profile command-runner metadata instead of assuming every profile command is a Verdun package script.
+- Updated deploy-check smoke coverage to reject reintroducing Garbage commands in Verdun `package.json`.
 - Added the parent `apps/garbage/` instance-package anchor with `verdun.instance.json`, documenting the current bundled Garbage frontend, API, crawler, SQL, and publishing paths that must move out of Verdun or become external package imports.
 - Documented the parent Garbage `@garbage/instance` command facade as the temporary external package surface that delegates declared commands into Verdun until those implementations move out.
 - Documented the next facade step: Garbage publishing entrypoints now live in the parent package while still importing bundled Verdun newsletter modules, and only operational compatibility smokes remain delegated.

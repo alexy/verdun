@@ -1,5 +1,5 @@
-import { spawnSync } from 'node:child_process'
 import { defaultDeployCheckProfileId, deployCheckProfile, supportedDeployCheckProfiles } from './instances/deploy-check-profiles.mjs'
+import { runCommand, runDeployProfileScript } from './instance-command-runner.mjs'
 
 const sqlPath = '/tmp/verdun-generic-load.sql'
 const profile = deployCheckProfile(defaultDeployCheckProfileId())
@@ -27,7 +27,7 @@ for (const instanceProfile of supportedDeployCheckProfiles()) {
     const smoke = instanceProfile.compatibilitySqlSmoke
     steps.push(
       ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--target', smoke.target, '--snapshot', snapshotPath, '--out', smoke.sqlPath]],
-      ['npm', ['run', smoke.loaderCommand, '--', smoke.sqlPath, snapshotPath]],
+      [instanceProfile, smoke.loaderCommand, [smoke.sqlPath, snapshotPath]],
     )
   }
   if (instanceProfile.genericSqlSmoke) {
@@ -60,17 +60,14 @@ for (const instanceProfile of supportedDeployCheckProfiles()) {
     )
   }
   for (const scriptName of instanceProfile.smokeAllCommands ?? []) {
-    steps.push(['npm', ['run', scriptName]])
+    steps.push([instanceProfile, scriptName, []])
   }
 }
 
-for (const [command, args] of steps) {
-  console.log(`\n> ${command} ${args.join(' ')}`)
-  const result = spawnSync(command, args, {
-    stdio: 'inherit',
-  })
-  if (result.error) throw result.error
-  if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(' ')} exited with ${result.status}`)
+for (const [commandOrProfile, argsOrScript, maybeArgs] of steps) {
+  if (typeof commandOrProfile === 'string') {
+    runCommand(commandOrProfile, argsOrScript)
+  } else {
+    runDeployProfileScript(commandOrProfile, argsOrScript, maybeArgs)
   }
 }

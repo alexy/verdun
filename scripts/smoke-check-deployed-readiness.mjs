@@ -8,6 +8,9 @@ const secondaryProfile = supportedDeployCheckProfiles().find((profile) => profil
 if (!defaultProfile?.sourceSnapshotPath || !defaultProfile?.draft || !defaultProfile?.smokeFixtureModule || !secondaryProfile?.smokeFixtureModule) {
   throw new Error('deployed-check smoke requires a default draft profile and a secondary workbench profile')
 }
+if (defaultProfile.commandRunner?.kind !== 'npm-workspace' || defaultProfile.commandRunner.workspace !== '@garbage/instance') {
+  throw new Error('default deploy profile should execute Garbage commands through the external package workspace')
+}
 const defaultBasePath = defaultProfile.basePath
 const secondaryBasePath = secondaryProfile.basePath
 const rawSnapshot = JSON.parse(await readFile(defaultProfile.sourceSnapshotPath, 'utf8'))
@@ -39,16 +42,13 @@ for (const scriptName of defaultProfile.removedGenericCommands ?? []) {
   }
 }
 for (const scriptName of defaultProfile.smokeCommands ?? []) {
-  if (!packageJson.scripts?.[scriptName]) {
-    throw new Error(`${scriptName} should exist as an explicit instance smoke command`)
-  }
-  if (!packageJson.scripts[scriptName].includes(`scripts/instances/${defaultProfile.id}/`)) {
-    throw new Error(`${scriptName} should run an instance-owned smoke script`)
+  if (packageJson.scripts?.[scriptName]) {
+    throw new Error(`${scriptName} should be owned by the external instance package, not Verdun package.json`)
   }
 }
 for (const scriptName of defaultProfile.publishingCommands ?? []) {
-  if (!packageJson.scripts?.[scriptName]?.includes(`scripts/instances/${defaultProfile.id}/`)) {
-    throw new Error(`${scriptName} should run an instance-owned publishing script`)
+  if (packageJson.scripts?.[scriptName]) {
+    throw new Error(`${scriptName} should be owned by the external instance package, not Verdun package.json`)
   }
 }
 if (vercelConfigSource.includes('/rbage/') || vercelConfigSource.includes('/greathouse/')) {
@@ -87,7 +87,7 @@ if (!garbageDraftChecksSource.includes('apps/garbage/scripts/deployed-draft-chec
 if (!profileModulePathMatchesInstance(defaultProfile)) {
   throw new Error('default deployed-check smoke fixture should be instance-owned profile metadata')
 }
-for (const metadataKey of ['smokeCommands', 'removedGenericCommands', 'publishingCommands', 'compatibilitySqlSmoke', 'smokeAllCommands', 'uiSmokeCommands']) {
+for (const metadataKey of ['commandRunner', 'smokeCommands', 'removedGenericCommands', 'publishingCommands', 'compatibilitySqlSmoke', 'smokeAllCommands', 'uiSmokeCommands']) {
   if (!(metadataKey in defaultProfile)) {
     throw new Error(`default deploy profile is missing ${metadataKey} metadata`)
   }

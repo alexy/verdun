@@ -20,6 +20,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - `npm run vercel:config` regenerates `vercel.json` from deploy profiles so app rewrites stay instance-owned rather than hand-coded in the root Vercel config.
 - Deploy-check profile exports are neutral inside each instance module, and shared deployment tooling discovers `scripts/instances/*/deploy-checks.mjs` entries by convention instead of statically importing Garbage or Greathouse profiles.
 - Garbage deploy-check profile metadata and hook implementations are parent-owned at `apps/garbage/scripts/deploy-checks.mjs`, `apps/garbage/scripts/deployed-check-smoke-fixture.mjs`, and `apps/garbage/scripts/deployed-draft-checks.mjs`; the resident Verdun files are only discovery/hook shims for the current generic registry.
+- Garbage deploy-check profile metadata also declares an external npm-workspace command runner for `@garbage/instance`, so shared Verdun orchestration runs Garbage commands through the package instead of local Verdun `garbage:*` scripts.
 - Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/garbage/newsletter/items --deployment <deployment-url>`.
 - Deployed draft API and publishing-readiness validation is instance-owned: the generic deployed checker loads Garbage's validator from `scripts/instances/garbage/deployed-draft-checks.mjs` through deploy-profile metadata.
 - Inbox filtering by search text, vote state, project, source, and evidence stage so editors can prioritize live/manual collected items before watchlist seed placeholders.
@@ -129,6 +130,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 - Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
 - Replace the parent Garbage package's remaining explicit legacy Verdun path compatibility after the crawler/output boundary moves.
+- Replace resident Garbage deploy-profile discovery and hook shim files with direct external package registration.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 

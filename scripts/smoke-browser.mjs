@@ -1,18 +1,10 @@
-import { spawn, spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
+import { runCommand, runDeployProfileScript } from './instance-command-runner.mjs'
 
 const profile = deployCheckProfile(defaultDeployCheckProfileId())
 const previewUrl = process.argv[2] ?? profile?.previewBaseUrl ?? 'http://127.0.0.1:5174/'
 const startupTimeoutMs = 20_000
-
-function run(command, args) {
-  console.log(`\n> ${command} ${args.join(' ')}`)
-  const result = spawnSync(command, args, { stdio: 'inherit' })
-  if (result.error) throw result.error
-  if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(' ')} exited with ${result.status}`)
-  }
-}
 
 async function waitForPreview(server) {
   const deadline = Date.now() + startupTimeoutMs
@@ -51,7 +43,7 @@ async function stopPreview(server) {
   })
 }
 
-run('npm', ['run', 'prod:build'])
+runCommand('npm', ['run', 'prod:build'])
 
 console.log('\n> npm run prod:app')
 const server = spawn('npm', ['run', 'prod:app'], {
@@ -64,7 +56,7 @@ server.stderr.on('data', (chunk) => process.stderr.write(chunk))
 try {
   await waitForPreview(server)
   for (const scriptName of profile?.uiSmokeCommands ?? []) {
-    run('npm', ['run', scriptName, '--', previewUrl])
+    runDeployProfileScript(profile, scriptName, [previewUrl])
   }
 } finally {
   await stopPreview(server)
