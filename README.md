@@ -65,6 +65,7 @@ The resident newsletter draft CLI, Ghost CLI/smoke, and local/draft/health API s
 The resident legacy newsletter SQL apply/deploy helpers and loader smoke also shim to the parent package while the compatibility migrations remain bundled.
 The resident newsletter snapshot composable and view-model smokes also shim to the parent package while the bundled UI modules remain in Verdun.
 The resident workbench compatibility smoke also shims to the parent package while the generic workbench API modules remain bundled in Verdun.
+The resident Garbage browser app and responsive UI smokes also shim to the parent package while the bundled Garbage UI remains in Verdun.
 
 ## Local app
 
