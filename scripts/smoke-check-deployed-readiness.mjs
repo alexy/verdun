@@ -37,6 +37,9 @@ for (const scriptName of ['garbage:smoke:draft-api', 'garbage:smoke:draft', 'gar
   if (!packageJson.scripts?.[scriptName]) {
     throw new Error(`${scriptName} should exist as an explicit Garbage smoke command`)
   }
+  if (!packageJson.scripts[scriptName].includes('scripts/instances/garbage/')) {
+    throw new Error(`${scriptName} should run an instance-owned Garbage smoke script`)
+  }
 }
 if (vercelConfigSource.includes('/rbage/') || vercelConfigSource.includes('/greathouse/')) {
   throw new Error('Vercel config generator should derive app paths from deploy profiles')

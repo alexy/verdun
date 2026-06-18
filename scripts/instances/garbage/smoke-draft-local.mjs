@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { assertDraftReady, buildNewsletterDraft, evaluateNewsletterProseQuality, loadSnapshotFile } from './instances/garbage/newsletter-draft.mjs'
+import { assertDraftReady, buildNewsletterDraft, evaluateNewsletterProseQuality, loadSnapshotFile } from './newsletter-draft.mjs'
 
 const stateDir = await mkdtemp(join(tmpdir(), 'verdun-draft-'))
 const stateFile = join(stateDir, 'editorial-state.json')
