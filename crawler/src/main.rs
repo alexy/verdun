@@ -224,7 +224,8 @@ fn export_sql(
     };
     let (sql, record_count, source_run_count, plan_count) = match target {
         SqlExportTarget::Newsletter => {
-            let payload = load_garbage_newsletter_export_payload(snapshot, input, source_runs)?;
+            let payload =
+                garbage::load_newsletter_export_payload(snapshot.as_ref(), &input, &source_runs)?;
             (
                 garbage::newsletter_export_sql(&payload)?,
                 payload.items.len(),
@@ -401,64 +402,10 @@ fn load_generic_crawler_snapshot(
             return serde_json::from_value(value)
                 .with_context(|| format!("parsing generic snapshot {}", snapshot.display()));
         }
-        return garbage_public_snapshot_value_as_crawler_snapshot(value, &snapshot);
+        return garbage::public_snapshot_value_as_crawler_snapshot(value, &snapshot);
     }
 
-    Ok(load_garbage_newsletter_export_payload(None, input, source_runs)?.normalized_snapshot())
-}
-
-fn garbage_public_snapshot_value_as_crawler_snapshot(
-    value: serde_json::Value,
-    path: &PathBuf,
-) -> Result<CrawlerSnapshot> {
-    let snapshot: garbage::PublicSnapshot = serde_json::from_value(value)
-        .with_context(|| format!("parsing Garbage snapshot {}", path.display()))?;
-    Ok(garbage::ExportPayload {
-        theme: snapshot.theme,
-        items: snapshot.items,
-        source_runs: snapshot.source_runs,
-        query_plans: snapshot.query_plans,
-        generated_at: snapshot.generated_at,
-    }
-    .normalized_snapshot())
-}
-
-fn load_garbage_newsletter_export_payload(
-    snapshot: Option<PathBuf>,
-    input: PathBuf,
-    source_runs: PathBuf,
-) -> Result<garbage::ExportPayload> {
-    if let Some(snapshot) = snapshot {
-        let snapshot: garbage::PublicSnapshot = serde_json::from_slice(
-            &fs::read(&snapshot).with_context(|| format!("reading {}", snapshot.display()))?,
-        )?;
-        return Ok(garbage::ExportPayload {
-            theme: snapshot.theme,
-            items: snapshot.items,
-            source_runs: snapshot.source_runs,
-            query_plans: snapshot.query_plans,
-            generated_at: snapshot.generated_at,
-        });
-    }
-
-    let items: Vec<garbage::NewsItem> = serde_json::from_slice(
-        &fs::read(&input).with_context(|| format!("reading {}", input.display()))?,
-    )?;
-    let source_runs: Vec<crate::core::SourceRun> = if source_runs.exists() {
-        serde_json::from_slice(
-            &fs::read(&source_runs)
-                .with_context(|| format!("reading {}", source_runs.display()))?,
-        )?
-    } else {
-        Vec::new()
-    };
-    Ok(garbage::ExportPayload {
-        theme: "Strongly typed and functional AI/data systems".to_string(),
-        items,
-        source_runs,
-        query_plans: Vec::new(),
-        generated_at: Utc::now(),
-    })
+    Ok(garbage::load_newsletter_export_payload(None, &input, &source_runs)?.normalized_snapshot())
 }
 
 fn verify(instance: Option<String>, config: Option<PathBuf>) -> Result<()> {

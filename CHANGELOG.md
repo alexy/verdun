@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved legacy Garbage newsletter snapshot and split-file payload loading out of `crawler/src/main.rs` and into the Garbage crawler instance module, leaving shared CLI code to route through an explicit instance-owned compatibility function.
 - Changed `verdun-crawler queries` to print generic `NormalizedCollectionPlan` JSON and renamed the crawler CLI snapshot loaders so generic snapshot loading and Garbage newsletter compatibility loading are explicit.
 - Changed Greathouse crawler adapters to emit core `NormalizedRecord` values directly instead of constructing Garbage `NewsItem` values internally.
 - Changed the crawler instance trait to return core `CrawlerCollection` output instead of exposing Garbage `NewsItem` vectors; the shared CLI now writes generic snapshots from instance collection output, and Greathouse public collection snapshots use the generic `records`/`collection_plans` shape.

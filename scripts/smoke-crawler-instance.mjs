@@ -26,8 +26,20 @@ for (const marker of [
     throw new Error(`crawler main still exposes ambiguous Garbage compatibility helper: ${marker}`)
   }
 }
-if (!crawlerMainSource.includes('load_garbage_newsletter_export_payload') || !crawlerMainSource.includes('load_generic_crawler_snapshot')) {
-  throw new Error('crawler main does not separate generic snapshot loading from Garbage newsletter compatibility loading')
+if (!crawlerMainSource.includes('garbage::load_newsletter_export_payload') || !crawlerMainSource.includes('load_generic_crawler_snapshot')) {
+  throw new Error('crawler main does not route generic snapshot loading and Garbage newsletter compatibility loading through separate paths')
+}
+for (const marker of [
+  'garbage::PublicSnapshot',
+  'garbage::ExportPayload',
+  'garbage::NewsItem',
+]) {
+  if (crawlerMainSource.includes(marker)) {
+    throw new Error(`crawler main still parses Garbage compatibility type directly: ${marker}`)
+  }
+}
+if (!garbageInstanceSource.includes('pub fn load_newsletter_export_payload') || !garbageInstanceSource.includes('pub fn public_snapshot_value_as_crawler_snapshot')) {
+  throw new Error('Garbage crawler instance does not own legacy newsletter snapshot loading')
 }
 for (const marker of [
   'default_value = "garbage"',
