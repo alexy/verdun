@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { ref } from 'vue'
 import { runnerImport } from 'vite'
 
@@ -70,11 +71,20 @@ if (!greathouseAppRegistrationSource.includes('GreathouseApp') || !greathouseApp
 if (!garbageAppRegistrationSource.includes('GarbageApp') || !garbageAppRegistrationSource.includes('garbageInstance.id')) {
   throw new Error('Garbage app component is not registered from its instance boundary')
 }
+if (!garbageAppRegistrationSource.includes('apps/garbage/src/config.ts')) {
+  throw new Error('Garbage app registration should consume the parent-owned Garbage config')
+}
 if (!greathouseInstanceRegistrationSource.includes('greathouseInstance') || !greathouseInstanceRegistrationSource.includes('greathousePilotSnapshot')) {
   throw new Error('Greathouse instance metadata is not registered from its instance boundary')
 }
 if (!garbageInstanceRegistrationSource.includes('garbageInstance') || !garbageInstanceRegistrationSource.includes('default: true')) {
   throw new Error('Garbage default instance metadata is not registered from its instance boundary')
+}
+if (!garbageInstanceRegistrationSource.includes('apps/garbage/src/config.ts')) {
+  throw new Error('Garbage instance registration should consume the parent-owned Garbage config')
+}
+if (existsSync('src/instances/garbage/config.ts')) {
+  throw new Error('Garbage instance config should live in the parent package, not resident Verdun source')
 }
 if (
   !instanceRegistrationsSource.includes('workbenchInstanceRegistration') ||

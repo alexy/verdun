@@ -9,7 +9,7 @@ import type {
   WorkbenchSourceRun,
   WorkbenchStateExport,
 } from '../../core/workbench'
-import { garbageInstance, garbageSeedFocuses } from './config'
+import { garbageInstance, garbageSeedFocuses } from '../../../../apps/garbage/src/config.ts'
 
 export type { SourceRunStatus } from '../../core/workbench'
 

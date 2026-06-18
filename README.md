@@ -7,7 +7,7 @@ The first reusable boundary is now explicit:
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
 - Generic reusable Vue controls live under `src/components/workbench/` and currently back both the Garbage newsletter app and the Greathouse pilot workbench.
-- Garbage instance configuration lives in `src/instances/garbage/config.ts`.
+- Garbage instance configuration lives in the parent package at `apps/garbage/src/config.ts`; resident Verdun code imports it during extraction.
 - Garbage-specific ontology data lives in `src/instances/garbage/ontology.json`.
 - A Greathouse pilot instance lives in `src/instances/greathouse/` and exercises property listing and blocked-source diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`; Garbage newsletter table/view compatibility migrations live under `db/instances/garbage/migrations/` and are selected by the Garbage deploy profile.
@@ -70,7 +70,7 @@ Without `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL`, the API uses the
 Set `VERDUN_STATIC_SNAPSHOT_FILE` to point bundled API modules at an explicit Garbage snapshot file; the parent Garbage package uses this during extraction so API smokes can run from `/Users/alexy/src/garbage` against `apps/garbage/data/newsletter-snapshot.json` without changing cwd into Verdun.
 The bundled Garbage API workbench adapter and view-model smoke import the parent package's `apps/garbage/src/workbench.ts` projection, so API fallback/workbench routes and view-model coverage use the external Garbage package's newsletter-to-workbench mapping.
 The duplicate resident Verdun projection file has been removed; `npm run smoke:workbench` fails if `src/instances/garbage/workbench.ts` reappears.
-The bundled Garbage API store and workbench adapter import `apps/garbage/src/config.ts` for instance metadata and seed focus. While those API modules are still bundled in Verdun, the store keeps explicit legacy fallbacks for `public/data/newsletter-snapshot.json` and `crawler/data/editorial-state.json`.
+The bundled Garbage API store, workbench adapter, app registration, instance registration, and resident newsletter compatibility module import `apps/garbage/src/config.ts` for instance metadata and seed focus. The duplicate resident `src/instances/garbage/config.ts` file has been removed. While API modules are still bundled in Verdun, the store keeps explicit legacy fallbacks for `public/data/newsletter-snapshot.json` and `crawler/data/editorial-state.json`.
 
 Run `npm run vercel:config` after changing deploy profiles; it regenerates `vercel.json` routes for every registered app path. Run the deterministic local checks with `npm run smoke:all`. Browser coverage for the production `/rbage/` path runs with `npm run smoke:browser`, which builds, starts a local preview server, runs Playwright against `http://127.0.0.1:5174/rbage/`, and then stops the server.
 

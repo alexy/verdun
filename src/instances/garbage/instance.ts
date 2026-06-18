@@ -1,5 +1,5 @@
 import type { WorkbenchInstanceRegistration } from '../instance-types'
-import { garbageInstance } from './config'
+import { garbageInstance } from '../../../../apps/garbage/src/config.ts'
 
 export const workbenchInstanceRegistration = {
   instance: garbageInstance,

@@ -106,6 +106,9 @@ try {
   if (existsSync('src/instances/garbage/workbench.ts')) {
     throw new Error('Garbage workbench projection should live in the parent package, not resident Verdun source')
   }
+  if (existsSync('src/instances/garbage/config.ts')) {
+    throw new Error('Garbage instance config should live in the parent package, not resident Verdun source')
+  }
 
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {
     logLevel: 'error',
