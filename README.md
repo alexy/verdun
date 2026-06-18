@@ -118,7 +118,7 @@ Without `--apply`, the helper regenerates `/tmp/verdun-workbench-load.sql` from 
 
 ## Crawler
 
-The reusable crawler core lives under `crawler/src/`; crawler instances own domain adapters and return a core `CrawlerCollection`. The current Garbage crawler config and manual social review files live in the parent package under `apps/garbage/crawler/instances/garbage/`, while the Garbage Rust instance implementation remains bundled under `crawler/src/instances/garbage.rs`. Greathouse owns its property/listing fixtures and adapters under `crawler/instances/greathouse/`. Generic SQL export runs through the core `CrawlerSnapshot` shape instead of writing directly from Garbage-specific newsletter items.
+The reusable crawler core lives under `crawler/src/`; crawler instances own domain adapters and return a core `CrawlerCollection`. The current Garbage crawler config, manual social review files, and Rust instance implementation live in the parent package under `apps/garbage/crawler/`; Verdun compiles that implementation through a temporary include shim at `crawler/src/instances/garbage.rs`. Greathouse owns its property/listing fixtures and adapters under `crawler/instances/greathouse/`. Generic SQL export runs through the core `CrawlerSnapshot` shape instead of writing directly from Garbage-specific newsletter items.
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json

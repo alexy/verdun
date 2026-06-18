@@ -75,7 +75,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Garbage newsletter compatibility migrations live under parent-owned `apps/garbage/db/instances/garbage/migrations/` and are selected through the Garbage deploy profile when the current newsletter fallback tables are needed.
 - Local no-database mode persists votes and focus notes to ignored `crawler/data/editorial-state.json`, with `VERDUN_LOCAL_STATE_FILE` available for tests or alternate local state.
 - Rust crawler/loader scaffold under `crawler/`.
-- Garbage crawler instance config and manual social imports live under parent-owned `apps/garbage/crawler/instances/garbage/`, while reusable crawler structs live in `crawler/src/core.rs`.
+- Garbage crawler instance config, manual social imports, and Rust instance implementation live under parent-owned `apps/garbage/crawler/`, while reusable crawler structs live in `crawler/src/core.rs` and Verdun keeps only an include shim for the Garbage instance.
 - Generic crawler instances now return `CrawlerCollection` from the shared trait. The shared CLI writes the core `CrawlerSnapshot` directly for generic reloads, Greathouse adapters emit core `NormalizedRecord` values directly, and Garbage owns its legacy newsletter item/public snapshot payloads.
 - Rust crawler instance modules now expose neutral `CRAWLER_INSTANCE` registrations, so the shared crawler registry does not consume Garbage/Greathouse-named static exports.
 - Resident Rust crawler modules are now listed in `crawler/src/instances/bundled.rs`, leaving the generic crawler resolver free of direct Garbage/Greathouse module references.

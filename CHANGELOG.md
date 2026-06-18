@@ -79,6 +79,7 @@
 - Moved the Garbage Vue app, newsletter components, and instance stylesheet to parent-owned `apps/garbage/src/app/`, and replaced resident Verdun frontend files with shims.
 - Moved Garbage newsletter compatibility migrations to parent-owned `apps/garbage/db/instances/garbage/migrations/`; the Garbage deploy profile now points at those package migrations plus Verdun's generic core workbench migration.
 - Moved Garbage crawler config and manual social imports to parent-owned `apps/garbage/crawler/instances/garbage/`; the bundled Garbage crawler instance now defaults to that package config and resolves relative source paths from the selected config file.
+- Moved the Garbage Rust crawler instance implementation to parent-owned `apps/garbage/crawler/src/instances/garbage.rs`; Verdun now compiles it through a temporary include shim.
 - Moved Garbage-only newsletter/publishing smoke scripts under `scripts/instances/garbage/` and kept the public package surface on explicit `garbage:smoke:*` commands.
 - Renamed Garbage-only newsletter/publishing smoke package commands to `garbage:smoke:*` and updated `smoke:all` to call those explicit instance checks instead of generic `smoke:*` aliases.
 - Changed Vite base-path selection and `vercel.json` routing to derive from registered deploy profiles; `npm run vercel:config` now generates rewrites for both Garbage and Greathouse app paths while Garbage remains the default root redirect.

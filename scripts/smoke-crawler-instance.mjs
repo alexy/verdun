@@ -4,13 +4,28 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const [crawlerMainSource, garbageInstanceSource, greathouseInstanceSource, instanceTraitSource, bundledInstancesSource] = await Promise.all([
+const [
+  crawlerMainSource,
+  residentGarbageShimSource,
+  garbageInstanceSource,
+  greathouseInstanceSource,
+  instanceTraitSource,
+  bundledInstancesSource,
+] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/garbage.rs', 'utf8'),
+  readFile('../apps/garbage/crawler/src/instances/garbage.rs', 'utf8'),
   readFile('crawler/src/instances/greathouse.rs', 'utf8'),
   readFile('crawler/src/instances/mod.rs', 'utf8'),
   readFile('crawler/src/instances/bundled.rs', 'utf8'),
 ])
+if (
+  !residentGarbageShimSource.includes('../../apps/garbage/crawler/src/instances/garbage.rs')
+  || residentGarbageShimSource.includes('insert into newsletter_items')
+  || residentGarbageShimSource.includes('pub struct GarbageCrawlerInstance')
+) {
+  throw new Error('resident Garbage crawler module should only include the parent-owned implementation')
+}
 if (crawlerMainSource.includes('insert into newsletter_')) {
   throw new Error('crawler main still embeds legacy newsletter SQL table exports')
 }
