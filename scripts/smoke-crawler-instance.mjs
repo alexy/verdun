@@ -17,17 +17,21 @@ if (crawlerMainSource.includes('fn generic_export_sql(payload: &ExportPayload'))
   throw new Error('generic SQL exporter still depends on Garbage export payloads')
 }
 for (const marker of [
+  'use crate::instances::garbage',
+  'garbage::load_newsletter_export_payload',
+  'garbage::newsletter_export_sql',
+  'garbage::public_snapshot_value_as_crawler_snapshot',
   'use crate::instances::garbage::{',
   'fn legacy_query_plans',
   'fn load_export_payload',
   'fn load_crawler_snapshot',
 ]) {
   if (crawlerMainSource.includes(marker)) {
-    throw new Error(`crawler main still exposes ambiguous Garbage compatibility helper: ${marker}`)
+    throw new Error(`crawler main still exposes direct Garbage compatibility wiring: ${marker}`)
   }
 }
-if (!crawlerMainSource.includes('garbage::load_newsletter_export_payload') || !crawlerMainSource.includes('load_generic_crawler_snapshot')) {
-  throw new Error('crawler main does not route generic snapshot loading and Garbage newsletter compatibility loading through separate paths')
+if (!crawlerMainSource.includes('.legacy_sql_export(') || !crawlerMainSource.includes('load_generic_crawler_snapshot')) {
+  throw new Error('crawler main does not route legacy SQL export and generic snapshot loading through crawler instance hooks')
 }
 for (const marker of [
   'garbage::PublicSnapshot',
@@ -38,8 +42,11 @@ for (const marker of [
     throw new Error(`crawler main still parses Garbage compatibility type directly: ${marker}`)
   }
 }
-if (!garbageInstanceSource.includes('pub fn load_newsletter_export_payload') || !garbageInstanceSource.includes('pub fn public_snapshot_value_as_crawler_snapshot')) {
-  throw new Error('Garbage crawler instance does not own legacy newsletter snapshot loading')
+if (!instanceTraitSource.includes('fn legacy_sql_export') || !instanceTraitSource.includes('fn public_snapshot_as_crawler_snapshot') || !instanceTraitSource.includes('fn split_payload_as_crawler_snapshot')) {
+  throw new Error('crawler instance trait does not expose optional compatibility hooks')
+}
+if (!garbageInstanceSource.includes('fn legacy_sql_export') || !garbageInstanceSource.includes('pub fn load_newsletter_export_payload') || !garbageInstanceSource.includes('pub fn public_snapshot_value_as_crawler_snapshot')) {
+  throw new Error('Garbage crawler instance does not own legacy newsletter export and snapshot loading')
 }
 for (const marker of [
   'default_value = "garbage"',

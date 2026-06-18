@@ -10,7 +10,7 @@ use crate::core::{
     NormalizedCollectionPlan, NormalizedRecord, ReviewTarget, SourceConfig, SourceRun,
     SourceRunStatus, slug, stable_id,
 };
-use crate::instances::CrawlerInstance;
+use crate::instances::{CrawlerInstance, LegacySqlExport};
 
 pub static GARBAGE_CRAWLER_INSTANCE: GarbageCrawlerInstance = GarbageCrawlerInstance;
 
@@ -97,6 +97,45 @@ impl CrawlerInstance for GarbageCrawlerInstance {
             item_payload: serde_json::to_value(&public_snapshot.items)?,
             public_payload: serde_json::to_value(public_snapshot)?,
         })
+    }
+
+    fn legacy_sql_export(
+        &self,
+        target: &str,
+        snapshot: Option<&PathBuf>,
+        input: &PathBuf,
+        source_runs: &PathBuf,
+    ) -> Result<Option<LegacySqlExport>> {
+        if target != "newsletter" {
+            return Ok(None);
+        }
+        let payload = load_newsletter_export_payload(snapshot, input, source_runs)?;
+        Ok(Some(LegacySqlExport {
+            sql: newsletter_export_sql(&payload)?,
+            record_count: payload.items.len(),
+            source_run_count: payload.source_runs.len(),
+            plan_count: payload.query_plans.len(),
+        }))
+    }
+
+    fn public_snapshot_as_crawler_snapshot(
+        &self,
+        value: serde_json::Value,
+        path: &PathBuf,
+    ) -> Result<Option<CrawlerSnapshot>> {
+        Ok(Some(public_snapshot_value_as_crawler_snapshot(
+            value, path,
+        )?))
+    }
+
+    fn split_payload_as_crawler_snapshot(
+        &self,
+        input: &PathBuf,
+        source_runs: &PathBuf,
+    ) -> Result<Option<CrawlerSnapshot>> {
+        Ok(Some(
+            load_newsletter_export_payload(None, input, source_runs)?.normalized_snapshot(),
+        ))
     }
 }
 
@@ -2084,4 +2123,62 @@ fn canonical_url(value: &str) -> Option<String> {
         normalized.pop();
     }
     Some(normalized.replace("://www.", "://"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::DateTime;
+
+    #[test]
+    fn parses_lobsters_search_story() {
+        let html = r#"
+            <li id="story_abc123" data-shortid="abc123" class="story">
+              <div class="details">
+                <span class="link">
+                  <a class="u-url" href="https://example.com/post?x=1&amp;y=2" rel="ugc noreferrer">Pydantic&#39;s typed adapter</a>
+                </span>
+              </div>
+              <a class="tag tag_python" href="/t/python">python</a>
+              <a class="tag tag_databases" href="/t/databases">databases</a>
+              <time title="2026-05-13 19:49:20" datetime="2026-05-13 19:49:20" data-at-unix="1778719760">1 month ago</time>
+              <details class="caches" name="caches">
+                <summary>caches</summary>
+                <ul>
+                  <li><a href="https://web.archive.org/">Archive.org</a></li>
+                </ul>
+              </details>
+              <a class="upvoter" href="/login">24</a>
+              <span class="comments_label"><a role="heading" aria-level="2" href="/s/abc123/pydantic_typed_adapter">11 comments</a></span>
+            </li>
+        "#;
+
+        let stories = parse_lobsters_search_stories(html);
+
+        assert_eq!(stories.len(), 1);
+        let story = &stories[0];
+        assert_eq!(story.short_id.as_deref(), Some("abc123"));
+        assert_eq!(story.title, "Pydantic's typed adapter");
+        assert_eq!(story.url, "https://example.com/post?x=1&y=2");
+        assert_eq!(
+            story.short_id_url.as_deref(),
+            Some("https://lobste.rs/s/abc123/pydantic_typed_adapter")
+        );
+        assert_eq!(story.score, Some(24));
+        assert_eq!(story.comment_count, Some(11));
+        assert_eq!(story.tags, vec!["python", "databases"]);
+        assert_eq!(
+            story.created_at,
+            DateTime::parse_from_rfc3339("2026-05-13T19:49:20Z")
+                .unwrap()
+                .with_timezone(&Utc)
+        );
+    }
+
+    #[test]
+    fn parses_lobsters_empty_search() {
+        let stories = parse_lobsters_search_stories("<ol class=\"stories\"></ol>");
+
+        assert!(stories.is_empty());
+    }
 }

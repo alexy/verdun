@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved legacy newsletter SQL export and compatibility snapshot loading behind optional crawler instance trait hooks, so shared crawler CLI code no longer imports the Garbage crawler module directly for those compatibility paths.
 - Refreshed `README.md` and `APP.md` to describe Verdun as the reusable core-in-extraction, Garbage as the newsletter instance, and Greathouse as an instance proof with local, HTTP, browser-diagnostic, Redfin-shaped, and Zillow-shaped crawler adapters.
 - Removed the remaining root `scripts/garbage-*.mjs` publishing wrappers; `garbage:*` package commands now call instance-owned publishing scripts under `scripts/instances/garbage/` directly.
 - Moved the Grust watchlist audit and its smoke test under `scripts/instances/garbage/`, with package commands renamed to `garbage:audit:grust` and `garbage:smoke:grust-watchlist`.

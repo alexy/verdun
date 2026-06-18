@@ -5,7 +5,16 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use std::path::PathBuf;
 
-use crate::core::{CrawlerCollection, CrawlerConfig, EditorialFocus, NormalizedCollectionPlan};
+use crate::core::{
+    CrawlerCollection, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
+};
+
+pub struct LegacySqlExport {
+    pub sql: String,
+    pub record_count: usize,
+    pub source_run_count: usize,
+    pub plan_count: usize,
+}
 
 pub struct CrawlerInstanceRegistration {
     pub instance: &'static dyn CrawlerInstance,
@@ -33,6 +42,29 @@ pub trait CrawlerInstance: Sync {
         since: DateTime<Utc>,
         editorial_focuses: &[EditorialFocus],
     ) -> Result<CrawlerCollection>;
+    fn legacy_sql_export(
+        &self,
+        _target: &str,
+        _snapshot: Option<&PathBuf>,
+        _input: &PathBuf,
+        _source_runs: &PathBuf,
+    ) -> Result<Option<LegacySqlExport>> {
+        Ok(None)
+    }
+    fn public_snapshot_as_crawler_snapshot(
+        &self,
+        _value: serde_json::Value,
+        _path: &PathBuf,
+    ) -> Result<Option<CrawlerSnapshot>> {
+        Ok(None)
+    }
+    fn split_payload_as_crawler_snapshot(
+        &self,
+        _input: &PathBuf,
+        _source_runs: &PathBuf,
+    ) -> Result<Option<CrawlerSnapshot>> {
+        Ok(None)
+    }
 }
 
 pub static REGISTERED_CRAWLER_INSTANCES: &[CrawlerInstanceRegistration] = &[

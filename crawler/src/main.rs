@@ -4,7 +4,6 @@ use clap::{Parser, Subcommand, ValueEnum};
 mod core;
 mod instances;
 use crate::core::{CrawlerConfig, CrawlerSnapshot};
-use crate::instances::garbage;
 use std::{fs, path::PathBuf};
 
 #[derive(Parser)]
@@ -224,17 +223,25 @@ fn export_sql(
     };
     let (sql, record_count, source_run_count, plan_count) = match target {
         SqlExportTarget::Newsletter => {
-            let payload =
-                garbage::load_newsletter_export_payload(snapshot.as_ref(), &input, &source_runs)?;
+            let export = crawler_instance
+                .legacy_sql_export(target.as_str(), snapshot.as_ref(), &input, &source_runs)?
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "crawler instance {:?} does not support --target {}",
+                        crawler_instance.id(),
+                        target.as_str()
+                    )
+                })?;
             (
-                garbage::newsletter_export_sql(&payload)?,
-                payload.items.len(),
-                payload.source_runs.len(),
-                payload.query_plans.len(),
+                export.sql,
+                export.record_count,
+                export.source_run_count,
+                export.plan_count,
             )
         }
         SqlExportTarget::Generic => {
-            let snapshot = load_generic_crawler_snapshot(snapshot, input, source_runs)?;
+            let snapshot =
+                load_generic_crawler_snapshot(crawler_instance, snapshot, input, source_runs)?;
             (
                 generic_export_sql(&snapshot, &instance)?,
                 snapshot.records.len(),
@@ -390,6 +397,7 @@ fn generic_export_sql(snapshot: &CrawlerSnapshot, instance: &ExportInstance) -> 
 }
 
 fn load_generic_crawler_snapshot(
+    crawler_instance: &'static dyn instances::CrawlerInstance,
     snapshot: Option<PathBuf>,
     input: PathBuf,
     source_runs: PathBuf,
@@ -402,10 +410,27 @@ fn load_generic_crawler_snapshot(
             return serde_json::from_value(value)
                 .with_context(|| format!("parsing generic snapshot {}", snapshot.display()));
         }
-        return garbage::public_snapshot_value_as_crawler_snapshot(value, &snapshot);
+        return crawler_instance
+            .public_snapshot_as_crawler_snapshot(value, &snapshot)?
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "crawler instance {:?} cannot convert compatibility snapshot {} to the generic crawler snapshot contract",
+                    crawler_instance.id(),
+                    snapshot.display()
+                )
+            });
     }
 
-    Ok(garbage::load_newsletter_export_payload(None, &input, &source_runs)?.normalized_snapshot())
+    crawler_instance
+        .split_payload_as_crawler_snapshot(&input, &source_runs)?
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "crawler instance {:?} cannot convert split payload files {} and {} to the generic crawler snapshot contract",
+                crawler_instance.id(),
+                input.display(),
+                source_runs.display()
+            )
+        })
 }
 
 fn verify(instance: Option<String>, config: Option<PathBuf>) -> Result<()> {
@@ -466,63 +491,4 @@ fn sql_text_array(values: &[String]) -> String {
         .collect::<Vec<_>>()
         .join(", ");
     format!("array[{}]::text[]", values)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::instances::garbage;
-    use chrono::DateTime;
-
-    #[test]
-    fn parses_lobsters_search_story() {
-        let html = r#"
-            <li id="story_abc123" data-shortid="abc123" class="story">
-              <div class="details">
-                <span class="link">
-                  <a class="u-url" href="https://example.com/post?x=1&amp;y=2" rel="ugc noreferrer">Pydantic&#39;s typed adapter</a>
-                </span>
-              </div>
-              <a class="tag tag_python" href="/t/python">python</a>
-              <a class="tag tag_databases" href="/t/databases">databases</a>
-              <time title="2026-05-13 19:49:20" datetime="2026-05-13 19:49:20" data-at-unix="1778719760">1 month ago</time>
-              <details class="caches" name="caches">
-                <summary>caches</summary>
-                <ul>
-                  <li><a href="https://web.archive.org/">Archive.org</a></li>
-                </ul>
-              </details>
-              <a class="upvoter" href="/login">24</a>
-              <span class="comments_label"><a role="heading" aria-level="2" href="/s/abc123/pydantic_typed_adapter">11 comments</a></span>
-            </li>
-        "#;
-
-        let stories = garbage::parse_lobsters_search_stories(html);
-
-        assert_eq!(stories.len(), 1);
-        let story = &stories[0];
-        assert_eq!(story.short_id.as_deref(), Some("abc123"));
-        assert_eq!(story.title, "Pydantic's typed adapter");
-        assert_eq!(story.url, "https://example.com/post?x=1&y=2");
-        assert_eq!(
-            story.short_id_url.as_deref(),
-            Some("https://lobste.rs/s/abc123/pydantic_typed_adapter")
-        );
-        assert_eq!(story.score, Some(24));
-        assert_eq!(story.comment_count, Some(11));
-        assert_eq!(story.tags, vec!["python", "databases"]);
-        assert_eq!(
-            story.created_at,
-            DateTime::parse_from_rfc3339("2026-05-13T19:49:20Z")
-                .unwrap()
-                .with_timezone(&Utc)
-        );
-    }
-
-    #[test]
-    fn parses_lobsters_empty_search() {
-        let stories = garbage::parse_lobsters_search_stories("<ol class=\"stories\"></ol>");
-
-        assert!(stories.is_empty());
-    }
 }
