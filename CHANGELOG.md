@@ -13,6 +13,7 @@
 - Documented that parent Garbage Grust watchlist audit commands now live in the parent package while the crawler config remains bundled during extraction.
 - Documented that parent Garbage source-gap review smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage draft smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
+- Documented that parent Garbage URL snapshot draft smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage publishing-readiness smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Documented that parent Garbage Ghost smoke coverage now lives in the parent package rather than Verdun's Garbage smoke scripts.
 - Added `crawler/src/instances/bundled.rs` as the bundled Rust crawler registration manifest, so the generic crawler resolver no longer declares or references resident Garbage/Greathouse modules directly.
