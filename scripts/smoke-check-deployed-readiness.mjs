@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
+import { createGarbageDeployedCheckSmokeFixture } from './instances/garbage/deployed-check-smoke-fixture.mjs'
 
 const garbageProfile = deployCheckProfile(defaultDeployCheckProfileId())
 const greathouseProfile = deployCheckProfile('greathouse')
@@ -67,57 +68,12 @@ if (!greathouseDeployProfileSource.includes("id: 'greathouse'") || !greathouseDe
   throw new Error('Greathouse deploy profile is missing static snapshot metadata')
 }
 const freshGeneratedAt = new Date().toISOString()
-let reviewedSnapshot = {
-  ...rawSnapshot,
-  generated_at: freshGeneratedAt,
-  editorial_persistence: 'database',
-  items: rawSnapshot.items.map((item) => ({
-    ...item,
-    vote: ['grust-sail-3683deba292c', 'lakesail-e5ce5d36852a'].includes(item.id) ? 1 : 0,
-  })),
-  focuses: [
-    {
-      id: 'focus-smoke-check-deployed-ready',
-      text: 'More typed lakehouse execution and graph lowering evidence.',
-      scope: 'this_week',
-      created_at: new Date().toISOString(),
-    },
-  ],
-}
-function snapshotJson() {
-  return JSON.stringify(reviewedSnapshot)
-}
-function databaseStatusJson() {
-  return JSON.stringify({
-    editorialPersistence: 'database',
-    generatedAt: reviewedSnapshot.generated_at,
-    recordCount: reviewedSnapshot.items.length,
-    itemCount: reviewedSnapshot.items.length,
-    focusCount: reviewedSnapshot.focuses.length,
-    reviewCount: 2,
-    voteCount: 2,
-    sourceRunCount: reviewedSnapshot.source_runs.length,
-    collectionPlanCount: reviewedSnapshot.query_plans.length,
-    queryPlanCount: reviewedSnapshot.query_plans.length,
-    writable: true,
-  })
-}
-function browserStatusJson() {
-  return JSON.stringify({
-    editorialPersistence: 'browser',
-    generatedAt: reviewedSnapshot.generated_at,
-    recordCount: reviewedSnapshot.items.length,
-    itemCount: reviewedSnapshot.items.length,
-    focusCount: reviewedSnapshot.focuses.length,
-    reviewCount: 0,
-    voteCount: 0,
-    sourceRunCount: reviewedSnapshot.source_runs.length,
-    collectionPlanCount: reviewedSnapshot.query_plans.length,
-    queryPlanCount: reviewedSnapshot.query_plans.length,
-    writable: false,
-  })
-}
-let statusJson = databaseStatusJson()
+const garbageFixture = createGarbageDeployedCheckSmokeFixture({
+  profile: garbageProfile,
+  rawSnapshot,
+  generatedAt: freshGeneratedAt,
+})
+let statusJson = garbageFixture.databaseStatusJson()
 const greathouseSnapshot = {
   instance: {
     id: 'greathouse',
@@ -203,22 +159,6 @@ function greathouseStatusJson() {
     writable: true,
   })
 }
-function healthJson() {
-  const status = JSON.parse(statusJson)
-  const databaseConfigured = status.editorialPersistence === 'database'
-  return JSON.stringify({
-    ok: true,
-    service: 'workbench',
-    surface: 'health',
-    state: databaseConfigured ? 'database_configured' : 'database_not_configured',
-    databaseConfigured,
-    editorialPersistence: status.editorialPersistence,
-    readSurfaces: ['records', 'status', 'health'],
-    writeSurfaces: ['review', 'focus'],
-    collectionSurfaces: ['crawler verify', 'crawler collect', 'crawler export-sql', 'db:deploy'],
-    activeSnapshot: status,
-  })
-}
 function greathouseHealthJson() {
   const status = JSON.parse(greathouseStatusJson())
   return JSON.stringify({
@@ -234,42 +174,6 @@ function greathouseHealthJson() {
     activeSnapshot: status,
   })
 }
-const draftMarkdown = `# Strongly Typed AI/Data Notes: June 16, 2026
-
-## Weekly throughline
-
-Typed lakehouse and graph systems are moving from experiments into practical infrastructure.
-
-## Sources watched
-
-- Hacker News: 5 items
-`
-const draftManifest = {
-  snapshotInput: garbageProfile.draft.manifestSnapshotInput,
-  issue: {
-    date: '2026-06-16',
-    slug: 'strongly-typed-ai-data-notes-june-16-2026',
-    title: 'Strongly Typed AI/Data Notes: June 16, 2026',
-    selectedItemCount: 2,
-  },
-  title: 'Strongly Typed AI/Data Notes: June 16, 2026',
-  itemIds: ['grust-sail-3683deba292c', 'lakesail-e5ce5d36852a'],
-  readiness: { status: 'ready', checks: [{ id: 'upvotes', passed: true }] },
-  proseQuality: { status: 'ready', checks: [{ id: 'throughline', passed: true }] },
-}
-const draftJson = JSON.stringify({
-  draft: {
-    title: draftManifest.title,
-    markdown: draftMarkdown,
-    html: '<h1>Strongly Typed AI/Data Notes: June 16, 2026</h1>',
-    itemIds: draftManifest.itemIds,
-  },
-  manifest: draftManifest,
-  readiness: draftManifest.readiness,
-  proseQuality: draftManifest.proseQuality,
-  sourceCoverage: { watchedProjects: [], coveredProjects: [], uncoveredProjects: [] },
-})
-
 const server = createServer((request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1')
   if (url.pathname === garbageBasePath || url.pathname === `${garbageBasePath}index.html`) {
@@ -294,7 +198,7 @@ const server = createServer((request, response) => {
   }
   if (url.pathname === profileStaticPath(garbageProfile) || url.pathname === '/api/workbench/records') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(snapshotJson())
+    response.end(garbageFixture.snapshotJson())
     return
   }
   if (url.pathname === '/api/workbench/status' && url.searchParams.get('instance') === 'greathouse') {
@@ -314,23 +218,10 @@ const server = createServer((request, response) => {
   }
   if (url.pathname === '/api/workbench/health') {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(healthJson())
+    response.end(garbageFixture.healthJson(statusJson))
     return
   }
-  if (url.pathname === garbageProfile.draft.apiPath) {
-    const format = url.searchParams.get('format')
-    if (format === 'markdown') {
-      response.writeHead(200, { 'content-type': 'text/markdown; charset=utf-8' })
-      response.end(draftMarkdown)
-      return
-    }
-    if (format === 'manifest') {
-      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-      response.end(JSON.stringify(draftManifest))
-      return
-    }
-    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(draftJson)
+  if (garbageFixture.handleDraftRequest(url, response)) {
     return
   }
   response.writeHead(404, { 'content-type': 'text/plain' })
@@ -363,11 +254,8 @@ try {
   if (previewResult.status !== 0 || !previewResult.stdout.includes('(static only)')) {
     throw new Error(`profile-backed preview check failed\n${previewResult.stdout}\n${previewResult.stderr}`)
   }
-  reviewedSnapshot = {
-    ...reviewedSnapshot,
-    generated_at: '2026-01-01T00:00:00Z',
-  }
-  statusJson = databaseStatusJson()
+  garbageFixture.setGeneratedAt('2026-01-01T00:00:00Z')
+  statusJson = garbageFixture.databaseStatusJson()
   const staleResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
     localProfileUrl(address.port, garbageProfile),
@@ -376,11 +264,8 @@ try {
   if (staleResult.status === 0 || !staleResult.stderr.includes('Snapshot freshness')) {
     throw new Error(`check-deployed readiness gate should reject stale snapshots\n${staleResult.stdout}\n${staleResult.stderr}`)
   }
-  reviewedSnapshot = {
-    ...reviewedSnapshot,
-    generated_at: freshGeneratedAt,
-  }
-  statusJson = databaseStatusJson()
+  garbageFixture.setGeneratedAt(freshGeneratedAt)
+  statusJson = garbageFixture.databaseStatusJson()
   const databaseResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
     localProfileUrl(address.port, garbageProfile),
@@ -389,7 +274,7 @@ try {
   if (databaseResult.status !== 0 || !databaseResult.stdout.includes('with database gate')) {
     throw new Error(`check-deployed database smoke failed\n${databaseResult.stdout}\n${databaseResult.stderr}`)
   }
-  statusJson = browserStatusJson()
+  statusJson = garbageFixture.browserStatusJson()
   const browserResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
     localProfileUrl(address.port, garbageProfile),
@@ -398,7 +283,7 @@ try {
   if (browserResult.status === 0 || !browserResult.stderr.includes('not database-backed')) {
     throw new Error(`check-deployed database gate should reject browser persistence\n${browserResult.stdout}\n${browserResult.stderr}`)
   }
-  statusJson = databaseStatusJson()
+  statusJson = garbageFixture.databaseStatusJson()
   const greathouseResult = await runCheckDeployed([
     'scripts/check-deployed.mjs',
     localProfileUrl(address.port, greathouseProfile),

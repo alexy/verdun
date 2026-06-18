@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Moved the Garbage-specific deployed-check smoke draft/status fixture under `scripts/instances/garbage/`, leaving the shared deployed-check smoke harness to route through deploy profiles and instance-owned fixture behavior.
 - Changed `verdun-crawler export-sql --target` from a shared `newsletter`/`generic` enum to a generic string target: `generic` stays built into the shared CLI, while compatibility targets such as `newsletter` are resolved by the selected crawler instance.
 - Moved legacy newsletter SQL export and compatibility snapshot loading behind optional crawler instance trait hooks, so shared crawler CLI code no longer imports the Garbage crawler module directly for those compatibility paths.
 - Refreshed `README.md` and `APP.md` to describe Verdun as the reusable core-in-extraction, Garbage as the newsletter instance, and Greathouse as an instance proof with local, HTTP, browser-diagnostic, Redfin-shaped, and Zillow-shaped crawler adapters.
