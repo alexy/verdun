@@ -9,6 +9,48 @@ export function redactedDatabaseUrlArg(databaseUrl) {
   return databaseUrl ? ['--database-url', '<redacted>'] : []
 }
 
+export function databaseReloadStatus(apply) {
+  return apply ? 'applied' : 'preflight'
+}
+
+export function databaseReloadHandoff({
+  apply,
+  kind,
+  instance,
+  displayName = null,
+  generatedSql,
+  snapshotPath,
+  sqlPath,
+  databaseUrl,
+  vercelEnvChecked,
+  deployedCheckSkipped,
+  deployedCheckCommand,
+  commands,
+  generatedAt = new Date().toISOString(),
+  extra = {},
+}) {
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    kind,
+    status: databaseReloadStatus(apply),
+    apply,
+    generatedSql,
+    instance,
+    displayName,
+    snapshotPath,
+    sqlPath,
+    databaseEnv: databaseEnvStatus(databaseUrl),
+    vercelEnvChecked,
+    deployedCheck: {
+      skipped: deployedCheckSkipped,
+      command: deployedCheckCommand,
+    },
+    commands,
+    ...extra,
+  }
+}
+
 export function writeDatabaseReloadHandoff(path, payload) {
   const dir = dirname(path)
   if (dir && dir !== '.') mkdirSync(dir, { recursive: true })

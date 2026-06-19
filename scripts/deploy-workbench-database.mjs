@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { databaseEnvStatus, redactedDatabaseUrlArg, writeDatabaseReloadHandoff } from './database-reload-handoff.mjs'
+import { databaseReloadHandoff, redactedDatabaseUrlArg, writeDatabaseReloadHandoff } from './database-reload-handoff.mjs'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
@@ -93,27 +93,18 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
     console.log(`deployed check target: ${deployedCheckArgs.join(' ')}`)
   }
   if (handoffOut) {
-    writeDatabaseReloadHandoff(handoffOut, {
-      schemaVersion: 1,
-      generatedAt: new Date().toISOString(),
+    writeDatabaseReloadHandoff(handoffOut, databaseReloadHandoff({
       kind: 'verdun_generic_workbench_database_reload',
-      status: apply ? 'applied' : 'preflight',
       apply,
       generatedSql: generate,
       instance,
-      instanceName: instanceName ?? null,
       displayName: profile?.name ?? null,
-      basePath: basePath ?? null,
       snapshotPath,
-      staticSnapshotPath: staticSnapshotPath ?? null,
       sqlPath,
-      migrationPaths: profile?.migrationPaths ?? null,
-      databaseEnv: databaseEnvStatus(databaseUrl),
+      databaseUrl,
       vercelEnvChecked: Boolean(apply && !skipVercelEnv),
-      deployedCheck: {
-        skipped: Boolean(skipDeployedCheck || !apply),
-        command: ['npm', 'run', 'check:deployed', '--', ...deployedCheckArgs],
-      },
+      deployedCheckSkipped: Boolean(skipDeployedCheck || !apply),
+      deployedCheckCommand: ['npm', 'run', 'check:deployed', '--', ...deployedCheckArgs],
       commands: {
         exportSql: generate
           ? [
@@ -146,7 +137,13 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
           ...(apply ? ['--apply'] : []),
         ],
       },
-    })
+      extra: {
+        instanceName: instanceName ?? null,
+        basePath: basePath ?? null,
+        staticSnapshotPath: staticSnapshotPath ?? null,
+        migrationPaths: profile?.migrationPaths ?? null,
+      },
+    }))
     console.log(`wrote generic workbench database handoff ${handoffOut}`)
   }
   console.log(apply

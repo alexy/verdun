@@ -82,7 +82,7 @@ if ('publicBundledProofModulePaths' in workbenchApiModules) {
 }
 
 const reloadHandoff = await import('./public/database-reload-handoff.mjs')
-for (const expectedSymbol of ['databaseEnvStatus', 'redactedDatabaseUrlArg', 'writeDatabaseReloadHandoff']) {
+for (const expectedSymbol of ['databaseEnvStatus', 'databaseReloadHandoff', 'databaseReloadStatus', 'redactedDatabaseUrlArg', 'writeDatabaseReloadHandoff']) {
   if (typeof reloadHandoff[expectedSymbol] !== 'function') {
     throw new Error(`scripts/public/database-reload-handoff.mjs does not export ${expectedSymbol}`)
   }
@@ -92,4 +92,32 @@ if (reloadHandoff.databaseEnvStatus('postgres://example') !== 'provided') {
 }
 if (JSON.stringify(reloadHandoff.redactedDatabaseUrlArg('postgres://example')) !== JSON.stringify(['--database-url', '<redacted>'])) {
   throw new Error('database reload handoff helper did not redact database URL args')
+}
+const surfaceHandoff = reloadHandoff.databaseReloadHandoff({
+  apply: false,
+  kind: 'surface_smoke_database_reload',
+  instance: 'surface-smoke',
+  generatedSql: true,
+  snapshotPath: '/tmp/surface-smoke.json',
+  sqlPath: '/tmp/surface-smoke.sql',
+  databaseUrl: 'postgres://example',
+  vercelEnvChecked: false,
+  deployedCheckSkipped: true,
+  deployedCheckCommand: ['npm', 'run', 'check:deployed', '--', '--require-database'],
+  commands: {
+    exportSql: ['surface', 'export'],
+    applySql: ['surface', 'apply', '--database-url', '<redacted>'],
+  },
+  extra: {
+    basePath: '/surface-smoke/',
+  },
+})
+if (
+  surfaceHandoff.schemaVersion !== 1 ||
+  surfaceHandoff.status !== 'preflight' ||
+  surfaceHandoff.databaseEnv !== 'provided' ||
+  surfaceHandoff.basePath !== '/surface-smoke/' ||
+  surfaceHandoff.deployedCheck?.skipped !== true
+) {
+  throw new Error(`database reload handoff constructor returned an unexpected shape: ${JSON.stringify(surfaceHandoff)}`)
 }

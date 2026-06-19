@@ -1,4 +1,6 @@
 export {
+  databaseReloadHandoff,
+  databaseReloadStatus,
   databaseEnvStatus,
   redactedDatabaseUrlArg,
   writeDatabaseReloadHandoff,
