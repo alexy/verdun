@@ -15,7 +15,7 @@ pub struct CrawlerConfig {
     pub sources: Vec<SourceConfig>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CollectionTarget {
     pub name: String,
     pub topic: String,
