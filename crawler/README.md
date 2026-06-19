@@ -4,14 +4,14 @@ Verdun's Rust crawler crate is the reusable data-loading core for Verdun-backed 
 
 ## Boundary
 
-- `src/core.rs` defines reusable data types: `CrawlerSnapshot`, `NormalizedRecord`, `SourceRun`, `NormalizedCollectionPlan`, review targets, source config, and focus terms.
-- `src/sdk.rs` is the public facade for app crates. External crawlers should import from `verdun_crawler::sdk`, not from `verdun_crawler::core` or `verdun_crawler::instances`.
-- `src/runtime.rs` owns the shared CLI: `verify`, `queries`, `collect`, and `export-sql`.
-- `src/instances/` contains only bundled Verdun proof instances. The default bundled instance is Greathouse/demo. Garbage is not bundled here.
+- `src/sdk.rs` is the public Rust API for app crates. It re-exports the stable generic data types, registration trait, and CLI runtime entrypoints.
+- `src/core.rs` defines reusable data types internally: `CrawlerSnapshot`, `NormalizedRecord`, `SourceRun`, `NormalizedCollectionPlan`, review targets, source config, and focus terms. External crates receive these through `verdun_crawler::sdk`.
+- `src/runtime.rs` owns the shared CLI internally: `verify`, `queries`, `collect`, and `export-sql`. External app binaries call it through `verdun_crawler::sdk::run_cli_with_registrations`.
+- `src/instances/` contains only bundled Verdun proof instances and is not a public app extension module. The default bundled instance is Greathouse/demo. Garbage is not bundled here.
 
 ## External App Pattern
 
-An app crawler crate should depend on Verdun with a matching version plus a local path while the repos are developed together:
+An app crawler crate should depend on Verdun with a matching version plus a local path while the repos are developed together. When `verdun-crawler` is published or moved to a shared repository, remove the `path` part and keep the same `verdun_crawler::sdk` imports:
 
 ```toml
 verdun-crawler = { version = "0.1.0", path = "../../../verdun/crawler" }
@@ -58,4 +58,3 @@ npm run smoke:crawler-instance
 ```
 
 `npm run smoke:crawler-instance` validates the bundled Greathouse/demo instance and generic export path. App-specific crawler ownership checks belong in the app repo.
-

@@ -2,6 +2,8 @@
 
 ## 2026-06-18
 
+- Updated Verdun app-state docs to match Garbage's app-owned runtime env boundary: `GARBAGE_*` names are app controls and Verdun-prefixed names are bridge internals only.
+- Made `verdun-crawler` expose its reusable Rust API through the `verdun_crawler::sdk` facade only, keeping `core`, `instances`, and `runtime` as crate-internal modules and routing the bundled binary through the SDK.
 - Corrected top-level Verdun docs to describe Garbage as an external parent-workspace app package rather than a resident Verdun proof instance, with smoke coverage rejecting the stale wording.
 - Corrected Verdun README/APP legacy Garbage newsletter compatibility examples to use the app-owned `/tmp/garbage-newsletter-load.sql` path, and added smoke coverage rejecting the old Verdun-named newsletter temp path in active docs.
 - Added `db/public/workbench-migrations.mjs` as the external app migration manifest for Verdun's reusable workbench database schema, leaving `db/core` as an internal source of truth.

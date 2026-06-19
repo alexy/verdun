@@ -58,8 +58,8 @@ for (const removedPath of ['crawler/src/instances/garbage.rs', 'crawler/src/inst
     throw new Error(`${removedPath} should not exist; app crawlers register from their own packages`)
   }
 }
-if (!crawlerLibSource.includes('pub use runtime::{run_cli, run_cli_with_registrations};')) {
-  throw new Error('verdun-crawler should expose a reusable CLI runtime for app-owned crawler binaries')
+if (crawlerLibSource.includes('pub mod core;') || crawlerLibSource.includes('pub mod instances;') || crawlerLibSource.includes('pub use runtime::')) {
+  throw new Error('verdun-crawler should expose reusable types/runtime through sdk.rs, not public core/instances/runtime modules')
 }
 if (!crawlerLibSource.includes('pub mod sdk;')) {
   throw new Error('verdun-crawler should expose a public SDK facade for app-owned crawler binaries')
@@ -67,14 +67,14 @@ if (!crawlerLibSource.includes('pub mod sdk;')) {
 if (!crawlerSdkSource.includes('run_cli_with_registrations') || !crawlerSdkSource.includes('CrawlerInstanceRegistration')) {
   throw new Error('verdun-crawler SDK should expose runtime and instance registration contracts')
 }
+if (!crawlerMainSource.includes('verdun_crawler::sdk::run_cli()')) {
+  throw new Error('crawler main should run through the public SDK facade')
+}
 if (bundledInstancesSource.includes('garbage') || bundledInstancesSource.includes('external::')) {
   throw new Error('Verdun bundled crawler registrations should not include Garbage or an external parent path')
 }
 if (existsSync('crawler/src/instances/garbage.rs')) {
   throw new Error('Garbage crawler implementation should not live behind a resident Verdun instance module')
-}
-if (!crawlerMainSource.includes('verdun_crawler::run_cli()')) {
-  throw new Error('crawler main should be a thin Verdun CLI wrapper')
 }
 if (crawlerRuntimeSource.includes('insert into newsletter_')) {
   throw new Error('crawler runtime still embeds legacy newsletter SQL table exports')

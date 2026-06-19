@@ -71,32 +71,3 @@ pub trait CrawlerInstance: Sync {
 
 pub static REGISTERED_CRAWLER_INSTANCES: &[CrawlerInstanceRegistration] =
     bundled::BUNDLED_CRAWLER_INSTANCE_REGISTRATIONS;
-
-pub fn default_crawler_instance() -> &'static dyn CrawlerInstance {
-    REGISTERED_CRAWLER_INSTANCES
-        .iter()
-        .find(|entry| entry.default)
-        .or_else(|| REGISTERED_CRAWLER_INSTANCES.first())
-        .map(|entry| entry.instance)
-        .expect("at least one crawler instance is registered")
-}
-
-pub fn crawler_instance(instance: &str) -> Result<&'static dyn CrawlerInstance> {
-    if let Some(entry) = REGISTERED_CRAWLER_INSTANCES
-        .iter()
-        .find(|entry| entry.instance.id() == instance)
-    {
-        return Ok(entry.instance);
-    }
-    anyhow::bail!(
-        "unknown crawler instance {instance:?}; supported instances: {}",
-        supported_crawler_instance_ids().join(", ")
-    )
-}
-
-fn supported_crawler_instance_ids() -> Vec<&'static str> {
-    REGISTERED_CRAWLER_INSTANCES
-        .iter()
-        .map(|entry| entry.instance.id())
-        .collect()
-}
