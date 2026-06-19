@@ -13,6 +13,7 @@ const [
   instanceTraitSource,
   bundledInstancesSource,
   crawlerLibSource,
+  crawlerSdkSource,
   crawlerRuntimeSource,
 ] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
@@ -22,6 +23,7 @@ const [
   readFile('crawler/src/instances/mod.rs', 'utf8'),
   readFile('crawler/src/instances/bundled.rs', 'utf8'),
   readFile('crawler/src/lib.rs', 'utf8'),
+  readFile('crawler/src/sdk.rs', 'utf8'),
   readFile('crawler/src/runtime.rs', 'utf8'),
 ])
 const trackedLegacyGarbageArtifacts = spawnSync('git', [
@@ -51,14 +53,23 @@ for (const removedPath of ['crawler/src/instances/garbage.rs', 'crawler/src/inst
 if (!crawlerLibSource.includes('pub use runtime::{run_cli, run_cli_with_registrations};')) {
   throw new Error('verdun-crawler should expose a reusable CLI runtime for app-owned crawler binaries')
 }
-if (!garbageCrawlerMainSource.includes('verdun_crawler::run_cli_with_registrations') || !garbageCrawlerMainSource.includes('GARBAGE_CRAWLER_INSTANCE_REGISTRATIONS')) {
-  throw new Error('Garbage crawler package should register its own instance against the Verdun crawler runtime')
+if (!crawlerLibSource.includes('pub mod sdk;')) {
+  throw new Error('verdun-crawler should expose a public SDK facade for app-owned crawler binaries')
+}
+if (!crawlerSdkSource.includes('run_cli_with_registrations') || !crawlerSdkSource.includes('CrawlerInstanceRegistration')) {
+  throw new Error('verdun-crawler SDK should expose runtime and instance registration contracts')
+}
+if (!garbageCrawlerMainSource.includes('verdun_crawler::sdk') || !garbageCrawlerMainSource.includes('GARBAGE_CRAWLER_INSTANCE_REGISTRATIONS')) {
+  throw new Error('Garbage crawler package should register its own instance through the Verdun crawler SDK')
 }
 if (bundledInstancesSource.includes('garbage') || bundledInstancesSource.includes('external::')) {
   throw new Error('Verdun bundled crawler registrations should not include Garbage or an external parent path')
 }
-if (!garbageInstanceSource.includes('use verdun_crawler::core') || !garbageInstanceSource.includes('use verdun_crawler::instances')) {
-  throw new Error('Garbage crawler instance should depend on the Verdun crawler library contract')
+if (!garbageInstanceSource.includes('use verdun_crawler::sdk')) {
+  throw new Error('Garbage crawler instance should depend on the Verdun crawler SDK contract')
+}
+if (garbageInstanceSource.includes('use verdun_crawler::core') || garbageInstanceSource.includes('use verdun_crawler::instances')) {
+  throw new Error('Garbage crawler instance should not import Verdun crawler internals directly')
 }
 if (existsSync('crawler/src/instances/garbage.rs')) {
   throw new Error('Garbage crawler implementation should not live behind a resident Verdun instance module')

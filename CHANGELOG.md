@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added `crawler/src/sdk.rs` as the public Rust crawler SDK facade for external app crawlers, re-exporting the stable instance, runtime, and generic snapshot contract without requiring consumers to import `core` or `instances` internals.
 - Added `api/public/http.ts` and `api/public/workbench-local-adapter.ts` as external app API entrypoints, so consumers do not import Verdun `api/core/*` internals directly.
 - Added `frontend/workbench-ui.ts` and `frontend/workbench-style.css` as external app entrypoints for shared workbench presentation, so consumers do not import Verdun `src/core/*` frontend files directly.
 - Documented Garbage-owned runtime environment names (`GARBAGE_STATIC_SNAPSHOT_FILE`, `GARBAGE_LOCAL_STATE_FILE`, and `GARBAGE_DEPLOYED_URL`) as the app-facing controls, with Verdun-prefixed names treated as compatibility fallbacks.
