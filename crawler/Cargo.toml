@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "Reusable crawler SDK and database reload runtime for Verdun workbench apps"
 readme = "README.md"
+repository = "https://github.com/alexy/verdun"
 keywords = ["crawler", "database", "workbench", "vercel"]
 categories = ["command-line-utilities", "database"]
 
