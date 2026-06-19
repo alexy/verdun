@@ -531,6 +531,33 @@ pub struct DatabaseReloadCommandSet {
     pub apply_sql: Vec<String>,
 }
 
+impl DatabaseReloadCommandSet {
+    pub fn new(export_sql: Option<Vec<String>>, apply_sql: Vec<String>) -> Self {
+        Self {
+            export_sql,
+            apply_sql,
+        }
+    }
+
+    pub fn redacted_psql_apply(sql_path: impl Into<String>) -> Vec<String> {
+        vec![
+            "psql".to_owned(),
+            "<redacted>".to_owned(),
+            "-v".to_owned(),
+            "ON_ERROR_STOP=1".to_owned(),
+            "-f".to_owned(),
+            sql_path.into(),
+        ]
+    }
+
+    pub fn with_redacted_psql_apply(
+        export_sql: Option<Vec<String>>,
+        sql_path: impl Into<String>,
+    ) -> Self {
+        Self::new(export_sql, Self::redacted_psql_apply(sql_path))
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DatabaseReloadHandoff {
@@ -553,6 +580,43 @@ pub struct DatabaseReloadHandoff {
 }
 
 impl DatabaseReloadHandoff {
+    pub fn new(
+        kind: impl Into<String>,
+        apply: bool,
+        generated_sql: bool,
+        instance: impl Into<String>,
+        display_name: impl Into<String>,
+        base_path: Option<String>,
+        snapshot_path: Option<String>,
+        sql_path: impl Into<String>,
+        migration_paths: Vec<String>,
+        database_url_available: bool,
+        commands: DatabaseReloadCommandSet,
+        metadata: serde_json::Value,
+    ) -> Self {
+        Self {
+            schema_version: 1,
+            generated_at: Utc::now(),
+            kind: kind.into(),
+            status: Self::reload_status(apply).to_owned(),
+            apply,
+            generated_sql,
+            instance: instance.into(),
+            display_name: display_name.into(),
+            base_path,
+            snapshot_path,
+            sql_path: sql_path.into(),
+            migration_paths,
+            database_env: Self::database_env_status(database_url_available).to_owned(),
+            commands,
+            metadata,
+        }
+    }
+
+    pub fn reload_status(apply: bool) -> &'static str {
+        if apply { "applied" } else { "preflight" }
+    }
+
     pub fn database_env_status(database_url_available: bool) -> &'static str {
         if database_url_available {
             "provided"
@@ -897,6 +961,76 @@ mod tests {
         assert_eq!(inventory.artifacts[1].modified_at, None);
 
         fs::remove_dir_all(&test_dir).expect("remove test dir");
+    }
+
+    #[test]
+    fn database_reload_command_set_builds_redacted_psql_apply() {
+        let commands = DatabaseReloadCommandSet::with_redacted_psql_apply(
+            Some(vec!["crawler".to_owned(), "export-sql".to_owned()]),
+            "/tmp/load.sql",
+        );
+
+        assert_eq!(
+            commands.export_sql,
+            Some(vec!["crawler".to_owned(), "export-sql".to_owned()])
+        );
+        assert_eq!(
+            commands.apply_sql,
+            vec![
+                "psql".to_owned(),
+                "<redacted>".to_owned(),
+                "-v".to_owned(),
+                "ON_ERROR_STOP=1".to_owned(),
+                "-f".to_owned(),
+                "/tmp/load.sql".to_owned(),
+            ]
+        );
+    }
+
+    #[test]
+    fn database_reload_handoff_constructor_sets_common_receipt_fields() {
+        let handoff = DatabaseReloadHandoff::new(
+            "test_reload",
+            false,
+            true,
+            "demo",
+            "Demo",
+            Some("/demo/".to_owned()),
+            Some("/tmp/snapshot.json".to_owned()),
+            "/tmp/load.sql",
+            vec!["db/migrations/0001.sql".to_owned()],
+            false,
+            DatabaseReloadCommandSet::with_redacted_psql_apply(None, "/tmp/load.sql"),
+            serde_json::json!({"recordCount": 2}),
+        );
+
+        assert_eq!(handoff.schema_version, 1);
+        assert_eq!(handoff.status, "preflight");
+        assert_eq!(handoff.database_env, "not_provided");
+        assert_eq!(handoff.instance, "demo");
+        assert_eq!(handoff.base_path.as_deref(), Some("/demo/"));
+        assert_eq!(
+            handoff.commands.apply_sql,
+            DatabaseReloadCommandSet::redacted_psql_apply("/tmp/load.sql")
+        );
+        assert_eq!(handoff.metadata["recordCount"], 2);
+
+        let applied = DatabaseReloadHandoff::new(
+            "test_reload",
+            true,
+            false,
+            "demo",
+            "Demo",
+            None,
+            None,
+            "/tmp/load.sql",
+            Vec::new(),
+            true,
+            DatabaseReloadCommandSet::with_redacted_psql_apply(None, "/tmp/load.sql"),
+            serde_json::Value::Null,
+        );
+        assert_eq!(applied.status, "applied");
+        assert_eq!(applied.database_env, "provided");
     }
 
     fn source_run(status: SourceRunStatus, item_count: usize) -> SourceRun {
