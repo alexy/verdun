@@ -13,9 +13,10 @@ pub use crate::core::{
     stable_id,
 };
 pub use crate::http::{
-    HttpFetch, HttpFetchMetadata, fetch_json, fetch_json_request, fetch_text,
-    fetch_text_allow_status, fetch_text_allow_status_request, fetch_text_request,
-    probe_http_status,
+    HttpFetch, HttpFetchMetadata, fetch_json, fetch_json_async, fetch_json_request,
+    fetch_json_request_async, fetch_text, fetch_text_allow_status, fetch_text_allow_status_async,
+    fetch_text_allow_status_request, fetch_text_allow_status_request_async, fetch_text_async,
+    fetch_text_request, fetch_text_request_async, probe_http_status, probe_http_status_async,
 };
 pub use crate::instances::{CrawlerInstance, CrawlerInstanceRegistration, LegacySqlExport};
 pub use crate::runtime::{run_cli, run_cli_with_registrations};
