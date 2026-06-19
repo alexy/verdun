@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Documented Garbage-owned runtime environment names (`GARBAGE_STATIC_SNAPSHOT_FILE`, `GARBAGE_LOCAL_STATE_FILE`, and `GARBAGE_DEPLOYED_URL`) as the app-facing controls, with Verdun-prefixed names treated as compatibility fallbacks.
 - Added `scripts/core/workbench-api-modules.mjs` as the core manifest for compatibility smokes that need Verdun workbench API module paths without hardcoding internal filenames in external apps.
 - Added `scripts/core/test-loader.mjs` as the external test-loader contract for apps that need to run compatibility smokes against Verdun TypeScript while supplying their own Vite/module resolution.
 - Added `scripts/core/check-deployed.mjs` as the deploy-core entrypoint for external apps that reuse Verdun deployment checks.
