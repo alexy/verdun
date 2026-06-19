@@ -299,9 +299,23 @@ pub struct SourceAdapterRegistration {
 }
 
 impl SourceAdapterRegistration {
+    pub const fn new(ids: &'static [&'static str], adapter: &'static dyn SourceAdapter) -> Self {
+        Self { ids, adapter }
+    }
+
     pub fn matches(&self, id: &str) -> bool {
         self.ids.iter().any(|registered_id| registered_id == &id)
     }
+}
+
+pub fn find_source_adapter<'a>(
+    id: &str,
+    adapters: &'a [SourceAdapterRegistration],
+) -> Option<&'a dyn SourceAdapter> {
+    adapters
+        .iter()
+        .find(|registration| registration.matches(id))
+        .map(|registration| registration.adapter)
 }
 
 pub fn collect_source_adapter_outputs(
@@ -316,17 +330,13 @@ pub fn collect_source_adapter_outputs(
     let mut source_runs = Vec::new();
     for source in &config.sources {
         let adapter_id = source.adapter.as_deref().unwrap_or(source.kind.as_str());
-        let adapter = adapters
-            .iter()
-            .find(|registration| registration.matches(adapter_id))
-            .map(|registration| registration.adapter)
-            .ok_or_else(|| {
-                anyhow::anyhow!(
-                    "{} uses unsupported source adapter {}",
-                    source.name,
-                    adapter_id
-                )
-            })?;
+        let adapter = find_source_adapter(adapter_id, adapters).ok_or_else(|| {
+            anyhow::anyhow!(
+                "{} uses unsupported source adapter {}",
+                source.name,
+                adapter_id
+            )
+        })?;
         let output = adapter.collect(SourceAdapterContext {
             config,
             source,
@@ -892,10 +902,10 @@ mod tests {
     #[test]
     fn collect_source_adapter_outputs_resolves_registered_aliases() {
         static TEST_ADAPTER: TestSourceAdapter = TestSourceAdapter;
-        static ADAPTERS: &[SourceAdapterRegistration] = &[SourceAdapterRegistration {
-            ids: &["test-adapter", "test-kind"],
-            adapter: &TEST_ADAPTER,
-        }];
+        static ADAPTERS: &[SourceAdapterRegistration] = &[SourceAdapterRegistration::new(
+            &["test-adapter", "test-kind"],
+            &TEST_ADAPTER,
+        )];
         let config = CrawlerConfig {
             theme: "demo".to_owned(),
             targets: Vec::new(),
@@ -920,6 +930,20 @@ mod tests {
         assert!(matches!(source_runs[0].status, SourceRunStatus::Ok));
         assert_eq!(records[0].provenance_json["live"], true);
         assert_eq!(records[0].provenance_json["max_per_project"], 7);
+    }
+
+    #[test]
+    fn find_source_adapter_resolves_aliases() {
+        static TEST_ADAPTER: TestSourceAdapter = TestSourceAdapter;
+        static ADAPTERS: &[SourceAdapterRegistration] = &[SourceAdapterRegistration::new(
+            &["test-adapter", "test-kind"],
+            &TEST_ADAPTER,
+        )];
+
+        let adapter = find_source_adapter("test-kind", ADAPTERS).expect("find adapter");
+
+        assert_eq!(adapter.id(), "test-adapter");
+        assert!(find_source_adapter("missing", ADAPTERS).is_none());
     }
 
     #[test]

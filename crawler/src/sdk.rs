@@ -11,7 +11,8 @@ pub use crate::core::{
     FreshnessAssessment, FreshnessPolicy, FreshnessStatus, NormalizedCollectionPlan,
     NormalizedRecord, ReviewTarget, SourceAdapter, SourceAdapterCacheContext, SourceAdapterContext,
     SourceAdapterOutput, SourceAdapterRegistration, SourceConfig, SourceRun, SourceRunStatus,
-    SourceRunSummary, collect_source_adapter_outputs, project_counts_for_records, slug, stable_id,
+    SourceRunSummary, collect_source_adapter_outputs, find_source_adapter,
+    project_counts_for_records, slug, stable_id,
 };
 pub use crate::http::{
     HttpFetch, HttpFetchMetadata, fetch_bytes, fetch_bytes_async, fetch_bytes_request,

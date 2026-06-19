@@ -327,18 +327,15 @@ static LOCAL_JSON_SOURCE_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapte
 static HTTP_JSON_SOURCE_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapter;
 static HTTP_STATUS_DIAGNOSTIC_ADAPTER: HttpStatusDiagnosticAdapter = HttpStatusDiagnosticAdapter;
 static DEMO_SOURCE_ADAPTERS: &[SourceAdapterRegistration] = &[
-    SourceAdapterRegistration {
-        ids: &["local-record-json", "local-diagnostic-json"],
-        adapter: &LOCAL_JSON_SOURCE_ADAPTER,
-    },
-    SourceAdapterRegistration {
-        ids: &["http-record-json", "http-diagnostic-json"],
-        adapter: &HTTP_JSON_SOURCE_ADAPTER,
-    },
-    SourceAdapterRegistration {
-        ids: &["http-status-diagnostic"],
-        adapter: &HTTP_STATUS_DIAGNOSTIC_ADAPTER,
-    },
+    SourceAdapterRegistration::new(
+        &["local-record-json", "local-diagnostic-json"],
+        &LOCAL_JSON_SOURCE_ADAPTER,
+    ),
+    SourceAdapterRegistration::new(
+        &["http-record-json", "http-diagnostic-json"],
+        &HTTP_JSON_SOURCE_ADAPTER,
+    ),
+    SourceAdapterRegistration::new(&["http-status-diagnostic"], &HTTP_STATUS_DIAGNOSTIC_ADAPTER),
 ];
 
 impl SourceAdapter for LocalJsonSourceAdapter {
