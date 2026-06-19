@@ -1,5 +1,7 @@
 use crate::cache::{write_pretty_json, write_text};
-use crate::core::{CrawlerConfig, CrawlerSnapshot};
+use crate::core::{
+    CrawlerConfig, CrawlerOutputPaths, CrawlerRunManifest, CrawlerSnapshot, SourceRunSummary,
+};
 use crate::instances::{self, CrawlerInstanceRegistration};
 use anyhow::{Context, Result};
 use chrono::{Duration, Utc};
@@ -33,6 +35,8 @@ enum CommandKind {
         public_out: Option<PathBuf>,
         #[arg(long)]
         generic_out: Option<PathBuf>,
+        #[arg(long)]
+        run_manifest_out: Option<PathBuf>,
         #[arg(long)]
         live: bool,
         #[arg(long, default_value_t = 4)]
@@ -92,6 +96,7 @@ pub fn run_cli_with_registrations(
             source_runs_out,
             public_out,
             generic_out,
+            run_manifest_out,
             live,
             max_live_per_project,
             since_days,
@@ -104,6 +109,7 @@ pub fn run_cli_with_registrations(
             source_runs_out,
             public_out,
             generic_out,
+            run_manifest_out,
             live,
             max_live_per_project,
             since_days,
@@ -152,18 +158,19 @@ fn collect(
     source_runs_out: Option<PathBuf>,
     public_out: Option<PathBuf>,
     generic_out: Option<PathBuf>,
+    run_manifest_out: Option<PathBuf>,
     live: bool,
     max_live_per_project: usize,
     since_days: i64,
     editorial_state: Option<PathBuf>,
 ) -> Result<()> {
     let crawler_instance = resolve_crawler_instance(instance.as_deref(), registrations)?;
-    let config = config.unwrap_or_else(|| crawler_instance.default_config_path());
+    let config_path = config.unwrap_or_else(|| crawler_instance.default_config_path());
     let out = out.unwrap_or_else(|| crawler_instance.default_item_payload_path());
     let source_runs_out =
         source_runs_out.unwrap_or_else(|| crawler_instance.default_source_runs_path());
     let public_out = public_out.unwrap_or_else(|| crawler_instance.default_public_snapshot_path());
-    let config = read_crawler_config(&config)?;
+    let config = read_crawler_config(&config_path)?;
     let editorial_state =
         editorial_state.unwrap_or_else(|| crawler_instance.default_editorial_state_path());
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
@@ -179,10 +186,32 @@ fn collect(
     let record_count = collection.snapshot.records.len();
     write_pretty_json(&out, &collection.item_payload)?;
     write_pretty_json(&source_runs_out, &collection.snapshot.source_runs)?;
-    if let Some(generic_out) = generic_out {
+    if let Some(generic_out) = generic_out.as_ref() {
         write_pretty_json(&generic_out, &collection.snapshot)?;
     }
     write_pretty_json(&public_out, &collection.public_payload)?;
+    if let Some(run_manifest_out) = run_manifest_out {
+        let manifest = CrawlerRunManifest {
+            generated_at: Utc::now(),
+            instance: crawler_instance.id().to_owned(),
+            display_name: crawler_instance.display_name().to_owned(),
+            base_path: crawler_instance.base_path().to_owned(),
+            config_path: path_string(&config_path),
+            output_paths: CrawlerOutputPaths {
+                item_payload: path_string(&out),
+                source_runs: path_string(&source_runs_out),
+                public_snapshot: path_string(&public_out),
+                generic_snapshot: generic_out.as_ref().map(path_string),
+            },
+            live,
+            max_live_per_project,
+            since_days,
+            record_count,
+            source_runs: SourceRunSummary::from_source_runs(&collection.snapshot.source_runs),
+            collection_plan_count: collection.snapshot.collection_plans.len(),
+        };
+        write_pretty_json(&run_manifest_out, &manifest)?;
+    }
     println!(
         "wrote {} records to {}, {}, and {}",
         record_count,
@@ -191,6 +220,10 @@ fn collect(
         public_out.display()
     );
     Ok(())
+}
+
+fn path_string(path: &PathBuf) -> String {
+    path.to_string_lossy().into_owned()
 }
 
 fn export_sql(

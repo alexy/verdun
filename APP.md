@@ -6,7 +6,7 @@ Maintain Verdun as a reusable Vercel plus database workbench core filled by exte
 
 ## Current Slice
 
-- The crawler SDK now exposes reusable JSON disk cache and artifact writer helpers through `verdun_crawler::sdk`: `JsonDiskCache`, `CacheRead`, `write_pretty_json`, and `write_text`. Verdun's own crawler runtime uses these helpers for collection/export output writes, and tests cover deterministic cache paths plus parent-directory creation.
+- The crawler SDK now exposes reusable JSON disk cache, artifact writer, and run-manifest helpers through `verdun_crawler::sdk`: `JsonDiskCache`, `CacheRead`, `write_pretty_json`, `write_text`, `CrawlerRunManifest`, `CrawlerOutputPaths`, and `SourceRunSummary`. Verdun's own crawler runtime uses these helpers for collection/export output writes and can write shared lifecycle metadata with `collect --run-manifest-out`; tests cover deterministic cache paths, source-run summaries, and parent-directory creation.
 - Verdun is the reusable core; the live newsletter app is the external Garbage package layered on top of Verdun public contracts.
 - `PUBLIC_SURFACE.md` defines the supported Verdun package subpaths and Rust SDK facade available to external apps.
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.

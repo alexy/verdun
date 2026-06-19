@@ -122,6 +122,63 @@ pub struct CrawlerCollection {
     pub public_payload: serde_json::Value,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CrawlerOutputPaths {
+    pub item_payload: String,
+    pub source_runs: String,
+    pub public_snapshot: String,
+    pub generic_snapshot: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SourceRunSummary {
+    pub total: usize,
+    pub ok: usize,
+    pub error: usize,
+    pub pending: usize,
+    pub skipped: usize,
+    pub item_count: usize,
+}
+
+impl SourceRunSummary {
+    pub fn from_source_runs(source_runs: &[SourceRun]) -> Self {
+        let mut summary = Self {
+            total: source_runs.len(),
+            ok: 0,
+            error: 0,
+            pending: 0,
+            skipped: 0,
+            item_count: 0,
+        };
+        for source_run in source_runs {
+            match source_run.status {
+                SourceRunStatus::Ok => summary.ok += 1,
+                SourceRunStatus::Error => summary.error += 1,
+                SourceRunStatus::Pending => summary.pending += 1,
+                SourceRunStatus::Skipped => summary.skipped += 1,
+            }
+            summary.item_count += source_run.item_count;
+        }
+        summary
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CrawlerRunManifest {
+    pub generated_at: DateTime<Utc>,
+    pub instance: String,
+    pub display_name: String,
+    pub base_path: String,
+    pub config_path: String,
+    pub output_paths: CrawlerOutputPaths,
+    pub live: bool,
+    pub max_live_per_project: usize,
+    pub since_days: i64,
+    pub record_count: usize,
+    pub source_runs: SourceRunSummary,
+    pub collection_plan_count: usize,
+}
+
 pub fn stable_id(subject: &str, url: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(subject.as_bytes());
@@ -153,4 +210,40 @@ pub fn slug(value: &str) -> String {
         .filter(|part| !part.is_empty())
         .collect::<Vec<_>>()
         .join("-")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn source_run_summary_counts_statuses_and_items() {
+        let source_runs = vec![
+            source_run(SourceRunStatus::Ok, 3),
+            source_run(SourceRunStatus::Error, 0),
+            source_run(SourceRunStatus::Pending, 2),
+            source_run(SourceRunStatus::Skipped, 0),
+            source_run(SourceRunStatus::Ok, 5),
+        ];
+
+        let summary = SourceRunSummary::from_source_runs(&source_runs);
+
+        assert_eq!(summary.total, 5);
+        assert_eq!(summary.ok, 2);
+        assert_eq!(summary.error, 1);
+        assert_eq!(summary.pending, 1);
+        assert_eq!(summary.skipped, 1);
+        assert_eq!(summary.item_count, 10);
+    }
+
+    fn source_run(status: SourceRunStatus, item_count: usize) -> SourceRun {
+        SourceRun {
+            source: "source".to_owned(),
+            kind: "kind".to_owned(),
+            status,
+            item_count,
+            message: "message".to_owned(),
+            project_counts: BTreeMap::new(),
+        }
+    }
 }
