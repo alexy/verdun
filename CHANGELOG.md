@@ -2,6 +2,7 @@
 
 ## 2026-06-19
 
+- Added generic HTTP fetch metadata helpers: `HttpFetchMetadata`, `HttpFetch<T>`, text/JSON fetch helpers, status-preserving fetch helpers, and `probe_http_status`; Verdun demo adapters now use them for HTTP JSON and status diagnostics.
 - Added generic JSON cache audit SDK primitives: `CacheNamespacePolicy`, `JsonCacheNamespaceAudit`, `JsonCacheAudit`, `audit_json_cache`, and `is_cache_metadata_path`, covering payload/metadata/temp/corrupt-file counts, metadata coverage, byte counts, age summaries, and app-supplied namespace freshness policies.
 - Added generic crawler freshness assessment support: `FreshnessStatus`, `FreshnessPolicy`, `FreshnessAssessment`, and `collect --fresh-after-hours` now let app crawlers report `snapshot_freshness` in shared run manifests.
 - Added generic crawler run manifest support: `CrawlerRunManifest`, `CrawlerOutputPaths`, `SourceRunSummary`, and `collect --run-manifest-out` now let external app crawlers emit shared lifecycle metadata for instance/config/output paths, run mode, record counts, source-run status counts, and collection-plan counts.

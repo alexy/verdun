@@ -9,6 +9,7 @@ use crate::core::{
     CrawlerCollection, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
     NormalizedRecord, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
 };
+use crate::http::{fetch_json, probe_http_status};
 use crate::instances::CrawlerInstance;
 
 pub static CRAWLER_INSTANCE: DemoCrawlerInstance = DemoCrawlerInstance;
@@ -369,18 +370,13 @@ impl DemoSourceAdapter for HttpJsonSourceAdapter {
         config: &CrawlerConfig,
         source: &SourceConfig,
     ) -> Result<Vec<NormalizedRecord>> {
-        let response = Client::builder()
+        let client = Client::builder()
             .timeout(StdDuration::from_secs(5))
             .user_agent("verdun-crawler/0.1 demo")
-            .build()?
-            .get(&source.url)
-            .send()
-            .with_context(|| format!("fetching {}", source.url))?
-            .error_for_status()
-            .with_context(|| format!("fetching {}", source.url))?;
-        let records: Vec<DemoLocalRecord> = response
-            .json()
-            .with_context(|| format!("parsing JSON from {}", source.url))?;
+            .build()?;
+        let records = fetch_json::<Vec<DemoLocalRecord>>(&client, &source.url)
+            .with_context(|| format!("loading HTTP JSON source {}", source.name))?
+            .body;
         records
             .into_iter()
             .enumerate()
@@ -424,9 +420,9 @@ impl DemoSourceAdapter for HttpStatusDiagnosticAdapter {
             .user_agent("verdun-crawler/0.1 demo")
             .build()?;
         let observed_at = Utc::now();
-        let record = match client.get(&source.url).send() {
-            Ok(response) => {
-                let status = response.status().as_u16();
+        let record = match probe_http_status(&client, &source.url) {
+            Ok(metadata) => {
+                let status = metadata.status;
                 DemoLocalRecord {
                     subject: target.name.clone(),
                     url: source.url.clone(),
@@ -439,7 +435,7 @@ impl DemoSourceAdapter for HttpStatusDiagnosticAdapter {
                     tags: vec!["diagnostic".to_string(), "http-status".to_string()],
                     score: Some(if status >= 400 { 72 } else { 50 }),
                     stage: Some("blocked_http".to_string()),
-                    raw: serde_json::json!({ "http_status": status }),
+                    raw: serde_json::json!({ "http": metadata }),
                 }
             }
             Err(error) => DemoLocalRecord {
