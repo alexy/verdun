@@ -233,6 +233,7 @@ fn demo_record(
     source: &SourceConfig,
     record: DemoLocalRecord,
     adapter: &str,
+    cache: &crate::core::SourceAdapterCacheContext,
     index: usize,
 ) -> NormalizedRecord {
     let observed_at = record.observed_at.unwrap_or_else(Utc::now);
@@ -278,6 +279,13 @@ fn demo_record(
         "source_kind": source.kind,
         "source_url": source.url,
         "evidence_url": evidence_url,
+        "cache": {
+            "namespace": cache.namespace,
+            "keySeed": cache.key_seed,
+            "cacheKey": cache.cache_key,
+            "observedAfter": cache.observed_after,
+            "maxAgeHours": cache.max_age_hours,
+        },
         "subject": target.name,
         "matched_keywords": target.keywords,
     });
@@ -328,6 +336,8 @@ impl SourceAdapter for LocalJsonSourceAdapter {
     }
 
     fn collect(&self, context: SourceAdapterContext<'_>) -> Result<SourceAdapterOutput> {
+        let adapter_id = context.adapter_id().to_owned();
+        let cache = context.cache_context(24);
         let fixture_path = context
             .source
             .fixture_path
@@ -347,11 +357,8 @@ impl SourceAdapter for LocalJsonSourceAdapter {
                     target,
                     context.source,
                     record,
-                    context
-                        .source
-                        .adapter
-                        .as_deref()
-                        .unwrap_or("local-record-json"),
+                    &adapter_id,
+                    &cache,
                     index,
                 ))
             })
@@ -360,7 +367,10 @@ impl SourceAdapter for LocalJsonSourceAdapter {
             source_run: SourceRun::from_records(
                 context.source,
                 &records,
-                "local JSON adapter loaded through the demo crawler instance",
+                format!(
+                    "local JSON adapter loaded through the demo crawler instance; cache namespace {}",
+                    cache.namespace
+                ),
             ),
             records,
         })
@@ -373,6 +383,8 @@ impl SourceAdapter for HttpJsonSourceAdapter {
     }
 
     fn collect(&self, context: SourceAdapterContext<'_>) -> Result<SourceAdapterOutput> {
+        let adapter_id = context.adapter_id().to_owned();
+        let cache = context.cache_context(1);
         let client = Client::builder()
             .timeout(StdDuration::from_secs(5))
             .user_agent("verdun-crawler/0.1 demo")
@@ -389,11 +401,8 @@ impl SourceAdapter for HttpJsonSourceAdapter {
                     target,
                     context.source,
                     record,
-                    context
-                        .source
-                        .adapter
-                        .as_deref()
-                        .unwrap_or("http-record-json"),
+                    &adapter_id,
+                    &cache,
                     index,
                 ))
             })
@@ -402,7 +411,10 @@ impl SourceAdapter for HttpJsonSourceAdapter {
             source_run: SourceRun::from_records(
                 context.source,
                 &records,
-                "HTTP JSON adapter loaded through the demo crawler instance",
+                format!(
+                    "HTTP JSON adapter loaded through the demo crawler instance; cache namespace {}",
+                    cache.namespace
+                ),
             ),
             records,
         })
@@ -415,6 +427,8 @@ impl SourceAdapter for HttpStatusDiagnosticAdapter {
     }
 
     fn collect(&self, context: SourceAdapterContext<'_>) -> Result<SourceAdapterOutput> {
+        let adapter_id = context.adapter_id().to_owned();
+        let cache = context.cache_context(1);
         let target = context
             .config
             .targets
@@ -472,14 +486,18 @@ impl SourceAdapter for HttpStatusDiagnosticAdapter {
             target,
             context.source,
             record,
-            "http-status-diagnostic",
+            &adapter_id,
+            &cache,
             0,
         )];
         Ok(SourceAdapterOutput {
             source_run: SourceRun::from_records(
                 context.source,
                 &records,
-                "HTTP status diagnostic adapter loaded through the demo crawler instance",
+                format!(
+                    "HTTP status diagnostic adapter loaded through the demo crawler instance; cache namespace {}",
+                    cache.namespace
+                ),
             ),
             records,
         })

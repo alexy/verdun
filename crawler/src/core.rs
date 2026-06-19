@@ -178,6 +178,37 @@ pub struct SourceAdapterContext<'a> {
     pub editorial_focuses: &'a [EditorialFocus],
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SourceAdapterCacheContext {
+    pub namespace: String,
+    pub key_seed: String,
+    pub cache_key: String,
+    pub observed_after: DateTime<Utc>,
+    pub max_age_hours: f64,
+}
+
+impl<'a> SourceAdapterContext<'a> {
+    pub fn adapter_id(&self) -> &str {
+        self.source
+            .adapter
+            .as_deref()
+            .unwrap_or(self.source.kind.as_str())
+    }
+
+    pub fn cache_context(&self, max_age_hours: u64) -> SourceAdapterCacheContext {
+        let namespace = slug(&self.source.kind);
+        let key_seed = source_cache_key_seed(self.source);
+        let cache_key = stable_id(&namespace, &key_seed);
+        SourceAdapterCacheContext {
+            namespace,
+            key_seed,
+            cache_key,
+            observed_after: self.since,
+            max_age_hours: max_age_hours as f64,
+        }
+    }
+}
+
 pub struct SourceAdapterOutput {
     pub records: Vec<NormalizedRecord>,
     pub source_run: SourceRun,
@@ -500,6 +531,23 @@ pub fn project_counts_for_records(records: &[NormalizedRecord]) -> BTreeMap<Stri
     counts
 }
 
+fn source_cache_key_seed(source: &SourceConfig) -> String {
+    let mut parts = vec![source.name.clone(), source.kind.clone()];
+    if let Some(adapter) = &source.adapter {
+        parts.push(adapter.clone());
+    }
+    if !source.url.is_empty() {
+        parts.push(source.url.clone());
+    }
+    if let Some(path) = &source.fixture_path {
+        parts.push(path.to_string_lossy().into_owned());
+    }
+    if let Some(path) = &source.manual_path {
+        parts.push(path.to_string_lossy().into_owned());
+    }
+    parts.join("|")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -550,6 +598,43 @@ mod tests {
         assert_eq!(source_run.message, "collected records");
         assert_eq!(source_run.project_counts.get("alpha"), Some(&2));
         assert_eq!(source_run.project_counts.get("beta"), Some(&1));
+    }
+
+    #[test]
+    fn source_adapter_context_builds_stable_cache_context() {
+        let config = CrawlerConfig {
+            theme: "demo".to_owned(),
+            targets: Vec::new(),
+            sources: Vec::new(),
+        };
+        let source = SourceConfig {
+            name: "HTTP Records".to_owned(),
+            kind: "HTTP JSON".to_owned(),
+            url: "https://example.test/records.json".to_owned(),
+            adapter: Some("http-record-json".to_owned()),
+            feed_urls: None,
+            manual_path: None,
+            fixture_path: Some(PathBuf::from("fixtures/records.json")),
+        };
+        let since = Utc::now();
+        let context = SourceAdapterContext {
+            config: &config,
+            source: &source,
+            live: true,
+            max_per_project: 10,
+            since,
+            editorial_focuses: &[],
+        };
+
+        let cache = context.cache_context(6);
+
+        assert_eq!(context.adapter_id(), "http-record-json");
+        assert_eq!(cache.namespace, "http-json");
+        assert_eq!(cache.observed_after, since);
+        assert_eq!(cache.max_age_hours, 6.0);
+        assert!(cache.key_seed.contains("HTTP Records"));
+        assert!(cache.key_seed.contains("fixtures/records.json"));
+        assert_eq!(cache.cache_key, stable_id("http-json", &cache.key_seed));
     }
 
     #[test]
