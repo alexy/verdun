@@ -211,10 +211,17 @@ impl<'a> SourceAdapterContext<'a> {
 
 pub struct SourceAdapterOutput {
     pub records: Vec<NormalizedRecord>,
-    pub source_run: SourceRun,
+    pub source_runs: Vec<SourceRun>,
 }
 
 impl SourceAdapterOutput {
+    pub fn new(records: Vec<NormalizedRecord>, source_runs: Vec<SourceRun>) -> Self {
+        Self {
+            records,
+            source_runs,
+        }
+    }
+
     pub fn from_records(
         source: &SourceConfig,
         records: Vec<NormalizedRecord>,
@@ -223,21 +230,21 @@ impl SourceAdapterOutput {
         let source_run = SourceRun::from_records(source, &records, message);
         Self {
             records,
-            source_run,
+            source_runs: vec![source_run],
         }
     }
 
     pub fn error(source: &SourceConfig, message: impl Into<String>) -> Self {
         Self {
             records: Vec::new(),
-            source_run: SourceRun::error(source, message),
+            source_runs: vec![SourceRun::error(source, message)],
         }
     }
 
     pub fn skipped(source: &SourceConfig, message: impl Into<String>) -> Self {
         Self {
             records: Vec::new(),
-            source_run: SourceRun::skipped(source, message),
+            source_runs: vec![SourceRun::skipped(source, message)],
         }
     }
 }
@@ -285,7 +292,7 @@ pub fn collect_source_adapter_outputs(
             editorial_focuses,
         })?;
         records.extend(output.records);
-        source_runs.push(output.source_run);
+        source_runs.extend(output.source_runs);
     }
     Ok((records, source_runs))
 }
@@ -695,11 +702,13 @@ mod tests {
         let output = SourceAdapterOutput::from_records(&source, records, "collected records");
 
         assert_eq!(output.records.len(), 2);
-        assert_eq!(output.source_run.source, "test source");
-        assert!(matches!(output.source_run.status, SourceRunStatus::Ok));
-        assert_eq!(output.source_run.item_count, 2);
-        assert_eq!(output.source_run.project_counts.get("alpha"), Some(&1));
-        assert_eq!(output.source_run.project_counts.get("beta"), Some(&1));
+        assert_eq!(output.source_runs.len(), 1);
+        let source_run = &output.source_runs[0];
+        assert_eq!(source_run.source, "test source");
+        assert!(matches!(source_run.status, SourceRunStatus::Ok));
+        assert_eq!(source_run.item_count, 2);
+        assert_eq!(source_run.project_counts.get("alpha"), Some(&1));
+        assert_eq!(source_run.project_counts.get("beta"), Some(&1));
     }
 
     #[test]
@@ -718,14 +727,19 @@ mod tests {
         let skipped = SourceAdapterOutput::skipped(&source, "not live");
 
         assert!(error.records.is_empty());
-        assert!(matches!(error.source_run.status, SourceRunStatus::Error));
-        assert_eq!(error.source_run.message, "failed");
-        assert!(skipped.records.is_empty());
+        assert_eq!(error.source_runs.len(), 1);
         assert!(matches!(
-            skipped.source_run.status,
+            error.source_runs[0].status,
+            SourceRunStatus::Error
+        ));
+        assert_eq!(error.source_runs[0].message, "failed");
+        assert!(skipped.records.is_empty());
+        assert_eq!(skipped.source_runs.len(), 1);
+        assert!(matches!(
+            skipped.source_runs[0].status,
             SourceRunStatus::Skipped
         ));
-        assert_eq!(skipped.source_run.message, "not live");
+        assert_eq!(skipped.source_runs[0].message, "not live");
     }
 
     #[test]
