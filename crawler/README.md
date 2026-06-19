@@ -7,7 +7,7 @@ Verdun's Rust crawler crate is the reusable data-loading core for Verdun-backed 
 - `src/sdk.rs` is the public Rust API for app crates. It re-exports the stable generic data types, registration trait, and CLI runtime entrypoints.
 - `src/core.rs` defines reusable data types internally: `CrawlerSnapshot`, `NormalizedRecord`, `SourceRun`, `NormalizedCollectionPlan`, review targets, source config, and focus terms. External crates receive these through `verdun_crawler::sdk`.
 - `src/runtime.rs` owns the shared CLI internally: `verify`, `queries`, `collect`, and `export-sql`. External app binaries call it through `verdun_crawler::sdk::run_cli_with_registrations`.
-- `src/instances/` contains only bundled Verdun proof instances and is not a public app extension module. The default bundled instance is Greathouse/demo. Garbage is not bundled here.
+- `src/instances/` contains only bundled Verdun proof crawler instances and is not a public app extension module. The current bundled crawler proof is Greathouse-shaped while Garbage and parent Greathouse run their own external crawler crates.
 
 ## External App Pattern
 
@@ -57,7 +57,7 @@ cargo test --manifest-path crawler/Cargo.toml
 npm run smoke:crawler-instance
 ```
 
-`npm run smoke:crawler-instance` validates the bundled Greathouse/demo instance and generic export path. App-specific crawler ownership checks belong in the app repo.
+`npm run smoke:crawler-instance` validates the temporary bundled Greathouse-shaped crawler proof and generic export path. App-specific crawler ownership checks belong in the app repo.
 
 ## Packaging Status
 

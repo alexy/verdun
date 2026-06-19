@@ -94,6 +94,17 @@ try {
   if (existsSync('src/instances/garbage/newsletter.ts') || existsSync('src/instances/garbage/ontology.ts') || existsSync('src/instances/garbage/ontology.json')) {
     throw new Error('Garbage newsletter and ontology modules should live in the parent package, not resident Verdun source')
   }
+  for (const removedGreathouseFrontendPath of [
+    'src/instances/greathouse/app.ts',
+    'src/instances/greathouse/instance.ts',
+    'src/instances/greathouse/GreathouseApp.vue',
+    'src/instances/greathouse/config.ts',
+    'scripts/instances/greathouse/deploy-checks.mjs',
+  ]) {
+    if (existsSync(removedGreathouseFrontendPath)) {
+      throw new Error(`${removedGreathouseFrontendPath} should not exist; Greathouse should own its app/deploy profile outside Verdun`)
+    }
+  }
   for (const removedGarbageApiPath of [
     'api/garbage',
     'api/instances/garbage',
@@ -131,11 +142,6 @@ try {
     logLevel: 'error',
     optimizeDeps: { noDiscovery: true },
   })
-  const { module: greathouseConfigModule } = await runnerImport('./src/instances/greathouse/config.ts', {
-    logLevel: 'error',
-    optimizeDeps: { noDiscovery: true },
-  })
-
   const databaseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql('demo'), demoInstance)
   if (
     databaseSnapshot.instance.id !== 'demo'
@@ -182,86 +188,67 @@ try {
     throw new Error(`workbench generic focus write did not return a focus: ${JSON.stringify(focus)}`)
   }
 
-  const greathouseInstance = greathouseConfigModule.greathouseInstance
-  const greathouseSnapshot = await dbModule.readDatabaseWorkbenchSnapshot(fakeWorkbenchSql('greathouse'), greathouseInstance)
-  if (greathouseSnapshot.instance.id !== 'greathouse' || greathouseSnapshot.records[0]?.subject !== 'Berkeley 2BR') {
-    throw new Error(`workbench database reader did not honor Greathouse instance parameter: ${JSON.stringify(greathouseSnapshot)}`)
-  }
-  const greathouseStatus = await dbModule.readDatabaseWorkbenchStatus(fakeWorkbenchSql('greathouse'), greathouseInstance)
-  if (greathouseStatus.instance.id !== 'greathouse' || greathouseStatus.recordCount !== 1) {
-    throw new Error(`workbench database status did not honor Greathouse instance parameter: ${JSON.stringify(greathouseStatus)}`)
-  }
-  const greathouseWriteSql = fakeWorkbenchWriteSql()
-  await dbModule.writeDatabaseWorkbenchReview(greathouseWriteSql, 'listing-redfin-berkeley-01', 1, greathouseInstance)
-  await dbModule.writeDatabaseWorkbenchFocus(greathouseWriteSql, 'Greathouse database focus.', 'ongoing', greathouseInstance)
-  if (!greathouseWriteSql.reviewWrites.some((write) => write.instance === 'greathouse' && write.recordId === 'listing-redfin-berkeley-01')) {
-    throw new Error(`workbench generic review write did not honor Greathouse instance: ${JSON.stringify(greathouseWriteSql.reviewWrites)}`)
-  }
-  if (!greathouseWriteSql.focusWrites.some((write) => write.instance === 'greathouse' && write.text === 'Greathouse database focus.')) {
-    throw new Error(`workbench generic focus write did not honor Greathouse instance: ${JSON.stringify(greathouseWriteSql.focusWrites)}`)
+  const demoRecordsResponse = await call(recordsModule.default, 'GET', undefined, { instance: 'demo' })
+  if (
+    demoRecordsResponse.code !== 200
+    || demoRecordsResponse.body?.instance?.id !== 'demo'
+    || !demoRecordsResponse.body?.records?.some((record) => record.provenance?.adapter === 'demo-live-json')
+  ) {
+    throw new Error(`workbench records route did not resolve the demo instance: ${JSON.stringify(demoRecordsResponse.body)}`)
   }
 
-  const greathouseRecordsResponse = await call(recordsModule.default, 'GET', undefined, { instance: 'greathouse' })
+  const demoStatusResponse = await call(statusModule.default, 'GET', undefined, { instance: 'demo' })
   if (
-    greathouseRecordsResponse.code !== 200
-    || greathouseRecordsResponse.body?.instance?.id !== 'greathouse'
-    || !greathouseRecordsResponse.body?.records?.some((record) => record.provenance?.adapter === 'local-listing-json')
+    demoStatusResponse.code !== 200
+    || demoStatusResponse.body?.instance?.id !== 'demo'
+    || demoStatusResponse.body?.writable !== false
+    || demoStatusResponse.body?.recordCount !== demoRecordsResponse.body.records.length
   ) {
-    throw new Error(`workbench records route did not resolve the Greathouse instance: ${JSON.stringify(greathouseRecordsResponse.body)}`)
+    throw new Error(`workbench status route did not resolve the demo instance: ${JSON.stringify(demoStatusResponse.body)}`)
   }
-
-  const greathouseStatusResponse = await call(statusModule.default, 'GET', undefined, { instance: 'greathouse' })
+  const demoHealthResponse = await call(healthModule.default, 'GET', undefined, { instance: 'demo' })
   if (
-    greathouseStatusResponse.code !== 200
-    || greathouseStatusResponse.body?.instance?.id !== 'greathouse'
-    || greathouseStatusResponse.body?.writable !== false
-    || greathouseStatusResponse.body?.recordCount !== greathouseRecordsResponse.body.records.length
+    demoHealthResponse.code !== 200
+    || demoHealthResponse.body?.instance?.id !== 'demo'
+    || demoHealthResponse.body?.databaseContract?.compatibilityTables?.length !== 0
   ) {
-    throw new Error(`workbench status route did not resolve the Greathouse instance: ${JSON.stringify(greathouseStatusResponse.body)}`)
+    throw new Error(`workbench health route did not keep demo free of compatibility tables: ${JSON.stringify(demoHealthResponse.body)}`)
   }
-  const greathouseHealthResponse = await call(healthModule.default, 'GET', undefined, { instance: 'greathouse' })
-  if (
-    greathouseHealthResponse.code !== 200
-    || greathouseHealthResponse.body?.instance?.id !== 'greathouse'
-    || greathouseHealthResponse.body?.databaseContract?.compatibilityTables?.length !== 0
-  ) {
-    throw new Error(`workbench health route did not keep Greathouse free of compatibility tables: ${JSON.stringify(greathouseHealthResponse.body)}`)
+  if (!demoHealthResponse.body?.supportedInstances?.some((instance) => instance.id === 'demo' && instance.basePath === '/demo/')) {
+    throw new Error(`workbench health route did not expose supported instances: ${JSON.stringify(demoHealthResponse.body?.supportedInstances)}`)
   }
-  if (!greathouseHealthResponse.body?.supportedInstances?.some((instance) => instance.id === 'greathouse' && instance.basePath === '/greathouse/')) {
-    throw new Error(`workbench health route did not expose supported instances: ${JSON.stringify(greathouseHealthResponse.body?.supportedInstances)}`)
-  }
-  if (!greathouseHealthResponse.body?.databaseContract?.reusableViews?.includes('workbench_records')) {
+  if (!demoHealthResponse.body?.databaseContract?.reusableViews?.includes('workbench_records')) {
     throw new Error('workbench health route did not expose reusable database views')
   }
-  if (!greathouseHealthResponse.body?.readSurfaces?.includes('records')) {
+  if (!demoHealthResponse.body?.readSurfaces?.includes('records')) {
     throw new Error('workbench health route did not expose generic read surfaces')
   }
-  if (!greathouseHealthResponse.body?.writeSurfaces?.includes('review') || !greathouseHealthResponse.body?.writeSurfaces?.includes('focus') || !greathouseHealthResponse.body?.writeSurfaces?.includes('state')) {
+  if (!demoHealthResponse.body?.writeSurfaces?.includes('review') || !demoHealthResponse.body?.writeSurfaces?.includes('focus') || !demoHealthResponse.body?.writeSurfaces?.includes('state')) {
     throw new Error('workbench health route did not expose generic write surfaces')
   }
 
-  const blocked = await call(recordsModule.default, 'DELETE', undefined, { instance: 'greathouse' })
+  const blocked = await call(recordsModule.default, 'DELETE', undefined, { instance: 'demo' })
   if (blocked.code !== 405) throw new Error('workbench records route did not reject DELETE')
 
-  const greathouseReviewResponse = await call(reviewModule.default, 'POST', {
-    recordId: 'listing-redfin-berkeley-01',
+  const demoReviewResponse = await call(reviewModule.default, 'POST', {
+    recordId: 'demo-live-record-01',
     review: 1,
-  }, { instance: 'greathouse' })
-  if (greathouseReviewResponse.code !== 403 || greathouseReviewResponse.body?.error !== 'workbench_instance_read_only') {
-    throw new Error(`workbench review route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseReviewResponse.body)}`)
+  }, { instance: 'demo' })
+  if (demoReviewResponse.code !== 403 || demoReviewResponse.body?.error !== 'workbench_instance_read_only') {
+    throw new Error(`workbench review route did not keep read-only demo writes isolated: ${JSON.stringify(demoReviewResponse.body)}`)
   }
-  const greathouseFocusResponse = await call(focusModule.default, 'POST', {
-    text: 'Greathouse route focus.',
+  const demoFocusResponse = await call(focusModule.default, 'POST', {
+    text: 'Demo route focus.',
     scope: 'this_week',
-  }, { instance: 'greathouse' })
-  if (greathouseFocusResponse.code !== 403 || greathouseFocusResponse.body?.error !== 'workbench_instance_read_only') {
-    throw new Error(`workbench focus route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseFocusResponse.body)}`)
+  }, { instance: 'demo' })
+  if (demoFocusResponse.code !== 403 || demoFocusResponse.body?.error !== 'workbench_instance_read_only') {
+    throw new Error(`workbench focus route did not keep read-only demo writes isolated: ${JSON.stringify(demoFocusResponse.body)}`)
   }
-  const greathouseStateResponse = await call(stateModule.default, 'POST', {
-    reviews: { 'listing-redfin-berkeley-01': 1 },
-  }, { instance: 'greathouse' })
-  if (greathouseStateResponse.code !== 403 || greathouseStateResponse.body?.error !== 'workbench_instance_read_only') {
-    throw new Error(`workbench state route did not keep read-only Greathouse pilot writes isolated: ${JSON.stringify(greathouseStateResponse.body)}`)
+  const demoStateResponse = await call(stateModule.default, 'POST', {
+    reviews: { 'demo-live-record-01': 1 },
+  }, { instance: 'demo' })
+  if (demoStateResponse.code !== 403 || demoStateResponse.body?.error !== 'workbench_instance_read_only') {
+    throw new Error(`workbench state route did not keep read-only demo writes isolated: ${JSON.stringify(demoStateResponse.body)}`)
   }
   const unknownInstanceResponse = await call(recordsModule.default, 'GET', undefined, { instance: 'unknown' })
   if (unknownInstanceResponse.code !== 400 || unknownInstanceResponse.body?.error !== 'unknown_workbench_instance') {
@@ -294,32 +281,6 @@ function fakeWorkbenchSql(expectedInstance = 'demo') {
       if (sql.includes('from workbench_records')) {
         if (sql.includes('max(updated_at)')) {
           return [{ generated_at: '2026-06-16T12:00:00.000Z' }]
-        }
-        if (expectedInstance === 'greathouse') {
-          return [{
-            id: 'listing-redfin-berkeley-01',
-            title: 'Berkeley two-bedroom with transit access',
-            source: 'Redfin',
-            source_kind: 'listing',
-            url: 'https://example.com/greathouse/berkeley-two-bedroom',
-            observed_at: '2026-06-16T12:00:00.000Z',
-            subject: 'Berkeley 2BR',
-            topic: 'buyer shortlist',
-            summary: 'Generic Greathouse workbench database record.',
-            tags: ['berkeley', '2br', 'transit'],
-            score: 86,
-            review: 1,
-            provenance_json: {
-              stage: 'local_json',
-              adapter: 'local-listing-json',
-              source: 'Redfin',
-              source_kind: 'listing',
-              source_url: 'https://example.com/redfin',
-              evidence_url: 'https://example.com/greathouse/berkeley-two-bedroom',
-              subject: 'Berkeley 2BR',
-              matched_keywords: ['berkeley', '2br'],
-            },
-          }]
         }
         return [{
           id: 'db-demo',
@@ -355,16 +316,6 @@ function fakeWorkbenchSql(expectedInstance = 'demo') {
         }]
       }
       if (sql.includes('from workbench_source_runs')) {
-        if (expectedInstance === 'greathouse') {
-          return [{
-            source: 'Redfin',
-            kind: 'listing',
-            status: 'ok',
-            item_count: 1,
-            message: 'Greathouse source run',
-            subject_counts: { 'Berkeley 2BR': 1 },
-          }]
-        }
         return [{
           source: 'Demo Source',
           kind: 'fixture',
@@ -375,22 +326,6 @@ function fakeWorkbenchSql(expectedInstance = 'demo') {
         }]
       }
       if (sql.includes('from workbench_collection_plans')) {
-        if (expectedInstance === 'greathouse') {
-          return [{
-            subject: 'Berkeley 2BR',
-            topic: 'buyer shortlist',
-            query: 'Berkeley 2BR transit comparable',
-            live_terms: ['berkeley', '2br'],
-            tags: ['berkeley'],
-            review_targets: [{
-              source: 'Redfin',
-              label: 'Redfin Berkeley 2BR',
-              url: 'https://example.com/redfin/search/berkeley-2br',
-              adapter: 'local-listing-json',
-            }],
-            focus_terms: ['transit'],
-          }]
-        }
         return [{
           subject: 'Demo Subject',
           topic: 'generic records',

@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Removed the bundled Greathouse frontend instance, deploy-check profile, Vercel route, and workbench smoke from Verdun; Greathouse app/deploy behavior now belongs to the parent `@greathouse/instance` package.
 - Added a neutral bundled `demo` workbench instance and deploy profile at `/demo/`, making Verdun's default proof app generic instead of Greathouse-specific.
 - Documented that Greathouse now has an external parent-workspace crawler crate/config/fixture copy registered through the Verdun crawler SDK, while Verdun keeps the bundled crawler proof temporarily.
 - Documented that Greathouse now has an external parent-workspace Vite app/pilot snapshot copy using Verdun public frontend subpaths, while Verdun keeps the bundled proof temporarily.

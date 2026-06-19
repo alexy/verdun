@@ -33,4 +33,4 @@ The SDK facade re-exports the stable crawler instance registration, runtime, sou
 
 Garbage consumes this surface from `apps/garbage/` as a local workspace dependency while Verdun remains nested in the same checkout. That local dependency is a development arrangement, not an ownership shortcut: Garbage owns its app, newsletter routes, crawler instance, deploy profile, publishing scripts, and compatibility SQL.
 
-Greathouse remains the bundled Verdun proof instance for now. The target shape is the same: app-specific crawling, deployment, and product UI can move outside Verdun while continuing to reuse this public surface.
+Greathouse consumes this surface from `apps/greathouse/` as a second parent-owned app package. Verdun no longer bundles the Greathouse frontend or deploy profile; the remaining Greathouse-shaped crawler proof is temporary core verification until a neutral crawler fixture replaces it.

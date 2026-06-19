@@ -93,6 +93,18 @@ for (const removedGarbageFrontendPath of [
     throw new Error(`${removedGarbageFrontendPath} should not exist; Garbage should own its app entrypoint outside Verdun`)
   }
 }
+for (const removedGreathouseFrontendPath of [
+  'src/instances/greathouse/app.ts',
+  'src/instances/greathouse/instance.ts',
+  'src/instances/greathouse/GreathouseApp.vue',
+  'src/instances/greathouse/config.ts',
+  'scripts/instances/greathouse/deploy-checks.mjs',
+  'scripts/smoke-greathouse-workbench.mjs',
+]) {
+  if (existsSync(removedGreathouseFrontendPath)) {
+    throw new Error(`${removedGreathouseFrontendPath} should not exist; Greathouse should own its app entrypoint outside Verdun`)
+  }
+}
 if (
   !instanceRegistrationsSource.includes('workbenchInstanceRegistration') ||
   instanceRegistrationsSource.includes('garbageWorkbenchInstance') ||

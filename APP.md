@@ -11,10 +11,10 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
 - Verdun's bundled default workbench is now the neutral `demo` instance at `/demo/`; it exists only to prove the reusable frontend/API/deploy contract without naming Garbage or Greathouse as core behavior.
 - The parent workspace now has a Greathouse external app package at `apps/greathouse/`, including its Vite entrypoint, property workbench component, config, pilot snapshot, static snapshot, crawler crate/config/fixtures, deploy-check profile, and smoke fixture.
-- Verdun still carries the bundled Greathouse frontend/profile/crawler temporarily as compatibility proof coverage until external Greathouse preview/deploy/database/crawler checks are equivalent and shared registries can load the external package.
+- Verdun no longer carries the bundled Greathouse frontend or deploy profile; Greathouse app/deploy ownership is parent-owned. Verdun still carries a Greathouse-shaped crawler proof until a neutral crawler fixture replaces it.
 - Generic compatibility-smoke TypeScript loading lives behind `scripts/public/test-loader.mjs`; Garbage consumes that public loader contract while resolving Vite, Vue, and Lucide from the app package.
 - Generic workbench API module paths for compatibility smokes live behind `scripts/public/workbench-api-modules.mjs`; Garbage consumes that public manifest instead of naming Verdun workbench route files directly.
-- A temporary Greathouse pilot under `src/instances/greathouse/` still uses the same workbench contract for property listing and blocked-source diagnostic records while the parent `@greathouse/instance` package becomes the normal app owner.
+- Greathouse's pilot app, route, deploy profile, and static snapshot are owned by the parent `@greathouse/instance` package and consume Verdun public frontend/deploy contracts.
 - Vue/Vite app with a newsroom triage interface.
 - Reusable workbench controls now live under `src/components/workbench/` and are exposed to external apps through `frontend/workbench-ui.ts` plus `frontend/workbench-style.css`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under parent-owned `apps/garbage/src/app/composables/`.
@@ -38,14 +38,14 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - `apps/garbage/src/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
 - Garbage publishing readiness checks in `apps/garbage/src/newsletter.ts` gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
 - App and instance registration exports are neutral inside bundled instance modules, and the shared Verdun frontend registries discover bundled `app.ts` / `instance.ts` entries by convention without registering Garbage.
-- Verdun smoke scripts validate Verdun's own bundled Greathouse/demo core and no longer read `../apps/garbage/*`; Garbage-specific crawler and browser-smoke ownership checks live in the parent Garbage verifier.
+- Verdun smoke scripts validate Verdun's own bundled demo core and no longer read `../apps/garbage/*`; Garbage-specific crawler and browser-smoke ownership checks live in the parent Garbage verifier.
 - Vercel API routes:
-  - `GET /api/workbench/records?instance=garbage|greathouse`
-  - `GET /api/workbench/status?instance=garbage|greathouse`
-  - `GET /api/workbench/health?instance=garbage|greathouse`
-  - `POST /api/workbench/review?instance=garbage|greathouse`
-  - `POST /api/workbench/focus?instance=garbage|greathouse`
-  - `POST /api/workbench/state?instance=garbage|greathouse`
+  - `GET /api/workbench/records?instance=demo`
+  - `GET /api/workbench/status?instance=demo`
+  - `GET /api/workbench/health?instance=demo`
+  - `POST /api/workbench/review?instance=demo`
+  - `POST /api/workbench/focus?instance=demo`
+  - `POST /api/workbench/state?instance=demo`
   - `GET /api/garbage/newsletter/items`
   - `GET /api/garbage/newsletter/status`
   - `GET /api/garbage/newsletter/health`
@@ -131,7 +131,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
 - Reduce compatibility-only smokes and helper names that still exist to prove the migration from resident Garbage code.
 - Continue hardening crawler and deploy-profile registration as reusable app/plugin contracts rather than one-off local workspace conventions.
-- Continue turning Greathouse into an external consumer proof of the same core by retiring the temporary bundled frontend/profile/crawler once the parent `apps/greathouse/` checks cover the same behavior and Verdun can discover external registrations.
+- Replace the remaining Greathouse-shaped bundled crawler proof with a neutral Verdun crawler fixture now that the Greathouse frontend/deploy profile live outside Verdun.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 
 ## Verification

@@ -23,18 +23,6 @@
       "destination": "/index.html"
     },
     {
-      "source": "/greathouse/assets/(.*)",
-      "destination": "/assets/$1"
-    },
-    {
-      "source": "/greathouse/data/(.*)",
-      "destination": "/data/$1"
-    },
-    {
-      "source": "/greathouse/(.*)",
-      "destination": "/index.html"
-    },
-    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },

@@ -13,7 +13,3 @@ export const workbenchApiSourceGuardPaths = {
   healthRoute: workbenchApiModulePaths.healthRoute,
   instanceAdapters: 'api/workbench/instance-adapters.ts',
 }
-
-export const bundledProofModulePaths = {
-  greathouseConfig: 'src/instances/greathouse/config.ts',
-}
