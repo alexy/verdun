@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Noted the new parent-owned `apps/greathouse/` extraction anchor in Verdun app-state docs, so core-side resumption points at the externalization checklist.
 - Added `EXTERNAL_APP.md` as the reusable app-package guide for Verdun consumers, covering frontend, API, database, deploy-profile, crawler, and check ownership boundaries.
 - Added `scripts/public/deploy-profile-contract.mjs` so external apps can validate Verdun deploy-check profile metadata through a public package subpath, and made the shared profile registry apply the same validator to bundled and external profiles.
 - Trimmed Garbage newsletter operations out of Verdun's README so the core docs now focus on reusable workbench, deployment, database, crawler, and public-surface contracts.
