@@ -15,6 +15,7 @@ const [
   crawlerRuntimeSource,
   readmeSource,
   appDocSource,
+  crawlerManifestSource,
 ] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/greathouse.rs', 'utf8'),
@@ -25,7 +26,14 @@ const [
   readFile('crawler/src/runtime.rs', 'utf8'),
   readFile('README.md', 'utf8'),
   readFile('APP.md', 'utf8'),
+  readFile('crawler/Cargo.toml', 'utf8'),
 ])
+if (!crawlerManifestSource.includes('description = "Reusable crawler SDK and database reload runtime for Verdun workbench apps"') || !crawlerManifestSource.includes('readme = "README.md"')) {
+  throw new Error('verdun-crawler package metadata should describe the reusable SDK/runtime and point at crawler/README.md')
+}
+if (!crawlerManifestSource.includes('keywords = ["crawler", "database", "workbench", "vercel"]')) {
+  throw new Error('verdun-crawler package metadata should keep reusable crawler/workbench keywords')
+}
 for (const [docPath, source] of [['README.md', readmeSource], ['APP.md', appDocSource]]) {
   if (source.includes('/tmp/verdun-newsletter-load.sql')) {
     throw new Error(`${docPath} should use the app-owned Garbage newsletter SQL temp path in legacy compatibility examples`)

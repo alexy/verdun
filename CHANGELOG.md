@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added neutral `verdun-crawler` package metadata and documented that final publishing still needs a repository and license/license-file decision.
 - Updated Verdun app-state docs to match Garbage's app-owned runtime env boundary: `GARBAGE_*` names are app controls and Verdun-prefixed names are bridge internals only.
 - Made `verdun-crawler` expose its reusable Rust API through the `verdun_crawler::sdk` facade only, keeping `core`, `instances`, and `runtime` as crate-internal modules and routing the bundled binary through the SDK.
 - Corrected top-level Verdun docs to describe Garbage as an external parent-workspace app package rather than a resident Verdun proof instance, with smoke coverage rejecting the stale wording.

@@ -58,3 +58,7 @@ npm run smoke:crawler-instance
 ```
 
 `npm run smoke:crawler-instance` validates the bundled Greathouse/demo instance and generic export path. App-specific crawler ownership checks belong in the app repo.
+
+## Packaging Status
+
+The crate has package metadata for local packaging checks, but publishing still needs an explicit repository URL and license or license-file decision for the extracted Verdun project. Until then, app crates should keep the version-pinned local path dependency shown above.
