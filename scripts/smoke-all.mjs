@@ -12,6 +12,7 @@ const steps = [
   ['cargo', ['test', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'verify']],
   ['npm', ['run', 'smoke:check-deployed']],
+  ['npm', ['run', 'smoke:public-surface']],
   ['npm', ['run', 'smoke:api-http']],
   ['npm', ['run', 'smoke:crawler-instance']],
   ['npm', ['run', 'smoke:workbench']],
