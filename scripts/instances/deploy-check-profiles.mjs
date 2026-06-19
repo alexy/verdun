@@ -1,5 +1,6 @@
 import { access, readdir } from 'node:fs/promises'
 import { externalDeployCheckProfileModules } from './external-deploy-check-profile-modules.mjs'
+import { validateDeployCheckProfile } from '../public/deploy-profile-contract.mjs'
 
 const registeredDeployCheckProfiles = await discoverDeployCheckProfiles()
 
@@ -35,7 +36,8 @@ async function discoverDeployCheckProfiles() {
     ...externalDeployCheckProfileModules,
   ].map(async (profileModuleUrl) => {
     const module = await import(profileModuleUrl)
-    return module.deployCheckProfile ?? null
+    const profile = module.deployCheckProfile ?? null
+    return profile ? validateDeployCheckProfile(profile, profileModuleUrl) : null
   }))
   return profiles
     .filter(Boolean)

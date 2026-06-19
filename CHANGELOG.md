@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added `scripts/public/deploy-profile-contract.mjs` so external apps can validate Verdun deploy-check profile metadata through a public package subpath, and made the shared profile registry apply the same validator to bundled and external profiles.
 - Trimmed Garbage newsletter operations out of Verdun's README so the core docs now focus on reusable workbench, deployment, database, crawler, and public-surface contracts.
 - Added `PUBLIC_SURFACE.md` plus `smoke:public-surface` so Verdun's documented external package subpaths, real exported files, and `package.json` exports stay aligned.
 - Added neutral `verdun-crawler` package metadata and documented that final publishing still needs a repository and license/license-file decision.

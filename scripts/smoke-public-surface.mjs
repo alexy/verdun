@@ -7,6 +7,7 @@ const expectedExports = {
   './frontend/workbench-style.css': './frontend/workbench-style.css',
   './frontend/workbench-ui': './frontend/workbench-ui.ts',
   './scripts/public/check-deployed': './scripts/public/check-deployed.mjs',
+  './scripts/public/deploy-profile-contract': './scripts/public/deploy-profile-contract.mjs',
   './scripts/public/test-loader': './scripts/public/test-loader.mjs',
   './scripts/public/workbench-api-modules': './scripts/public/workbench-api-modules.mjs',
 }
@@ -42,4 +43,19 @@ for (const forbidden of ['verdun/src/core/', 'verdun/api/core/', 'verdun/db/core
 
 if (!documentedSurface.includes('verdun_crawler::sdk')) {
   throw new Error('PUBLIC_SURFACE.md does not document the Rust crawler SDK facade')
+}
+
+const { validateDeployCheckProfile } = await import('./public/deploy-profile-contract.mjs')
+validateDeployCheckProfile({
+  id: 'surface-smoke',
+  basePath: '/surface-smoke/',
+  defaultBaseUrl: 'https://example.com/surface-smoke/',
+  staticSnapshotPath: 'data/surface-smoke.json',
+}, 'public-surface smoke profile')
+
+try {
+  validateDeployCheckProfile({ id: 'bad-profile', basePath: 'bad' }, 'bad public-surface smoke profile')
+  throw new Error('deploy profile contract accepted an invalid basePath')
+} catch (error) {
+  if (!String(error?.message ?? error).includes('basePath')) throw error
 }
