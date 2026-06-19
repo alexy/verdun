@@ -3,6 +3,16 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "exports": {
+    "./api/public/http": "./api/public/http.ts",
+    "./api/public/workbench-local-adapter": "./api/public/workbench-local-adapter.ts",
+    "./db/public/workbench-migrations": "./db/public/workbench-migrations.mjs",
+    "./frontend/workbench-style.css": "./frontend/workbench-style.css",
+    "./frontend/workbench-ui": "./frontend/workbench-ui.ts",
+    "./scripts/public/check-deployed": "./scripts/public/check-deployed.mjs",
+    "./scripts/public/test-loader": "./scripts/public/test-loader.mjs",
+    "./scripts/public/workbench-api-modules": "./scripts/public/workbench-api-modules.mjs"
+  },
   "scripts": {
     "dev": "vite",
     "dev:app": "vite --host 127.0.0.1 --port 5176 --strictPort",

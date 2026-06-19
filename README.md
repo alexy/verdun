@@ -4,6 +4,7 @@ Verdun is being extracted into the reusable core for database-backed collection/
 
 The first reusable boundary is now explicit:
 
+- Verdun's `package.json` exports its app-facing JS/CSS surface as package subpaths (`verdun/frontend/*`, `verdun/api/public/*`, `verdun/db/public/*`, and `verdun/scripts/public/*`) so external apps do not import by filesystem-relative paths.
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
 - Generic reusable Vue controls live under `src/components/workbench/`; external apps should consume them through `frontend/workbench-ui.ts`, and shared workbench CSS through `frontend/workbench-style.css`.
