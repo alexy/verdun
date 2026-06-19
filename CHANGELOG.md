@@ -2,6 +2,7 @@
 
 ## 2026-06-19
 
+- Added generic crawler artifact inventory support: `ArtifactSpec`, `ArtifactInventory`, `ArtifactInventoryEntry`, `ArtifactInventorySummary`, and `CrawlerRunManifest.artifact_inventory` now let app crawlers report required output existence, byte counts, modified times, and missing-required counts in shared run manifests.
 - Added generic workbench database reload handoff support: `deploy-workbench-database --handoff-out` writes redacted snapshot/SQL/migration/deployed-check metadata, and public script subpaths now expose generic DB deploy/apply helpers to external apps.
 - Added generic HTTP fetch metadata helpers: `HttpFetchMetadata`, `HttpFetch<T>`, text/JSON fetch helpers, status-preserving fetch helpers, and `probe_http_status`; Verdun demo adapters now use them for HTTP JSON and status diagnostics.
 - Added generic JSON cache audit SDK primitives: `CacheNamespacePolicy`, `JsonCacheNamespaceAudit`, `JsonCacheAudit`, `audit_json_cache`, and `is_cache_metadata_path`, covering payload/metadata/temp/corrupt-file counts, metadata coverage, byte counts, age summaries, and app-supplied namespace freshness policies.

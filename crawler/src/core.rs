@@ -1,7 +1,11 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeMap, path::PathBuf};
+use std::{
+    collections::BTreeMap,
+    fs,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Deserialize)]
 pub struct CrawlerConfig {
@@ -131,6 +135,94 @@ pub struct CrawlerOutputPaths {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArtifactSpec {
+    pub label: String,
+    pub kind: String,
+    pub path: String,
+    pub required: bool,
+}
+
+impl ArtifactSpec {
+    pub fn new(
+        label: impl Into<String>,
+        kind: impl Into<String>,
+        path: impl AsRef<Path>,
+        required: bool,
+    ) -> Self {
+        Self {
+            label: label.into(),
+            kind: kind.into(),
+            path: path.as_ref().to_string_lossy().into_owned(),
+            required,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArtifactInventoryEntry {
+    pub label: String,
+    pub kind: String,
+    pub path: String,
+    pub required: bool,
+    pub exists: bool,
+    pub bytes: Option<u64>,
+    pub modified_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArtifactInventorySummary {
+    pub total: usize,
+    pub existing: usize,
+    pub missing_required: usize,
+    pub total_bytes: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArtifactInventory {
+    pub generated_at: DateTime<Utc>,
+    pub summary: ArtifactInventorySummary,
+    pub artifacts: Vec<ArtifactInventoryEntry>,
+}
+
+impl ArtifactInventory {
+    pub fn inspect(generated_at: DateTime<Utc>, specs: &[ArtifactSpec]) -> Self {
+        let artifacts = specs
+            .iter()
+            .map(|spec| {
+                let metadata = fs::metadata(&spec.path).ok();
+                let modified_at = metadata
+                    .as_ref()
+                    .and_then(|metadata| metadata.modified().ok())
+                    .map(DateTime::<Utc>::from);
+                ArtifactInventoryEntry {
+                    label: spec.label.clone(),
+                    kind: spec.kind.clone(),
+                    path: spec.path.clone(),
+                    required: spec.required,
+                    exists: metadata.is_some(),
+                    bytes: metadata.as_ref().map(fs::Metadata::len),
+                    modified_at,
+                }
+            })
+            .collect::<Vec<_>>();
+        let summary = ArtifactInventorySummary {
+            total: artifacts.len(),
+            existing: artifacts.iter().filter(|artifact| artifact.exists).count(),
+            missing_required: artifacts
+                .iter()
+                .filter(|artifact| artifact.required && !artifact.exists)
+                .count(),
+            total_bytes: artifacts.iter().filter_map(|artifact| artifact.bytes).sum(),
+        };
+        Self {
+            generated_at,
+            summary,
+            artifacts,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SourceRunSummary {
     pub total: usize,
     pub ok: usize,
@@ -220,6 +312,7 @@ pub struct CrawlerRunManifest {
     pub base_path: String,
     pub config_path: String,
     pub output_paths: CrawlerOutputPaths,
+    pub artifact_inventory: ArtifactInventory,
     pub live: bool,
     pub max_live_per_project: usize,
     pub since_days: i64,
@@ -310,6 +403,41 @@ mod tests {
         assert_eq!(fresh.age_hours, Some(2.0));
         assert_eq!(stale.status, FreshnessStatus::Stale);
         assert_eq!(unknown.status, FreshnessStatus::Unknown);
+    }
+
+    #[test]
+    fn artifact_inventory_marks_existing_and_missing_files() {
+        let test_dir = std::env::temp_dir().join(format!(
+            "verdun-artifact-inventory-test-{}",
+            std::process::id()
+        ));
+        fs::create_dir_all(&test_dir).expect("create test dir");
+        let existing_path = test_dir.join("existing.json");
+        let missing_path = test_dir.join("missing.json");
+        fs::write(&existing_path, "{}").expect("write existing artifact");
+
+        let checked_at = DateTime::from_timestamp(3_600 * 10, 0).expect("checked time");
+        let inventory = ArtifactInventory::inspect(
+            checked_at,
+            &[
+                ArtifactSpec::new("existing", "json", &existing_path, true),
+                ArtifactSpec::new("missing", "json", &missing_path, true),
+            ],
+        );
+
+        assert_eq!(inventory.generated_at, checked_at);
+        assert_eq!(inventory.summary.total, 2);
+        assert_eq!(inventory.summary.existing, 1);
+        assert_eq!(inventory.summary.missing_required, 1);
+        assert_eq!(inventory.summary.total_bytes, 2);
+        assert!(inventory.artifacts[0].exists);
+        assert_eq!(inventory.artifacts[0].bytes, Some(2));
+        assert!(inventory.artifacts[0].modified_at.is_some());
+        assert!(!inventory.artifacts[1].exists);
+        assert_eq!(inventory.artifacts[1].bytes, None);
+        assert_eq!(inventory.artifacts[1].modified_at, None);
+
+        fs::remove_dir_all(&test_dir).expect("remove test dir");
     }
 
     fn source_run(status: SourceRunStatus, item_count: usize) -> SourceRun {

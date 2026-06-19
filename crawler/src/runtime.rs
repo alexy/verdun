@@ -1,7 +1,7 @@
 use crate::cache::{write_pretty_json, write_text};
 use crate::core::{
-    CrawlerConfig, CrawlerOutputPaths, CrawlerRunManifest, CrawlerSnapshot, FreshnessAssessment,
-    FreshnessPolicy, SourceRunSummary,
+    ArtifactInventory, ArtifactSpec, CrawlerConfig, CrawlerOutputPaths, CrawlerRunManifest,
+    CrawlerSnapshot, FreshnessAssessment, FreshnessPolicy, SourceRunSummary,
 };
 use crate::instances::{self, CrawlerInstanceRegistration};
 use anyhow::{Context, Result};
@@ -218,6 +218,10 @@ fn collect(
                 public_snapshot: path_string(&public_out),
                 generic_snapshot: generic_out.as_ref().map(path_string),
             },
+            artifact_inventory: ArtifactInventory::inspect(
+                checked_at,
+                &crawler_artifact_specs(&out, &source_runs_out, &public_out, generic_out.as_ref()),
+            ),
             live,
             max_live_per_project,
             since_days,
@@ -240,6 +244,28 @@ fn collect(
         public_out.display()
     );
     Ok(())
+}
+
+fn crawler_artifact_specs(
+    out: &Path,
+    source_runs_out: &Path,
+    public_out: &Path,
+    generic_out: Option<&PathBuf>,
+) -> Vec<ArtifactSpec> {
+    let mut specs = vec![
+        ArtifactSpec::new("item payload", "app_payload", out, true),
+        ArtifactSpec::new("source runs", "source_runs", source_runs_out, true),
+        ArtifactSpec::new("public snapshot", "public_snapshot", public_out, true),
+    ];
+    if let Some(generic_out) = generic_out {
+        specs.push(ArtifactSpec::new(
+            "generic snapshot",
+            "generic_snapshot",
+            generic_out,
+            true,
+        ));
+    }
+    specs
 }
 
 fn path_string(path: &PathBuf) -> String {
