@@ -48,8 +48,8 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
   - `POST /api/garbage/newsletter/vote`
   - `POST /api/garbage/newsletter/focus`
   - `POST /api/garbage/newsletter/editorial-state`
-- Generic backend route helpers live in `api/core/http.ts`; Garbage data access and local fallback state live under parent-owned `apps/garbage/src/api/`.
-- Generic local workbench adapter types are exposed externally through `api/core/workbench-local-adapter.ts`; Garbage fallback behavior is now an instance-owned registration rather than a Garbage-named adapter contract in the shared resolver.
+- Generic backend route helpers live internally in `api/core/http.ts` and are exposed to external apps through `api/public/http.ts`; Garbage data access and local fallback state live under parent-owned `apps/garbage/src/api/`.
+- Generic local workbench adapter types are exposed externally through `api/public/workbench-local-adapter.ts`; Garbage fallback behavior is now an instance-owned registration rather than a Garbage-named adapter contract in the shared resolver.
 - Bundled API fallback adapters are isolated in `api/instances/bundled-workbench-adapters.ts`, so the generic adapter registry does not directly import Garbage.
 - The parent Garbage repo exposes `@garbage/instance` package commands as the stable app command surface. Publishing entrypoints, the newsletter draft builder, workbench projection, default publishing data, draft/URL-draft/readiness/source-gap/Ulysses/Ghost/public-snapshot/recency/API smoke coverage, browser smoke coverage, and Grust watchlist/dedupe/provenance/manual-source/query-plan crawler smoke commands now live in the parent package, import package TypeScript directly with Node, and no longer change cwd into Verdun. Local API smoke is parent-owned and loads app-owned route/store modules through the shared TypeScript migration loader.
 - Grust watchlist audit and smoke scripts are parent-owned in `apps/garbage/scripts/`; Verdun reaches them through deploy-profile command metadata.
