@@ -2,14 +2,15 @@
 
 ## 2026-06-18
 
+- Updated Verdun docs to state the completed core/app ownership split plainly: Verdun owns the reusable demo core, while Garbage and Greathouse own their app, crawler, deploy, and compatibility behavior as external consumers.
 - Removed the deleted bundled-proof module export from the public workbench API module manifest and added public-surface smoke coverage so external apps cannot consume Verdun instance-proof internals.
 - Replaced Verdun's bundled Greathouse crawler proof with a neutral `demo` crawler instance and fixtures, leaving Greathouse crawling parent-owned under `apps/greathouse/`.
 - Removed the bundled Greathouse frontend instance, deploy-check profile, Vercel route, and workbench smoke from Verdun; Greathouse app/deploy behavior now belongs to the parent `@greathouse/instance` package.
 - Added a neutral bundled `demo` workbench instance and deploy profile at `/demo/`, making Verdun's default proof app generic instead of Greathouse-specific.
-- Documented that Greathouse now has an external parent-workspace crawler crate/config/fixture copy registered through the Verdun crawler SDK, while Verdun keeps the bundled crawler proof temporarily.
-- Documented that Greathouse now has an external parent-workspace Vite app/pilot snapshot copy using Verdun public frontend subpaths, while Verdun keeps the bundled proof temporarily.
+- Documented that Greathouse now has an external parent-workspace crawler crate/config/fixture copy registered through the Verdun crawler SDK.
+- Documented that Greathouse now has an external parent-workspace Vite app/pilot snapshot copy using Verdun public frontend subpaths.
 - Added `frontend/workbench-view.ts` as the public frontend view-model/type export for external apps that want Verdun filtering, counts, coverage, and `WorkbenchSnapshot` contracts without importing `src/*` internals.
-- Documented that Greathouse's deploy-check profile now has an app-owned parent workspace copy while Verdun keeps the bundled profile temporarily during extraction.
+- Documented that Greathouse's deploy-check profile now has an app-owned parent workspace copy.
 - Noted the new parent-owned `apps/greathouse/` extraction anchor in Verdun app-state docs, so core-side resumption points at the externalization checklist.
 - Added `EXTERNAL_APP.md` as the reusable app-package guide for Verdun consumers, covering frontend, API, database, deploy-profile, crawler, and check ownership boundaries.
 - Added `scripts/public/deploy-profile-contract.mjs` so external apps can validate Verdun deploy-check profile metadata through a public package subpath, and made the shared profile registry apply the same validator to bundled and external profiles.
@@ -37,10 +38,10 @@
 - Added core frontend reuse entrypoints for shared workbench UI and CSS (`src/core/workbench-ui.ts` and `src/core/workbench-style.css`) so external apps can import Verdun workbench presentation without reaching into raw component/style files.
 - Corrected README/APP publishing-path docs so Garbage Grust audits, source-gap reviews, and Ulysses exports point at parent-owned `apps/garbage/data/` outputs instead of legacy Verdun `crawler/data/` paths.
 - Removed tracked Garbage crawler/newsletter artifacts from Verdun `crawler/data/` and `public/data/`, ignored those legacy paths, and added smoke coverage to reject their return.
-- Changed standalone `smoke:db-apply` and `smoke:db-deploy` to generate the default Greathouse/demo generic snapshot and SQL instead of falling back to a missing or Garbage-shaped static snapshot.
-- Refreshed `README.md` and `APP.md` to describe Verdun as the Greathouse/demo bundled core and Garbage as an external app-owned consumer for frontend, API, crawler, and deployment checks.
+- Changed standalone `smoke:db-apply` and `smoke:db-deploy` to generate the default demo generic snapshot and SQL instead of falling back to a missing or Garbage-shaped static snapshot.
+- Refreshed `README.md` and `APP.md` to describe Verdun as the neutral demo bundled core and Garbage as an external app-owned consumer for frontend, API, crawler, and deployment checks.
 - Exported `verdun-crawler` as a library/runtime, made Verdun's crawler binary a thin wrapper, and removed the hardcoded Garbage external crawler include.
-- Changed Verdun's bundled crawler registry to Greathouse/demo-only; Garbage now owns `apps/garbage/crawler/Cargo.toml` and registers its crawler against Verdun from the app package.
+- Changed Verdun's bundled crawler registry to demo-only; Garbage now owns `apps/garbage/crawler/Cargo.toml` and registers its crawler against Verdun from the app package.
 - Changed external deploy-profile discovery from a hardcoded Garbage path to `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`; Garbage now owns its deployed-check wrapper.
 - Moved the Garbage feed-content smoke into the parent app package and removed the Verdun `smoke:feed-content` command.
 - Regenerated Verdun `vercel.json` for the Greathouse default profile and updated `smoke:all` to avoid assuming a Garbage/static default snapshot.
@@ -57,8 +58,8 @@
 - Added an external deploy-profile module registry and removed the resident Garbage deploy-profile, deployed-check fixture, and deployed-draft/readiness hook shims; Garbage deploy hooks now load directly from `apps/garbage/scripts/`.
 - Removed the remaining resident Garbage publishing/smoke script shims under `scripts/instances/garbage/`; shared smokes now validate parent-owned `apps/garbage/scripts/` implementations directly.
 - Added an external crawler registration module and removed the resident Garbage crawler module; Verdun now compiles the parent-owned Garbage crawler through `crawler/src/instances/external.rs`.
-- Added the parent `apps/garbage/` instance-package anchor with `verdun.instance.json`, documenting the temporary bundled Garbage API, crawler, SQL, and publishing paths that must move out of Verdun or become external package imports.
-- Documented the parent Garbage `@garbage/instance` command facade as the temporary external package surface that delegates declared commands into Verdun until those implementations move out.
+- Added the parent `apps/garbage/` instance-package anchor with `verdun.instance.json`, documenting the Garbage API, crawler, SQL, and publishing paths that must stay app-owned or become explicit external package imports.
+- Documented the parent Garbage `@garbage/instance` command facade as the external package surface for app-owned commands.
 - Documented the next facade step: Garbage publishing entrypoints now live in the parent package while still importing bundled Verdun newsletter modules, and only operational compatibility smokes remain delegated.
 - Documented that the Garbage newsletter draft builder and ontology copy have moved into the parent package publishing surface, leaving runtime/data assumptions as the remaining publishing boundary.
 - Documented that parent publishing scripts no longer change cwd into Verdun and now use explicit Verdun data fallbacks during extraction.
@@ -242,11 +243,11 @@
 - Verified the checkpoint with Rust checks/tests, generic SQL export, generic loader smoke tests, Greathouse namespace export smoke tests, and `npm run smoke:all`.
 - After the Garbage crawler instance splits, reverified `cargo fmt`, `cargo check`, `cargo test`, generic SQL export, `npm run smoke:generic-loader`, and `npm run smoke:all`.
 
-Known remaining extraction work:
+Known remaining hardening work:
 
 - Legacy Garbage newsletter database/API paths still coexist with generic workbench paths, but default SQL export and default package database commands now target the generic workbench contract.
 - Garbage's crawler implementation now lives in the external app crate and registers through `verdun_crawler::sdk`; the remaining crawler work is to harden that SDK packaging story and keep Greathouse/Garbage on the same `CrawlerSnapshot` contract.
-- Crawler instance selection supports Verdun's bundled Greathouse/demo instance; external apps such as Garbage run their own binary with app-owned registrations.
+- Crawler instance selection supports Verdun's bundled demo instance; external apps such as Garbage and Greathouse run their own binaries with app-owned registrations.
 - Workbench API routes support explicit Garbage/Greathouse instance selection, and the browser app now reads/reviews/focuses/imports Garbage state through generic workbench routes.
 - Newsletter draft generation, readiness, Ulysses export, Ghost publishing helpers, SQL reload helpers, editorial-state import, ontology rendering, snapshot normalization, Garbage-specific UI panels/composables/app composition, and newsletter route implementations are now implemented under the Garbage instance, with explicit Garbage API/package commands.
 - Workbench API routes no longer depend on the newsletter HTTP helper path or the legacy newsletter DB helper path for local static/local-file mode.

@@ -2,11 +2,11 @@
 
 ## Goal
 
-Extract Verdun into a reusable Vercel plus database workbench core filled by external Rust crawlers. Garbage is the current Strongly Typed AI/newsletter instance running at `collected.ga/rbage/`; it shows candidate news items, supports editorial upvote/downvote triage, accepts collection-focus requests, and exports local Markdown for editing/publishing with Ulysses.
+Maintain Verdun as a reusable Vercel plus database workbench core filled by external Rust crawlers. Garbage is the Strongly Typed AI/newsletter instance running at `collected.ga/rbage/`; it shows candidate news items, supports editorial upvote/downvote triage, accepts collection-focus requests, and exports local Markdown for editing/publishing with Ulysses.
 
 ## Current Slice
 
-- Verdun is now being extracted as the reusable core; the live newsletter app is the external Garbage package layered on top of Verdun public contracts.
+- Verdun is the reusable core; the live newsletter app is the external Garbage package layered on top of Verdun public contracts.
 - `PUBLIC_SURFACE.md` defines the supported Verdun package subpaths and Rust SDK facade available to external apps.
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
 - Verdun's bundled default workbench is now the neutral `demo` instance at `/demo/`; it exists only to prove the reusable frontend/API/deploy contract without naming Garbage or Greathouse as core behavior.
@@ -128,9 +128,9 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 ## Next Work
 
-- Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
-- Reduce compatibility-only smokes and helper names that still exist to prove the migration from resident Garbage code.
-- Continue hardening crawler and deploy-profile registration as reusable app/plugin contracts rather than one-off local workspace conventions.
+- Keep Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior app-owned behind explicit Garbage instance namespaces.
+- Reduce migration-era smoke and helper names now that Verdun no longer carries resident Garbage or Greathouse implementations.
+- Continue hardening crawler and deploy-profile registration as reusable app/plugin contracts rather than local workspace conventions.
 - Harden `verdun-crawler` publication metadata and keep app crawler registration paths package-owned for Garbage, Greathouse, and future consumers.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 

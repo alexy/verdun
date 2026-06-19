@@ -31,7 +31,7 @@ import { WorkbenchHero, WorkbenchReviewRail } from 'verdun/frontend/workbench-ui
 import { useWorkbenchView, type WorkbenchSnapshot } from 'verdun/frontend/workbench-view'
 ```
 
-Do not register app components inside Verdun unless the app is a temporary bundled proof instance. A normal external app mounts its own entrypoint and chooses its own base path.
+Do not register app components inside Verdun unless the app is an intentional Verdun-owned neutral proof instance. A normal external app mounts its own entrypoint and chooses its own base path.
 
 ## API and Local Fallback
 

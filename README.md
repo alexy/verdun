@@ -1,6 +1,6 @@
 # Verdun
 
-Verdun is being extracted into the reusable core for database-backed collection/review workbenches. This repository carries the generic core plus a neutral bundled demo instance; Garbage and Greathouse are external app packages in the parent workspace that extend Verdun through public package, API, database, deploy, and crawler contracts.
+Verdun is the reusable core for database-backed collection/review workbenches. This repository carries the generic core plus a neutral bundled demo instance; Garbage and Greathouse are external app packages in the parent workspace that extend Verdun through public package, API, database, deploy, and crawler contracts.
 
 The first reusable boundary is now explicit:
 
@@ -30,7 +30,7 @@ The first reusable boundary is now explicit:
 - Garbage deploy-check profile metadata and hooks are parent-owned at `apps/garbage/scripts/deploy-checks.mjs`, `apps/garbage/scripts/check-deployed.mjs`, `apps/garbage/scripts/deployed-check-smoke-fixture.mjs`, and `apps/garbage/scripts/deployed-draft-checks.mjs`; Garbage opts into Verdun's generic deployed checker through the `scripts/public/check-deployed.mjs` entrypoint and `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`.
 - Garbage deploy-profile metadata declares an external npm-workspace command runner for `@garbage/instance`; shared orchestration such as `smoke:all` and `smoke:browser` now executes Garbage commands through that package instead of Verdun-local `garbage:*` package scripts.
 - Deployed draft/readiness checks are deploy-profile hooks; Garbage owns newsletter draft validation under parent-owned `apps/garbage/scripts/`, while the shared deployment checker validates only generic route, snapshot, status, and health mechanics.
-- Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
+- Newsletter routes, scripts, and compatibility database tables are Garbage-owned surfaces in the parent app package, not Verdun core behavior.
 - Verdun smoke scripts validate Verdun's own bundled demo core and no longer read `../apps/garbage/*`; external app ownership checks belong in the app package.
 
 The current core proof points are intentionally generic:
@@ -45,7 +45,7 @@ The current core proof points are intentionally generic:
 
 Garbage-specific operations are documented in the parent app package at `../apps/garbage/README.md`. Verdun docs should describe the reusable contracts and bundled proof instance only; Garbage newsletter publishing, Strongly Typed AI ontology, `/rbage/` deployment, Ulysses export, and legacy newsletter compatibility SQL belong in the Garbage package docs.
 
-The extraction is still incomplete, but Garbage implementation ownership has moved out of Verdun for the frontend app, newsletter API routes/store, crawler crate, deployment-check wrapper, publishing scripts, and compatibility SQL. Greathouse now has external frontend, crawler, and deploy package copies, and Verdun no longer bundles its frontend, crawler, or deploy profile. Verdun's own default is the neutral demo. External apps consume Verdun's JS/CSS/API/DB/script public surface through package subpaths. The next architectural move is to harden the crawler SDK packaging story, reduce compatibility-only smoke/runtime coupling, and keep Greathouse as an ordinary consumer of the same core contracts.
+The ownership split is in place: Garbage owns its frontend app, newsletter API routes/store, crawler crate, deployment-check wrapper, publishing scripts, and compatibility SQL; Greathouse owns its frontend app, crawler crate, and deploy profile; Verdun's own default is the neutral demo. External apps consume Verdun's JS/CSS/API/DB/script public surface through package subpaths. The next architectural work is to harden crawler SDK packaging, reduce migration-era smoke/runtime naming, and keep Garbage, Greathouse, and future apps on the same core contracts.
 
 ## Local app
 
