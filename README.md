@@ -1,6 +1,6 @@
 # Verdun
 
-Verdun is being extracted into the reusable core for database-backed collection/review workbenches. The current repository still carries the Garbage and Greathouse instance proofs while that extraction is underway, but the intended Verdun core is the generic Vercel app shell, API/database contract, and Rust crawler/reloader boundary.
+Verdun is being extracted into the reusable core for database-backed collection/review workbenches. This repository carries the generic core plus the bundled Greathouse/demo proof instance; Garbage is now an external app package in the parent workspace that extends Verdun through public package, API, database, deploy, and crawler contracts.
 
 The first reusable boundary is now explicit:
 
@@ -29,7 +29,7 @@ The first reusable boundary is now explicit:
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
 - Verdun smoke scripts validate Verdun's own bundled Greathouse/demo core and no longer read `../apps/garbage/*`; external app ownership checks belong in the app package.
 
-The current proof points are:
+The current proof points span the Verdun core plus external app consumers:
 
 - Vue/Vite app deployed by Vercel.
 - Vite is built from deploy profile metadata; Verdun's bundled default profile uses `/greathouse/`, and Garbage owns the `/rbage/` app build under `apps/garbage/`.

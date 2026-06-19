@@ -30,6 +30,9 @@ for (const [docPath, source] of [['README.md', readmeSource], ['APP.md', appDocS
   if (source.includes('/tmp/verdun-newsletter-load.sql')) {
     throw new Error(`${docPath} should use the app-owned Garbage newsletter SQL temp path in legacy compatibility examples`)
   }
+  if (source.includes('current repository still carries the Garbage and Greathouse instance proofs')) {
+    throw new Error(`${docPath} should describe Garbage as an external app package, not a resident Verdun proof instance`)
+  }
 }
 const trackedLegacyGarbageArtifacts = spawnSync('git', [
   'ls-files',

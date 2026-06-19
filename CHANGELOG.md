@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Corrected top-level Verdun docs to describe Garbage as an external parent-workspace app package rather than a resident Verdun proof instance, with smoke coverage rejecting the stale wording.
 - Corrected Verdun README/APP legacy Garbage newsletter compatibility examples to use the app-owned `/tmp/garbage-newsletter-load.sql` path, and added smoke coverage rejecting the old Verdun-named newsletter temp path in active docs.
 - Added `db/public/workbench-migrations.mjs` as the external app migration manifest for Verdun's reusable workbench database schema, leaving `db/core` as an internal source of truth.
 - Added package `exports` for Verdun's public JS/CSS app surface so external apps can import `verdun/frontend/*`, `verdun/api/public/*`, `verdun/db/public/*`, and `verdun/scripts/public/*` subpaths instead of filesystem-relative paths.
