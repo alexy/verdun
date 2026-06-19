@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-06-19
+
+- Added SDK-exported crawler cache/output primitives: `JsonDiskCache`, `CacheRead`, `write_pretty_json`, and `write_text`, with tests covering deterministic cache paths, miss/hit behavior, and parent-directory creation.
+- Switched Verdun crawler runtime collection/export output writes to the shared artifact helpers, giving external app crawlers a concrete cache/output SDK surface before Greathouse adopts the generic crawler registration path.
+
 ## 2026-06-18
 
 - Updated Verdun docs to state the completed core/app ownership split plainly: Verdun owns the reusable demo core, while Garbage and Greathouse own their app, crawler, deploy, and compatibility behavior as external consumers.

@@ -1,3 +1,4 @@
+mod cache;
 mod core;
 mod instances;
 mod runtime;

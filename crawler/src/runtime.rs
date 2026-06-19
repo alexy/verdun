@@ -1,3 +1,4 @@
+use crate::cache::{write_pretty_json, write_text};
 use crate::core::{CrawlerConfig, CrawlerSnapshot};
 use crate::instances::{self, CrawlerInstanceRegistration};
 use anyhow::{Context, Result};
@@ -176,37 +177,12 @@ fn collect(
         &editorial_focuses,
     )?;
     let record_count = collection.snapshot.records.len();
-    if let Some(parent) = out.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
-    }
-    let payload = serde_json::to_string_pretty(&collection.item_payload)?;
-    fs::write(&out, &payload).with_context(|| format!("writing {}", out.display()))?;
-    if let Some(parent) = source_runs_out.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
-    }
-    fs::write(
-        &source_runs_out,
-        serde_json::to_string_pretty(&collection.snapshot.source_runs)?,
-    )
-    .with_context(|| format!("writing {}", source_runs_out.display()))?;
+    write_pretty_json(&out, &collection.item_payload)?;
+    write_pretty_json(&source_runs_out, &collection.snapshot.source_runs)?;
     if let Some(generic_out) = generic_out {
-        if let Some(parent) = generic_out.parent() {
-            fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
-        }
-        fs::write(
-            &generic_out,
-            serde_json::to_string_pretty(&collection.snapshot)?,
-        )
-        .with_context(|| format!("writing {}", generic_out.display()))?;
+        write_pretty_json(&generic_out, &collection.snapshot)?;
     }
-    if let Some(parent) = public_out.parent() {
-        fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
-    }
-    fs::write(
-        &public_out,
-        serde_json::to_string_pretty(&collection.public_payload)?,
-    )
-    .with_context(|| format!("writing {}", public_out.display()))?;
+    write_pretty_json(&public_out, &collection.public_payload)?;
     println!(
         "wrote {} records to {}, {}, and {}",
         record_count,
@@ -264,7 +240,7 @@ fn export_sql(
             export.plan_count,
         )
     };
-    fs::write(&out, sql).with_context(|| format!("writing {}", out.display()))?;
+    write_text(&out, sql)?;
     println!(
         "wrote {} SQL load for {} items, {} source runs, and {} query plans to {}",
         target,
