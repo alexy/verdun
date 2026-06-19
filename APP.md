@@ -12,7 +12,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Generic workbench API module paths for compatibility smokes live behind `scripts/core/workbench-api-modules.mjs`; Garbage consumes that manifest instead of naming Verdun workbench route files directly.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
-- Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
+- Reusable workbench controls now live under `src/components/workbench/` and are exposed to external apps through `frontend/workbench-ui.ts` plus `frontend/workbench-style.css`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under parent-owned `apps/garbage/src/app/composables/`.
 - Garbage-specific newsletter app components, publishing/ontology/source-gap styles, browser composables, and app entrypoint live under parent-owned `apps/garbage/src/`; root `src/style.css` now keeps shared shell/workbench layout and Verdun no longer loads the Garbage frontend.
 - Vite and generated Vercel routing use registered deploy profiles; Verdun's bundled default is Greathouse at `/greathouse/`, while Garbage owns its `/rbage/` app and Vercel config under `apps/garbage/`.
