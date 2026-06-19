@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Removed the deleted bundled-proof module export from the public workbench API module manifest and added public-surface smoke coverage so external apps cannot consume Verdun instance-proof internals.
 - Replaced Verdun's bundled Greathouse crawler proof with a neutral `demo` crawler instance and fixtures, leaving Greathouse crawling parent-owned under `apps/greathouse/`.
 - Removed the bundled Greathouse frontend instance, deploy-check profile, Vercel route, and workbench smoke from Verdun; Greathouse app/deploy behavior now belongs to the parent `@greathouse/instance` package.
 - Added a neutral bundled `demo` workbench instance and deploy profile at `/demo/`, making Verdun's default proof app generic instead of Greathouse-specific.

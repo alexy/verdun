@@ -67,3 +67,13 @@ for (const expectedSymbol of ['useWorkbenchView', 'WorkbenchSnapshot', 'Workbenc
     throw new Error(`frontend/workbench-view.ts does not export ${expectedSymbol}`)
   }
 }
+
+const workbenchApiModules = await import('./public/workbench-api-modules.mjs')
+for (const expectedSymbol of ['publicWorkbenchApiModulePaths', 'publicWorkbenchApiSourceGuardPaths']) {
+  if (!workbenchApiModules[expectedSymbol]) {
+    throw new Error(`scripts/public/workbench-api-modules.mjs does not export ${expectedSymbol}`)
+  }
+}
+if ('publicBundledProofModulePaths' in workbenchApiModules) {
+  throw new Error('scripts/public/workbench-api-modules.mjs should not expose bundled proof modules to external apps')
+}
