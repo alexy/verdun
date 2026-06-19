@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Trimmed Garbage newsletter operations out of Verdun's README so the core docs now focus on reusable workbench, deployment, database, crawler, and public-surface contracts.
 - Added `PUBLIC_SURFACE.md` plus `smoke:public-surface` so Verdun's documented external package subpaths, real exported files, and `package.json` exports stay aligned.
 - Added neutral `verdun-crawler` package metadata and documented that final publishing still needs a repository and license/license-file decision.
 - Updated Verdun app-state docs to match Garbage's app-owned runtime env boundary: `GARBAGE_*` names are app controls and Verdun-prefixed names are bridge internals only.
