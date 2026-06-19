@@ -1,6 +1,7 @@
 use crate::cache::{write_pretty_json, write_text};
 use crate::core::{
-    CrawlerConfig, CrawlerOutputPaths, CrawlerRunManifest, CrawlerSnapshot, SourceRunSummary,
+    CrawlerConfig, CrawlerOutputPaths, CrawlerRunManifest, CrawlerSnapshot, FreshnessAssessment,
+    FreshnessPolicy, SourceRunSummary,
 };
 use crate::instances::{self, CrawlerInstanceRegistration};
 use anyhow::{Context, Result};
@@ -43,6 +44,8 @@ enum CommandKind {
         max_live_per_project: usize,
         #[arg(long, default_value_t = 45)]
         since_days: i64,
+        #[arg(long, default_value_t = 72.0)]
+        fresh_after_hours: f64,
         #[arg(long)]
         editorial_state: Option<PathBuf>,
     },
@@ -100,6 +103,7 @@ pub fn run_cli_with_registrations(
             live,
             max_live_per_project,
             since_days,
+            fresh_after_hours,
             editorial_state,
         } => collect(
             registrations,
@@ -113,6 +117,7 @@ pub fn run_cli_with_registrations(
             live,
             max_live_per_project,
             since_days,
+            fresh_after_hours,
             editorial_state,
         ),
         CommandKind::ExportSql {
@@ -162,6 +167,7 @@ fn collect(
     live: bool,
     max_live_per_project: usize,
     since_days: i64,
+    fresh_after_hours: f64,
     editorial_state: Option<PathBuf>,
 ) -> Result<()> {
     let crawler_instance = resolve_crawler_instance(instance.as_deref(), registrations)?;
@@ -175,6 +181,10 @@ fn collect(
         editorial_state.unwrap_or_else(|| crawler_instance.default_editorial_state_path());
     let editorial_focuses = crawler_instance.read_editorial_focuses(&editorial_state)?;
     anyhow::ensure!(since_days > 0, "--since-days must be positive");
+    anyhow::ensure!(
+        fresh_after_hours > 0.0,
+        "--fresh-after-hours must be positive"
+    );
     let since = Utc::now() - Duration::days(since_days);
     let collection = crawler_instance.collect(
         &config,
@@ -191,8 +201,13 @@ fn collect(
     }
     write_pretty_json(&public_out, &collection.public_payload)?;
     if let Some(run_manifest_out) = run_manifest_out {
+        let checked_at = Utc::now();
+        let freshness_policy = FreshnessPolicy {
+            max_age_hours: fresh_after_hours,
+            reason: "generic crawler snapshot age".to_owned(),
+        };
         let manifest = CrawlerRunManifest {
-            generated_at: Utc::now(),
+            generated_at: checked_at,
             instance: crawler_instance.id().to_owned(),
             display_name: crawler_instance.display_name().to_owned(),
             base_path: crawler_instance.base_path().to_owned(),
@@ -206,6 +221,11 @@ fn collect(
             live,
             max_live_per_project,
             since_days,
+            snapshot_freshness: FreshnessAssessment::assess(
+                Some(collection.snapshot.generated_at),
+                checked_at,
+                &freshness_policy,
+            ),
             record_count,
             source_runs: SourceRunSummary::from_source_runs(&collection.snapshot.source_runs),
             collection_plan_count: collection.snapshot.collection_plans.len(),

@@ -163,6 +163,55 @@ impl SourceRunSummary {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum FreshnessStatus {
+    Fresh,
+    Stale,
+    Unknown,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FreshnessPolicy {
+    pub max_age_hours: f64,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FreshnessAssessment {
+    pub status: FreshnessStatus,
+    pub observed_at: Option<DateTime<Utc>>,
+    pub checked_at: DateTime<Utc>,
+    pub age_hours: Option<f64>,
+    pub max_age_hours: f64,
+    pub reason: String,
+}
+
+impl FreshnessAssessment {
+    pub fn assess(
+        observed_at: Option<DateTime<Utc>>,
+        checked_at: DateTime<Utc>,
+        policy: &FreshnessPolicy,
+    ) -> Self {
+        let age_hours = observed_at.map(|observed_at| {
+            checked_at.signed_duration_since(observed_at).num_minutes() as f64 / 60.0
+        });
+        let status = match age_hours {
+            Some(age_hours) if age_hours <= policy.max_age_hours => FreshnessStatus::Fresh,
+            Some(_) => FreshnessStatus::Stale,
+            None => FreshnessStatus::Unknown,
+        };
+        Self {
+            status,
+            observed_at,
+            checked_at,
+            age_hours,
+            max_age_hours: policy.max_age_hours,
+            reason: policy.reason.clone(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CrawlerRunManifest {
     pub generated_at: DateTime<Utc>,
@@ -174,6 +223,7 @@ pub struct CrawlerRunManifest {
     pub live: bool,
     pub max_live_per_project: usize,
     pub since_days: i64,
+    pub snapshot_freshness: FreshnessAssessment,
     pub record_count: usize,
     pub source_runs: SourceRunSummary,
     pub collection_plan_count: usize,
@@ -234,6 +284,32 @@ mod tests {
         assert_eq!(summary.pending, 1);
         assert_eq!(summary.skipped, 1);
         assert_eq!(summary.item_count, 10);
+    }
+
+    #[test]
+    fn freshness_assessment_marks_fresh_stale_and_unknown() {
+        let checked_at = DateTime::from_timestamp(3_600 * 10, 0).expect("checked time");
+        let policy = FreshnessPolicy {
+            max_age_hours: 6.0,
+            reason: "test freshness".to_owned(),
+        };
+
+        let fresh = FreshnessAssessment::assess(
+            DateTime::from_timestamp(3_600 * 8, 0),
+            checked_at,
+            &policy,
+        );
+        let stale = FreshnessAssessment::assess(
+            DateTime::from_timestamp(3_600 * 2, 0),
+            checked_at,
+            &policy,
+        );
+        let unknown = FreshnessAssessment::assess(None, checked_at, &policy);
+
+        assert_eq!(fresh.status, FreshnessStatus::Fresh);
+        assert_eq!(fresh.age_hours, Some(2.0));
+        assert_eq!(stale.status, FreshnessStatus::Stale);
+        assert_eq!(unknown.status, FreshnessStatus::Unknown);
     }
 
     fn source_run(status: SourceRunStatus, item_count: usize) -> SourceRun {

@@ -2,6 +2,7 @@
 
 ## 2026-06-19
 
+- Added generic crawler freshness assessment support: `FreshnessStatus`, `FreshnessPolicy`, `FreshnessAssessment`, and `collect --fresh-after-hours` now let app crawlers report `snapshot_freshness` in shared run manifests.
 - Added generic crawler run manifest support: `CrawlerRunManifest`, `CrawlerOutputPaths`, `SourceRunSummary`, and `collect --run-manifest-out` now let external app crawlers emit shared lifecycle metadata for instance/config/output paths, run mode, record counts, source-run status counts, and collection-plan counts.
 - Added SDK-exported crawler cache/output primitives: `JsonDiskCache`, `CacheRead`, `write_pretty_json`, and `write_text`, with tests covering deterministic cache paths, miss/hit behavior, and parent-directory creation.
 - Switched Verdun crawler runtime collection/export output writes to the shared artifact helpers, giving external app crawlers a concrete cache/output SDK surface before Greathouse adopts the generic crawler registration path.
