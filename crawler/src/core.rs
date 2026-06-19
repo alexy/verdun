@@ -106,13 +106,27 @@ impl SourceRun {
         records: &[NormalizedRecord],
         message: impl Into<String>,
     ) -> Self {
-        Self::with_counts(
+        Self::from_records_with_status(
             source,
             if records.is_empty() {
                 SourceRunStatus::Error
             } else {
                 SourceRunStatus::Ok
             },
+            records,
+            message,
+        )
+    }
+
+    pub fn from_records_with_status(
+        source: &SourceConfig,
+        status: SourceRunStatus,
+        records: &[NormalizedRecord],
+        message: impl Into<String>,
+    ) -> Self {
+        Self::with_counts(
+            source,
+            status,
             records.len(),
             message,
             project_counts_for_records(records),
@@ -127,6 +141,16 @@ impl SourceRun {
         Self::with_counts(
             source,
             SourceRunStatus::Skipped,
+            0,
+            message,
+            BTreeMap::new(),
+        )
+    }
+
+    pub fn pending(source: &SourceConfig, message: impl Into<String>) -> Self {
+        Self::with_counts(
+            source,
+            SourceRunStatus::Pending,
             0,
             message,
             BTreeMap::new(),
@@ -234,6 +258,19 @@ impl SourceAdapterOutput {
         }
     }
 
+    pub fn from_records_with_status(
+        source: &SourceConfig,
+        records: Vec<NormalizedRecord>,
+        status: SourceRunStatus,
+        message: impl Into<String>,
+    ) -> Self {
+        let source_run = SourceRun::from_records_with_status(source, status, &records, message);
+        Self {
+            records,
+            source_runs: vec![source_run],
+        }
+    }
+
     pub fn error(source: &SourceConfig, message: impl Into<String>) -> Self {
         Self {
             records: Vec::new(),
@@ -245,6 +282,13 @@ impl SourceAdapterOutput {
         Self {
             records: Vec::new(),
             source_runs: vec![SourceRun::skipped(source, message)],
+        }
+    }
+
+    pub fn pending(source: &SourceConfig, message: impl Into<String>) -> Self {
+        Self {
+            records: Vec::new(),
+            source_runs: vec![SourceRun::pending(source, message)],
         }
     }
 }
@@ -789,6 +833,7 @@ mod tests {
 
         let error = SourceAdapterOutput::error(&source, "failed");
         let skipped = SourceAdapterOutput::skipped(&source, "not live");
+        let pending = SourceAdapterOutput::pending(&source, "configure adapter");
 
         assert!(error.records.is_empty());
         assert_eq!(error.source_runs.len(), 1);
@@ -804,6 +849,44 @@ mod tests {
             SourceRunStatus::Skipped
         ));
         assert_eq!(skipped.source_runs[0].message, "not live");
+        assert!(pending.records.is_empty());
+        assert_eq!(pending.source_runs.len(), 1);
+        assert!(matches!(
+            pending.source_runs[0].status,
+            SourceRunStatus::Pending
+        ));
+        assert_eq!(pending.source_runs[0].message, "configure adapter");
+    }
+
+    #[test]
+    fn source_adapter_output_can_force_status_for_records() {
+        let source = SourceConfig {
+            name: "manual source".to_owned(),
+            kind: "manual".to_owned(),
+            url: "https://example.test".to_owned(),
+            adapter: Some("manual".to_owned()),
+            feed_urls: None,
+            manual_path: None,
+            fixture_path: None,
+        };
+        let records = vec![normalized_record("alpha", "https://example.test/a")];
+
+        let output = SourceAdapterOutput::from_records_with_status(
+            &source,
+            records,
+            SourceRunStatus::Error,
+            "manual import is stale",
+        );
+
+        assert_eq!(output.records.len(), 1);
+        assert_eq!(output.source_runs.len(), 1);
+        assert!(matches!(
+            output.source_runs[0].status,
+            SourceRunStatus::Error
+        ));
+        assert_eq!(output.source_runs[0].item_count, 1);
+        assert_eq!(output.source_runs[0].project_counts.get("alpha"), Some(&1));
+        assert_eq!(output.source_runs[0].message, "manual import is stale");
     }
 
     #[test]
