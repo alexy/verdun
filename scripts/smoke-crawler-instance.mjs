@@ -7,8 +7,6 @@ import { join } from 'node:path'
 
 const [
   crawlerMainSource,
-  garbageInstanceSource,
-  garbageCrawlerMainSource,
   greathouseInstanceSource,
   instanceTraitSource,
   bundledInstancesSource,
@@ -17,8 +15,6 @@ const [
   crawlerRuntimeSource,
 ] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
-  readFile('../apps/garbage/crawler/src/instances/garbage.rs', 'utf8'),
-  readFile('../apps/garbage/crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/greathouse.rs', 'utf8'),
   readFile('crawler/src/instances/mod.rs', 'utf8'),
   readFile('crawler/src/instances/bundled.rs', 'utf8'),
@@ -59,17 +55,8 @@ if (!crawlerLibSource.includes('pub mod sdk;')) {
 if (!crawlerSdkSource.includes('run_cli_with_registrations') || !crawlerSdkSource.includes('CrawlerInstanceRegistration')) {
   throw new Error('verdun-crawler SDK should expose runtime and instance registration contracts')
 }
-if (!garbageCrawlerMainSource.includes('verdun_crawler::sdk') || !garbageCrawlerMainSource.includes('GARBAGE_CRAWLER_INSTANCE_REGISTRATIONS')) {
-  throw new Error('Garbage crawler package should register its own instance through the Verdun crawler SDK')
-}
 if (bundledInstancesSource.includes('garbage') || bundledInstancesSource.includes('external::')) {
   throw new Error('Verdun bundled crawler registrations should not include Garbage or an external parent path')
-}
-if (!garbageInstanceSource.includes('use verdun_crawler::sdk')) {
-  throw new Error('Garbage crawler instance should depend on the Verdun crawler SDK contract')
-}
-if (garbageInstanceSource.includes('use verdun_crawler::core') || garbageInstanceSource.includes('use verdun_crawler::instances')) {
-  throw new Error('Garbage crawler instance should not import Verdun crawler internals directly')
 }
 if (existsSync('crawler/src/instances/garbage.rs')) {
   throw new Error('Garbage crawler implementation should not live behind a resident Verdun instance module')
@@ -114,9 +101,6 @@ for (const marker of [
 if (!instanceTraitSource.includes('fn legacy_sql_export') || !instanceTraitSource.includes('fn public_snapshot_as_crawler_snapshot') || !instanceTraitSource.includes('fn split_payload_as_crawler_snapshot')) {
   throw new Error('crawler instance trait does not expose optional compatibility hooks')
 }
-if (!garbageInstanceSource.includes('fn legacy_sql_export') || !garbageInstanceSource.includes('pub fn load_newsletter_export_payload') || !garbageInstanceSource.includes('pub fn public_snapshot_value_as_crawler_snapshot')) {
-  throw new Error('Garbage crawler instance does not own legacy newsletter export and snapshot loading')
-}
 for (const marker of [
   'default_value = "garbage"',
   'default_value = "Garbage"',
@@ -140,12 +124,6 @@ for (const marker of [
     throw new Error(`crawler instance trait is missing instance-owned path metadata: ${marker}`)
   }
 }
-if (!garbageInstanceSource.includes('pub fn newsletter_export_sql') || !garbageInstanceSource.includes('insert into newsletter_items')) {
-  throw new Error('Garbage crawler instance does not own the legacy newsletter SQL exporter')
-}
-if (!garbageInstanceSource.includes('pub fn news_item_record') || !garbageInstanceSource.includes('NormalizedRecord')) {
-  throw new Error('Garbage crawler instance does not expose a core record projection for legacy news items')
-}
 if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.includes('Vec<NormalizedCollectionPlan>')) {
   throw new Error('crawler instance trait still exposes Garbage query-plan types instead of core collection plans')
 }
@@ -159,7 +137,6 @@ if (
   instanceTraitSource.includes('greathouse::CRAWLER_INSTANCE') ||
   instanceTraitSource.includes('GARBAGE_CRAWLER_INSTANCE') ||
   instanceTraitSource.includes('GREATHOUSE_CRAWLER_INSTANCE') ||
-  !garbageInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
   !greathouseInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
   !bundledInstancesSource.includes('BUNDLED_CRAWLER_INSTANCE_REGISTRATIONS') ||
   !bundledInstancesSource.includes('greathouse::CRAWLER_INSTANCE')
@@ -196,22 +173,6 @@ if (verifyGreathouse.status !== 0) {
 }
 if (!verifyGreathouse.stdout.includes('verified greathouse instance')) {
   throw new Error('default crawler verification did not report the bundled Greathouse instance')
-}
-
-const verifyGarbageFromPackage = spawnSync('cargo', [
-  'run',
-  '--manifest-path',
-  '../apps/garbage/crawler/Cargo.toml',
-  '--',
-  'verify',
-], { encoding: 'utf8' })
-
-if (verifyGarbageFromPackage.error) throw verifyGarbageFromPackage.error
-if (verifyGarbageFromPackage.status !== 0) {
-  throw new Error(`Garbage package crawler verification failed\n${verifyGarbageFromPackage.stdout}\n${verifyGarbageFromPackage.stderr}`)
-}
-if (!verifyGarbageFromPackage.stdout.includes('verified garbage instance')) {
-  throw new Error('Garbage package crawler verification did not report the selected instance')
 }
 
 const verifyUnknown = spawnSync('cargo', [

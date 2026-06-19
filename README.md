@@ -26,6 +26,7 @@ The first reusable boundary is now explicit:
 - Garbage deploy-profile metadata declares an external npm-workspace command runner for `@garbage/instance`; shared orchestration such as `smoke:all` and `smoke:browser` now executes Garbage commands through that package instead of Verdun-local `garbage:*` package scripts.
 - Deployed draft/readiness checks are deploy-profile hooks; Garbage owns newsletter draft validation under parent-owned `apps/garbage/scripts/`, while the shared deployment checker validates only generic route, snapshot, status, and health mechanics.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
+- Verdun smoke scripts validate Verdun's own bundled Greathouse/demo core and no longer read `../apps/garbage/*`; external app ownership checks belong in the app package.
 
 The current proof points are:
 

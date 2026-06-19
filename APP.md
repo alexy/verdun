@@ -34,6 +34,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - `apps/garbage/src/ontology.json` is the Garbage ontology source for the site and local Markdown drafts.
 - Garbage publishing readiness checks in `apps/garbage/src/newsletter.ts` gate editorial picks, live source/project coverage, project spread, focus notes, source health, and snapshot freshness before Ulysses export.
 - App and instance registration exports are neutral inside bundled instance modules, and the shared Verdun frontend registries discover bundled `app.ts` / `instance.ts` entries by convention without registering Garbage.
+- Verdun smoke scripts validate Verdun's own bundled Greathouse/demo core and no longer read `../apps/garbage/*`; Garbage-specific crawler and browser-smoke ownership checks live in the parent Garbage verifier.
 - Vercel API routes:
   - `GET /api/workbench/records?instance=garbage|greathouse`
   - `GET /api/workbench/status?instance=garbage|greathouse`

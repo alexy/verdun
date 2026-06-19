@@ -17,8 +17,6 @@ const smokeDbApplySource = readFileSync('scripts/smoke-db-apply.mjs', 'utf8')
 const smokeDbDeploySource = readFileSync('scripts/smoke-db-deploy.mjs', 'utf8')
 const genericLoaderSource = readFileSync('scripts/smoke-generic-loader-sql.mjs', 'utf8')
 const smokeBrowserSource = readFileSync('scripts/smoke-browser.mjs', 'utf8')
-const smokeResponsiveSource = readFileSync('../apps/garbage/scripts/smoke-responsive.mjs', 'utf8')
-const smokeAppSource = readFileSync('../apps/garbage/scripts/smoke-app.mjs', 'utf8')
 const coreMigrationSource = readFileSync('db/migrations/0003_generic_workbench_tables.sql', 'utf8')
 
 if (applySource.includes('public/data/newsletter-snapshot.json')) {
@@ -43,8 +41,6 @@ for (const marker of ['public/data/newsletter-snapshot.json', "'garbage'", "'/rb
 }
 for (const [label, source] of [
   ['smoke-browser', smokeBrowserSource],
-  ['external-garbage-smoke-responsive', smokeResponsiveSource],
-  ['external-garbage-smoke-app', smokeAppSource],
 ]) {
   if (source.includes('/rbage/')) {
     throw new Error(`${label} still embeds the Garbage preview base path instead of using profile metadata`)
