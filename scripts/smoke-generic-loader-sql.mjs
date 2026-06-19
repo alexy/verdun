@@ -80,8 +80,13 @@ for (const item of representativeItems(items)) {
   if (!sql.includes(sqlString(item.url))) throw new Error(`generic SQL export is missing URL for ${item.id}`)
   if (!sql.includes(sqlString(subjectOf(item)))) throw new Error(`generic SQL export is missing subject for ${item.id}`)
   const rawJson = item.raw_json ?? item.rawJson ?? {}
-  if (rawJson.provenance && !sql.includes(sqlString(JSON.stringify(rawJson.provenance)))) {
-    throw new Error(`generic SQL export is missing provenance JSON for ${item.id}`)
+  const provenance = item.provenance_json ?? item.provenanceJson ?? rawJson.provenance
+  if (provenance) {
+    for (const [key, value] of stableProvenanceEntries(provenance)) {
+      if (!sql.includes(sqlJsonPair(key, value))) {
+        throw new Error(`generic SQL export is missing provenance ${key} for ${item.id}`)
+      }
+    }
   }
 }
 for (const plan of representativeQueryPlans(queryPlans)) {
@@ -104,6 +109,16 @@ function sqlString(value) {
 
 function sqlTextArray(values) {
   return `array[${values.map(sqlString).join(", ")}]`
+}
+
+function sqlJsonPair(key, value) {
+  return `"${key}":${JSON.stringify(value)}`
+}
+
+function stableProvenanceEntries(provenance) {
+  return ['adapter', 'source', 'source_kind', 'source_url', 'stage', 'subject']
+    .filter((key) => provenance[key] !== undefined && provenance[key] !== null)
+    .map((key) => [key, provenance[key]])
 }
 
 function valueAfter(flag) {

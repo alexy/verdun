@@ -1,8 +1,14 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { pathToFileURL } from 'node:url'
+import { dirname, join } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { databaseEnvStatus, redactedDatabaseUrlArg, writeDatabaseReloadHandoff } from './database-reload-handoff.mjs'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
+
+const scriptDir = dirname(fileURLToPath(import.meta.url))
+const verdunRoot = dirname(scriptDir)
+const applySqlScript = join(scriptDir, 'workbench-apply-sql.mjs')
+const crawlerManifest = join(verdunRoot, 'crawler/Cargo.toml')
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await runDeployWorkbenchDatabaseCli(process.argv.slice(2), process.env)
@@ -43,7 +49,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
     run('cargo', [
       'run',
       '--manifest-path',
-      'crawler/Cargo.toml',
+      crawlerManifest,
       '--',
       'export-sql',
       '--snapshot',
@@ -62,7 +68,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
   if (apply && !skipVercelEnv) assertVercelDatabaseEnv()
 
   run('node', [
-    'scripts/workbench-apply-sql.mjs',
+    applySqlScript,
     '--instance',
     instance,
     '--sql',
@@ -114,7 +120,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
               'cargo',
               'run',
               '--manifest-path',
-              'crawler/Cargo.toml',
+              crawlerManifest,
               '--',
               'export-sql',
               '--snapshot',
@@ -128,7 +134,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
           : null,
         applySql: [
           'node',
-          'scripts/workbench-apply-sql.mjs',
+          applySqlScript,
           '--instance',
           instance,
           '--sql',

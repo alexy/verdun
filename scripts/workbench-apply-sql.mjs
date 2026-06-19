@@ -1,8 +1,13 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { dirname, join } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
+
+const scriptDir = dirname(fileURLToPath(import.meta.url))
+const verdunRoot = dirname(scriptDir)
+const genericLoaderSmokeScript = join(scriptDir, 'smoke-generic-loader-sql.mjs')
+const migrationDir = join(verdunRoot, 'db/migrations')
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   await runApplyWorkbenchSqlCli(process.argv.slice(2), process.env)
@@ -31,7 +36,7 @@ export async function runApplyWorkbenchSqlCli(args, env = process.env) {
   assertFile(snapshotPath, 'snapshot file')
   for (const migrationPath of migrationPaths) assertFile(migrationPath, 'migration file')
 
-  run('node', ['scripts/smoke-generic-loader-sql.mjs', ...loaderArgs])
+  run('node', [genericLoaderSmokeScript, ...loaderArgs])
   console.log(`migrations ready: ${migrationPaths.join(', ')}`)
 
   if (!apply) {
@@ -77,7 +82,6 @@ function assertFile(path, label) {
 }
 
 function defaultMigrationPaths() {
-  const migrationDir = 'db/migrations'
   return readdirSync(migrationDir)
     .filter((name) => name.endsWith('.sql'))
     .sort((left, right) => left.localeCompare(right))
