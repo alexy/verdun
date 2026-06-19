@@ -242,7 +242,55 @@ impl SourceAdapterOutput {
     }
 }
 
-pub trait SourceAdapter {
+pub struct SourceAdapterRegistration {
+    pub ids: &'static [&'static str],
+    pub adapter: &'static dyn SourceAdapter,
+}
+
+impl SourceAdapterRegistration {
+    pub fn matches(&self, id: &str) -> bool {
+        self.ids.iter().any(|registered_id| registered_id == &id)
+    }
+}
+
+pub fn collect_source_adapter_outputs(
+    config: &CrawlerConfig,
+    live: bool,
+    max_per_project: usize,
+    since: DateTime<Utc>,
+    editorial_focuses: &[EditorialFocus],
+    adapters: &[SourceAdapterRegistration],
+) -> anyhow::Result<(Vec<NormalizedRecord>, Vec<SourceRun>)> {
+    let mut records = Vec::new();
+    let mut source_runs = Vec::new();
+    for source in &config.sources {
+        let adapter_id = source.adapter.as_deref().unwrap_or(source.kind.as_str());
+        let adapter = adapters
+            .iter()
+            .find(|registration| registration.matches(adapter_id))
+            .map(|registration| registration.adapter)
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "{} uses unsupported source adapter {}",
+                    source.name,
+                    adapter_id
+                )
+            })?;
+        let output = adapter.collect(SourceAdapterContext {
+            config,
+            source,
+            live,
+            max_per_project,
+            since,
+            editorial_focuses,
+        })?;
+        records.extend(output.records);
+        source_runs.push(output.source_run);
+    }
+    Ok((records, source_runs))
+}
+
+pub trait SourceAdapter: Sync {
     fn id(&self) -> &'static str;
     fn collect(&self, context: SourceAdapterContext<'_>) -> anyhow::Result<SourceAdapterOutput>;
 }
@@ -681,6 +729,65 @@ mod tests {
     }
 
     #[test]
+    fn collect_source_adapter_outputs_resolves_registered_aliases() {
+        static TEST_ADAPTER: TestSourceAdapter = TestSourceAdapter;
+        static ADAPTERS: &[SourceAdapterRegistration] = &[SourceAdapterRegistration {
+            ids: &["test-adapter", "test-kind"],
+            adapter: &TEST_ADAPTER,
+        }];
+        let config = CrawlerConfig {
+            theme: "demo".to_owned(),
+            targets: Vec::new(),
+            sources: vec![SourceConfig {
+                name: "test source".to_owned(),
+                kind: "test-kind".to_owned(),
+                url: "https://example.test".to_owned(),
+                adapter: Some("test-adapter".to_owned()),
+                feed_urls: None,
+                manual_path: None,
+                fixture_path: None,
+            }],
+        };
+
+        let (records, source_runs) =
+            collect_source_adapter_outputs(&config, true, 7, Utc::now(), &[], ADAPTERS)
+                .expect("collect adapter outputs");
+
+        assert_eq!(records.len(), 1);
+        assert_eq!(source_runs.len(), 1);
+        assert_eq!(source_runs[0].source, "test source");
+        assert!(matches!(source_runs[0].status, SourceRunStatus::Ok));
+        assert_eq!(records[0].provenance_json["live"], true);
+        assert_eq!(records[0].provenance_json["max_per_project"], 7);
+    }
+
+    #[test]
+    fn collect_source_adapter_outputs_reports_missing_adapter() {
+        let config = CrawlerConfig {
+            theme: "demo".to_owned(),
+            targets: Vec::new(),
+            sources: vec![SourceConfig {
+                name: "test source".to_owned(),
+                kind: "test-kind".to_owned(),
+                url: "https://example.test".to_owned(),
+                adapter: Some("missing-adapter".to_owned()),
+                feed_urls: None,
+                manual_path: None,
+                fixture_path: None,
+            }],
+        };
+
+        let error = collect_source_adapter_outputs(&config, true, 7, Utc::now(), &[], &[])
+            .expect_err("missing adapter should fail");
+
+        assert!(
+            error
+                .to_string()
+                .contains("test source uses unsupported source adapter missing-adapter")
+        );
+    }
+
+    #[test]
     fn source_adapter_context_builds_stable_cache_context() {
         let config = CrawlerConfig {
             theme: "demo".to_owned(),
@@ -807,6 +914,30 @@ mod tests {
             provenance_json: serde_json::json!({}),
             normalized_json: serde_json::json!({}),
             raw_json: serde_json::json!({}),
+        }
+    }
+
+    struct TestSourceAdapter;
+
+    impl SourceAdapter for TestSourceAdapter {
+        fn id(&self) -> &'static str {
+            "test-adapter"
+        }
+
+        fn collect(
+            &self,
+            context: SourceAdapterContext<'_>,
+        ) -> anyhow::Result<SourceAdapterOutput> {
+            let mut record = normalized_record("alpha", "https://example.test/a");
+            record.provenance_json = serde_json::json!({
+                "live": context.live,
+                "max_per_project": context.max_per_project,
+            });
+            Ok(SourceAdapterOutput::from_records(
+                context.source,
+                vec![record],
+                "test adapter collected records",
+            ))
         }
     }
 }

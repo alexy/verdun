@@ -8,7 +8,7 @@ use std::{fs, path::PathBuf, time::Duration as StdDuration};
 use crate::core::{
     CrawlerCollection, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
     NormalizedRecord, ReviewTarget, SourceAdapter, SourceAdapterContext, SourceAdapterOutput,
-    SourceConfig, SourceRun, stable_id,
+    SourceAdapterRegistration, SourceConfig, SourceRun, collect_source_adapter_outputs, stable_id,
 };
 use crate::http::{fetch_json, probe_http_status};
 use crate::instances::CrawlerInstance;
@@ -195,21 +195,14 @@ fn demo_adapter_outputs(
     live: bool,
     editorial_focuses: &[EditorialFocus],
 ) -> Result<(Vec<NormalizedRecord>, Vec<SourceRun>)> {
-    let mut records = Vec::new();
-    let mut source_runs = Vec::new();
-    for source in &config.sources {
-        let output = adapter_for_source(source)?.collect(SourceAdapterContext {
-            config,
-            source,
-            live,
-            max_per_project: usize::MAX,
-            since: Utc::now(),
-            editorial_focuses,
-        })?;
-        records.extend(output.records);
-        source_runs.push(output.source_run);
-    }
-    Ok((records, source_runs))
+    collect_source_adapter_outputs(
+        config,
+        live,
+        usize::MAX,
+        Utc::now(),
+        editorial_focuses,
+        DEMO_SOURCE_ADAPTERS,
+    )
 }
 
 fn dedupe_records(records: Vec<NormalizedRecord>) -> Vec<NormalizedRecord> {
@@ -329,6 +322,24 @@ fn demo_record(
 struct LocalJsonSourceAdapter;
 struct HttpJsonSourceAdapter;
 struct HttpStatusDiagnosticAdapter;
+
+static LOCAL_JSON_SOURCE_ADAPTER: LocalJsonSourceAdapter = LocalJsonSourceAdapter;
+static HTTP_JSON_SOURCE_ADAPTER: HttpJsonSourceAdapter = HttpJsonSourceAdapter;
+static HTTP_STATUS_DIAGNOSTIC_ADAPTER: HttpStatusDiagnosticAdapter = HttpStatusDiagnosticAdapter;
+static DEMO_SOURCE_ADAPTERS: &[SourceAdapterRegistration] = &[
+    SourceAdapterRegistration {
+        ids: &["local-record-json", "local-diagnostic-json"],
+        adapter: &LOCAL_JSON_SOURCE_ADAPTER,
+    },
+    SourceAdapterRegistration {
+        ids: &["http-record-json", "http-diagnostic-json"],
+        adapter: &HTTP_JSON_SOURCE_ADAPTER,
+    },
+    SourceAdapterRegistration {
+        ids: &["http-status-diagnostic"],
+        adapter: &HTTP_STATUS_DIAGNOSTIC_ADAPTER,
+    },
+];
 
 impl SourceAdapter for LocalJsonSourceAdapter {
     fn id(&self) -> &'static str {
@@ -492,15 +503,6 @@ impl SourceAdapter for HttpStatusDiagnosticAdapter {
                 cache.namespace
             ),
         ))
-    }
-}
-
-fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn SourceAdapter> {
-    match source.adapter.as_deref().unwrap_or("local-record-json") {
-        "local-record-json" | "local-diagnostic-json" => Ok(&LocalJsonSourceAdapter),
-        "http-record-json" | "http-diagnostic-json" => Ok(&HttpJsonSourceAdapter),
-        "http-status-diagnostic" => Ok(&HttpStatusDiagnosticAdapter),
-        adapter => anyhow::bail!("{} uses unsupported demo adapter {}", source.name, adapter),
     }
 }
 

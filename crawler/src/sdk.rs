@@ -9,8 +9,8 @@ pub use crate::core::{
     CrawlerSnapshot, DatabaseReloadCommandSet, DatabaseReloadHandoff, EditorialFocus,
     FreshnessAssessment, FreshnessPolicy, FreshnessStatus, NormalizedCollectionPlan,
     NormalizedRecord, ReviewTarget, SourceAdapter, SourceAdapterCacheContext, SourceAdapterContext,
-    SourceAdapterOutput, SourceConfig, SourceRun, SourceRunStatus, SourceRunSummary,
-    project_counts_for_records, slug, stable_id,
+    SourceAdapterOutput, SourceAdapterRegistration, SourceConfig, SourceRun, SourceRunStatus,
+    SourceRunSummary, collect_source_adapter_outputs, project_counts_for_records, slug, stable_id,
 };
 pub use crate::http::{
     HttpFetch, HttpFetchMetadata, fetch_json, fetch_json_allow_status,
