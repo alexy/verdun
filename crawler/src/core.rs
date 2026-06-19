@@ -34,6 +34,33 @@ pub struct SourceConfig {
     pub fixture_path: Option<PathBuf>,
 }
 
+impl SourceConfig {
+    pub fn adapter_id(&self) -> &str {
+        self.adapter.as_deref().unwrap_or(self.kind.as_str())
+    }
+
+    pub fn cache_namespace(&self) -> String {
+        slug(&self.kind)
+    }
+
+    pub fn cache_key_seed(&self) -> String {
+        let mut parts = vec![self.name.clone(), self.kind.clone()];
+        if let Some(adapter) = &self.adapter {
+            parts.push(adapter.clone());
+        }
+        if !self.url.is_empty() {
+            parts.push(self.url.clone());
+        }
+        if let Some(path) = &self.fixture_path {
+            parts.push(path.to_string_lossy().into_owned());
+        }
+        if let Some(path) = &self.manual_path {
+            parts.push(path.to_string_lossy().into_owned());
+        }
+        parts.join("|")
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SourceRunStatus {
@@ -213,15 +240,12 @@ pub struct SourceAdapterCacheContext {
 
 impl<'a> SourceAdapterContext<'a> {
     pub fn adapter_id(&self) -> &str {
-        self.source
-            .adapter
-            .as_deref()
-            .unwrap_or(self.source.kind.as_str())
+        self.source.adapter_id()
     }
 
     pub fn cache_context(&self, max_age_hours: u64) -> SourceAdapterCacheContext {
-        let namespace = slug(&self.source.kind);
-        let key_seed = source_cache_key_seed(self.source);
+        let namespace = self.source.cache_namespace();
+        let key_seed = self.source.cache_key_seed();
         let cache_key = stable_id(&namespace, &key_seed);
         SourceAdapterCacheContext {
             namespace,
@@ -329,7 +353,7 @@ pub fn collect_source_adapter_outputs(
     let mut records = Vec::new();
     let mut source_runs = Vec::new();
     for source in &config.sources {
-        let adapter_id = source.adapter.as_deref().unwrap_or(source.kind.as_str());
+        let adapter_id = source.adapter_id();
         let adapter = find_source_adapter(adapter_id, adapters).ok_or_else(|| {
             anyhow::anyhow!(
                 "{} uses unsupported source adapter {}",
@@ -732,23 +756,6 @@ pub fn project_counts_for_records(records: &[NormalizedRecord]) -> BTreeMap<Stri
     counts
 }
 
-fn source_cache_key_seed(source: &SourceConfig) -> String {
-    let mut parts = vec![source.name.clone(), source.kind.clone()];
-    if let Some(adapter) = &source.adapter {
-        parts.push(adapter.clone());
-    }
-    if !source.url.is_empty() {
-        parts.push(source.url.clone());
-    }
-    if let Some(path) = &source.fixture_path {
-        parts.push(path.to_string_lossy().into_owned());
-    }
-    if let Some(path) = &source.manual_path {
-        parts.push(path.to_string_lossy().into_owned());
-    }
-    parts.join("|")
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -944,6 +951,30 @@ mod tests {
 
         assert_eq!(adapter.id(), "test-adapter");
         assert!(find_source_adapter("missing", ADAPTERS).is_none());
+    }
+
+    #[test]
+    fn source_config_exposes_adapter_and_cache_identity() {
+        let source = SourceConfig {
+            name: "Manual Leads".to_owned(),
+            kind: "Manual JSON".to_owned(),
+            url: String::new(),
+            adapter: None,
+            feed_urls: None,
+            manual_path: Some(PathBuf::from("data/manual.json")),
+            fixture_path: Some(PathBuf::from("fixtures/manual.json")),
+        };
+
+        assert_eq!(source.adapter_id(), "Manual JSON");
+        assert_eq!(source.cache_namespace(), "manual-json");
+        assert!(source.cache_key_seed().contains("Manual Leads"));
+        assert!(source.cache_key_seed().contains("fixtures/manual.json"));
+        assert!(source.cache_key_seed().contains("data/manual.json"));
+
+        let mut adapted = source.clone();
+        adapted.adapter = Some("custom-adapter".to_owned());
+        assert_eq!(adapted.adapter_id(), "custom-adapter");
+        assert!(adapted.cache_key_seed().contains("custom-adapter"));
     }
 
     #[test]
