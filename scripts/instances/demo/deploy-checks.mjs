@@ -6,6 +6,13 @@ export const deployCheckProfile = {
   previewBaseUrl: 'http://127.0.0.1:5174/demo/',
   devAppBaseUrl: 'http://127.0.0.1:5176/demo/',
   staticSnapshotPath: 'data/demo-snapshot.json',
+  genericSqlSmoke: {
+    sqlPath: '/tmp/verdun-demo-generic-load.sql',
+    itemsPath: '/tmp/verdun-demo-items.json',
+    sourceRunsPath: '/tmp/verdun-demo-source-runs.json',
+    publicSnapshotPath: '/tmp/verdun-demo-public-snapshot.json',
+    genericSnapshotPath: '/tmp/verdun-demo-generic-snapshot.json',
+  },
   smokeFixtureModule: './instances/demo/deployed-check-smoke-fixture.mjs',
   smokeAllCommands: [
     'smoke:demo-workbench',

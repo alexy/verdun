@@ -1,0 +1,27 @@
+theme = "Generic crawler and database reload demo"
+
+[[projects]]
+name = "Reusable workbench"
+topic = "core contract"
+homepage = "https://example.com/demo/reusable-workbench"
+keywords = ["generic", "workbench", "provenance", "database"]
+
+[[projects]]
+name = "Source diagnostics"
+topic = "source health"
+homepage = "https://example.com/demo/source-diagnostics"
+keywords = ["diagnostic", "source-health", "retry", "blocked"]
+
+[[sources]]
+name = "Demo record feed"
+kind = "record"
+url = "https://example.com/demo/records"
+adapter = "local-record-json"
+fixture_path = "crawler/instances/demo/fixtures/records.json"
+
+[[sources]]
+name = "Demo diagnostics"
+kind = "diagnostic"
+url = "https://example.com/demo/diagnostics"
+adapter = "local-diagnostic-json"
+fixture_path = "crawler/instances/demo/fixtures/diagnostics.json"

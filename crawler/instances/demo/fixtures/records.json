@@ -1,0 +1,12 @@
+[
+  {
+    "subject": "Reusable workbench",
+    "url": "https://example.com/demo/reusable-workbench-record",
+    "title": "Reusable workbench crawler record",
+    "observed_at": "2026-06-18T12:00:00Z",
+    "summary": "A generic crawler record with stable provenance, review tags, and database reload metadata.",
+    "tags": ["generic", "workbench", "provenance"],
+    "score": 82,
+    "stage": "local_json"
+  }
+]

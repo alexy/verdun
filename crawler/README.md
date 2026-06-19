@@ -7,7 +7,7 @@ Verdun's Rust crawler crate is the reusable data-loading core for Verdun-backed 
 - `src/sdk.rs` is the public Rust API for app crates. It re-exports the stable generic data types, registration trait, and CLI runtime entrypoints.
 - `src/core.rs` defines reusable data types internally: `CrawlerSnapshot`, `NormalizedRecord`, `SourceRun`, `NormalizedCollectionPlan`, review targets, source config, and focus terms. External crates receive these through `verdun_crawler::sdk`.
 - `src/runtime.rs` owns the shared CLI internally: `verify`, `queries`, `collect`, and `export-sql`. External app binaries call it through `verdun_crawler::sdk::run_cli_with_registrations`.
-- `src/instances/` contains only bundled Verdun proof crawler instances and is not a public app extension module. The current bundled crawler proof is Greathouse-shaped while Garbage and parent Greathouse run their own external crawler crates.
+- `src/instances/` contains only bundled Verdun proof crawler instances and is not a public app extension module. The current bundled crawler proof is the neutral demo while Garbage and Greathouse run their own external crawler crates.
 
 ## External App Pattern
 
@@ -39,9 +39,9 @@ The instance implements `CrawlerInstance`, returns a generic `CrawlerCollection`
 ## Generic Reload Flow
 
 ```sh
-cargo run --manifest-path crawler/Cargo.toml -- collect --instance greathouse --generic-out /tmp/greathouse-snapshot.json
-cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot /tmp/greathouse-snapshot.json --out /tmp/verdun-load.sql --instance greathouse
-npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot /tmp/greathouse-snapshot.json
+cargo run --manifest-path crawler/Cargo.toml -- collect --instance demo --generic-out /tmp/demo-snapshot.json
+cargo run --manifest-path crawler/Cargo.toml -- export-sql --snapshot /tmp/demo-snapshot.json --out /tmp/verdun-load.sql --instance demo
+npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot /tmp/demo-snapshot.json
 ```
 
 External app crates run the same CLI through their own binary and manifest path.
@@ -57,7 +57,7 @@ cargo test --manifest-path crawler/Cargo.toml
 npm run smoke:crawler-instance
 ```
 
-`npm run smoke:crawler-instance` validates the temporary bundled Greathouse-shaped crawler proof and generic export path. App-specific crawler ownership checks belong in the app repo.
+`npm run smoke:crawler-instance` validates the bundled demo crawler proof and generic export path. App-specific crawler ownership checks belong in the app repo.
 
 ## Packaging Status
 

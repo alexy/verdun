@@ -1,0 +1,12 @@
+[
+  {
+    "subject": "Source diagnostics",
+    "url": "https://example.com/demo/source-diagnostic-record",
+    "title": "Reusable source diagnostic record",
+    "observed_at": "2026-06-18T11:45:00Z",
+    "summary": "A generic diagnostic record retained as first-class source-health evidence.",
+    "tags": ["diagnostic", "source-health", "retry"],
+    "score": 68,
+    "stage": "local_json"
+  }
+]
