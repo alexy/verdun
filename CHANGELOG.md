@@ -2,6 +2,7 @@
 
 ## 2026-06-19
 
+- Added public JavaScript reload command constructors (`cargoRunCommand`, `nodeApplySqlCommand`) so generic and app-specific database deploy wrappers can share redacted command envelopes in handoff artifacts.
 - Added Rust SDK database reload handoff types (`DatabaseReloadHandoff`, `DatabaseReloadCommandSet`) so app-owned Rust loaders can emit redacted reload receipts with the same shape as Verdun's JS deploy tooling.
 - Extracted the redacted database reload handoff helpers into the public `verdun/scripts/public/database-reload-handoff` surface so generic and app-specific database loaders can share handoff writing and database URL redaction.
 - Added lower-level generic source-run constructors `SourceRun::new` and `SourceRun::with_counts` so external app crawlers can reuse Verdun's source-run shape even when their source metadata does not come directly from `SourceConfig`.

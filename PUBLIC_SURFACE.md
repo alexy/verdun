@@ -15,7 +15,7 @@ These package subpaths are the supported external app surface:
 - `verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.
 - `verdun/db/public/workbench-migrations`: generic workbench migration manifest.
 - `verdun/scripts/public/check-deployed`: deploy/readiness checker entrypoint for external app wrappers.
-- `verdun/scripts/public/database-reload-handoff`: redacted database reload handoff writer for generic and app-specific loaders.
+- `verdun/scripts/public/database-reload-handoff`: redacted database reload handoff writer plus shared cargo export and Node SQL apply command constructors for generic and app-specific loaders.
 - `verdun/scripts/public/deploy-workbench-database`: generic workbench database deploy/preflight entrypoint with handoff artifact support.
 - `verdun/scripts/public/deploy-profile-contract`: deploy-check profile validator for external app profile modules.
 - `verdun/scripts/public/test-loader`: TypeScript compatibility-smoke loader contract.
