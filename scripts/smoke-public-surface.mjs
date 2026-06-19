@@ -8,6 +8,7 @@ const expectedExports = {
   './frontend/workbench-ui': './frontend/workbench-ui.ts',
   './frontend/workbench-view': './frontend/workbench-view.ts',
   './scripts/public/check-deployed': './scripts/public/check-deployed.mjs',
+  './scripts/public/database-reload-handoff': './scripts/public/database-reload-handoff.mjs',
   './scripts/public/deploy-workbench-database': './scripts/public/deploy-workbench-database.mjs',
   './scripts/public/deploy-profile-contract': './scripts/public/deploy-profile-contract.mjs',
   './scripts/public/test-loader': './scripts/public/test-loader.mjs',
@@ -78,4 +79,17 @@ for (const expectedSymbol of ['publicWorkbenchApiModulePaths', 'publicWorkbenchA
 }
 if ('publicBundledProofModulePaths' in workbenchApiModules) {
   throw new Error('scripts/public/workbench-api-modules.mjs should not expose bundled proof modules to external apps')
+}
+
+const reloadHandoff = await import('./public/database-reload-handoff.mjs')
+for (const expectedSymbol of ['databaseEnvStatus', 'redactedDatabaseUrlArg', 'writeDatabaseReloadHandoff']) {
+  if (typeof reloadHandoff[expectedSymbol] !== 'function') {
+    throw new Error(`scripts/public/database-reload-handoff.mjs does not export ${expectedSymbol}`)
+  }
+}
+if (reloadHandoff.databaseEnvStatus('postgres://example') !== 'provided') {
+  throw new Error('database reload handoff helper did not report provided database env')
+}
+if (JSON.stringify(reloadHandoff.redactedDatabaseUrlArg('postgres://example')) !== JSON.stringify(['--database-url', '<redacted>'])) {
+  throw new Error('database reload handoff helper did not redact database URL args')
 }

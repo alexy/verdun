@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { existsSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
+import { databaseEnvStatus, redactedDatabaseUrlArg, writeDatabaseReloadHandoff } from './database-reload-handoff.mjs'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
@@ -87,7 +87,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
     console.log(`deployed check target: ${deployedCheckArgs.join(' ')}`)
   }
   if (handoffOut) {
-    writeHandoff(handoffOut, {
+    writeDatabaseReloadHandoff(handoffOut, {
       schemaVersion: 1,
       generatedAt: new Date().toISOString(),
       kind: 'verdun_generic_workbench_database_reload',
@@ -102,7 +102,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
       staticSnapshotPath: staticSnapshotPath ?? null,
       sqlPath,
       migrationPaths: profile?.migrationPaths ?? null,
-      databaseEnv: databaseUrl ? 'provided' : 'not_provided',
+      databaseEnv: databaseEnvStatus(databaseUrl),
       vercelEnvChecked: Boolean(apply && !skipVercelEnv),
       deployedCheck: {
         skipped: Boolean(skipDeployedCheck || !apply),
@@ -136,7 +136,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
           '--snapshot',
           snapshotPath,
           ...loaderArgs,
-          ...(databaseUrl ? ['--database-url', '<redacted>'] : []),
+          ...redactedDatabaseUrlArg(databaseUrl),
           ...(apply ? ['--apply'] : []),
         ],
       },
@@ -162,12 +162,6 @@ function repeatArg(name, values) {
 
 function assertFile(path, label) {
   if (!existsSync(path)) throw new Error(`${label} not found: ${path}`)
-}
-
-function writeHandoff(path, payload) {
-  const dir = dirname(path)
-  if (dir && dir !== '.') mkdirSync(dir, { recursive: true })
-  writeFileSync(path, `${JSON.stringify(payload, null, 2)}\n`)
 }
 
 function assertVercelDatabaseEnv() {

@@ -2,6 +2,7 @@
 
 ## 2026-06-19
 
+- Extracted the redacted database reload handoff helpers into the public `verdun/scripts/public/database-reload-handoff` surface so generic and app-specific database loaders can share handoff writing and database URL redaction.
 - Added lower-level generic source-run constructors `SourceRun::new` and `SourceRun::with_counts` so external app crawlers can reuse Verdun's source-run shape even when their source metadata does not come directly from `SourceConfig`.
 - Added the first generic source-adapter SDK contract: `SourceAdapter`, `SourceAdapterContext`, `SourceAdapterOutput`, `SourceRun::from_records`, `SourceRun::error`, `SourceRun::skipped`, and `project_counts_for_records`; Verdun's demo crawler now uses this public adapter contract instead of a private demo-only trait.
 - Added generic crawler artifact inventory support: `ArtifactSpec`, `ArtifactInventory`, `ArtifactInventoryEntry`, `ArtifactInventorySummary`, and `CrawlerRunManifest.artifact_inventory` now let app crawlers report required output existence, byte counts, modified times, and missing-required counts in shared run manifests.
