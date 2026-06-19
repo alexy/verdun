@@ -2,6 +2,8 @@
 
 Verdun's reusable app contract is intentionally smaller than its repository tree. External apps such as Garbage should import only the package subpaths and Rust SDK facade listed here. Other files are implementation detail unless they are promoted into this document and `package.json` exports together.
 
+For the full app-package shape, see `EXTERNAL_APP.md`.
+
 ## JavaScript, TypeScript, and CSS Exports
 
 These package subpaths are the supported external app surface:
