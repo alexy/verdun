@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Refreshed `README.md` and `APP.md` to describe Verdun as the Greathouse/demo bundled core and Garbage as an external app-owned consumer for frontend, API, crawler, and deployment checks.
 - Exported `verdun-crawler` as a library/runtime, made Verdun's crawler binary a thin wrapper, and removed the hardcoded Garbage external crawler include.
 - Changed Verdun's bundled crawler registry to Greathouse/demo-only; Garbage now owns `apps/garbage/crawler/Cargo.toml` and registers its crawler against Verdun from the app package.
 - Changed external deploy-profile discovery from a hardcoded Garbage path to `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`; Garbage now owns its deployed-check wrapper.

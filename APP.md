@@ -7,21 +7,21 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 ## Current Slice
 
 - Verdun is now being extracted as the reusable core; the live newsletter app is the Garbage instance layered on top of it.
-- Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, and browser snapshot-normalization sources live in the parent package under `apps/garbage/src/`, while resident Verdun UI/API compatibility code imports them during extraction.
+- Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
-- Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/` with resident Verdun shims.
+- Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under parent-owned `apps/garbage/src/app/composables/`.
 - Garbage-specific newsletter app components, publishing/ontology/source-gap styles, browser composables, and app entrypoint live under parent-owned `apps/garbage/src/`; root `src/style.css` now keeps shared shell/workbench layout and Verdun no longer loads the Garbage frontend.
-- Vite and generated Vercel routing use registered deploy profiles; Garbage remains the default `/rbage/` public path and Greathouse is routable at `/greathouse/`.
+- Vite and generated Vercel routing use registered deploy profiles; Verdun's bundled default is Greathouse at `/greathouse/`, while Garbage owns its `/rbage/` app and Vercel config under `apps/garbage/`.
 - Vercel has `collected.ga` attached to the `garbage` project and aliased to the latest production deployment; `npm run check:deployed` is the public DNS/route check, while `npx vercel domains inspect collected.ga` and `npx vercel alias ls` verify Vercel-side domain state during DNS propagation.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.
 - `npm run check:deployed -- --require-database` verifies the deployed API is backed by writable external database persistence rather than browser-local fallback.
 - `npm run vercel:config` regenerates `vercel.json` from deploy profiles so app rewrites stay instance-owned rather than hand-coded in the root Vercel config.
 - Deploy-check profile exports are neutral inside each instance module, and shared deployment tooling discovers `scripts/instances/*/deploy-checks.mjs` entries by convention instead of statically importing Garbage or Greathouse profiles.
-- Garbage deploy-check profile metadata and hook implementations are parent-owned at `apps/garbage/scripts/deploy-checks.mjs`, `apps/garbage/scripts/deployed-check-smoke-fixture.mjs`, and `apps/garbage/scripts/deployed-draft-checks.mjs`.
+- Garbage deploy-check profile metadata, wrapper, and hook implementations are parent-owned at `apps/garbage/scripts/deploy-checks.mjs`, `apps/garbage/scripts/check-deployed.mjs`, `apps/garbage/scripts/deployed-check-smoke-fixture.mjs`, and `apps/garbage/scripts/deployed-draft-checks.mjs`.
 - Garbage deploy-check profile metadata also declares an external npm-workspace command runner for `@garbage/instance`, so shared Verdun orchestration runs Garbage commands through the package instead of local Verdun `garbage:*` scripts.
-- Verdun deploy-profile discovery now loads Garbage through `scripts/instances/external-deploy-check-profile-modules.mjs`; the old resident Garbage deploy-profile and deployed-check hook shim files are gone.
+- Verdun external deploy-profile discovery is environment-driven through `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`; Garbage opts in from its parent-owned `check-deployed.mjs` wrapper.
 - Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/garbage/newsletter/items --deployment <deployment-url>`.
 - Deployed draft API and publishing-readiness validation is instance-owned: the generic deployed checker loads Garbage's validator from parent-owned `apps/garbage/scripts/deployed-draft-checks.mjs` through deploy-profile metadata.
 - Inbox filtering by search text, vote state, project, source, and evidence stage so editors can prioritize live/manual collected items before watchlist seed placeholders.
@@ -49,43 +49,38 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Generic backend route helpers live in `api/core/http.ts`; Garbage data access and local fallback state live under parent-owned `apps/garbage/src/api/`.
 - Generic local workbench adapter types live in `api/workbench/local-adapter-types.ts`; Garbage fallback behavior is now an instance-owned registration rather than a Garbage-named adapter contract in the shared resolver.
 - Bundled API fallback adapters are isolated in `api/instances/bundled-workbench-adapters.ts`, so the generic adapter registry does not directly import Garbage.
-- The parent Garbage repo now exposes `@garbage/instance` package commands as the temporary stable command surface while Garbage implementation moves out of Verdun. Publishing entrypoints, the newsletter draft builder, workbench projection, default publishing data, draft/URL-draft/readiness/source-gap/Ulysses/Ghost/public-snapshot/recency/API smoke coverage, and Grust watchlist/dedupe/provenance/manual-source/query-plan crawler smoke commands now live in the parent package, import package TypeScript directly with Node, and no longer change cwd into Verdun; local API smoke is parent-owned while it still loads bundled API modules, and operational compatibility smokes still delegate through the external instance manifest into declared Verdun scripts.
+- The parent Garbage repo exposes `@garbage/instance` package commands as the stable app command surface. Publishing entrypoints, the newsletter draft builder, workbench projection, default publishing data, draft/URL-draft/readiness/source-gap/Ulysses/Ghost/public-snapshot/recency/API smoke coverage, browser smoke coverage, and Grust watchlist/dedupe/provenance/manual-source/query-plan crawler smoke commands now live in the parent package, import package TypeScript directly with Node, and no longer change cwd into Verdun. Local API smoke is parent-owned and loads app-owned route/store modules through the shared TypeScript migration loader.
 - Grust watchlist audit and smoke scripts are parent-owned in `apps/garbage/scripts/`; Verdun reaches them through deploy-profile command metadata.
-- Verdun's resident Garbage crawler dedupe, provenance, query-plan, and manual-source freshness smokes now only shim to the parent package.
-- Verdun's resident Garbage draft, URL draft, publishing-readiness, and snapshot-recency smokes now only shim to the parent package.
-- Verdun's resident source-gap review CLI/smoke, public snapshot coverage smoke, and Ulysses export smoke now only shim to the parent package.
+- Garbage crawler dedupe, provenance, query-plan, manual-source freshness, draft, URL draft, publishing-readiness, snapshot-recency, source-gap review, public snapshot coverage, and Ulysses export smokes are parent-owned app commands.
 - Verdun's resident newsletter draft CLI and Ghost CLI/smoke paths have been removed from Verdun's package surface; local/draft/health API smokes run from the parent Garbage package against app-owned route modules.
-- Verdun's resident legacy newsletter SQL apply/deploy helpers and loader smoke now only shim to the parent package, which owns the compatibility migrations.
-- Verdun's resident newsletter snapshot composable and view-model smokes now only shim to the parent package while the bundled UI modules remain in Verdun.
-- Verdun's resident workbench compatibility smoke now only shims to the parent package while the generic workbench API modules remain bundled in Verdun.
+- Legacy newsletter SQL apply/deploy helpers, loader smoke, newsletter snapshot/view smokes, and workbench compatibility smoke are parent-owned app commands. Some of those checks still intentionally load generic Verdun runtime helpers or API test-loader paths.
 - Verdun's shared browser smoke orchestration runs Garbage app and responsive UI checks through the parent package command runner; the bundled Garbage UI and registration shim files have been removed.
 - Garbage's API workbench adapter, newsletter store, and newsletter route handlers live under parent-owned `apps/garbage/src/api/`, with app-owned Vercel route files under `apps/garbage/api/garbage/newsletter/`.
-- The resident Garbage workbench adapter imports parent-owned `apps/garbage/src/api/workbench.ts`; the bundled adapter manifest still lives in Verdun to feed the generic local adapter registry.
+- Garbage workbench adapter metadata is parent-owned at `apps/garbage/src/api/workbench.ts`; Verdun's bundled adapter manifest feeds only generic proof-instance fallback behavior.
 - Garbage browser snapshot/view composables, app component, component files, style sheet, app entrypoint, and default-instance metadata are parent-owned; Verdun does not import them from its frontend registry.
-- Resident Garbage UI components, composables, the API draft route, and compatibility scripts import parent-owned `apps/garbage/src/newsletter.ts` and `apps/garbage/src/ontology.ts`; the duplicate resident newsletter and ontology files have been removed.
-- The resident Garbage snapshot composable imports parent-owned `apps/garbage/src/snapshot.ts`; the duplicate resident snapshot normalizer has been removed and the snapshot smoke guards against its return.
+- The duplicate resident newsletter, ontology, and snapshot-normalizer files have been removed; parent-owned Garbage modules are the source of truth.
 - Generic Verdun workbench read routes live in `api/workbench/records.ts`, `api/workbench/status.ts`, and `api/workbench/health.ts`; their DB helper now requires an explicit `WorkbenchInstance` namespace while the public routes resolve defaults through the instance registry.
 - `GET /api/garbage/newsletter/health` follows the Greathouse service-health pattern and reports database env state, read/write surfaces, guarded publishing surfaces, the Rust loader command, and active snapshot counts.
-- Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local development without a database uses ignored `crawler/data/editorial-state.json`.
-- Static no-database API fallback can read `VERDUN_STATIC_SNAPSHOT_FILE`, which lets the parent Garbage package exercise bundled API modules against package-owned snapshot data without running from Verdun's cwd.
+- Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local Garbage development without a database uses ignored `apps/garbage/data/editorial-state.json`.
+- Static no-database API fallback can read `VERDUN_STATIC_SNAPSHOT_FILE`, which lets the parent Garbage package exercise app-owned API modules against package-owned snapshot data without running from Verdun's cwd.
 - The app can import exported `{ votes, focuses }` editorial-state JSON into writable API modes, so a browser-local review session can be promoted into durable Postgres-backed state after the external database is configured.
 - Generic database tables and views live in `db/migrations/0003_generic_workbench_tables.sql` (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`).
 - Garbage newsletter compatibility migrations live under parent-owned `apps/garbage/db/instances/garbage/migrations/` and are selected through the Garbage deploy profile when the current newsletter fallback tables are needed.
-- Local no-database mode persists votes and focus notes to ignored `crawler/data/editorial-state.json`, with `VERDUN_LOCAL_STATE_FILE` available for tests or alternate local state.
+- Local no-database Garbage mode persists votes and focus notes to ignored `apps/garbage/data/editorial-state.json`, with `VERDUN_LOCAL_STATE_FILE` available for tests or alternate local state.
 - Rust crawler/loader scaffold under `crawler/`.
-- Garbage crawler instance config, manual social imports, and Rust instance implementation live under parent-owned `apps/garbage/crawler/`, while reusable crawler structs live in `crawler/src/core.rs` and Verdun reaches Garbage through the external crawler registry module.
+- Garbage crawler instance config, manual social imports, and Rust instance implementation live under parent-owned `apps/garbage/crawler/`, while reusable crawler structs live in `crawler/src/core.rs`. Verdun exports the `verdun-crawler` runtime; Garbage registers its crawler from its own crate.
 - Generic crawler instances now return `CrawlerCollection` from the shared trait. The shared CLI writes the core `CrawlerSnapshot` directly for generic reloads, Greathouse adapters emit core `NormalizedRecord` values directly, and Garbage owns its legacy newsletter item/public snapshot payloads.
 - Rust crawler instance modules now expose neutral `CRAWLER_INSTANCE` registrations, so the shared crawler registry does not consume Garbage/Greathouse-named static exports.
 - Resident Rust crawler modules are now listed in `crawler/src/instances/bundled.rs`, leaving the generic crawler resolver free of direct Garbage/Greathouse module references.
 - Rust crawler output and editorial-state default paths now come from the selected crawler instance, so Greathouse no longer falls back to Garbage's `crawler/data/*` files.
 - Greathouse crawler adapters now cover local listing/diagnostic JSON, HTTP listing/diagnostic JSON, HTTP status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings behind the same generic snapshot contract.
-- Static fallback data in `public/data/newsletter-snapshot.json`, regenerated by the Rust crawler.
+- Garbage static fallback data lives in `apps/garbage/data/newsletter-snapshot.json`, regenerated by the app-owned Rust crawler.
 - Crawler items include normalized `raw_json.provenance` with source adapter, evidence URL, matched project, and matched keywords.
 - Live/manual crawler items are deduplicated by canonical URL while retaining duplicate source evidence in `raw_json.duplicates`.
 - External DB loader SQL exports to the reusable generic Verdun tables by default, while `export-sql --target newsletter` remains the explicit Garbage/newsletter compatibility path. Generic snapshot loading stays in the shared CLI; legacy Garbage newsletter snapshot and split-file payload loading is owned by the Garbage crawler instance. Both preserve the snapshot collection timestamp.
 - `npm run db:apply` validates a generated generic workbench SQL load against its paired snapshot, applies the database migration, and loads external Postgres only when `--apply` and a database URL are present.
 - `npm run db:deploy` regenerates or validates the generic workbench SQL load from the selected deploy profile, checks Vercel production database env before applying, loads external Postgres when `--apply` is present, and then runs the deployed `--require-database` gate.
-- `npm run garbage:smoke:loader -- /tmp/verdun-newsletter-load.sql public/data/newsletter-snapshot.json` checks that the legacy Garbage newsletter SQL export preserves required projects, source runs, query plans, tags, URLs, provenance JSON, and snapshot collection time before applying it to external Postgres.
+- `npm run garbage:smoke:loader -- /tmp/verdun-newsletter-load.sql apps/garbage/data/newsletter-snapshot.json` checks that the legacy Garbage newsletter SQL export preserves required projects, source runs, query plans, tags, URLs, provenance JSON, and snapshot collection time before applying it to external Postgres.
 - Database-backed API snapshots and status responses preserve the source collection timestamp from `newsletter_source_runs.collected_at`, so deployed draft issue dates follow the crawler/load run rather than serverless request time.
 - Source-health metadata shown in the app sidebar, including per-project coverage for each watched source.
 - Source-health coverage gaps use the crawler query plan as the watched-project authority, identify watched projects without live/manual source matches, show crawler query hints and source-specific review links for the first gaps, can be saved directly as this-week focus requests, and include the same actionable gap signal in local Markdown drafts.
@@ -104,7 +99,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Publish manifests include deterministic prose-quality checks for weekly throughline/arc, crawler/feed boilerplate leaks, per-selected-item source-linked evidence, source links, credo fit, and selection audit; `--require-ready` now blocks Ulysses/Ghost-ready exports when those prose checks fail.
 - Fallback draft selection prefers live/manual collected items over watchlist seed placeholders and keeps project diversity unless the editor explicitly upvotes different items.
 - Draft rendering normalizes thin feed snippets, generic feed captions, and crawler boilerplate into fuller source-aware/project-aware prose before Markdown/Ghost output.
-- Local draft generation overlays ignored `crawler/data/editorial-state.json` so no-database app upvotes/focus notes drive the Ulysses and Ghost draft paths; `NEWSLETTER_APPLY_LOCAL_STATE=false` renders the raw snapshot.
+- Local draft generation overlays ignored `apps/garbage/data/editorial-state.json` so no-database app upvotes/focus notes drive the Ulysses and Ghost draft paths; `NEWSLETTER_APPLY_LOCAL_STATE=false` renders the raw snapshot.
 - Draft and Ghost scripts can read a snapshot from a local JSON file or an `http(s)` URL, including the deployed `/api/garbage/newsletter/items` endpoint.
 - Draft and Ghost scripts support `--require-upvotes` / `NEWSLETTER_REQUIRE_UPVOTES=true` to block publishing from a fallback-ranked draft when no item has been explicitly upvoted.
 - Draft and Ghost scripts support `--require-ready` / `NEWSLETTER_REQUIRE_READY=true` to apply the same publishing readiness checks used by the app before writing or posting a draft.
@@ -141,7 +136,7 @@ Current local checks:
 - `npm run prod:build`
 - `npm run check:deployed`
 - `npm run check:preview`
-- `cargo run --manifest-path crawler/Cargo.toml -- collect --live --max-live-per-project 2`
-- `cargo run --manifest-path crawler/Cargo.toml -- queries`
+- `cargo run --manifest-path apps/garbage/crawler/Cargo.toml -- collect --live --max-live-per-project 2`
+- `cargo run --manifest-path apps/garbage/crawler/Cargo.toml -- queries`
 - `npm run garbage:draft`
 - `npm run garbage:smoke:app -- http://127.0.0.1:5174/rbage/`
