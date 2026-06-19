@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import { ref } from 'vue'
 import { runnerImport } from 'vite'
 
-const { module: pilotModule } = await runnerImport('./src/instances/greathouse/pilot.ts', {
+const { module: pilotModule } = await runnerImport('./src/instances/demo/pilot.ts', {
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
@@ -15,10 +15,19 @@ const { module: registryModule } = await runnerImport('./src/instances/registry.
   logLevel: 'error',
   optimizeDeps: { noDiscovery: true },
 })
-const [greathouseAppSource, greathouseAppRegistrationSource, greathouseInstanceRegistrationSource, instanceRegistrationsSource, appSource, appComponentsSource, appRegistrySource, registrySource] = await Promise.all([
-  readFile('src/instances/greathouse/GreathouseApp.vue', 'utf8'),
-  readFile('src/instances/greathouse/app.ts', 'utf8'),
-  readFile('src/instances/greathouse/instance.ts', 'utf8'),
+const [
+  demoAppSource,
+  demoAppRegistrationSource,
+  demoInstanceRegistrationSource,
+  instanceRegistrationsSource,
+  appSource,
+  appComponentsSource,
+  appRegistrySource,
+  registrySource,
+] = await Promise.all([
+  readFile('src/instances/demo/DemoApp.vue', 'utf8'),
+  readFile('src/instances/demo/app.ts', 'utf8'),
+  readFile('src/instances/demo/instance.ts', 'utf8'),
   readFile('src/instances/instances.ts', 'utf8'),
   readFile('src/App.vue', 'utf8'),
   readFile('src/instances/app-components.ts', 'utf8'),
@@ -26,48 +35,48 @@ const [greathouseAppSource, greathouseAppRegistrationSource, greathouseInstanceR
   readFile('src/instances/registry.ts', 'utf8'),
 ])
 
-const snapshotRef = ref(pilotModule.greathousePilotSnapshot())
+const snapshotRef = ref(pilotModule.demoPilotSnapshot())
 const view = workbenchViewModule.useWorkbenchView(snapshotRef)
 const snapshot = snapshotRef.value
 
-if (snapshot.instance.id !== 'greathouse' || snapshot.instance.basePath !== '/greathouse/') {
-  throw new Error(`Greathouse pilot did not expose its own instance boundary: ${JSON.stringify(snapshot.instance)}`)
+if (snapshot.instance.id !== 'demo' || snapshot.instance.basePath !== '/demo/') {
+  throw new Error(`Demo pilot did not expose its own instance boundary: ${JSON.stringify(snapshot.instance)}`)
 }
-if (!snapshot.records.some((record) => record.sourceKind === 'listing' && record.subject === 'Berkeley 2BR')) {
-  throw new Error('Greathouse pilot did not expose listing-shaped records through the workbench contract')
+if (!snapshot.records.some((record) => record.sourceKind === 'record' && record.subject === 'Reusable workbench')) {
+  throw new Error('Demo pilot did not expose generic records through the workbench contract')
 }
-if (!snapshot.records.some((record) => record.sourceKind === 'diagnostic' && record.provenance?.adapter === 'local-diagnostic-json')) {
-  throw new Error('Greathouse pilot did not preserve blocked-source diagnostic provenance')
+if (!snapshot.records.some((record) => record.sourceKind === 'diagnostic' && record.provenance?.adapter === 'demo-diagnostic-json')) {
+  throw new Error('Demo pilot did not preserve diagnostic provenance')
 }
-if (!view.subjectOptions.value.includes('Berkeley 2BR') || !view.sourceOptions.value.includes('Redfin')) {
-  throw new Error('shared workbench view did not derive Greathouse subject/source filters')
+if (!view.subjectOptions.value.includes('Reusable workbench') || !view.sourceOptions.value.includes('Demo live source')) {
+  throw new Error('shared workbench view did not derive demo subject/source filters')
 }
-if (view.includedRecords.value.length !== 1 || view.includedRecords.value[0]?.id !== 'listing-redfin-berkeley-01') {
-  throw new Error('shared workbench view did not treat Greathouse review state generically')
+if (view.includedRecords.value.length !== 1 || view.includedRecords.value[0]?.id !== 'demo-live-record-01') {
+  throw new Error('shared workbench view did not treat demo review state generically')
 }
-view.subjectFilter.value = 'Oakland blocked source'
+view.subjectFilter.value = 'Source diagnostics'
 if (view.filteredRecords.value.length !== 1 || view.filteredRecords.value[0]?.sourceKind !== 'diagnostic') {
-  throw new Error('shared workbench subject filter did not isolate the Greathouse diagnostic record')
+  throw new Error('shared workbench subject filter did not isolate the demo diagnostic record')
 }
 view.subjectFilter.value = 'all'
 view.evidenceFilter.value = 'live'
 if (view.filteredRecords.value.length !== 2) {
-  throw new Error('shared workbench live evidence filter did not work for Greathouse records')
+  throw new Error('shared workbench live evidence filter did not work for demo records')
 }
-if (!view.coverage.value.uncoveredSubjects.includes('Oakland blocked source')) {
-  throw new Error('shared workbench coverage did not flag Greathouse blocked-source gaps')
+if (!view.coverage.value.uncoveredSubjects.includes('Source diagnostics')) {
+  throw new Error('shared workbench coverage did not flag demo diagnostic coverage gaps')
 }
 if (view.liveSourceCount.value !== 1 || view.pendingSourceCount.value !== 0) {
-  throw new Error('shared workbench source counters did not handle Greathouse source runs')
+  throw new Error('shared workbench source counters did not handle demo source runs')
 }
-if (!greathouseAppSource.includes('greathousePilotSnapshot') || !greathouseAppSource.includes('WorkbenchReviewRail')) {
-  throw new Error('Greathouse workbench app component is not wired to the generic workbench pilot')
+if (!demoAppSource.includes('demoPilotSnapshot') || !demoAppSource.includes('WorkbenchReviewRail')) {
+  throw new Error('Demo workbench app component is not wired to the generic workbench pilot')
 }
-if (!greathouseAppRegistrationSource.includes('GreathouseApp') || !greathouseAppRegistrationSource.includes('greathouseInstance.id')) {
-  throw new Error('Greathouse app component is not registered from its instance boundary')
+if (!demoAppRegistrationSource.includes('DemoApp') || !demoAppRegistrationSource.includes('demoInstance.id')) {
+  throw new Error('Demo app component is not registered from its instance boundary')
 }
-if (!greathouseInstanceRegistrationSource.includes('greathouseInstance') || !greathouseInstanceRegistrationSource.includes('greathousePilotSnapshot')) {
-  throw new Error('Greathouse instance metadata is not registered from its instance boundary')
+if (!demoInstanceRegistrationSource.includes('demoInstance') || !demoInstanceRegistrationSource.includes('demoPilotSnapshot') || !demoInstanceRegistrationSource.includes('default: true')) {
+  throw new Error('Demo instance metadata is not registered as the bundled default')
 }
 for (const removedGarbageFrontendPath of [
   'src/instances/garbage/app.ts',
@@ -137,15 +146,15 @@ if (
 ) {
   throw new Error('instance registry still imports or hard-codes concrete instance metadata')
 }
-if (registryModule.resolveWorkbenchInstanceForPath('/greathouse/').id !== 'greathouse') {
-  throw new Error('registry did not resolve /greathouse/ to the Greathouse instance')
+if (registryModule.resolveWorkbenchInstanceForPath('/demo/').id !== 'demo') {
+  throw new Error('registry did not resolve /demo/ to the demo instance')
 }
 if (registryModule.resolveWorkbenchInstanceForPath('/rbage/').id !== 'demo') {
   throw new Error('Verdun registry should not resolve /rbage/ to Garbage; Garbage owns its app entrypoint')
 }
 if (registryModule.defaultWorkbenchInstance().id !== 'demo') {
-  throw new Error('Verdun registry should default to its bundled demo instance after external apps are decoupled')
+  throw new Error('Verdun registry should default to its bundled demo instance')
 }
-if (registryModule.staticWorkbenchSnapshot(registryModule.resolveWorkbenchInstance('greathouse'))?.instance?.id !== 'greathouse') {
-  throw new Error('registry did not expose the Greathouse static snapshot from registration metadata')
+if (registryModule.staticWorkbenchSnapshot(registryModule.resolveWorkbenchInstance('demo'))?.instance?.id !== 'demo') {
+  throw new Error('registry did not expose the demo static snapshot from registration metadata')
 }

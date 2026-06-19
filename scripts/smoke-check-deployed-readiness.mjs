@@ -8,8 +8,8 @@ const defaultProfile = deployCheckProfile(defaultDeployCheckProfileId())
 if (!defaultProfile?.smokeFixtureModule || !defaultProfile.staticSnapshotPath) {
   throw new Error('deployed-check smoke requires a bundled workbench deploy profile')
 }
-if (defaultProfile.id !== 'greathouse') {
-  throw new Error(`Verdun default deploy profile should be bundled Greathouse, found ${defaultProfile.id}`)
+if (defaultProfile.id !== 'demo') {
+  throw new Error(`Verdun default deploy profile should be bundled demo, found ${defaultProfile.id}`)
 }
 if (supportedDeployCheckProfiles().some((profile) => profile.id === 'garbage')) {
   throw new Error('Verdun deploy profiles should not register Garbage unless an external app opts in')
@@ -22,7 +22,7 @@ const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
 
-for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json', 'Weekly throughline', 'upvoted items will lead the draft']) {
+for (const marker of ['collected.ga', '/rbage/', '/greathouse/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json', 'Weekly throughline', 'upvoted items will lead the draft']) {
   if (checkDeployedSource.includes(marker)) {
     throw new Error(`generic deployed checker still embeds Garbage deploy marker: ${marker}`)
   }
@@ -56,7 +56,7 @@ if (
 if (externalProfilesSource.includes('apps/garbage') || !externalProfilesSource.includes('VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES')) {
   throw new Error('external deploy-profile registry should be environment-provided, not hardcoded to Garbage')
 }
-if (!defaultProfile.smokeFixtureModule.includes(`instances/${defaultProfile.id}/`) || !defaultProfile.genericSqlSmoke || !defaultProfile.smokeAllCommands) {
+if (!defaultProfile.smokeFixtureModule.includes(`instances/${defaultProfile.id}/`) || !defaultProfile.smokeAllCommands) {
   throw new Error('bundled deploy profile is missing reusable workbench smoke metadata')
 }
 

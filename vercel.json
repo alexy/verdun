@@ -5,11 +5,23 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/greathouse/",
+      "destination": "/demo/",
       "permanent": false
     }
   ],
   "rewrites": [
+    {
+      "source": "/demo/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/demo/data/(.*)",
+      "destination": "/data/$1"
+    },
+    {
+      "source": "/demo/(.*)",
+      "destination": "/index.html"
+    },
     {
       "source": "/greathouse/assets/(.*)",
       "destination": "/assets/$1"

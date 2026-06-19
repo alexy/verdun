@@ -1,0 +1,113 @@
+import type { WorkbenchSnapshot } from '../../core/workbench'
+import { demoInstance, demoSeedFocuses } from './config'
+
+export function demoPilotSnapshot(): WorkbenchSnapshot {
+  return {
+    generatedAt: '2026-06-18T12:00:00.000Z',
+    instance: demoInstance,
+    editorialPersistence: 'browser',
+    records: [
+      {
+        id: 'demo-live-record-01',
+        title: 'Generic live source record',
+        source: 'Demo live source',
+        sourceKind: 'record',
+        url: 'https://example.com/demo/live-record',
+        observedAt: '2026-06-18T12:00:00.000Z',
+        subject: 'Reusable workbench',
+        topic: 'core contract',
+        summary: 'A normalized record with source provenance, tags, score, and review state for reusable workbench validation.',
+        tags: ['generic', 'workbench', 'provenance'],
+        score: 82,
+        review: 1,
+        provenance: {
+          stage: 'live',
+          adapter: 'demo-live-json',
+          source: 'Demo live source',
+          sourceKind: 'record',
+          sourceUrl: 'https://example.com/demo/source',
+          evidenceUrl: 'https://example.com/demo/live-record',
+          subject: 'Reusable workbench',
+          matchedKeywords: ['generic', 'workbench'],
+        },
+      },
+      {
+        id: 'demo-diagnostic-record-01',
+        title: 'Generic source diagnostic record',
+        source: 'Demo source diagnostics',
+        sourceKind: 'diagnostic',
+        url: 'https://example.com/demo/diagnostic',
+        observedAt: '2026-06-18T11:45:00.000Z',
+        subject: 'Source diagnostics',
+        topic: 'source health',
+        summary: 'A diagnostic record retained as first-class evidence so external apps can review source health without custom core logic.',
+        tags: ['diagnostic', 'source-health', 'retry'],
+        score: 68,
+        review: 0,
+        provenance: {
+          stage: 'live',
+          adapter: 'demo-diagnostic-json',
+          source: 'Demo source diagnostics',
+          sourceKind: 'diagnostic',
+          sourceUrl: 'https://example.com/demo/diagnostics',
+          evidenceUrl: 'https://example.com/demo/diagnostic',
+          subject: 'Source diagnostics',
+          matchedKeywords: ['diagnostic', 'retry'],
+        },
+      },
+    ],
+    focuses: demoSeedFocuses,
+    sourceRuns: [
+      {
+        source: 'Demo live source',
+        kind: 'record',
+        status: 'ok',
+        itemCount: 1,
+        message: 'demo live source loaded through the generic workbench contract',
+        subjectCounts: { 'Reusable workbench': 1 },
+      },
+      {
+        source: 'Demo source diagnostics',
+        kind: 'diagnostic',
+        status: 'error',
+        itemCount: 1,
+        message: 'demo diagnostic source retained source-health evidence',
+        subjectCounts: { 'Source diagnostics': 1 },
+      },
+    ],
+    collectionPlans: [
+      {
+        subject: 'Reusable workbench',
+        topic: 'core contract',
+        query: 'generic workbench record provenance',
+        liveTerms: ['generic', 'workbench', 'provenance'],
+        tags: ['generic', 'workbench'],
+        reviewTargets: [
+          {
+            source: 'Demo live source',
+            label: 'Demo live source: reusable workbench',
+            url: 'https://example.com/demo/source/search?q=reusable+workbench',
+            adapter: 'demo-live-json',
+          },
+        ],
+        focusTerms: ['provenance'],
+      },
+      {
+        subject: 'Source diagnostics',
+        topic: 'source health',
+        query: 'generic source diagnostic retry',
+        liveTerms: ['diagnostic', 'source-health', 'retry'],
+        tags: ['diagnostic', 'source-health'],
+        reviewTargets: [
+          {
+            source: 'Demo source diagnostics',
+            label: 'Demo source diagnostics: source health',
+            url: 'https://example.com/demo/diagnostics/search?q=source+health',
+            adapter: 'demo-diagnostic-json',
+          },
+        ],
+        focusTerms: ['retry'],
+      },
+    ],
+  }
+}

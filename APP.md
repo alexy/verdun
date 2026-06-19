@@ -9,8 +9,9 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Verdun is now being extracted as the reusable core; the live newsletter app is the external Garbage package layered on top of Verdun public contracts.
 - `PUBLIC_SURFACE.md` defines the supported Verdun package subpaths and Rust SDK facade available to external apps.
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
+- Verdun's bundled default workbench is now the neutral `demo` instance at `/demo/`; it exists only to prove the reusable frontend/API/deploy contract without naming Garbage or Greathouse as core behavior.
 - The parent workspace now has a Greathouse external app package at `apps/greathouse/`, including its Vite entrypoint, property workbench component, config, pilot snapshot, static snapshot, crawler crate/config/fixtures, deploy-check profile, and smoke fixture.
-- Verdun still carries the bundled Greathouse frontend/profile/crawler temporarily as proof coverage until external Greathouse preview/deploy/database/crawler checks are equivalent and shared registries can load the external package.
+- Verdun still carries the bundled Greathouse frontend/profile/crawler temporarily as compatibility proof coverage until external Greathouse preview/deploy/database/crawler checks are equivalent and shared registries can load the external package.
 - Generic compatibility-smoke TypeScript loading lives behind `scripts/public/test-loader.mjs`; Garbage consumes that public loader contract while resolving Vite, Vue, and Lucide from the app package.
 - Generic workbench API module paths for compatibility smokes live behind `scripts/public/workbench-api-modules.mjs`; Garbage consumes that public manifest instead of naming Verdun workbench route files directly.
 - A temporary Greathouse pilot under `src/instances/greathouse/` still uses the same workbench contract for property listing and blocked-source diagnostic records while the parent `@greathouse/instance` package becomes the normal app owner.
@@ -18,7 +19,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Reusable workbench controls now live under `src/components/workbench/` and are exposed to external apps through `frontend/workbench-ui.ts` plus `frontend/workbench-style.css`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`; Garbage-specific snapshot loading, optimistic vote/focus persistence, draft state, and readiness derivation live under parent-owned `apps/garbage/src/app/composables/`.
 - Garbage-specific newsletter app components, publishing/ontology/source-gap styles, browser composables, and app entrypoint live under parent-owned `apps/garbage/src/`; root `src/style.css` now keeps shared shell/workbench layout and Verdun no longer loads the Garbage frontend.
-- Vite and generated Vercel routing use registered deploy profiles; Verdun's bundled default is Greathouse at `/greathouse/`, while Garbage owns its `/rbage/` app and Vercel config under `apps/garbage/`.
+- Vite and generated Vercel routing use registered deploy profiles; Verdun's bundled default is the neutral demo at `/demo/`, while Garbage owns its `/rbage/` app and Vercel config under `apps/garbage/`.
 - Vercel has `collected.ga` attached to the `garbage` project and aliased to the latest production deployment; `npm run check:deployed` is the public DNS/route check, while `npx vercel domains inspect collected.ga` and `npx vercel alias ls` verify Vercel-side domain state during DNS propagation.
 - `npm run check:deployed -- --require-ready` verifies the deployed route, static snapshot, API snapshot, and publishing readiness criteria after editorial review.
 - `npm run check:deployed -- --require-database` verifies the deployed API is backed by writable external database persistence rather than browser-local fallback.
@@ -137,6 +138,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 Current local checks:
 
+- `npm run smoke:demo-workbench`
 - `npm run smoke:all`
 - `npm run smoke:browser`
 - `npm run garbage:smoke:ulysses`
