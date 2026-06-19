@@ -8,10 +8,14 @@ crawler/target/
 crawler/data/raw/
 crawler/data/out/
 crawler/data/ulysses/
+crawler/data/items.json
+crawler/data/source-runs.json
 crawler/data/editorial-state.json
 crawler/data/grust-watchlist-audit.md
+crawler/data/newsletter-draft.md
 crawler/data/source-gap-review.md
 crawler/data/*.manifest.json
+public/data/newsletter-snapshot.json
 *.log
 .env
 .env.local

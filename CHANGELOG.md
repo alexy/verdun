@@ -2,6 +2,8 @@
 
 ## 2026-06-18
 
+- Removed tracked Garbage crawler/newsletter artifacts from Verdun `crawler/data/` and `public/data/`, ignored those legacy paths, and added smoke coverage to reject their return.
+- Changed standalone `smoke:db-apply` and `smoke:db-deploy` to generate the default Greathouse/demo generic snapshot and SQL instead of falling back to a missing or Garbage-shaped static snapshot.
 - Refreshed `README.md` and `APP.md` to describe Verdun as the Greathouse/demo bundled core and Garbage as an external app-owned consumer for frontend, API, crawler, and deployment checks.
 - Exported `verdun-crawler` as a library/runtime, made Verdun's crawler binary a thin wrapper, and removed the hardcoded Garbage external crawler include.
 - Changed Verdun's bundled crawler registry to Greathouse/demo-only; Garbage now owns `apps/garbage/crawler/Cargo.toml` and registers its crawler against Verdun from the app package.

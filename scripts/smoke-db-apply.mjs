@@ -2,9 +2,15 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
-const sqlPath = process.argv[2] ?? '/tmp/verdun-generic-load.sql'
 const profile = deployCheckProfile(defaultDeployCheckProfileId())
-const snapshotPath = process.argv[3] ?? profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
+const explicitSqlPath = process.argv[2]
+const explicitSnapshotPath = process.argv[3]
+const defaultGenericSmoke = profile?.genericSqlSmoke
+const sqlPath = explicitSqlPath ?? defaultGenericSmoke?.sqlPath ?? '/tmp/verdun-generic-load.sql'
+const snapshotPath = explicitSnapshotPath
+  ?? profile?.sourceSnapshotPath
+  ?? defaultGenericSmoke?.genericSnapshotPath
+  ?? 'public/data/workbench-snapshot.json'
 const applySource = readFileSync('scripts/workbench-apply-sql.mjs', 'utf8')
 const smokeAllSource = readFileSync('scripts/smoke-all.mjs', 'utf8')
 const smokeDbApplySource = readFileSync('scripts/smoke-db-apply.mjs', 'utf8')
@@ -49,6 +55,50 @@ if (smokeBrowserSource.includes('smoke:app') || smokeBrowserSource.includes('smo
 }
 if (coreMigrationSource.includes('newsletter_') || coreMigrationSource.includes("'garbage'") || coreMigrationSource.includes('/rbage/')) {
   throw new Error('generic workbench migration still embeds Garbage newsletter compatibility')
+}
+
+if (!explicitSqlPath && !explicitSnapshotPath && defaultGenericSmoke?.genericSnapshotPath) {
+  const collect = spawnSync('cargo', [
+    'run',
+    '--manifest-path',
+    'crawler/Cargo.toml',
+    '--',
+    'collect',
+    '--instance',
+    profile.id,
+    '--out',
+    defaultGenericSmoke.itemsPath,
+    '--source-runs-out',
+    defaultGenericSmoke.sourceRunsPath,
+    '--public-out',
+    defaultGenericSmoke.publicSnapshotPath,
+    '--generic-out',
+    defaultGenericSmoke.genericSnapshotPath,
+    '--live',
+  ], { encoding: 'utf8' })
+  if (collect.error) throw collect.error
+  if (collect.status !== 0) {
+    throw new Error(`default ${profile.id} collection failed\n${collect.stdout}\n${collect.stderr}`)
+  }
+  const exportSql = spawnSync('cargo', [
+    'run',
+    '--manifest-path',
+    'crawler/Cargo.toml',
+    '--',
+    'export-sql',
+    '--target',
+    'generic',
+    '--instance',
+    profile.id,
+    '--snapshot',
+    snapshotPath,
+    '--out',
+    sqlPath,
+  ], { encoding: 'utf8' })
+  if (exportSql.error) throw exportSql.error
+  if (exportSql.status !== 0) {
+    throw new Error(`default ${profile.id} SQL export failed\n${exportSql.stdout}\n${exportSql.stderr}`)
+  }
 }
 
 const dryRun = spawnSync('node', [

@@ -24,6 +24,25 @@ const [
   readFile('crawler/src/lib.rs', 'utf8'),
   readFile('crawler/src/runtime.rs', 'utf8'),
 ])
+const trackedLegacyGarbageArtifacts = spawnSync('git', [
+  'ls-files',
+  'public/data/newsletter-snapshot.json',
+  'crawler/data/items.json',
+  'crawler/data/source-runs.json',
+  'crawler/data/newsletter-draft.md',
+], { encoding: 'utf8' })
+if (trackedLegacyGarbageArtifacts.error) throw trackedLegacyGarbageArtifacts.error
+if (trackedLegacyGarbageArtifacts.status !== 0) {
+  throw new Error(`could not inspect tracked legacy Garbage artifacts\n${trackedLegacyGarbageArtifacts.stderr}`)
+}
+const presentTrackedLegacyArtifacts = trackedLegacyGarbageArtifacts.stdout
+  .trim()
+  .split('\n')
+  .filter(Boolean)
+  .filter((artifactPath) => existsSync(artifactPath))
+if (presentTrackedLegacyArtifacts.length) {
+  throw new Error(`Verdun should not keep tracked Garbage crawler/newsletter artifacts:\n${presentTrackedLegacyArtifacts.join('\n')}`)
+}
 for (const removedPath of ['crawler/src/instances/garbage.rs', 'crawler/src/instances/external.rs']) {
   if (existsSync(removedPath)) {
     throw new Error(`${removedPath} should not exist; app crawlers register from their own packages`)
