@@ -4,10 +4,15 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, BTreeSet},
-    fs,
+    fs::{self, OpenOptions},
+    io::Write,
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
+    sync::atomic::{AtomicU64, Ordering},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
+
+static CACHE_WRITE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
+const CACHE_METADATA_SCHEMA_VERSION: u32 = 1;
 
 #[derive(Debug, Clone)]
 pub struct JsonDiskCache {
@@ -18,6 +23,24 @@ pub struct JsonDiskCache {
 pub struct CacheRead<T> {
     pub path: PathBuf,
     pub value: Option<T>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ReadableJsonDiskCache<'a> {
+    root: Option<&'a Path>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CacheWriteMetadata {
+    schema_version: u32,
+    namespace: String,
+    key: String,
+    payload_file: String,
+    payload_bytes: usize,
+    written_at_unix: u64,
+    backfilled: bool,
+    key_recovered: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -78,6 +101,234 @@ impl<T> CacheRead<T> {
     pub fn hit(&self) -> bool {
         self.value.is_some()
     }
+}
+
+impl<'a> ReadableJsonDiskCache<'a> {
+    pub fn new(root: Option<&'a Path>) -> Self {
+        Self { root }
+    }
+
+    pub fn namespace_dir(&self, namespace: &str) -> Option<PathBuf> {
+        Some(self.root?.join(namespace))
+    }
+
+    pub fn path(&self, namespace: &str, key: &str) -> Option<PathBuf> {
+        let mut path = self.namespace_dir(namespace)?;
+        path.push(format!("{}.json", safe_cache_key(key)));
+        Some(path)
+    }
+
+    pub fn read<T>(&self, namespace: &str, key: &str) -> Option<T>
+    where
+        T: DeserializeOwned,
+    {
+        let path = self.path(namespace, key)?;
+        self.read_path(&path)
+    }
+
+    pub fn read_path<T>(&self, path: &Path) -> Option<T>
+    where
+        T: DeserializeOwned,
+    {
+        let text = fs::read_to_string(path).ok()?;
+        serde_json::from_str::<T>(&text).ok()
+    }
+
+    pub fn read_fresh_path<T>(&self, path: &Path, max_age: Duration) -> Option<T>
+    where
+        T: DeserializeOwned,
+    {
+        let modified = fs::metadata(path).ok()?.modified().ok()?;
+        if modified.elapsed().ok()? > max_age {
+            return None;
+        }
+        self.read_path(path)
+    }
+
+    pub fn write<T>(&self, namespace: &str, key: &str, value: &T)
+    where
+        T: Serialize,
+    {
+        let Some(path) = self.path(namespace, key) else {
+            return;
+        };
+        if let Some(parent) = path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+        if let Ok(text) = serde_json::to_string_pretty(value)
+            && write_atomic_json(&path, &text).is_ok()
+        {
+            let _ = write_cache_metadata(namespace, key, &path, text.as_bytes().len() + 1);
+        }
+    }
+}
+
+pub fn backfill_cache_metadata(root: &Path) -> Result<serde_json::Value> {
+    let mut summary = BackfillSummary::default();
+    if !root.exists() {
+        return Ok(summary.into_json(root));
+    }
+    backfill_dir(root, root, &mut summary)?;
+    Ok(summary.into_json(root))
+}
+
+#[derive(Default)]
+struct BackfillSummary {
+    payload_json_files: u64,
+    existing_metadata_files: u64,
+    payloads_with_existing_metadata: u64,
+    written_metadata_files: u64,
+    skipped_corrupt_json_files: u64,
+    skipped_non_json_files: u64,
+    failed_metadata_writes: u64,
+}
+
+impl BackfillSummary {
+    fn into_json(self, root: &Path) -> serde_json::Value {
+        serde_json::json!({
+            "cacheDir": path_string(root),
+            "payloadJsonFiles": self.payload_json_files,
+            "existingMetadataFiles": self.existing_metadata_files,
+            "payloadsWithExistingMetadata": self.payloads_with_existing_metadata,
+            "writtenMetadataFiles": self.written_metadata_files,
+            "skippedCorruptJsonFiles": self.skipped_corrupt_json_files,
+            "skippedNonJsonFiles": self.skipped_non_json_files,
+            "failedMetadataWrites": self.failed_metadata_writes,
+        })
+    }
+}
+
+fn backfill_dir(root: &Path, dir: &Path, summary: &mut BackfillSummary) -> Result<()> {
+    let paths = fs::read_dir(dir)
+        .with_context(|| format!("failed to read cache dir {}", dir.display()))?
+        .map(|entry| entry.map(|entry| entry.path()))
+        .collect::<std::io::Result<Vec<_>>>()
+        .with_context(|| format!("failed to list cache dir {}", dir.display()))?;
+    for path in paths {
+        if path.is_dir() {
+            backfill_dir(root, &path, summary)?;
+            continue;
+        }
+        if is_cache_metadata_path(&path) {
+            summary.existing_metadata_files += 1;
+            continue;
+        }
+        if path.extension().and_then(|ext| ext.to_str()) != Some("json") {
+            summary.skipped_non_json_files += 1;
+            continue;
+        }
+        summary.payload_json_files += 1;
+        let Some(metadata_path) = cache_metadata_path(&path) else {
+            summary.failed_metadata_writes += 1;
+            continue;
+        };
+        if metadata_path.exists() {
+            summary.payloads_with_existing_metadata += 1;
+            continue;
+        }
+        let text = fs::read_to_string(&path)
+            .with_context(|| format!("failed to read {}", path.display()))?;
+        if serde_json::from_str::<serde_json::Value>(&text).is_err() {
+            summary.skipped_corrupt_json_files += 1;
+            continue;
+        }
+        let namespace = path
+            .strip_prefix(root)
+            .unwrap_or(&path)
+            .parent()
+            .and_then(|parent| parent.components().next())
+            .map(|component| component.as_os_str().to_string_lossy().to_string())
+            .unwrap_or_else(|| "root".to_owned());
+        let key = path
+            .file_stem()
+            .and_then(|name| name.to_str())
+            .unwrap_or("legacy-cache-payload");
+        match write_cache_metadata_with_flags(&namespace, key, &path, text.as_bytes().len(), true) {
+            Ok(()) => summary.written_metadata_files += 1,
+            Err(_) => summary.failed_metadata_writes += 1,
+        }
+    }
+    Ok(())
+}
+
+fn write_cache_metadata(
+    namespace: &str,
+    key: &str,
+    payload_path: &Path,
+    payload_bytes: usize,
+) -> std::io::Result<()> {
+    write_cache_metadata_with_flags(namespace, key, payload_path, payload_bytes, false)
+}
+
+fn write_cache_metadata_with_flags(
+    namespace: &str,
+    key: &str,
+    payload_path: &Path,
+    payload_bytes: usize,
+    backfilled: bool,
+) -> std::io::Result<()> {
+    let Some(metadata_path) = cache_metadata_path(payload_path) else {
+        return Ok(());
+    };
+    let metadata = CacheWriteMetadata {
+        schema_version: CACHE_METADATA_SCHEMA_VERSION,
+        namespace: namespace.to_owned(),
+        key: key.to_owned(),
+        payload_file: payload_path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("cache.json")
+            .to_owned(),
+        payload_bytes,
+        written_at_unix: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|duration| duration.as_secs())
+            .unwrap_or(0),
+        backfilled,
+        key_recovered: !backfilled,
+    };
+    let text = serde_json::to_string_pretty(&metadata)?;
+    write_atomic_json(&metadata_path, &text)
+}
+
+fn cache_metadata_path(payload_path: &Path) -> Option<PathBuf> {
+    let file_name = payload_path.file_name()?.to_str()?;
+    Some(payload_path.with_file_name(format!("{file_name}.meta.json")))
+}
+
+fn write_atomic_json(path: &Path, text: &str) -> std::io::Result<()> {
+    let Some(parent) = path.parent() else {
+        return Ok(());
+    };
+    let file_name = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("cache.json");
+    let sequence = CACHE_WRITE_SEQUENCE.fetch_add(1, Ordering::Relaxed);
+    let temp_path = parent.join(format!(
+        ".{file_name}.{}.{}.tmp",
+        std::process::id(),
+        sequence
+    ));
+    let result = (|| {
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&temp_path)?;
+        file.write_all(text.as_bytes())?;
+        file.write_all(b"\n")?;
+        file.sync_all()?;
+        drop(file);
+        fs::rename(&temp_path, path)?;
+        if let Ok(parent_dir) = fs::File::open(parent) {
+            let _ = parent_dir.sync_all();
+        }
+        Ok(())
+    })();
+    if result.is_err() {
+        let _ = fs::remove_file(&temp_path);
+    }
+    result
 }
 
 pub fn audit_json_cache(
@@ -366,6 +617,19 @@ pub fn is_cache_metadata_path(path: &Path) -> bool {
         .is_some_and(|name| name.ends_with(".meta.json"))
 }
 
+pub fn safe_cache_key(value: &str) -> String {
+    value
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || ch == '-' || ch == '_' || ch == '.' {
+                ch
+            } else {
+                '_'
+            }
+        })
+        .collect()
+}
+
 fn metadata_payload_name(path: &Path) -> Option<String> {
     path.file_name()?
         .to_str()?
@@ -530,6 +794,124 @@ mod tests {
         assert_eq!(audit.namespaces[0].freshness_class, "http-json-class");
 
         let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn readable_cache_writes_payload_and_metadata_atomically() {
+        let root = temp_root("readable-cache-atomic");
+        let cache = ReadableJsonDiskCache::new(Some(&root));
+
+        cache.write(
+            "api",
+            "https://example.test/query?a=1&b=2",
+            &json!({"count": 1}),
+        );
+        cache.write(
+            "api",
+            "https://example.test/query?a=1&b=2",
+            &json!({"count": 2}),
+        );
+
+        assert_eq!(
+            cache.read::<serde_json::Value>("api", "https://example.test/query?a=1&b=2"),
+            Some(json!({"count": 2}))
+        );
+        let path = cache
+            .path("api", "https://example.test/query?a=1&b=2")
+            .expect("cache path");
+        let metadata_path = cache_metadata_path(&path).expect("metadata path");
+        let metadata = cache
+            .read_path::<serde_json::Value>(&metadata_path)
+            .expect("metadata json");
+        assert_eq!(metadata["schemaVersion"], 1);
+        assert_eq!(metadata["namespace"], "api");
+        assert_eq!(metadata["key"], "https://example.test/query?a=1&b=2");
+        assert_eq!(
+            metadata["payloadFile"],
+            "https___example.test_query_a_1_b_2.json"
+        );
+        assert!(metadata["payloadBytes"].as_u64().expect("payload bytes") > 0);
+        assert!(metadata["writtenAtUnix"].as_u64().expect("written at") > 0);
+        let temp_files = fs::read_dir(cache.namespace_dir("api").expect("namespace dir"))
+            .expect("read cache namespace")
+            .filter_map(Result::ok)
+            .filter(|entry| entry.file_name().to_string_lossy().ends_with(".tmp"))
+            .count();
+        assert_eq!(temp_files, 0);
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn readable_cache_ignores_corrupt_json_entries() {
+        let root = temp_root("readable-cache-corrupt");
+        let cache = ReadableJsonDiskCache::new(Some(&root));
+        let path = cache.path("api", "corrupt").expect("cache path");
+        fs::create_dir_all(path.parent().expect("cache parent")).expect("cache parent");
+        fs::write(&path, "{not valid json\n").expect("write corrupt cache");
+
+        assert_eq!(cache.read::<serde_json::Value>("api", "corrupt"), None);
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn readable_cache_backfills_metadata_without_overwriting_existing_metadata() {
+        let root = temp_root("readable-cache-backfill");
+        let namespace = root.join("api");
+        fs::create_dir_all(&namespace).expect("cache namespace");
+        let legacy_path = namespace.join("legacy_payload.json");
+        fs::write(&legacy_path, "{\"ok\":true}\n").expect("legacy payload");
+        let corrupt_path = namespace.join("corrupt_payload.json");
+        fs::write(&corrupt_path, "{not-json\n").expect("corrupt payload");
+
+        let cache = ReadableJsonDiskCache::new(Some(&root));
+        cache.write(
+            "api",
+            "https://example.test/exact-key",
+            &json!({"count": 1}),
+        );
+        let exact_path = cache
+            .path("api", "https://example.test/exact-key")
+            .expect("exact path");
+        let exact_metadata_path = cache_metadata_path(&exact_path).expect("exact metadata path");
+        let before = fs::read_to_string(&exact_metadata_path).expect("existing metadata");
+
+        let summary = backfill_cache_metadata(&root).expect("backfill summary");
+        assert_eq!(summary["payloadJsonFiles"], 3);
+        assert_eq!(summary["existingMetadataFiles"], 1);
+        assert_eq!(summary["payloadsWithExistingMetadata"], 1);
+        assert_eq!(summary["writtenMetadataFiles"], 1);
+        assert_eq!(summary["skippedCorruptJsonFiles"], 1);
+        assert_eq!(
+            fs::read_to_string(&exact_metadata_path).expect("existing metadata after"),
+            before
+        );
+
+        let legacy_metadata = cache
+            .read_path::<serde_json::Value>(
+                &cache_metadata_path(&legacy_path).expect("legacy metadata path"),
+            )
+            .expect("legacy metadata");
+        assert_eq!(legacy_metadata["namespace"], "api");
+        assert_eq!(legacy_metadata["payloadFile"], "legacy_payload.json");
+        assert_eq!(legacy_metadata["backfilled"], true);
+        assert_eq!(legacy_metadata["keyRecovered"], false);
+        assert!(
+            !cache_metadata_path(&corrupt_path)
+                .expect("corrupt metadata path")
+                .exists()
+        );
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn safe_cache_key_preserves_readable_ascii_and_replaces_separators() {
+        assert_eq!(
+            safe_cache_key("Area Name/FeatureServer?x=1&y=2"),
+            "Area_Name_FeatureServer_x_1_y_2"
+        );
     }
 
     fn temp_root(name: &str) -> PathBuf {

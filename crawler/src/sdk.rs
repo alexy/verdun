@@ -1,6 +1,7 @@
 pub use crate::cache::{
     CacheNamespacePolicy, CacheRead, JsonCacheAudit, JsonCacheNamespaceAudit, JsonDiskCache,
-    audit_json_cache, is_cache_metadata_path, write_pretty_json, write_text,
+    ReadableJsonDiskCache, audit_json_cache, backfill_cache_metadata, is_cache_metadata_path,
+    safe_cache_key, write_pretty_json, write_text,
 };
 pub use crate::core::{
     ArtifactInventory, ArtifactInventoryEntry, ArtifactInventorySummary, ArtifactSpec,
