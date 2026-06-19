@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added `frontend/workbench-view.ts` as the public frontend view-model/type export for external apps that want Verdun filtering, counts, coverage, and `WorkbenchSnapshot` contracts without importing `src/*` internals.
 - Documented that Greathouse's deploy-check profile now has an app-owned parent workspace copy while Verdun keeps the bundled profile temporarily during extraction.
 - Noted the new parent-owned `apps/greathouse/` extraction anchor in Verdun app-state docs, so core-side resumption points at the externalization checklist.
 - Added `EXTERNAL_APP.md` as the reusable app-package guide for Verdun consumers, covering frontend, API, database, deploy-profile, crawler, and check ownership boundaries.

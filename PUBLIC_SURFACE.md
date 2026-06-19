@@ -9,6 +9,7 @@ For the full app-package shape, see `EXTERNAL_APP.md`.
 These package subpaths are the supported external app surface:
 
 - `verdun/frontend/workbench-ui`: shared Vue workbench controls.
+- `verdun/frontend/workbench-view`: shared workbench filtering/count/coverage composable and TypeScript workbench types.
 - `verdun/frontend/workbench-style.css`: shared workbench shell and component CSS.
 - `verdun/api/public/http`: reusable Vercel-style request/response helpers.
 - `verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.

@@ -6,6 +6,7 @@ const expectedExports = {
   './db/public/workbench-migrations': './db/public/workbench-migrations.mjs',
   './frontend/workbench-style.css': './frontend/workbench-style.css',
   './frontend/workbench-ui': './frontend/workbench-ui.ts',
+  './frontend/workbench-view': './frontend/workbench-view.ts',
   './scripts/public/check-deployed': './scripts/public/check-deployed.mjs',
   './scripts/public/deploy-profile-contract': './scripts/public/deploy-profile-contract.mjs',
   './scripts/public/test-loader': './scripts/public/test-loader.mjs',
@@ -58,4 +59,11 @@ try {
   throw new Error('deploy profile contract accepted an invalid basePath')
 } catch (error) {
   if (!String(error?.message ?? error).includes('basePath')) throw error
+}
+
+const workbenchViewSource = await readFile('frontend/workbench-view.ts', 'utf8')
+for (const expectedSymbol of ['useWorkbenchView', 'WorkbenchSnapshot', 'WorkbenchRecord', 'ReviewValue']) {
+  if (!workbenchViewSource.includes(expectedSymbol)) {
+    throw new Error(`frontend/workbench-view.ts does not export ${expectedSymbol}`)
+  }
 }

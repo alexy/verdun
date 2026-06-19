@@ -9,7 +9,7 @@ The first reusable boundary is now explicit:
 - `EXTERNAL_APP.md` is the implementation guide for app packages that extend Verdun without moving domain behavior into the core repo.
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
-- Generic reusable Vue controls live under `src/components/workbench/`; external apps should consume them through `frontend/workbench-ui.ts`, and shared workbench CSS through `frontend/workbench-style.css`.
+- Generic reusable Vue controls live under `src/components/workbench/`; external apps should consume them through `frontend/workbench-ui.ts`, shared workbench CSS through `frontend/workbench-style.css`, and the shared workbench view model/types through `frontend/workbench-view.ts`.
 - Generic compatibility-smoke loading is exposed through `scripts/public/test-loader.mjs`; external apps can reuse Verdun's TypeScript loader contract while supplying their own Vite, Vue, and icon-library resolution.
 - Generic workbench API module discovery for compatibility smokes is exposed through `scripts/public/workbench-api-modules.mjs`, so external apps do not need to hardcode Verdun's internal workbench route filenames.
 - External deploy-check profile modules can validate their app-owned metadata through `scripts/public/deploy-profile-contract.mjs` before opting into Verdun's public deployed-check entrypoint.

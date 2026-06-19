@@ -28,6 +28,7 @@ The app owns its `index.html`, `vite.config.ts`, `src/main.ts`, domain app compo
 ```ts
 import 'verdun/frontend/workbench-style.css'
 import { WorkbenchHero, WorkbenchReviewRail } from 'verdun/frontend/workbench-ui'
+import { useWorkbenchView, type WorkbenchSnapshot } from 'verdun/frontend/workbench-view'
 ```
 
 Do not register app components inside Verdun unless the app is a temporary bundled proof instance. A normal external app mounts its own entrypoint and chooses its own base path.
