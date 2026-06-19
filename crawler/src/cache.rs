@@ -475,6 +475,29 @@ pub fn write_text(path: impl AsRef<Path>, text: impl AsRef<str>) -> Result<()> {
     fs::write(path, text.as_ref()).with_context(|| format!("writing {}", path.display()))
 }
 
+pub fn read_json<T: DeserializeOwned>(path: impl AsRef<Path>) -> Result<T> {
+    let path = path.as_ref();
+    let text =
+        fs::read_to_string(path).with_context(|| format!("failed to read {}", path.display()))?;
+    serde_json::from_str(&text).with_context(|| format!("failed to parse {}", path.display()))
+}
+
+pub fn read_optional_json<T: DeserializeOwned>(path: impl AsRef<Path>) -> Result<Option<T>> {
+    let path = path.as_ref();
+    if !path.exists() {
+        return Ok(None);
+    }
+    read_json(path).map(Some)
+}
+
+pub fn read_json_value(path: impl AsRef<Path>) -> Result<serde_json::Value> {
+    read_json(path)
+}
+
+pub fn read_optional_json_value(path: impl AsRef<Path>) -> Result<Option<serde_json::Value>> {
+    read_optional_json(path)
+}
+
 fn cache_digest(key: &str) -> String {
     let digest = Sha256::digest(key.as_bytes());
     digest[..16]
@@ -756,6 +779,24 @@ mod tests {
 
         assert!(json_path.exists());
         assert_eq!(fs::read_to_string(text_path).expect("read text"), "hello");
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn artifact_readers_parse_required_and_optional_json() {
+        let root = temp_root("artifact-read");
+        let json_path = root.join("nested").join("artifact.json");
+        write_pretty_json(&json_path, &json!({"items": [1, 2]})).expect("write json");
+
+        let required = read_json_value(&json_path).expect("read required json");
+        let optional = read_optional_json_value(&json_path).expect("read optional json");
+        let missing =
+            read_optional_json_value(root.join("missing.json")).expect("missing optional");
+
+        assert_eq!(required["items"].as_array().map(Vec::len), Some(2));
+        assert_eq!(optional.expect("optional json")["items"][0], json!(1));
+        assert!(missing.is_none());
 
         let _ = fs::remove_dir_all(root);
     }
