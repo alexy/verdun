@@ -13,7 +13,9 @@ pub use crate::core::{
     project_counts_for_records, slug, stable_id,
 };
 pub use crate::http::{
-    HttpFetch, HttpFetchMetadata, fetch_json, fetch_json_async, fetch_json_request,
+    HttpFetch, HttpFetchMetadata, fetch_json, fetch_json_allow_status,
+    fetch_json_allow_status_async, fetch_json_allow_status_request,
+    fetch_json_allow_status_request_async, fetch_json_async, fetch_json_request,
     fetch_json_request_async, fetch_text, fetch_text_allow_status, fetch_text_allow_status_async,
     fetch_text_allow_status_request, fetch_text_allow_status_request_async, fetch_text_async,
     fetch_text_request, fetch_text_request_async, probe_http_status, probe_http_status_async,

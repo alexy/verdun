@@ -64,6 +64,13 @@ pub fn fetch_json<T: DeserializeOwned>(client: &Client, url: &str) -> Result<Htt
     fetch_json_request(client.get(url), url)
 }
 
+pub fn fetch_json_allow_status<T: DeserializeOwned>(
+    client: &Client,
+    url: &str,
+) -> Result<HttpFetch<T>> {
+    fetch_json_allow_status_request(client.get(url), url)
+}
+
 pub fn fetch_json_request<T: DeserializeOwned>(
     request: RequestBuilder,
     label: &str,
@@ -75,6 +82,20 @@ pub fn fetch_json_request<T: DeserializeOwned>(
     response
         .error_for_status_ref()
         .with_context(|| format!("fetching {label}"))?;
+    let body = response
+        .json::<T>()
+        .with_context(|| format!("decoding JSON from {label}"))?;
+    Ok(HttpFetch { metadata, body })
+}
+
+pub fn fetch_json_allow_status_request<T: DeserializeOwned>(
+    request: RequestBuilder,
+    label: &str,
+) -> Result<HttpFetch<T>> {
+    let response = request
+        .send()
+        .with_context(|| format!("fetching {label}"))?;
+    let metadata = metadata_from_response(label, &response);
     let body = response
         .json::<T>()
         .with_context(|| format!("decoding JSON from {label}"))?;
@@ -142,6 +163,13 @@ pub async fn fetch_json_async<T: DeserializeOwned>(
     fetch_json_request_async(client.get(url), url).await
 }
 
+pub async fn fetch_json_allow_status_async<T: DeserializeOwned>(
+    client: &AsyncClient,
+    url: &str,
+) -> Result<HttpFetch<T>> {
+    fetch_json_allow_status_request_async(client.get(url), url).await
+}
+
 pub async fn fetch_json_request_async<T: DeserializeOwned>(
     request: AsyncRequestBuilder,
     label: &str,
@@ -154,6 +182,22 @@ pub async fn fetch_json_request_async<T: DeserializeOwned>(
     response
         .error_for_status_ref()
         .with_context(|| format!("fetching {label}"))?;
+    let body = response
+        .json::<T>()
+        .await
+        .with_context(|| format!("decoding JSON from {label}"))?;
+    Ok(HttpFetch { metadata, body })
+}
+
+pub async fn fetch_json_allow_status_request_async<T: DeserializeOwned>(
+    request: AsyncRequestBuilder,
+    label: &str,
+) -> Result<HttpFetch<T>> {
+    let response = request
+        .send()
+        .await
+        .with_context(|| format!("fetching {label}"))?;
+    let metadata = metadata_from_async_response(label, &response);
     let body = response
         .json::<T>()
         .await
