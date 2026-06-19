@@ -9,6 +9,40 @@ export function redactedDatabaseUrlArg(databaseUrl) {
   return databaseUrl ? ['--database-url', '<redacted>'] : []
 }
 
+export function cargoRunCommand(manifestPath, args = []) {
+  return [
+    'cargo',
+    'run',
+    '--manifest-path',
+    manifestPath,
+    '--',
+    ...args,
+  ]
+}
+
+export function nodeApplySqlCommand({
+  scriptPath,
+  leadingArgs = [],
+  sqlPath,
+  snapshotPath,
+  trailingArgs = [],
+  databaseUrl,
+  apply = false,
+}) {
+  return [
+    'node',
+    scriptPath,
+    ...leadingArgs,
+    '--sql',
+    sqlPath,
+    '--snapshot',
+    snapshotPath,
+    ...trailingArgs,
+    ...redactedDatabaseUrlArg(databaseUrl),
+    ...(apply ? ['--apply'] : []),
+  ]
+}
+
 export function databaseReloadStatus(apply) {
   return apply ? 'applied' : 'preflight'
 }

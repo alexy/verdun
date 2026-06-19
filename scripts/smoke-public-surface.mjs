@@ -82,7 +82,7 @@ if ('publicBundledProofModulePaths' in workbenchApiModules) {
 }
 
 const reloadHandoff = await import('./public/database-reload-handoff.mjs')
-for (const expectedSymbol of ['databaseEnvStatus', 'databaseReloadHandoff', 'databaseReloadStatus', 'redactedDatabaseUrlArg', 'writeDatabaseReloadHandoff']) {
+for (const expectedSymbol of ['cargoRunCommand', 'databaseEnvStatus', 'databaseReloadHandoff', 'databaseReloadStatus', 'nodeApplySqlCommand', 'redactedDatabaseUrlArg', 'writeDatabaseReloadHandoff']) {
   if (typeof reloadHandoff[expectedSymbol] !== 'function') {
     throw new Error(`scripts/public/database-reload-handoff.mjs does not export ${expectedSymbol}`)
   }
@@ -92,6 +92,21 @@ if (reloadHandoff.databaseEnvStatus('postgres://example') !== 'provided') {
 }
 if (JSON.stringify(reloadHandoff.redactedDatabaseUrlArg('postgres://example')) !== JSON.stringify(['--database-url', '<redacted>'])) {
   throw new Error('database reload handoff helper did not redact database URL args')
+}
+if (JSON.stringify(reloadHandoff.cargoRunCommand('crawler/Cargo.toml', ['export-sql'])) !== JSON.stringify(['cargo', 'run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql'])) {
+  throw new Error('database reload handoff helper did not build cargo run command')
+}
+const nodeApply = reloadHandoff.nodeApplySqlCommand({
+  scriptPath: 'scripts/apply.mjs',
+  leadingArgs: ['--instance', 'surface-smoke'],
+  sqlPath: '/tmp/surface-smoke.sql',
+  snapshotPath: '/tmp/surface-smoke.json',
+  trailingArgs: ['--loader', 'strict'],
+  databaseUrl: 'postgres://example',
+  apply: true,
+})
+if (JSON.stringify(nodeApply) !== JSON.stringify(['node', 'scripts/apply.mjs', '--instance', 'surface-smoke', '--sql', '/tmp/surface-smoke.sql', '--snapshot', '/tmp/surface-smoke.json', '--loader', 'strict', '--database-url', '<redacted>', '--apply'])) {
+  throw new Error(`database reload handoff helper did not build redacted node apply command: ${JSON.stringify(nodeApply)}`)
 }
 const surfaceHandoff = reloadHandoff.databaseReloadHandoff({
   apply: false,

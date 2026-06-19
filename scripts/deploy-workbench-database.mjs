@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { databaseReloadHandoff, redactedDatabaseUrlArg, writeDatabaseReloadHandoff } from './database-reload-handoff.mjs'
+import { cargoRunCommand, databaseReloadHandoff, nodeApplySqlCommand, writeDatabaseReloadHandoff } from './database-reload-handoff.mjs'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
@@ -107,12 +107,7 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
       deployedCheckCommand: ['npm', 'run', 'check:deployed', '--', ...deployedCheckArgs],
       commands: {
         exportSql: generate
-          ? [
-              'cargo',
-              'run',
-              '--manifest-path',
-              crawlerManifest,
-              '--',
+          ? cargoRunCommand(crawlerManifest, [
               'export-sql',
               '--snapshot',
               snapshotPath,
@@ -121,21 +116,17 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
               ...(instance ? ['--instance', instance] : []),
               ...(instanceName ? ['--instance-name', instanceName] : []),
               ...(basePath ? ['--base-path', basePath] : []),
-            ]
+            ])
           : null,
-        applySql: [
-          'node',
-          applySqlScript,
-          '--instance',
-          instance,
-          '--sql',
+        applySql: nodeApplySqlCommand({
+          scriptPath: applySqlScript,
+          leadingArgs: ['--instance', instance],
           sqlPath,
-          '--snapshot',
           snapshotPath,
-          ...loaderArgs,
-          ...redactedDatabaseUrlArg(databaseUrl),
-          ...(apply ? ['--apply'] : []),
-        ],
+          trailingArgs: loaderArgs,
+          databaseUrl,
+          apply,
+        }),
       },
       extra: {
         instanceName: instanceName ?? null,
