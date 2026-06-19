@@ -4,6 +4,7 @@
 
 - Added `db/public/workbench-migrations.mjs` as the external app migration manifest for Verdun's reusable workbench database schema, leaving `db/core` as an internal source of truth.
 - Added package `exports` for Verdun's public JS/CSS app surface so external apps can import `verdun/frontend/*`, `verdun/api/public/*`, `verdun/db/public/*`, and `verdun/scripts/public/*` subpaths instead of filesystem-relative paths.
+- Added `crawler/README.md` to document Verdun's reusable crawler SDK/runtime boundary and the external app registration pattern.
 - Added `scripts/public/test-loader.mjs`, `scripts/public/workbench-api-modules.mjs`, and `scripts/public/check-deployed.mjs` as external app entrypoints, leaving `scripts/core` as the internal implementation layer for reusable test/deploy helpers.
 - Removed the remaining Verdun smoke-script reads of `../apps/garbage/*`; Garbage-specific crawler and browser-smoke ownership checks now belong to the external app verifier.
 - Added `crawler/src/sdk.rs` as the public Rust crawler SDK facade for external app crawlers, re-exporting the stable instance, runtime, and generic snapshot contract without requiring consumers to import `core` or `instances` internals.
