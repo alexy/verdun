@@ -64,7 +64,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Deployed no-database mode reports `editorialPersistence: "browser"` and stores votes/focus notes in browser-local state for export/import and Ulysses handoff; configured Postgres deployments report `database`, while local Garbage development without a database uses ignored `apps/garbage/data/editorial-state.json`.
 - Static no-database API fallback can read `VERDUN_STATIC_SNAPSHOT_FILE`, which lets the parent Garbage package exercise app-owned API modules against package-owned snapshot data without running from Verdun's cwd.
 - The app can import exported `{ votes, focuses }` editorial-state JSON into writable API modes, so a browser-local review session can be promoted into durable Postgres-backed state after the external database is configured.
-- Generic database tables and views live in `db/migrations/0003_generic_workbench_tables.sql` (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`).
+- Generic database tables and views live in `db/migrations/0003_generic_workbench_tables.sql` (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and are exposed to external apps through `db/core/workbench-migrations.mjs`.
 - Garbage newsletter compatibility migrations live under parent-owned `apps/garbage/db/instances/garbage/migrations/` and are selected through the Garbage deploy profile when the current newsletter fallback tables are needed.
 - Local no-database Garbage mode persists votes and focus notes to ignored `apps/garbage/data/editorial-state.json`, with `VERDUN_LOCAL_STATE_FILE` available for tests or alternate local state.
 - Rust crawler/loader scaffold under `crawler/`.

@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added `db/core/workbench-migrations.mjs` as the external migration manifest for Verdun's reusable workbench database schema.
 - Added `api/core/workbench-local-adapter.ts` as the external type entrypoint for apps that register local workbench fallback adapters without importing Verdun workbench internals.
 - Added core frontend reuse entrypoints for shared workbench UI and CSS (`src/core/workbench-ui.ts` and `src/core/workbench-style.css`) so external apps can import Verdun workbench presentation without reaching into raw component/style files.
 - Corrected README/APP publishing-path docs so Garbage Grust audits, source-gap reviews, and Ulysses exports point at parent-owned `apps/garbage/data/` outputs instead of legacy Verdun `crawler/data/` paths.
