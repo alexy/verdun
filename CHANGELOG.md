@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added core frontend reuse entrypoints for shared workbench UI and CSS (`src/core/workbench-ui.ts` and `src/core/workbench-style.css`) so external apps can import Verdun workbench presentation without reaching into raw component/style files.
 - Corrected README/APP publishing-path docs so Garbage Grust audits, source-gap reviews, and Ulysses exports point at parent-owned `apps/garbage/data/` outputs instead of legacy Verdun `crawler/data/` paths.
 - Removed tracked Garbage crawler/newsletter artifacts from Verdun `crawler/data/` and `public/data/`, ignored those legacy paths, and added smoke coverage to reject their return.
 - Changed standalone `smoke:db-apply` and `smoke:db-deploy` to generate the default Greathouse/demo generic snapshot and SQL instead of falling back to a missing or Garbage-shaped static snapshot.

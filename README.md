@@ -6,7 +6,7 @@ The first reusable boundary is now explicit:
 
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
-- Generic reusable Vue controls live under `src/components/workbench/` and currently back both the Garbage newsletter app and the Greathouse pilot workbench.
+- Generic reusable Vue controls live under `src/components/workbench/`; external apps should consume them through `src/core/workbench-ui.ts`, and shared workbench CSS through `src/core/workbench-style.css`.
 - Garbage instance configuration and default workbench instance registration live in the parent package at `apps/garbage/src/config.ts` and `apps/garbage/src/instance-registration.ts`; Verdun core no longer imports or registers the Garbage frontend.
 - Garbage-specific ontology, newsletter, browser snapshot-normalization logic, browser composables, app components, app entrypoint, app styles, newsletter API routes, deployment profile, and crawler crate live in the parent package under `apps/garbage/`; Verdun no longer imports or registers the Garbage frontend, API routes, deploy profile, or crawler implementation.
 - A Greathouse pilot instance lives in `src/instances/greathouse/` and exercises property listing and blocked-source diagnostic records through the same `WorkbenchSnapshot` and generic view model.
