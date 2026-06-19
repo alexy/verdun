@@ -410,6 +410,55 @@ pub struct CrawlerRunManifest {
     pub collection_plan_count: usize,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatabaseReloadCommandSet {
+    pub export_sql: Option<Vec<String>>,
+    pub apply_sql: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatabaseReloadHandoff {
+    pub schema_version: u8,
+    pub generated_at: DateTime<Utc>,
+    pub kind: String,
+    pub status: String,
+    pub apply: bool,
+    pub generated_sql: bool,
+    pub instance: String,
+    pub display_name: String,
+    pub base_path: Option<String>,
+    pub snapshot_path: Option<String>,
+    pub sql_path: String,
+    pub migration_paths: Vec<String>,
+    pub database_env: String,
+    pub commands: DatabaseReloadCommandSet,
+    #[serde(default, skip_serializing_if = "serde_json::Value::is_null")]
+    pub metadata: serde_json::Value,
+}
+
+impl DatabaseReloadHandoff {
+    pub fn database_env_status(database_url_available: bool) -> &'static str {
+        if database_url_available {
+            "provided"
+        } else {
+            "not_provided"
+        }
+    }
+
+    pub fn write_pretty_json(&self, path: impl AsRef<Path>) -> std::io::Result<()> {
+        let path = path.as_ref();
+        if let Some(parent) = path.parent() {
+            if !parent.as_os_str().is_empty() {
+                fs::create_dir_all(parent)?;
+            }
+        }
+        let text = serde_json::to_string_pretty(self).map_err(std::io::Error::other)?;
+        fs::write(path, format!("{text}\n"))
+    }
+}
+
 pub fn stable_id(subject: &str, url: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(subject.as_bytes());
