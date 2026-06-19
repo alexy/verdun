@@ -9,6 +9,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Verdun is now being extracted as the reusable core; the live newsletter app is the Garbage instance layered on top of it.
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
 - Generic compatibility-smoke TypeScript loading lives behind `scripts/core/test-loader.mjs`; Garbage consumes that core loader contract while resolving Vite, Vue, and Lucide from the app package.
+- Generic workbench API module paths for compatibility smokes live behind `scripts/core/workbench-api-modules.mjs`; Garbage consumes that manifest instead of naming Verdun workbench route files directly.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
 - Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
