@@ -214,6 +214,34 @@ pub struct SourceAdapterOutput {
     pub source_run: SourceRun,
 }
 
+impl SourceAdapterOutput {
+    pub fn from_records(
+        source: &SourceConfig,
+        records: Vec<NormalizedRecord>,
+        message: impl Into<String>,
+    ) -> Self {
+        let source_run = SourceRun::from_records(source, &records, message);
+        Self {
+            records,
+            source_run,
+        }
+    }
+
+    pub fn error(source: &SourceConfig, message: impl Into<String>) -> Self {
+        Self {
+            records: Vec::new(),
+            source_run: SourceRun::error(source, message),
+        }
+    }
+
+    pub fn skipped(source: &SourceConfig, message: impl Into<String>) -> Self {
+        Self {
+            records: Vec::new(),
+            source_run: SourceRun::skipped(source, message),
+        }
+    }
+}
+
 pub trait SourceAdapter {
     fn id(&self) -> &'static str;
     fn collect(&self, context: SourceAdapterContext<'_>) -> anyhow::Result<SourceAdapterOutput>;
@@ -598,6 +626,58 @@ mod tests {
         assert_eq!(source_run.message, "collected records");
         assert_eq!(source_run.project_counts.get("alpha"), Some(&2));
         assert_eq!(source_run.project_counts.get("beta"), Some(&1));
+    }
+
+    #[test]
+    fn source_adapter_output_from_records_builds_matching_source_run() {
+        let source = SourceConfig {
+            name: "test source".to_owned(),
+            kind: "test_kind".to_owned(),
+            url: "https://example.test".to_owned(),
+            adapter: Some("test-adapter".to_owned()),
+            feed_urls: None,
+            manual_path: None,
+            fixture_path: None,
+        };
+        let records = vec![
+            normalized_record("alpha", "https://example.test/a"),
+            normalized_record("beta", "https://example.test/b"),
+        ];
+
+        let output = SourceAdapterOutput::from_records(&source, records, "collected records");
+
+        assert_eq!(output.records.len(), 2);
+        assert_eq!(output.source_run.source, "test source");
+        assert!(matches!(output.source_run.status, SourceRunStatus::Ok));
+        assert_eq!(output.source_run.item_count, 2);
+        assert_eq!(output.source_run.project_counts.get("alpha"), Some(&1));
+        assert_eq!(output.source_run.project_counts.get("beta"), Some(&1));
+    }
+
+    #[test]
+    fn source_adapter_output_terminal_constructors_are_empty() {
+        let source = SourceConfig {
+            name: "test source".to_owned(),
+            kind: "test_kind".to_owned(),
+            url: "https://example.test".to_owned(),
+            adapter: Some("test-adapter".to_owned()),
+            feed_urls: None,
+            manual_path: None,
+            fixture_path: None,
+        };
+
+        let error = SourceAdapterOutput::error(&source, "failed");
+        let skipped = SourceAdapterOutput::skipped(&source, "not live");
+
+        assert!(error.records.is_empty());
+        assert!(matches!(error.source_run.status, SourceRunStatus::Error));
+        assert_eq!(error.source_run.message, "failed");
+        assert!(skipped.records.is_empty());
+        assert!(matches!(
+            skipped.source_run.status,
+            SourceRunStatus::Skipped
+        ));
+        assert_eq!(skipped.source_run.message, "not live");
     }
 
     #[test]

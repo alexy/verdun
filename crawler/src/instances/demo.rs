@@ -363,17 +363,14 @@ impl SourceAdapter for LocalJsonSourceAdapter {
                 ))
             })
             .collect::<Result<Vec<_>>>()?;
-        Ok(SourceAdapterOutput {
-            source_run: SourceRun::from_records(
-                context.source,
-                &records,
-                format!(
-                    "local JSON adapter loaded through the demo crawler instance; cache namespace {}",
-                    cache.namespace
-                ),
-            ),
+        Ok(SourceAdapterOutput::from_records(
+            context.source,
             records,
-        })
+            format!(
+                "local JSON adapter loaded through the demo crawler instance; cache namespace {}",
+                cache.namespace
+            ),
+        ))
     }
 }
 
@@ -407,17 +404,14 @@ impl SourceAdapter for HttpJsonSourceAdapter {
                 ))
             })
             .collect::<Result<Vec<_>>>()?;
-        Ok(SourceAdapterOutput {
-            source_run: SourceRun::from_records(
-                context.source,
-                &records,
-                format!(
-                    "HTTP JSON adapter loaded through the demo crawler instance; cache namespace {}",
-                    cache.namespace
-                ),
-            ),
+        Ok(SourceAdapterOutput::from_records(
+            context.source,
             records,
-        })
+            format!(
+                "HTTP JSON adapter loaded through the demo crawler instance; cache namespace {}",
+                cache.namespace
+            ),
+        ))
     }
 }
 
@@ -490,17 +484,14 @@ impl SourceAdapter for HttpStatusDiagnosticAdapter {
             &cache,
             0,
         )];
-        Ok(SourceAdapterOutput {
-            source_run: SourceRun::from_records(
-                context.source,
-                &records,
-                format!(
-                    "HTTP status diagnostic adapter loaded through the demo crawler instance; cache namespace {}",
-                    cache.namespace
-                ),
-            ),
+        Ok(SourceAdapterOutput::from_records(
+            context.source,
             records,
-        })
+            format!(
+                "HTTP status diagnostic adapter loaded through the demo crawler instance; cache namespace {}",
+                cache.namespace
+            ),
+        ))
     }
 }
 
