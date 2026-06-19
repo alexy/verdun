@@ -2,6 +2,7 @@
 
 ## 2026-06-19
 
+- Added the first generic source-adapter SDK contract: `SourceAdapter`, `SourceAdapterContext`, `SourceAdapterOutput`, `SourceRun::from_records`, `SourceRun::error`, `SourceRun::skipped`, and `project_counts_for_records`; Verdun's demo crawler now uses this public adapter contract instead of a private demo-only trait.
 - Added generic crawler artifact inventory support: `ArtifactSpec`, `ArtifactInventory`, `ArtifactInventoryEntry`, `ArtifactInventorySummary`, and `CrawlerRunManifest.artifact_inventory` now let app crawlers report required output existence, byte counts, modified times, and missing-required counts in shared run manifests.
 - Added generic workbench database reload handoff support: `deploy-workbench-database --handoff-out` writes redacted snapshot/SQL/migration/deployed-check metadata, and public script subpaths now expose generic DB deploy/apply helpers to external apps.
 - Added generic HTTP fetch metadata helpers: `HttpFetchMetadata`, `HttpFetch<T>`, text/JSON fetch helpers, status-preserving fetch helpers, and `probe_http_status`; Verdun demo adapters now use them for HTTP JSON and status diagnostics.

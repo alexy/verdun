@@ -29,7 +29,7 @@ External crawler crates should depend on `verdun-crawler` and import through:
 
 - `verdun_crawler::sdk`
 
-The SDK facade re-exports the stable crawler instance registration, runtime, source, artifact inventory, run-manifest, cache, HTTP fetch, and generic snapshot contracts. The crate's `core`, `instances`, and `runtime` modules are internal.
+The SDK facade re-exports the stable crawler instance registration, runtime, source adapter, source-run reporting, artifact inventory, run-manifest, cache, HTTP fetch, and generic snapshot contracts. The crate's `core`, `instances`, and `runtime` modules are internal.
 
 ## Current Consumers
 

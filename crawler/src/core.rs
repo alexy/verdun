@@ -65,6 +65,49 @@ pub struct SourceRun {
     pub project_counts: BTreeMap<String, usize>,
 }
 
+impl SourceRun {
+    pub fn from_records(
+        source: &SourceConfig,
+        records: &[NormalizedRecord],
+        message: impl Into<String>,
+    ) -> Self {
+        Self {
+            source: source.name.clone(),
+            kind: source.kind.clone(),
+            status: if records.is_empty() {
+                SourceRunStatus::Error
+            } else {
+                SourceRunStatus::Ok
+            },
+            item_count: records.len(),
+            message: message.into(),
+            project_counts: project_counts_for_records(records),
+        }
+    }
+
+    pub fn error(source: &SourceConfig, message: impl Into<String>) -> Self {
+        Self {
+            source: source.name.clone(),
+            kind: source.kind.clone(),
+            status: SourceRunStatus::Error,
+            item_count: 0,
+            message: message.into(),
+            project_counts: BTreeMap::new(),
+        }
+    }
+
+    pub fn skipped(source: &SourceConfig, message: impl Into<String>) -> Self {
+        Self {
+            source: source.name.clone(),
+            kind: source.kind.clone(),
+            status: SourceRunStatus::Skipped,
+            item_count: 0,
+            message: message.into(),
+            project_counts: BTreeMap::new(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReviewTarget {
     pub source: String,
@@ -98,6 +141,25 @@ pub struct NormalizedRecord {
     pub provenance_json: serde_json::Value,
     pub normalized_json: serde_json::Value,
     pub raw_json: serde_json::Value,
+}
+
+pub struct SourceAdapterContext<'a> {
+    pub config: &'a CrawlerConfig,
+    pub source: &'a SourceConfig,
+    pub live: bool,
+    pub max_per_project: usize,
+    pub since: DateTime<Utc>,
+    pub editorial_focuses: &'a [EditorialFocus],
+}
+
+pub struct SourceAdapterOutput {
+    pub records: Vec<NormalizedRecord>,
+    pub source_run: SourceRun,
+}
+
+pub trait SourceAdapter {
+    fn id(&self) -> &'static str;
+    fn collect(&self, context: SourceAdapterContext<'_>) -> anyhow::Result<SourceAdapterOutput>;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -355,6 +417,14 @@ pub fn slug(value: &str) -> String {
         .join("-")
 }
 
+pub fn project_counts_for_records(records: &[NormalizedRecord]) -> BTreeMap<String, usize> {
+    let mut counts = BTreeMap::new();
+    for record in records {
+        *counts.entry(record.subject.clone()).or_insert(0) += 1;
+    }
+    counts
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -377,6 +447,34 @@ mod tests {
         assert_eq!(summary.pending, 1);
         assert_eq!(summary.skipped, 1);
         assert_eq!(summary.item_count, 10);
+    }
+
+    #[test]
+    fn source_run_from_records_counts_subjects() {
+        let source = SourceConfig {
+            name: "test source".to_owned(),
+            kind: "test_kind".to_owned(),
+            url: "https://example.test".to_owned(),
+            adapter: Some("test-adapter".to_owned()),
+            feed_urls: None,
+            manual_path: None,
+            fixture_path: None,
+        };
+        let records = vec![
+            normalized_record("alpha", "https://example.test/a"),
+            normalized_record("alpha", "https://example.test/b"),
+            normalized_record("beta", "https://example.test/c"),
+        ];
+
+        let source_run = SourceRun::from_records(&source, &records, "collected records");
+
+        assert_eq!(source_run.source, "test source");
+        assert_eq!(source_run.kind, "test_kind");
+        assert!(matches!(source_run.status, SourceRunStatus::Ok));
+        assert_eq!(source_run.item_count, 3);
+        assert_eq!(source_run.message, "collected records");
+        assert_eq!(source_run.project_counts.get("alpha"), Some(&2));
+        assert_eq!(source_run.project_counts.get("beta"), Some(&1));
     }
 
     #[test]
@@ -448,6 +546,27 @@ mod tests {
             item_count,
             message: "message".to_owned(),
             project_counts: BTreeMap::new(),
+        }
+    }
+
+    fn normalized_record(subject: &str, url: &str) -> NormalizedRecord {
+        NormalizedRecord {
+            id: stable_id(subject, url),
+            title: "title".to_owned(),
+            url: url.to_owned(),
+            source: "test source".to_owned(),
+            source_kind: "test_kind".to_owned(),
+            observed_at: DateTime::from_timestamp(3_600, 0).expect("observed time"),
+            subject: subject.to_owned(),
+            topic: "topic".to_owned(),
+            summary: "summary".to_owned(),
+            tags: Vec::new(),
+            score: 1,
+            status: "candidate".to_owned(),
+            dedupe_key: url.to_owned(),
+            provenance_json: serde_json::json!({}),
+            normalized_json: serde_json::json!({}),
+            raw_json: serde_json::json!({}),
         }
     }
 }

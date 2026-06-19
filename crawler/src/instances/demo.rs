@@ -7,7 +7,8 @@ use std::{fs, path::PathBuf, time::Duration as StdDuration};
 
 use crate::core::{
     CrawlerCollection, CrawlerConfig, CrawlerSnapshot, EditorialFocus, NormalizedCollectionPlan,
-    NormalizedRecord, ReviewTarget, SourceConfig, SourceRun, SourceRunStatus, stable_id,
+    NormalizedRecord, ReviewTarget, SourceAdapter, SourceAdapterContext, SourceAdapterOutput,
+    SourceConfig, SourceRun, stable_id,
 };
 use crate::http::{fetch_json, probe_http_status};
 use crate::instances::CrawlerInstance;
@@ -88,15 +89,10 @@ impl CrawlerInstance for DemoCrawlerInstance {
         _since: DateTime<Utc>,
         editorial_focuses: &[EditorialFocus],
     ) -> Result<CrawlerCollection> {
-        let items = if live {
-            demo_records(config)?
+        let (items, source_runs) = if live {
+            demo_adapter_outputs(config, live, editorial_focuses)?
         } else {
-            Vec::new()
-        };
-        let source_runs = if live {
-            source_runs_from_records(config, &items)
-        } else {
-            skipped_source_runs(config)
+            (Vec::new(), skipped_source_runs(config))
         };
         let records = dedupe_records(items);
         let snapshot = CrawlerSnapshot {
@@ -194,12 +190,26 @@ fn verify_config(config: &CrawlerConfig) -> Result<()> {
     Ok(())
 }
 
-fn demo_records(config: &CrawlerConfig) -> Result<Vec<NormalizedRecord>> {
+fn demo_adapter_outputs(
+    config: &CrawlerConfig,
+    live: bool,
+    editorial_focuses: &[EditorialFocus],
+) -> Result<(Vec<NormalizedRecord>, Vec<SourceRun>)> {
     let mut records = Vec::new();
+    let mut source_runs = Vec::new();
     for source in &config.sources {
-        records.extend(adapter_for_source(source)?.collect(config, source)?);
+        let output = adapter_for_source(source)?.collect(SourceAdapterContext {
+            config,
+            source,
+            live,
+            max_per_project: usize::MAX,
+            since: Utc::now(),
+            editorial_focuses,
+        })?;
+        records.extend(output.records);
+        source_runs.push(output.source_run);
     }
-    Ok(records)
+    Ok((records, source_runs))
 }
 
 fn dedupe_records(records: Vec<NormalizedRecord>) -> Vec<NormalizedRecord> {
@@ -214,14 +224,7 @@ fn skipped_source_runs(config: &CrawlerConfig) -> Vec<SourceRun> {
     config
         .sources
         .iter()
-        .map(|source| SourceRun {
-            source: source.name.clone(),
-            kind: source.kind.clone(),
-            status: SourceRunStatus::Skipped,
-            item_count: 0,
-            message: "run with --live to refresh this demo source".to_string(),
-            project_counts: Default::default(),
-        })
+        .map(|source| SourceRun::skipped(source, "run with --live to refresh this demo source"))
         .collect()
 }
 
@@ -315,122 +318,134 @@ fn demo_record(
     }
 }
 
-trait DemoSourceAdapter {
-    fn collect(
-        &self,
-        config: &CrawlerConfig,
-        source: &SourceConfig,
-    ) -> Result<Vec<NormalizedRecord>>;
-    fn message(&self) -> &'static str;
-}
-
 struct LocalJsonSourceAdapter;
 struct HttpJsonSourceAdapter;
 struct HttpStatusDiagnosticAdapter;
 
-impl DemoSourceAdapter for LocalJsonSourceAdapter {
-    fn collect(
-        &self,
-        config: &CrawlerConfig,
-        source: &SourceConfig,
-    ) -> Result<Vec<NormalizedRecord>> {
-        let fixture_path = source
+impl SourceAdapter for LocalJsonSourceAdapter {
+    fn id(&self) -> &'static str {
+        "local-json"
+    }
+
+    fn collect(&self, context: SourceAdapterContext<'_>) -> Result<SourceAdapterOutput> {
+        let fixture_path = context
+            .source
             .fixture_path
             .as_ref()
-            .with_context(|| format!("{} must configure fixture_path", source.name))?;
+            .with_context(|| format!("{} must configure fixture_path", context.source.name))?;
         let records: Vec<DemoLocalRecord> = serde_json::from_slice(
             &fs::read(fixture_path)
                 .with_context(|| format!("reading {}", fixture_path.display()))?,
         )
         .with_context(|| format!("parsing {}", fixture_path.display()))?;
-        records
+        let records = records
             .into_iter()
             .enumerate()
             .map(|(index, record)| {
-                let target = target_for_record(config, &record)?;
+                let target = target_for_record(context.config, &record)?;
                 Ok(demo_record(
                     target,
-                    source,
+                    context.source,
                     record,
-                    source.adapter.as_deref().unwrap_or("local-record-json"),
+                    context
+                        .source
+                        .adapter
+                        .as_deref()
+                        .unwrap_or("local-record-json"),
                     index,
                 ))
             })
-            .collect()
-    }
-
-    fn message(&self) -> &'static str {
-        "local JSON adapter loaded through the demo crawler instance"
+            .collect::<Result<Vec<_>>>()?;
+        Ok(SourceAdapterOutput {
+            source_run: SourceRun::from_records(
+                context.source,
+                &records,
+                "local JSON adapter loaded through the demo crawler instance",
+            ),
+            records,
+        })
     }
 }
 
-impl DemoSourceAdapter for HttpJsonSourceAdapter {
-    fn collect(
-        &self,
-        config: &CrawlerConfig,
-        source: &SourceConfig,
-    ) -> Result<Vec<NormalizedRecord>> {
+impl SourceAdapter for HttpJsonSourceAdapter {
+    fn id(&self) -> &'static str {
+        "http-json"
+    }
+
+    fn collect(&self, context: SourceAdapterContext<'_>) -> Result<SourceAdapterOutput> {
         let client = Client::builder()
             .timeout(StdDuration::from_secs(5))
             .user_agent("verdun-crawler/0.1 demo")
             .build()?;
-        let records = fetch_json::<Vec<DemoLocalRecord>>(&client, &source.url)
-            .with_context(|| format!("loading HTTP JSON source {}", source.name))?
+        let records = fetch_json::<Vec<DemoLocalRecord>>(&client, &context.source.url)
+            .with_context(|| format!("loading HTTP JSON source {}", context.source.name))?
             .body;
-        records
+        let records = records
             .into_iter()
             .enumerate()
             .map(|(index, record)| {
-                let target = target_for_record(config, &record)?;
+                let target = target_for_record(context.config, &record)?;
                 Ok(demo_record(
                     target,
-                    source,
+                    context.source,
                     record,
-                    source.adapter.as_deref().unwrap_or("http-record-json"),
+                    context
+                        .source
+                        .adapter
+                        .as_deref()
+                        .unwrap_or("http-record-json"),
                     index,
                 ))
             })
-            .collect()
-    }
-
-    fn message(&self) -> &'static str {
-        "HTTP JSON adapter loaded through the demo crawler instance"
+            .collect::<Result<Vec<_>>>()?;
+        Ok(SourceAdapterOutput {
+            source_run: SourceRun::from_records(
+                context.source,
+                &records,
+                "HTTP JSON adapter loaded through the demo crawler instance",
+            ),
+            records,
+        })
     }
 }
 
-impl DemoSourceAdapter for HttpStatusDiagnosticAdapter {
-    fn collect(
-        &self,
-        config: &CrawlerConfig,
-        source: &SourceConfig,
-    ) -> Result<Vec<NormalizedRecord>> {
-        let target = config
+impl SourceAdapter for HttpStatusDiagnosticAdapter {
+    fn id(&self) -> &'static str {
+        "http-status-diagnostic"
+    }
+
+    fn collect(&self, context: SourceAdapterContext<'_>) -> Result<SourceAdapterOutput> {
+        let target = context
+            .config
             .targets
             .iter()
             .find(|target| {
                 let topic = target.topic.to_lowercase();
                 topic.contains("diagnostic") || topic.contains("source")
             })
-            .or_else(|| config.targets.first())
+            .or_else(|| context.config.targets.first())
             .with_context(|| {
-                format!("{} status diagnostic has no configured target", source.name)
+                format!(
+                    "{} status diagnostic has no configured target",
+                    context.source.name
+                )
             })?;
         let client = Client::builder()
             .timeout(StdDuration::from_secs(5))
             .user_agent("verdun-crawler/0.1 demo")
             .build()?;
         let observed_at = Utc::now();
-        let record = match probe_http_status(&client, &source.url) {
+        let record = match probe_http_status(&client, &context.source.url) {
             Ok(metadata) => {
                 let status = metadata.status;
                 DemoLocalRecord {
                     subject: target.name.clone(),
-                    url: source.url.clone(),
-                    title: Some(format!("{} returned HTTP {}", source.name, status)),
+                    url: context.source.url.clone(),
+                    title: Some(format!("{} returned HTTP {}", context.source.name, status)),
                     observed_at: Some(observed_at),
                     summary: Some(format!(
                         "{} returned HTTP {} during source diagnostics.",
-                        source.name, status
+                        context.source.name, status
                     )),
                     tags: vec!["diagnostic".to_string(), "http-status".to_string()],
                     score: Some(if status >= 400 { 72 } else { 50 }),
@@ -440,12 +455,12 @@ impl DemoSourceAdapter for HttpStatusDiagnosticAdapter {
             }
             Err(error) => DemoLocalRecord {
                 subject: target.name.clone(),
-                url: source.url.clone(),
-                title: Some(format!("{} unreachable", source.name)),
+                url: context.source.url.clone(),
+                title: Some(format!("{} unreachable", context.source.name)),
                 observed_at: Some(observed_at),
                 summary: Some(format!(
                     "{} could not be reached during source diagnostics: {}.",
-                    source.name, error
+                    context.source.name, error
                 )),
                 tags: vec!["diagnostic".to_string(), "http-error".to_string()],
                 score: Some(70),
@@ -453,21 +468,25 @@ impl DemoSourceAdapter for HttpStatusDiagnosticAdapter {
                 raw: serde_json::json!({ "error": error.to_string() }),
             },
         };
-        Ok(vec![demo_record(
+        let records = vec![demo_record(
             target,
-            source,
+            context.source,
             record,
             "http-status-diagnostic",
             0,
-        )])
-    }
-
-    fn message(&self) -> &'static str {
-        "HTTP status diagnostic adapter loaded through the demo crawler instance"
+        )];
+        Ok(SourceAdapterOutput {
+            source_run: SourceRun::from_records(
+                context.source,
+                &records,
+                "HTTP status diagnostic adapter loaded through the demo crawler instance",
+            ),
+            records,
+        })
     }
 }
 
-fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn DemoSourceAdapter> {
+fn adapter_for_source(source: &SourceConfig) -> Result<&'static dyn SourceAdapter> {
     match source.adapter.as_deref().unwrap_or("local-record-json") {
         "local-record-json" | "local-diagnostic-json" => Ok(&LocalJsonSourceAdapter),
         "http-record-json" | "http-diagnostic-json" => Ok(&HttpJsonSourceAdapter),
@@ -485,41 +504,6 @@ fn target_for_record<'a>(
         .iter()
         .find(|target| target.name == record.subject)
         .with_context(|| format!("record references unknown subject {}", record.subject))
-}
-
-fn source_runs_from_records(
-    config: &CrawlerConfig,
-    records: &[NormalizedRecord],
-) -> Vec<SourceRun> {
-    config
-        .sources
-        .iter()
-        .map(|source| {
-            let matching: Vec<_> = records
-                .iter()
-                .filter(|record| record.source == source.name)
-                .collect();
-            let mut project_counts = BTreeMap::new();
-            for record in &matching {
-                *project_counts.entry(record.subject.clone()).or_insert(0) += 1;
-            }
-            let message = adapter_for_source(source)
-                .map(|adapter| adapter.message().to_string())
-                .unwrap_or_else(|_| "demo source loaded".to_string());
-            SourceRun {
-                source: source.name.clone(),
-                kind: source.kind.clone(),
-                status: if matching.is_empty() {
-                    SourceRunStatus::Error
-                } else {
-                    SourceRunStatus::Ok
-                },
-                item_count: matching.len(),
-                message,
-                project_counts,
-            }
-        })
-        .collect()
 }
 
 fn review_targets(
