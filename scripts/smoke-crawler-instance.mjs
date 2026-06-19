@@ -13,6 +13,8 @@ const [
   crawlerLibSource,
   crawlerSdkSource,
   crawlerRuntimeSource,
+  readmeSource,
+  appDocSource,
 ] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/greathouse.rs', 'utf8'),
@@ -21,7 +23,14 @@ const [
   readFile('crawler/src/lib.rs', 'utf8'),
   readFile('crawler/src/sdk.rs', 'utf8'),
   readFile('crawler/src/runtime.rs', 'utf8'),
+  readFile('README.md', 'utf8'),
+  readFile('APP.md', 'utf8'),
 ])
+for (const [docPath, source] of [['README.md', readmeSource], ['APP.md', appDocSource]]) {
+  if (source.includes('/tmp/verdun-newsletter-load.sql')) {
+    throw new Error(`${docPath} should use the app-owned Garbage newsletter SQL temp path in legacy compatibility examples`)
+  }
+}
 const trackedLegacyGarbageArtifacts = spawnSync('git', [
   'ls-files',
   'public/data/newsletter-snapshot.json',
