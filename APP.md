@@ -10,6 +10,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - `PUBLIC_SURFACE.md` defines the supported Verdun package subpaths and Rust SDK facade available to external apps.
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
 - The parent workspace now has a Greathouse extraction anchor at `apps/greathouse/`, recording the current bundled Verdun paths and the target external app package shape.
+- Greathouse deploy-check profile and smoke fixture now also exist in the parent `@greathouse/instance` workspace; Verdun still carries the bundled profile temporarily until the rest of Greathouse can run externally.
 - Generic compatibility-smoke TypeScript loading lives behind `scripts/public/test-loader.mjs`; Garbage consumes that public loader contract while resolving Vite, Vue, and Lucide from the app package.
 - Generic workbench API module paths for compatibility smokes live behind `scripts/public/workbench-api-modules.mjs`; Garbage consumes that public manifest instead of naming Verdun workbench route files directly.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
