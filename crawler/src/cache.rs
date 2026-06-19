@@ -1,9 +1,12 @@
 use anyhow::{Context, Result};
-use serde::{Serialize, de::DeserializeOwned};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use sha2::{Digest, Sha256};
 use std::{
+    collections::{BTreeMap, BTreeSet},
     fs,
     path::{Path, PathBuf},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 #[derive(Debug, Clone)]
@@ -17,10 +20,145 @@ pub struct CacheRead<T> {
     pub value: Option<T>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CacheNamespacePolicy {
+    pub stale_after_hours: f64,
+    pub freshness_class: String,
+    pub refresh_reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JsonCacheNamespaceAudit {
+    pub name: String,
+    pub files: u64,
+    pub json_files: u64,
+    pub payload_json_files: u64,
+    pub metadata_files: u64,
+    pub payloads_with_metadata: u64,
+    pub legacy_payload_json_files: u64,
+    pub metadata_coverage_ratio: Option<f64>,
+    pub corrupt_json_files: u64,
+    pub temp_files: u64,
+    pub bytes: u64,
+    pub oldest_modified_iso: Option<String>,
+    pub newest_modified_iso: Option<String>,
+    pub oldest_age_hours: Option<f64>,
+    pub newest_age_hours: Option<f64>,
+    pub stale_after_hours: f64,
+    pub freshness_class: String,
+    pub refresh_reason: String,
+    pub stale: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JsonCacheAudit {
+    pub enabled: bool,
+    pub directory: String,
+    pub files: u64,
+    pub json_files: u64,
+    pub payload_json_files: u64,
+    pub metadata_files: u64,
+    pub payloads_with_metadata: u64,
+    pub legacy_payload_json_files: u64,
+    pub metadata_coverage_ratio: Option<f64>,
+    pub corrupt_json_files: u64,
+    pub temp_files: u64,
+    pub bytes: u64,
+    pub oldest_age_hours: Option<f64>,
+    pub newest_age_hours: Option<f64>,
+    pub default_stale_after_hours: f64,
+    pub stale_namespaces: usize,
+    pub namespaces: Vec<JsonCacheNamespaceAudit>,
+}
+
 impl<T> CacheRead<T> {
     pub fn hit(&self) -> bool {
         self.value.is_some()
     }
+}
+
+pub fn audit_json_cache(
+    root: impl AsRef<Path>,
+    default_stale_after_hours: f64,
+    policy_for_namespace: impl Fn(&str, f64) -> CacheNamespacePolicy,
+) -> Result<JsonCacheAudit> {
+    let root = root.as_ref();
+    if !root.exists() {
+        return Ok(JsonCacheAudit {
+            enabled: false,
+            directory: path_string(root),
+            files: 0,
+            json_files: 0,
+            payload_json_files: 0,
+            metadata_files: 0,
+            payloads_with_metadata: 0,
+            legacy_payload_json_files: 0,
+            metadata_coverage_ratio: None,
+            corrupt_json_files: 0,
+            temp_files: 0,
+            bytes: 0,
+            oldest_age_hours: None,
+            newest_age_hours: None,
+            default_stale_after_hours,
+            stale_namespaces: 0,
+            namespaces: Vec::new(),
+        });
+    }
+
+    let mut namespaces = BTreeMap::<String, NamespaceStats>::new();
+    collect_cache_files(root, root, &mut namespaces)?;
+    let mut rows = namespaces
+        .into_iter()
+        .map(|(name, stats)| {
+            stats.into_audit(name, default_stale_after_hours, &policy_for_namespace)
+        })
+        .collect::<Vec<_>>();
+    rows.sort_by(|left, right| right.bytes.cmp(&left.bytes));
+
+    let files = rows.iter().map(|row| row.files).sum();
+    let json_files = rows.iter().map(|row| row.json_files).sum();
+    let payload_json_files = rows.iter().map(|row| row.payload_json_files).sum();
+    let metadata_files = rows.iter().map(|row| row.metadata_files).sum();
+    let payloads_with_metadata = rows.iter().map(|row| row.payloads_with_metadata).sum();
+    let legacy_payload_json_files = rows.iter().map(|row| row.legacy_payload_json_files).sum();
+    let corrupt_json_files = rows.iter().map(|row| row.corrupt_json_files).sum();
+    let temp_files = rows.iter().map(|row| row.temp_files).sum();
+    let bytes = rows.iter().map(|row| row.bytes).sum();
+    let stale_namespaces = rows.iter().filter(|row| row.stale).count();
+
+    Ok(JsonCacheAudit {
+        enabled: true,
+        directory: path_string(root),
+        files,
+        json_files,
+        payload_json_files,
+        metadata_files,
+        payloads_with_metadata,
+        legacy_payload_json_files,
+        metadata_coverage_ratio: metadata_coverage_ratio(
+            payloads_with_metadata,
+            payload_json_files,
+        ),
+        corrupt_json_files,
+        temp_files,
+        bytes,
+        oldest_age_hours: round_opt(
+            rows.iter()
+                .filter_map(|row| row.oldest_age_hours)
+                .reduce(f64::max),
+        ),
+        newest_age_hours: round_opt(
+            rows.iter()
+                .filter_map(|row| row.newest_age_hours)
+                .reduce(f64::min),
+        ),
+        default_stale_after_hours,
+        stale_namespaces,
+        namespaces: rows,
+    })
 }
 
 impl JsonDiskCache {
@@ -92,6 +230,184 @@ fn cache_digest(key: &str) -> String {
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect()
+}
+
+#[derive(Default)]
+struct NamespaceStats {
+    files: u64,
+    json_files: u64,
+    payload_json_files: u64,
+    metadata_files: u64,
+    payload_names: BTreeSet<String>,
+    metadata_payload_names: BTreeSet<String>,
+    corrupt_json_files: u64,
+    temp_files: u64,
+    bytes: u64,
+    oldest: Option<SystemTime>,
+    newest: Option<SystemTime>,
+}
+
+impl NamespaceStats {
+    fn add(&mut self, path: &Path, bytes: u64, modified: SystemTime) {
+        self.files += 1;
+        self.bytes += bytes;
+        if path.extension().and_then(|ext| ext.to_str()) == Some("json") {
+            self.json_files += 1;
+            if is_cache_metadata_path(path) {
+                self.metadata_files += 1;
+                if let Some(payload_name) = metadata_payload_name(path) {
+                    self.metadata_payload_names.insert(payload_name);
+                }
+            } else {
+                self.payload_json_files += 1;
+                if let Some(payload_name) = path.file_name().and_then(|name| name.to_str()) {
+                    self.payload_names.insert(payload_name.to_owned());
+                }
+            }
+            if !cache_json_is_valid(path) {
+                self.corrupt_json_files += 1;
+            }
+        }
+        if path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .is_some_and(|name| name.ends_with(".tmp"))
+        {
+            self.temp_files += 1;
+        }
+        self.oldest = Some(
+            self.oldest
+                .map(|oldest| oldest.min(modified))
+                .unwrap_or(modified),
+        );
+        self.newest = Some(
+            self.newest
+                .map(|newest| newest.max(modified))
+                .unwrap_or(modified),
+        );
+    }
+
+    fn into_audit(
+        self,
+        name: String,
+        default_stale_after_hours: f64,
+        policy_for_namespace: &impl Fn(&str, f64) -> CacheNamespacePolicy,
+    ) -> JsonCacheNamespaceAudit {
+        let oldest_age_hours = self.oldest.map(age_hours);
+        let newest_age_hours = self.newest.map(age_hours);
+        let payloads_with_metadata = self
+            .payload_names
+            .intersection(&self.metadata_payload_names)
+            .count() as u64;
+        let legacy_payload_json_files = self
+            .payload_json_files
+            .saturating_sub(payloads_with_metadata);
+        let policy = policy_for_namespace(&name, default_stale_after_hours);
+        JsonCacheNamespaceAudit {
+            name,
+            files: self.files,
+            json_files: self.json_files,
+            payload_json_files: self.payload_json_files,
+            metadata_files: self.metadata_files,
+            payloads_with_metadata,
+            legacy_payload_json_files,
+            metadata_coverage_ratio: metadata_coverage_ratio(
+                payloads_with_metadata,
+                self.payload_json_files,
+            ),
+            corrupt_json_files: self.corrupt_json_files,
+            temp_files: self.temp_files,
+            bytes: self.bytes,
+            oldest_modified_iso: self.oldest.map(system_time_iso),
+            newest_modified_iso: self.newest.map(system_time_iso),
+            oldest_age_hours: round_opt(oldest_age_hours),
+            newest_age_hours: round_opt(newest_age_hours),
+            stale_after_hours: policy.stale_after_hours,
+            freshness_class: policy.freshness_class,
+            refresh_reason: policy.refresh_reason,
+            stale: oldest_age_hours
+                .map(|age| age > policy.stale_after_hours)
+                .unwrap_or(false),
+        }
+    }
+}
+
+fn collect_cache_files(
+    root: &Path,
+    dir: &Path,
+    namespaces: &mut BTreeMap<String, NamespaceStats>,
+) -> Result<()> {
+    for entry in fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_cache_files(root, &path, namespaces)?;
+            continue;
+        }
+        let metadata = entry.metadata()?;
+        let relative = path.strip_prefix(root).unwrap_or(&path);
+        let namespace = relative
+            .parent()
+            .and_then(|parent| parent.components().next())
+            .map(|component| component.as_os_str().to_string_lossy().to_string())
+            .unwrap_or_else(|| "root".to_owned());
+        let modified = metadata.modified().unwrap_or(SystemTime::UNIX_EPOCH);
+        namespaces
+            .entry(namespace)
+            .or_default()
+            .add(&path, metadata.len(), modified);
+    }
+    Ok(())
+}
+
+pub fn is_cache_metadata_path(path: &Path) -> bool {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| name.ends_with(".meta.json"))
+}
+
+fn metadata_payload_name(path: &Path) -> Option<String> {
+    path.file_name()?
+        .to_str()?
+        .strip_suffix(".meta.json")
+        .map(str::to_owned)
+}
+
+fn cache_json_is_valid(path: &Path) -> bool {
+    fs::read_to_string(path)
+        .ok()
+        .and_then(|text| serde_json::from_str::<serde_json::Value>(&text).ok())
+        .is_some()
+}
+
+fn metadata_coverage_ratio(payloads_with_metadata: u64, payload_json_files: u64) -> Option<f64> {
+    if payload_json_files == 0 {
+        None
+    } else {
+        round_opt(Some(
+            payloads_with_metadata as f64 / payload_json_files as f64,
+        ))
+    }
+}
+
+fn round_opt(value: Option<f64>) -> Option<f64> {
+    value.map(|value| (value * 100.0).round() / 100.0)
+}
+
+fn age_hours(time: SystemTime) -> f64 {
+    time.elapsed()
+        .map(|duration| duration.as_secs_f64() / 3600.0)
+        .unwrap_or(0.0)
+}
+
+fn system_time_iso(time: SystemTime) -> String {
+    let duration = time.duration_since(UNIX_EPOCH).unwrap_or_default();
+    DateTime::<Utc>::from(UNIX_EPOCH + duration)
+        .to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
+}
+
+fn path_string(path: &Path) -> String {
+    path.to_string_lossy().to_string()
 }
 
 fn slug_path_part(value: &str) -> String {
@@ -176,6 +492,42 @@ mod tests {
 
         assert!(json_path.exists());
         assert_eq!(fs::read_to_string(text_path).expect("read text"), "hello");
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn json_cache_audit_counts_payload_metadata_and_temp_files() {
+        let root = temp_root("cache-audit");
+        let namespace = root.join("http-json");
+        fs::create_dir_all(&namespace).expect("create namespace");
+        fs::write(namespace.join("payload.json"), "{\"ok\":true}\n").expect("write payload");
+        fs::write(
+            namespace.join("payload.json.meta.json"),
+            "{\"payloadFile\":\"payload.json\"}\n",
+        )
+        .expect("write metadata");
+        fs::write(namespace.join("broken.json"), "{").expect("write broken payload");
+        fs::write(namespace.join(".payload.tmp"), "").expect("write temp");
+
+        let audit = audit_json_cache(&root, 72.0, |name, fallback| CacheNamespacePolicy {
+            stale_after_hours: fallback,
+            freshness_class: format!("{name}-class"),
+            refresh_reason: "test policy".to_owned(),
+        })
+        .expect("audit cache");
+
+        assert!(audit.enabled);
+        assert_eq!(audit.files, 4);
+        assert_eq!(audit.payload_json_files, 2);
+        assert_eq!(audit.metadata_files, 1);
+        assert_eq!(audit.payloads_with_metadata, 1);
+        assert_eq!(audit.legacy_payload_json_files, 1);
+        assert_eq!(audit.corrupt_json_files, 1);
+        assert_eq!(audit.temp_files, 1);
+        assert_eq!(audit.metadata_coverage_ratio, Some(0.5));
+        assert_eq!(audit.namespaces.len(), 1);
+        assert_eq!(audit.namespaces[0].freshness_class, "http-json-class");
 
         let _ = fs::remove_dir_all(root);
     }
