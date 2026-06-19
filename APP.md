@@ -110,7 +110,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - The app draft preview exports the same publish manifest shape used by the CLI, so browser triage can audit selected item IDs, votes, focuses, readiness, coverage, and source/query-plan counts before local export.
 - Publish manifests and the draft preview summarize the selected spine's evidence mix by live/manual/seed counts and source mix before Ulysses or Ghost handoff.
 - `npm run garbage:ulysses:ready` gates local Ulysses Markdown export on explicit upvotes and publishing readiness, failing until local editorial state is ready.
-- `npm run garbage:ulysses:draft` writes a dated Markdown export under ignored `crawler/data/ulysses/` by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
+- `npm run garbage:ulysses:draft` writes a dated Markdown export under ignored `apps/garbage/data/ulysses/` in the parent Garbage package by default, or to `ULYSSES_DRAFT_DIR` / `NEWSLETTER_DRAFT_OUT` when set.
 - `npm run garbage:ulysses:ready -- --editorial-state /path/to/exported-state.json` uses a downloaded app editorial-state file directly and records it in the paired manifest as `editorialStateInput`.
 - `ULYSSES_IMPORT_DIR` or `--ulysses-import-dir` copies the generated Markdown and paired manifest into an external Ulysses handoff folder after a successful export.
 - File-based draft exports also write a same-stem `.manifest.json` with issue identity metadata, the snapshot input, publishing gates, selected item IDs, selected item metadata, votes, focuses, readiness checks, source coverage, source runs, and query-plan count.

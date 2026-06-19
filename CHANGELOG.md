@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Corrected README/APP publishing-path docs so Garbage Grust audits, source-gap reviews, and Ulysses exports point at parent-owned `apps/garbage/data/` outputs instead of legacy Verdun `crawler/data/` paths.
 - Removed tracked Garbage crawler/newsletter artifacts from Verdun `crawler/data/` and `public/data/`, ignored those legacy paths, and added smoke coverage to reject their return.
 - Changed standalone `smoke:db-apply` and `smoke:db-deploy` to generate the default Greathouse/demo generic snapshot and SQL instead of falling back to a missing or Garbage-shaped static snapshot.
 - Refreshed `README.md` and `APP.md` to describe Verdun as the Greathouse/demo bundled core and Garbage as an external app-owned consumer for frontend, API, crawler, and deployment checks.
