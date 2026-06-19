@@ -226,10 +226,9 @@
 
 Known remaining extraction work:
 
-- Garbage crawler and compatibility route/discovery shims still live inside Verdun, while newsletter UI/API/publishing behavior is now largely parent-owned.
-- Legacy newsletter database/API paths still coexist with generic workbench paths, but default SQL export and default package database commands now target the generic workbench contract.
-- The Rust crawler now has a `CrawlerInstance` dispatch trait and a Garbage instance module for snapshot/domain structs, normalization, dedupe, project-count aggregation, source-run construction, manual-source freshness wording, watchlist seed item construction, provenance metadata, parsed source records, item constructors, query/focus planning, HN/Lobste.rs/dev.to/feed live fetch adapters, and manual source collection.
-- Crawler instance selection supports `--instance garbage` and `--instance greathouse`.
+- Legacy Garbage newsletter database/API paths still coexist with generic workbench paths, but default SQL export and default package database commands now target the generic workbench contract.
+- Garbage's crawler implementation now lives in the external app crate and registers through `verdun_crawler::sdk`; the remaining crawler work is to harden that SDK packaging story and keep Greathouse/Garbage on the same `CrawlerSnapshot` contract.
+- Crawler instance selection supports Verdun's bundled Greathouse/demo instance; external apps such as Garbage run their own binary with app-owned registrations.
 - Workbench API routes support explicit Garbage/Greathouse instance selection, and the browser app now reads/reviews/focuses/imports Garbage state through generic workbench routes.
 - Newsletter draft generation, readiness, Ulysses export, Ghost publishing helpers, SQL reload helpers, editorial-state import, ontology rendering, snapshot normalization, Garbage-specific UI panels/composables/app composition, and newsletter route implementations are now implemented under the Garbage instance, with explicit Garbage API/package commands.
 - Workbench API routes no longer depend on the newsletter HTTP helper path or the legacy newsletter DB helper path for local static/local-file mode.

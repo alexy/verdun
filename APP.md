@@ -125,8 +125,8 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 ## Next Work
 
 - Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
-- Replace the parent Garbage package's remaining explicit Verdun core path compatibility after the crawler/output boundary moves.
-- Continue replacing remaining crawler and deploy-profile Verdun-to-Garbage imports with package-owned entrypoints.
+- Reduce compatibility-only smokes and helper names that still exist to prove the migration from resident Garbage code.
+- Continue hardening crawler and deploy-profile registration as reusable app/plugin contracts rather than one-off local workspace conventions.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.
 
