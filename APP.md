@@ -8,6 +8,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 - Verdun is now being extracted as the reusable core; the live newsletter app is the Garbage instance layered on top of it.
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
+- Generic compatibility-smoke TypeScript loading lives behind `scripts/core/test-loader.mjs`; Garbage consumes that core loader contract while resolving Vite, Vue, and Lucide from the app package.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
 - Reusable workbench controls now live under `src/components/workbench/`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
@@ -122,7 +123,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 ## Next Work
 
 - Keep moving Garbage-specific crawler, SQL compatibility, route/discovery, deployment, and runtime integration behavior behind explicit Garbage instance namespaces until shared Verdun files stop embedding newsletter or Strongly Typed AI assumptions.
-- Replace the parent Garbage package's remaining explicit legacy Verdun path compatibility after the crawler/output boundary moves.
+- Replace the parent Garbage package's remaining explicit Verdun core path compatibility after the crawler/output boundary moves.
 - Continue replacing remaining crawler and deploy-profile Verdun-to-Garbage imports with package-owned entrypoints.
 - Continue turning Greathouse into an external consumer proof of the same core rather than merely a resident pilot.
 - Replace manual LinkedIn/X imports with authenticated or policy-aware Garbage adapters when credentials and platform policy are settled.

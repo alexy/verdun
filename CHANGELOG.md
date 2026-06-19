@@ -2,6 +2,7 @@
 
 ## 2026-06-18
 
+- Added `scripts/core/test-loader.mjs` as the external test-loader contract for apps that need to run compatibility smokes against Verdun TypeScript while supplying their own Vite/module resolution.
 - Added `scripts/core/check-deployed.mjs` as the deploy-core entrypoint for external apps that reuse Verdun deployment checks.
 - Added `db/core/workbench-migrations.mjs` as the external migration manifest for Verdun's reusable workbench database schema.
 - Added `api/core/workbench-local-adapter.ts` as the external type entrypoint for apps that register local workbench fallback adapters without importing Verdun workbench internals.
