@@ -66,45 +66,71 @@ pub struct SourceRun {
 }
 
 impl SourceRun {
+    pub fn new(
+        source: impl Into<String>,
+        kind: impl Into<String>,
+        status: SourceRunStatus,
+        item_count: usize,
+        message: impl Into<String>,
+        project_counts: BTreeMap<String, usize>,
+    ) -> Self {
+        Self {
+            source: source.into(),
+            kind: kind.into(),
+            status,
+            item_count,
+            message: message.into(),
+            project_counts,
+        }
+    }
+
+    pub fn with_counts(
+        source: &SourceConfig,
+        status: SourceRunStatus,
+        item_count: usize,
+        message: impl Into<String>,
+        project_counts: BTreeMap<String, usize>,
+    ) -> Self {
+        Self::new(
+            source.name.clone(),
+            source.kind.clone(),
+            status,
+            item_count,
+            message,
+            project_counts,
+        )
+    }
+
     pub fn from_records(
         source: &SourceConfig,
         records: &[NormalizedRecord],
         message: impl Into<String>,
     ) -> Self {
-        Self {
-            source: source.name.clone(),
-            kind: source.kind.clone(),
-            status: if records.is_empty() {
+        Self::with_counts(
+            source,
+            if records.is_empty() {
                 SourceRunStatus::Error
             } else {
                 SourceRunStatus::Ok
             },
-            item_count: records.len(),
-            message: message.into(),
-            project_counts: project_counts_for_records(records),
-        }
+            records.len(),
+            message,
+            project_counts_for_records(records),
+        )
     }
 
     pub fn error(source: &SourceConfig, message: impl Into<String>) -> Self {
-        Self {
-            source: source.name.clone(),
-            kind: source.kind.clone(),
-            status: SourceRunStatus::Error,
-            item_count: 0,
-            message: message.into(),
-            project_counts: BTreeMap::new(),
-        }
+        Self::with_counts(source, SourceRunStatus::Error, 0, message, BTreeMap::new())
     }
 
     pub fn skipped(source: &SourceConfig, message: impl Into<String>) -> Self {
-        Self {
-            source: source.name.clone(),
-            kind: source.kind.clone(),
-            status: SourceRunStatus::Skipped,
-            item_count: 0,
-            message: message.into(),
-            project_counts: BTreeMap::new(),
-        }
+        Self::with_counts(
+            source,
+            SourceRunStatus::Skipped,
+            0,
+            message,
+            BTreeMap::new(),
+        )
     }
 }
 
