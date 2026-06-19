@@ -2,6 +2,11 @@
 
 ## 2026-06-18
 
+- Exported `verdun-crawler` as a library/runtime, made Verdun's crawler binary a thin wrapper, and removed the hardcoded Garbage external crawler include.
+- Changed Verdun's bundled crawler registry to Greathouse/demo-only; Garbage now owns `apps/garbage/crawler/Cargo.toml` and registers its crawler against Verdun from the app package.
+- Changed external deploy-profile discovery from a hardcoded Garbage path to `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`; Garbage now owns its deployed-check wrapper.
+- Moved the Garbage feed-content smoke into the parent app package and removed the Verdun `smoke:feed-content` command.
+- Regenerated Verdun `vercel.json` for the Greathouse default profile and updated `smoke:all` to avoid assuming a Garbage/static default snapshot.
 - Removed resident Verdun Garbage API route and local-adapter shims under `api/garbage` and `api/instances/garbage`; Garbage now owns its Vercel newsletter API route files under `apps/garbage/api/garbage/newsletter/`.
 - Changed the bundled workbench adapter manifest to stop importing a Garbage local adapter, leaving Verdun generic workbench fallback behavior to bundled generic proof instances.
 - Updated Garbage API smokes to exercise package-owned route/store modules instead of Verdun API shims.

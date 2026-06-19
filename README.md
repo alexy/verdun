@@ -8,18 +8,18 @@ The first reusable boundary is now explicit:
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
 - Generic reusable Vue controls live under `src/components/workbench/` and currently back both the Garbage newsletter app and the Greathouse pilot workbench.
 - Garbage instance configuration and default workbench instance registration live in the parent package at `apps/garbage/src/config.ts` and `apps/garbage/src/instance-registration.ts`; resident Verdun code imports them during extraction.
-- Garbage-specific ontology, newsletter, browser snapshot-normalization logic, browser composables, app components, app entrypoint, app styles, and newsletter API routes live in the parent package under `apps/garbage/`; Verdun no longer imports or registers the Garbage frontend or API routes.
+- Garbage-specific ontology, newsletter, browser snapshot-normalization logic, browser composables, app components, app entrypoint, app styles, newsletter API routes, deployment profile, and crawler crate live in the parent package under `apps/garbage/`; Verdun no longer imports or registers the Garbage frontend, API routes, deploy profile, or crawler implementation.
 - A Greathouse pilot instance lives in `src/instances/greathouse/` and exercises property listing and blocked-source diagnostic records through the same `WorkbenchSnapshot` and generic view model.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`; Garbage newsletter table/view compatibility migrations live under parent-owned `apps/garbage/db/instances/garbage/migrations/` and are selected by the Garbage deploy profile.
 - Generic crawler structs live in `crawler/src/core.rs`; crawler instances now return `CrawlerCollection` with a core `CrawlerSnapshot`, while any legacy item/public JSON compatibility payloads stay instance-owned. Greathouse adapters emit core `NormalizedRecord` values directly from local JSON, HTTP JSON, HTTP status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings.
 - Crawler instance modules export a neutral `CRAWLER_INSTANCE` registration; the shared Rust registry no longer consumes Garbage/Greathouse-named static instance symbols.
-- Bundled crawler instance modules are isolated behind `crawler/src/instances/bundled.rs`; the generic crawler resolver consumes that bundled manifest rather than naming Garbage or Greathouse modules directly.
+- Bundled crawler instance modules are isolated behind `crawler/src/instances/bundled.rs`; Verdun's bundled crawler is Greathouse/demo-only, while app crawlers register against the exported `verdun-crawler` runtime from their own crates.
 - Crawler default item payload, source-run, public snapshot, config, and editorial-state paths are instance-owned metadata rather than shared `crawler/data/*` CLI defaults.
 - Generic Vercel workbench surfaces live under `api/workbench/`; the current routes default to Garbage, while the DB helper can read/write any `WorkbenchInstance` namespace such as the Greathouse pilot.
 - Generic local workbench adapter contracts live in `api/workbench/local-adapter-types.ts`; instance-specific fallback adapters export neutral registration metadata from their own namespace.
-- Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Garbage remains the default `/rbage/` app path and Greathouse has a reusable `/greathouse/` path.
+- Vite base-path selection and `vercel.json` routing derive from registered deploy profiles; Verdun's default bundled profile is Greathouse at `/greathouse/`, while Garbage owns its own Vercel config under `apps/garbage/vercel.json` for `/rbage/`.
 - Instance deploy-check modules export neutral `deployCheckProfile` metadata, and the shared deployment registry discovers `scripts/instances/*/deploy-checks.mjs` profiles by convention.
-- Garbage deploy-check profile metadata and hooks are parent-owned at `apps/garbage/scripts/deploy-checks.mjs`, `apps/garbage/scripts/deployed-check-smoke-fixture.mjs`, and `apps/garbage/scripts/deployed-draft-checks.mjs`; Verdun loads the profile through `scripts/instances/external-deploy-check-profile-modules.mjs` rather than resident Garbage deploy-profile shims.
+- Garbage deploy-check profile metadata and hooks are parent-owned at `apps/garbage/scripts/deploy-checks.mjs`, `apps/garbage/scripts/check-deployed.mjs`, `apps/garbage/scripts/deployed-check-smoke-fixture.mjs`, and `apps/garbage/scripts/deployed-draft-checks.mjs`; Garbage opts into Verdun's generic deployed checker through `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`.
 - Garbage deploy-profile metadata declares an external npm-workspace command runner for `@garbage/instance`; shared orchestration such as `smoke:all` and `smoke:browser` now executes Garbage commands through that package instead of Verdun-local `garbage:*` package scripts.
 - Deployed draft/readiness checks are deploy-profile hooks; Garbage owns newsletter draft validation under parent-owned `apps/garbage/scripts/`, while the shared deployment checker validates only generic route, snapshot, status, and health mechanics.
 - Existing newsletter routes, scripts, and database tables are explicit Garbage compatibility surfaces while the boundary is extracted incrementally.
@@ -27,7 +27,7 @@ The first reusable boundary is now explicit:
 The current proof points are:
 
 - Vue/Vite app deployed by Vercel.
-- Vite is built from deploy profile metadata; the default Garbage profile uses `/rbage/` for `collected.ga/rbage/`, and profile selection can build the same shell for `/greathouse/`.
+- Vite is built from deploy profile metadata; Verdun's bundled default profile uses `/greathouse/`, and Garbage owns the `/rbage/` app build under `apps/garbage/`.
 - Vercel serverless API routes reading an external Postgres database.
 - Rust crawler/loader crate that collects instance-owned records and exports SQL for the generic database shape.
 - Greathouse crawler adapters for local fixtures, HTTP JSON, status diagnostics, browser diagnostics, Redfin-shaped listings, and Zillow-shaped listings, all preserving the same `CrawlerSnapshot` contract.
@@ -114,7 +114,7 @@ Without `--apply`, the helper regenerates `/tmp/verdun-workbench-load.sql` from 
 
 ## Crawler
 
-The reusable crawler core lives under `crawler/src/`; crawler instances own domain adapters and return a core `CrawlerCollection`. The current Garbage crawler config, manual social review files, and Rust instance implementation live in the parent package under `apps/garbage/crawler/`; Verdun compiles that implementation through the external crawler registry at `crawler/src/instances/external.rs` rather than through a resident Garbage module. Greathouse owns its property/listing fixtures and adapters under `crawler/instances/greathouse/`. Generic SQL export runs through the core `CrawlerSnapshot` shape instead of writing directly from Garbage-specific newsletter items.
+The reusable crawler core lives under `crawler/src/`; crawler instances own domain adapters and return a core `CrawlerCollection`. Verdun exports the `verdun-crawler` library/runtime and bundles Greathouse as its local proof instance. Garbage owns its crawler config, manual social review files, Rust instance implementation, and binary under `apps/garbage/crawler/`; it depends on `../../verdun/crawler` and registers its own instance locally. Generic SQL export runs through the core `CrawlerSnapshot` shape instead of writing directly from Garbage-specific newsletter items.
 
 ```sh
 cargo run --manifest-path crawler/Cargo.toml -- collect --out crawler/data/items.json

@@ -1,33 +1,31 @@
 import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
-import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+
 import { defaultDeployCheckProfileId, deployCheckProfile, supportedDeployCheckProfiles } from './instances/deploy-check-profiles.mjs'
 
 const defaultProfile = deployCheckProfile(defaultDeployCheckProfileId())
-const secondaryProfile = supportedDeployCheckProfiles().find((profile) => profile.id !== defaultProfile?.id && profile.smokeFixtureModule)
-if (!defaultProfile?.sourceSnapshotPath || !defaultProfile?.draft || !defaultProfile?.smokeFixtureModule || !secondaryProfile?.smokeFixtureModule) {
-  throw new Error('deployed-check smoke requires a default draft profile and a secondary workbench profile')
+if (!defaultProfile?.smokeFixtureModule || !defaultProfile.staticSnapshotPath) {
+  throw new Error('deployed-check smoke requires a bundled workbench deploy profile')
 }
-if (defaultProfile.commandRunner?.kind !== 'npm-workspace' || defaultProfile.commandRunner.workspace !== '@garbage/instance') {
-  throw new Error('default deploy profile should execute Garbage commands through the external package workspace')
+if (defaultProfile.id !== 'greathouse') {
+  throw new Error(`Verdun default deploy profile should be bundled Greathouse, found ${defaultProfile.id}`)
 }
-const defaultBasePath = defaultProfile.basePath
-const secondaryBasePath = secondaryProfile.basePath
-const rawSnapshot = JSON.parse(await readFile(defaultProfile.sourceSnapshotPath, 'utf8'))
+if (supportedDeployCheckProfiles().some((profile) => profile.id === 'garbage')) {
+  throw new Error('Verdun deploy profiles should not register Garbage unless an external app opts in')
+}
+
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
 const deployProfilesSource = await readFile('scripts/instances/deploy-check-profiles.mjs', 'utf8')
 const externalProfilesSource = await readFile('scripts/instances/external-deploy-check-profile-modules.mjs', 'utf8')
 const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
+
 for (const marker of ['collected.ga', '/rbage/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json', 'Weekly throughline', 'upvoted items will lead the draft']) {
   if (checkDeployedSource.includes(marker)) {
     throw new Error(`generic deployed checker still embeds Garbage deploy marker: ${marker}`)
   }
-}
-if (!profileModulePathMatchesInstance(defaultProfile)) {
-  throw new Error('default deploy profile should load hooks from the external Garbage package boundary')
 }
 if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs') {
   throw new Error('check:preview should use the profile-backed preview checker')
@@ -35,30 +33,12 @@ if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs')
 if (packageJson.scripts?.['vercel:config'] !== 'node scripts/generate-vercel-config.mjs' || packageJson.scripts?.['smoke:vercel-config'] !== 'node scripts/generate-vercel-config.mjs --check') {
   throw new Error('Vercel config scripts should use the deploy-profile-backed generator')
 }
-for (const scriptName of defaultProfile.removedGenericCommands ?? []) {
-  if (packageJson.scripts?.[scriptName]) {
-    throw new Error(`${scriptName} should be named as an explicit instance command`)
-  }
-}
-for (const scriptName of defaultProfile.smokeCommands ?? []) {
-  if (packageJson.scripts?.[scriptName]) {
-    throw new Error(`${scriptName} should be owned by the external instance package, not Verdun package.json`)
-  }
-}
-for (const scriptName of defaultProfile.publishingCommands ?? []) {
-  if (packageJson.scripts?.[scriptName]) {
-    throw new Error(`${scriptName} should be owned by the external instance package, not Verdun package.json`)
-  }
-}
 if (vercelConfigSource.includes('/rbage/') || vercelConfigSource.includes('/greathouse/')) {
   throw new Error('Vercel config generator should derive app paths from deploy profiles')
 }
-for (const profile of [defaultProfile, secondaryProfile]) {
-  const basePath = profile.basePath
-  for (const source of [`${basePath}assets/(.*)`, `${basePath}data/(.*)`, `${basePath}(.*)`]) {
-    if (!vercelConfig.rewrites?.some((rewrite) => rewrite.source === source)) {
-      throw new Error(`generated vercel.json is missing rewrite ${source}`)
-    }
+for (const source of [`${defaultProfile.basePath}assets/(.*)`, `${defaultProfile.basePath}data/(.*)`, `${defaultProfile.basePath}(.*)`]) {
+  if (!vercelConfig.rewrites?.some((rewrite) => rewrite.source === source)) {
+    throw new Error(`generated vercel.json is missing rewrite ${source}`)
   }
 }
 if (vercelConfig.redirects?.[0]?.destination !== defaultProfile.basePath) {
@@ -68,99 +48,50 @@ if (
   !deployProfilesSource.includes('registeredDeployCheckProfiles') ||
   !deployProfilesSource.includes('externalDeployCheckProfileModules') ||
   deployProfilesSource.includes('garbageDeployCheckProfile') ||
-  deployProfilesSource.includes('greathouseDeployCheckProfile') ||
   deployProfilesSource.includes('./garbage/') ||
-  deployProfilesSource.includes('./greathouse/') ||
   !deployProfilesSource.includes('readdir(instanceDirectory')
 ) {
   throw new Error('deploy check profiles are not discovered from instance profile modules')
 }
-if (!externalProfilesSource.includes('apps/garbage/scripts/deploy-checks.mjs')) {
-  throw new Error('external deploy-profile registry should include the parent Garbage profile module')
+if (externalProfilesSource.includes('apps/garbage') || !externalProfilesSource.includes('VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES')) {
+  throw new Error('external deploy-profile registry should be environment-provided, not hardcoded to Garbage')
 }
-for (const removedShim of [
-  'scripts/instances/garbage/deploy-checks.mjs',
-  'scripts/instances/garbage/deployed-check-smoke-fixture.mjs',
-  'scripts/instances/garbage/deployed-draft-checks.mjs',
-]) {
-  if (existsSync(removedShim)) {
-    throw new Error(`${removedShim} should not exist; Garbage deploy hooks should load from the external package`)
-  }
+if (!defaultProfile.smokeFixtureModule.includes(`instances/${defaultProfile.id}/`) || !defaultProfile.genericSqlSmoke || !defaultProfile.smokeAllCommands) {
+  throw new Error('bundled deploy profile is missing reusable workbench smoke metadata')
 }
-for (const moduleUrl of [defaultProfile.smokeFixtureModule, defaultProfile.readinessCheckModule, defaultProfile.draft?.checkModule]) {
-  if (!moduleUrl?.includes('apps/garbage/scripts/')) {
-    throw new Error(`Garbage deploy hook should load from apps/garbage/scripts, got ${moduleUrl}`)
-  }
-}
-for (const metadataKey of ['commandRunner', 'smokeCommands', 'removedGenericCommands', 'publishingCommands', 'compatibilitySqlSmoke', 'smokeAllCommands', 'uiSmokeCommands']) {
-  if (!(metadataKey in defaultProfile)) {
-    throw new Error(`default deploy profile is missing ${metadataKey} metadata`)
-  }
-}
-if (!secondaryProfile.staticSnapshotPath || !profileModulePathMatchesInstance(secondaryProfile) || !secondaryProfile.genericSqlSmoke || !secondaryProfile.smokeAllCommands) {
-  throw new Error('secondary deploy profile is missing reusable workbench smoke metadata')
-}
+
 const freshGeneratedAt = new Date().toISOString()
 const { createDeployedCheckSmokeFixture } = await import(defaultProfile.smokeFixtureModule)
-const defaultFixture = createDeployedCheckSmokeFixture({
+const fixture = createDeployedCheckSmokeFixture({
   profile: defaultProfile,
-  rawSnapshot,
   generatedAt: freshGeneratedAt,
 })
-let statusJson = defaultFixture.databaseStatusJson()
-const { createDeployedCheckSmokeFixture: createSecondaryDeployedCheckSmokeFixture } = await import(secondaryProfile.smokeFixtureModule)
-const secondaryFixture = createSecondaryDeployedCheckSmokeFixture({
-  profile: secondaryProfile,
-  generatedAt: freshGeneratedAt,
-})
+
 const server = createServer((request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1')
-  if (url.pathname === defaultBasePath || url.pathname === `${defaultBasePath}index.html`) {
+  if (url.pathname === defaultProfile.basePath || url.pathname === `${defaultProfile.basePath}index.html`) {
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
-    response.end(`<!doctype html><div id="app"></div><script type="module" src="${defaultBasePath}assets/index.js"></script>`)
+    response.end(`<!doctype html><div id="app"></div><script type="module" src="${defaultProfile.basePath}assets/index.js"></script>`)
     return
   }
-  if (url.pathname === secondaryBasePath || url.pathname === `${secondaryBasePath}index.html`) {
-    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
-    response.end(`<!doctype html><div id="app"></div><script type="module" src="${secondaryBasePath}assets/index.js"></script>`)
-    return
-  }
-  if (url.pathname === profileStaticPath(secondaryProfile)) {
+  if (url.pathname === profileStaticPath(defaultProfile)) {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(secondaryFixture.snapshotJson())
+    response.end(fixture.snapshotJson())
     return
   }
-  if (url.pathname === '/api/workbench/records' && url.searchParams.get('instance') === secondaryProfile.id) {
+  if (url.pathname === '/api/workbench/records' && url.searchParams.get('instance') === defaultProfile.id) {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(secondaryFixture.snapshotJson())
+    response.end(fixture.snapshotJson())
     return
   }
-  if (url.pathname === profileStaticPath(defaultProfile) || url.pathname === '/api/workbench/records') {
+  if (url.pathname === '/api/workbench/status' && url.searchParams.get('instance') === defaultProfile.id) {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(defaultFixture.snapshotJson())
+    response.end(fixture.statusJson())
     return
   }
-  if (url.pathname === '/api/workbench/status' && url.searchParams.get('instance') === secondaryProfile.id) {
+  if (url.pathname === '/api/workbench/health' && url.searchParams.get('instance') === defaultProfile.id) {
     response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(secondaryFixture.statusJson())
-    return
-  }
-  if (url.pathname === '/api/workbench/status') {
-    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(statusJson)
-    return
-  }
-  if (url.pathname === '/api/workbench/health' && url.searchParams.get('instance') === secondaryProfile.id) {
-    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(secondaryFixture.healthJson())
-    return
-  }
-  if (url.pathname === '/api/workbench/health') {
-    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-    response.end(defaultFixture.healthJson(statusJson))
-    return
-  }
-  if (defaultFixture.handleDraftRequest(url, response)) {
+    response.end(fixture.healthJson())
     return
   }
   response.writeHead(404, { 'content-type': 'text/plain' })
@@ -178,62 +109,23 @@ try {
   const result = await runCheckDeployed([
     'scripts/check-deployed.mjs',
     localProfileUrl(address.port, defaultProfile),
-    '--require-ready',
+    '--instance',
+    defaultProfile.id,
   ])
   if (result.status !== 0) {
-    throw new Error(`check-deployed readiness smoke failed\n${result.stdout}\n${result.stderr}`)
+    throw new Error(`check-deployed workbench smoke failed\n${result.stdout}\n${result.stderr}`)
   }
-  if (!result.stdout.includes('with readiness gate')) {
-    throw new Error('check-deployed readiness smoke did not report the readiness gate')
+  if (!result.stdout.includes(`Verdun ${defaultProfile.id} deployment`) || !result.stdout.includes('without draft API checks')) {
+    throw new Error('check-deployed smoke did not report generic instance validation without draft checks')
   }
   const previewResult = await runCheckDeployed([
     'scripts/check-preview.mjs',
     localProfileUrl(address.port, defaultProfile),
+    '--instance',
+    defaultProfile.id,
   ])
   if (previewResult.status !== 0 || !previewResult.stdout.includes('(static only)')) {
     throw new Error(`profile-backed preview check failed\n${previewResult.stdout}\n${previewResult.stderr}`)
-  }
-  defaultFixture.setGeneratedAt('2026-01-01T00:00:00Z')
-  statusJson = defaultFixture.databaseStatusJson()
-  const staleResult = await runCheckDeployed([
-    'scripts/check-deployed.mjs',
-    localProfileUrl(address.port, defaultProfile),
-    '--require-ready',
-  ])
-  if (staleResult.status === 0 || !staleResult.stderr.includes('Snapshot freshness')) {
-    throw new Error(`check-deployed readiness gate should reject stale snapshots\n${staleResult.stdout}\n${staleResult.stderr}`)
-  }
-  defaultFixture.setGeneratedAt(freshGeneratedAt)
-  statusJson = defaultFixture.databaseStatusJson()
-  const databaseResult = await runCheckDeployed([
-    'scripts/check-deployed.mjs',
-    localProfileUrl(address.port, defaultProfile),
-    '--require-database',
-  ])
-  if (databaseResult.status !== 0 || !databaseResult.stdout.includes('with database gate')) {
-    throw new Error(`check-deployed database smoke failed\n${databaseResult.stdout}\n${databaseResult.stderr}`)
-  }
-  statusJson = defaultFixture.browserStatusJson()
-  const browserResult = await runCheckDeployed([
-    'scripts/check-deployed.mjs',
-    localProfileUrl(address.port, defaultProfile),
-    '--require-database',
-  ])
-  if (browserResult.status === 0 || !browserResult.stderr.includes('not database-backed')) {
-    throw new Error(`check-deployed database gate should reject browser persistence\n${browserResult.stdout}\n${browserResult.stderr}`)
-  }
-  statusJson = defaultFixture.databaseStatusJson()
-  const secondaryResult = await runCheckDeployed([
-    'scripts/check-deployed.mjs',
-    localProfileUrl(address.port, secondaryProfile),
-    '--instance',
-    secondaryProfile.id,
-  ])
-  if (secondaryResult.status !== 0) {
-    throw new Error(`check-deployed ${secondaryProfile.id} workbench smoke failed\n${secondaryResult.stdout}\n${secondaryResult.stderr}`)
-  }
-  if (!secondaryResult.stdout.includes(`Verdun ${secondaryProfile.id} deployment`) || !secondaryResult.stdout.includes('without draft API checks')) {
-    throw new Error(`check-deployed ${secondaryProfile.id} smoke did not report generic instance validation without draft checks`)
   }
 } finally {
   server.closeIdleConnections?.()
@@ -249,13 +141,6 @@ function localProfileUrl(port, profile) {
 
 function profileStaticPath(profile) {
   return new URL(profile.staticSnapshotPath, `http://127.0.0.1${profile.basePath}`).pathname
-}
-
-function profileModulePathMatchesInstance(profile) {
-  if (profile.commandRunner?.workspace === '@garbage/instance') {
-    return profile.smokeFixtureModule?.includes('apps/garbage/scripts/')
-  }
-  return profile.smokeFixtureModule?.includes(`instances/${profile.id}/`)
 }
 
 function runCheckDeployed(args) {

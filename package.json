@@ -23,7 +23,6 @@
     "smoke:crawler-instance": "node scripts/smoke-crawler-instance.mjs",
     "smoke:db-apply": "node scripts/smoke-db-apply.mjs",
     "smoke:db-deploy": "node scripts/smoke-db-deploy.mjs",
-    "smoke:feed-content": "node scripts/smoke-feed-content.mjs",
     "smoke:generic-loader": "node scripts/smoke-generic-loader-sql.mjs",
     "smoke:greathouse-workbench": "node scripts/smoke-greathouse-workbench.mjs",
     "smoke:workbench": "node scripts/smoke-workbench-api.mjs"

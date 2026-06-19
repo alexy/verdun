@@ -5,7 +5,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/rbage/",
+      "destination": "/greathouse/",
       "permanent": false
     }
   ],
@@ -20,18 +20,6 @@
     },
     {
       "source": "/greathouse/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/rbage/assets/(.*)",
-      "destination": "/assets/$1"
-    },
-    {
-      "source": "/rbage/data/(.*)",
-      "destination": "/data/$1"
-    },
-    {
-      "source": "/rbage/(.*)",
       "destination": "/index.html"
     },
     {

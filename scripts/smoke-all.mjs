@@ -3,7 +3,7 @@ import { runCommand, runDeployProfileScript } from './instance-command-runner.mj
 
 const sqlPath = '/tmp/verdun-generic-load.sql'
 const profile = deployCheckProfile(defaultDeployCheckProfileId())
-const snapshotPath = profile?.sourceSnapshotPath ?? 'public/data/workbench-snapshot.json'
+const snapshotPath = profile?.sourceSnapshotPath
 
 const steps = [
   ['npm', ['run', 'smoke:vercel-config']],
@@ -11,16 +11,20 @@ const steps = [
   ['cargo', ['check', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['test', '--manifest-path', 'crawler/Cargo.toml']],
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'verify']],
-  ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--snapshot', snapshotPath, '--out', sqlPath]],
-  ['npm', ['run', 'smoke:generic-loader', '--', sqlPath, snapshotPath]],
-  ['npm', ['run', 'smoke:db-apply', '--', sqlPath, snapshotPath]],
-  ['npm', ['run', 'smoke:db-deploy', '--', sqlPath, snapshotPath]],
   ['npm', ['run', 'smoke:check-deployed']],
   ['npm', ['run', 'smoke:api-http']],
   ['npm', ['run', 'smoke:crawler-instance']],
-  ['npm', ['run', 'smoke:feed-content']],
   ['npm', ['run', 'smoke:workbench']],
 ]
+
+if (snapshotPath) {
+  steps.splice(5, 0,
+    ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'export-sql', '--snapshot', snapshotPath, '--out', sqlPath]],
+    ['npm', ['run', 'smoke:generic-loader', '--', sqlPath, snapshotPath]],
+    ['npm', ['run', 'smoke:db-apply', '--', sqlPath, snapshotPath]],
+    ['npm', ['run', 'smoke:db-deploy', '--', sqlPath, snapshotPath]],
+  )
+}
 
 for (const instanceProfile of supportedDeployCheckProfiles()) {
   if (instanceProfile.compatibilitySqlSmoke) {
