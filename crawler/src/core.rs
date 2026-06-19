@@ -634,6 +634,22 @@ impl DatabaseReloadCommandSet {
     ) -> Self {
         Self::new(export_sql, Self::redacted_psql_apply(sql_path))
     }
+
+    pub fn cargo_export_with_redacted_psql_apply(
+        manifest_path: impl Into<String>,
+        export_args: impl IntoIterator<Item = impl Into<String>>,
+        sql_path: impl Into<String>,
+    ) -> Self {
+        let mut export_sql = vec![
+            "cargo".to_owned(),
+            "run".to_owned(),
+            "--manifest-path".to_owned(),
+            manifest_path.into(),
+            "--".to_owned(),
+        ];
+        export_sql.extend(export_args.into_iter().map(Into::into));
+        Self::with_redacted_psql_apply(Some(export_sql), sql_path)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1122,6 +1138,39 @@ mod tests {
                 "-f".to_owned(),
                 "/tmp/load.sql".to_owned(),
             ]
+        );
+    }
+
+    #[test]
+    fn database_reload_command_set_builds_cargo_export_and_redacted_apply() {
+        let commands = DatabaseReloadCommandSet::cargo_export_with_redacted_psql_apply(
+            "crawler/Cargo.toml",
+            [
+                "load-property-intel-db",
+                "--public-dir",
+                "public/data/property-intel",
+                "--activate",
+            ],
+            "/tmp/property.sql",
+        );
+
+        assert_eq!(
+            commands.export_sql,
+            Some(vec![
+                "cargo".to_owned(),
+                "run".to_owned(),
+                "--manifest-path".to_owned(),
+                "crawler/Cargo.toml".to_owned(),
+                "--".to_owned(),
+                "load-property-intel-db".to_owned(),
+                "--public-dir".to_owned(),
+                "public/data/property-intel".to_owned(),
+                "--activate".to_owned(),
+            ])
+        );
+        assert_eq!(
+            commands.apply_sql,
+            DatabaseReloadCommandSet::redacted_psql_apply("/tmp/property.sql")
         );
     }
 
