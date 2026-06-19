@@ -28,6 +28,25 @@ pub fn fetch_text(client: &Client, url: &str) -> Result<HttpFetch<String>> {
     fetch_text_request(client.get(url), url)
 }
 
+pub fn fetch_bytes(client: &Client, url: &str) -> Result<HttpFetch<Vec<u8>>> {
+    fetch_bytes_request(client.get(url), url)
+}
+
+pub fn fetch_bytes_request(request: RequestBuilder, label: &str) -> Result<HttpFetch<Vec<u8>>> {
+    let response = request
+        .send()
+        .with_context(|| format!("fetching {label}"))?;
+    let metadata = metadata_from_response(label, &response);
+    response
+        .error_for_status_ref()
+        .with_context(|| format!("fetching {label}"))?;
+    let body = response
+        .bytes()
+        .with_context(|| format!("reading response bytes from {label}"))?
+        .to_vec();
+    Ok(HttpFetch { metadata, body })
+}
+
 pub fn fetch_text_request(request: RequestBuilder, label: &str) -> Result<HttpFetch<String>> {
     let response = request
         .send()
@@ -112,6 +131,30 @@ pub fn probe_http_status(client: &Client, url: &str) -> Result<HttpFetchMetadata
 
 pub async fn fetch_text_async(client: &AsyncClient, url: &str) -> Result<HttpFetch<String>> {
     fetch_text_request_async(client.get(url), url).await
+}
+
+pub async fn fetch_bytes_async(client: &AsyncClient, url: &str) -> Result<HttpFetch<Vec<u8>>> {
+    fetch_bytes_request_async(client.get(url), url).await
+}
+
+pub async fn fetch_bytes_request_async(
+    request: AsyncRequestBuilder,
+    label: &str,
+) -> Result<HttpFetch<Vec<u8>>> {
+    let response = request
+        .send()
+        .await
+        .with_context(|| format!("fetching {label}"))?;
+    let metadata = metadata_from_async_response(label, &response);
+    response
+        .error_for_status_ref()
+        .with_context(|| format!("fetching {label}"))?;
+    let body = response
+        .bytes()
+        .await
+        .with_context(|| format!("reading response bytes from {label}"))?
+        .to_vec();
+    Ok(HttpFetch { metadata, body })
 }
 
 pub async fn fetch_text_request_async(
@@ -279,5 +322,23 @@ mod tests {
         assert_eq!(metadata.status, 200);
         assert_eq!(metadata.url, "https://example.test/data.json");
         assert_eq!(metadata.content_type.as_deref(), Some("application/json"));
+    }
+
+    #[test]
+    fn byte_fetch_uses_same_metadata_envelope() {
+        let fetch = HttpFetch {
+            metadata: HttpFetchMetadata {
+                url: "https://example.test/raster.tif".to_owned(),
+                status: 200,
+                content_type: Some("image/tiff".to_owned()),
+                content_length: Some(4),
+                fetched_at: Utc::now(),
+            },
+            body: vec![0, 1, 2, 3],
+        };
+
+        assert_eq!(fetch.metadata.status, 200);
+        assert_eq!(fetch.metadata.content_length, Some(fetch.body.len() as u64));
+        assert_eq!(fetch.body, vec![0, 1, 2, 3]);
     }
 }
