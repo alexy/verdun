@@ -73,6 +73,8 @@ npm run check:deployed -- --require-database
 
 Apply migrations through the guarded helpers rather than applying every SQL file by directory. Verdun's reusable database contract lives in `db/migrations/0003_generic_workbench_tables.sql` and is exposed to external apps through `db/public/workbench-migrations.mjs`; Garbage's legacy newsletter tables and fallback `workbench_*` view overlay live under parent-owned `apps/garbage/db/instances/garbage/migrations/` and are selected by the Garbage deploy profile.
 
+See `DATABASE_RELOAD.md` for the external-crawler-to-Vercel/Neon runbook, including generic workbench reloads, app-specific loaders, redacted handoff artifacts, and verification commands.
+
 Use the guarded deployment helper when moving a crawler snapshot into the external database:
 
 ```sh
