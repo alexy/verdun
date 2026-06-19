@@ -27,6 +27,8 @@ if (!sql.includes("insert into instances")) {
   throw new Error('generic SQL export is missing instance upsert')
 }
 const allowsCustomInstance = process.argv.includes('--allow-custom-instance')
+const expectedSubjects = valuesAfter('--expect-subject')
+const expectedPlans = valuesAfter('--expect-plan')
 if (!allowsCustomInstance && (!sql.includes(sqlString(defaultInstance)) || !sql.includes(sqlString(defaultBasePath)))) {
   throw new Error(`generic SQL export is missing default instance namespace: ${defaultInstance} at ${defaultBasePath}`)
 }
@@ -63,8 +65,13 @@ if (!allowsCustomInstance) {
     if (!queryPlans.some((plan) => planSubject(plan) === project)) throw new Error(`snapshot is missing query plan for ${project}`)
   }
 } else {
-  for (const project of new Set(items.map(subjectOf))) {
+  const requiredSubjects = expectedSubjects.length ? expectedSubjects : [...new Set(items.map(subjectOf))]
+  const requiredPlans = expectedPlans.length ? expectedPlans : requiredSubjects
+  for (const project of requiredSubjects) {
+    if (!items.some((item) => subjectOf(item) === project)) throw new Error(`snapshot is missing custom subject ${project}`)
     if (!sql.includes(sqlString(project))) throw new Error(`generic SQL export is missing custom subject ${project}`)
+  }
+  for (const project of requiredPlans) {
     if (!queryPlans.some((plan) => planSubject(plan) === project)) throw new Error(`snapshot is missing query plan for custom subject ${project}`)
   }
 }
@@ -102,6 +109,17 @@ function sqlTextArray(values) {
 function valueAfter(flag) {
   const index = process.argv.indexOf(flag)
   return index >= 0 ? process.argv[index + 1] : undefined
+}
+
+function valuesAfter(flag) {
+  const values = []
+  for (let index = 0; index < process.argv.length; index += 1) {
+    if (process.argv[index] !== flag) continue
+    const value = process.argv[index + 1]
+    if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`)
+    values.push(value)
+  }
+  return values
 }
 
 function hasSnapshotCollectedAt(sql, snapshotGeneratedAt) {

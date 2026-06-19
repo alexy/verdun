@@ -8,8 +8,10 @@ const expectedExports = {
   './frontend/workbench-ui': './frontend/workbench-ui.ts',
   './frontend/workbench-view': './frontend/workbench-view.ts',
   './scripts/public/check-deployed': './scripts/public/check-deployed.mjs',
+  './scripts/public/deploy-workbench-database': './scripts/public/deploy-workbench-database.mjs',
   './scripts/public/deploy-profile-contract': './scripts/public/deploy-profile-contract.mjs',
   './scripts/public/test-loader': './scripts/public/test-loader.mjs',
+  './scripts/public/workbench-apply-sql': './scripts/public/workbench-apply-sql.mjs',
   './scripts/public/workbench-api-modules': './scripts/public/workbench-api-modules.mjs',
 }
 

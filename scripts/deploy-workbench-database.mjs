@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { defaultDeployCheckProfileId, deployCheckProfile } from './instances/deploy-check-profiles.mjs'
 
@@ -22,9 +23,12 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
   const staticSnapshotPath = optionValue(args, '--static-snapshot') ?? env.WORKBENCH_STATIC_SNAPSHOT ?? profile?.staticSnapshotPath
   const databaseUrl = optionValue(args, '--database-url') ?? env.POSTGRES_URL ?? env.DATABASE_URL ?? env.NEON_DATABASE_URL
   const baseUrl = optionValue(args, '--base-url') ?? env.VERDUN_DEPLOYED_URL
+  const handoffOut = optionValue(args, '--handoff-out') ?? env.WORKBENCH_DB_HANDOFF_FILE
   const loaderArgs = [
     ...(instance !== defaultDeployCheckProfileId() ? ['--allow-custom-instance', '--expect-instance', instance] : []),
     ...(basePath ? ['--expect-base-path', basePath] : []),
+    ...repeatArg('--expect-subject', profile?.requiredSubjects ?? []),
+    ...repeatArg('--expect-plan', profile?.requiredPlans ?? []),
   ]
   const deployedCheckArgs = [
     ...(baseUrl ? [baseUrl] : []),
@@ -82,6 +86,63 @@ export async function runDeployWorkbenchDatabaseCli(args, env = process.env) {
   if (skipDeployedCheck || !apply) {
     console.log(`deployed check target: ${deployedCheckArgs.join(' ')}`)
   }
+  if (handoffOut) {
+    writeHandoff(handoffOut, {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      kind: 'verdun_generic_workbench_database_reload',
+      status: apply ? 'applied' : 'preflight',
+      apply,
+      generatedSql: generate,
+      instance,
+      instanceName: instanceName ?? null,
+      displayName: profile?.name ?? null,
+      basePath: basePath ?? null,
+      snapshotPath,
+      staticSnapshotPath: staticSnapshotPath ?? null,
+      sqlPath,
+      migrationPaths: profile?.migrationPaths ?? null,
+      databaseEnv: databaseUrl ? 'provided' : 'not_provided',
+      vercelEnvChecked: Boolean(apply && !skipVercelEnv),
+      deployedCheck: {
+        skipped: Boolean(skipDeployedCheck || !apply),
+        command: ['npm', 'run', 'check:deployed', '--', ...deployedCheckArgs],
+      },
+      commands: {
+        exportSql: generate
+          ? [
+              'cargo',
+              'run',
+              '--manifest-path',
+              'crawler/Cargo.toml',
+              '--',
+              'export-sql',
+              '--snapshot',
+              snapshotPath,
+              '--out',
+              sqlPath,
+              ...(instance ? ['--instance', instance] : []),
+              ...(instanceName ? ['--instance-name', instanceName] : []),
+              ...(basePath ? ['--base-path', basePath] : []),
+            ]
+          : null,
+        applySql: [
+          'node',
+          'scripts/workbench-apply-sql.mjs',
+          '--instance',
+          instance,
+          '--sql',
+          sqlPath,
+          '--snapshot',
+          snapshotPath,
+          ...loaderArgs,
+          ...(databaseUrl ? ['--database-url', '<redacted>'] : []),
+          ...(apply ? ['--apply'] : []),
+        ],
+      },
+    })
+    console.log(`wrote generic workbench database handoff ${handoffOut}`)
+  }
   console.log(apply
     ? 'generic workbench database load applied and deployed database gate passed'
     : 'generic workbench database deployment preflight passed (dry run only; add --apply to load external Postgres)')
@@ -95,8 +156,18 @@ function optionValue(args, name) {
   return value
 }
 
+function repeatArg(name, values) {
+  return values.flatMap((value) => [name, value])
+}
+
 function assertFile(path, label) {
   if (!existsSync(path)) throw new Error(`${label} not found: ${path}`)
+}
+
+function writeHandoff(path, payload) {
+  const dir = dirname(path)
+  if (dir && dir !== '.') mkdirSync(dir, { recursive: true })
+  writeFileSync(path, `${JSON.stringify(payload, null, 2)}\n`)
 }
 
 function assertVercelDatabaseEnv() {

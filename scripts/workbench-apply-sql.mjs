@@ -23,6 +23,8 @@ export async function runApplyWorkbenchSqlCli(args, env = process.env) {
     ...optionalValue(args, '--allow-custom-instance'),
     ...optionalPair(args, '--expect-instance'),
     ...optionalPair(args, '--expect-base-path'),
+    ...repeatArg('--expect-subject', profile?.requiredSubjects ?? []),
+    ...repeatArg('--expect-plan', profile?.requiredPlans ?? []),
   ]
 
   assertFile(sqlPath, 'SQL load file')
@@ -64,6 +66,10 @@ function optionalValue(args, name) {
 function optionalPair(args, name) {
   const value = optionValue(args, name)
   return value ? [name, value] : []
+}
+
+function repeatArg(name, values) {
+  return values.flatMap((value) => [name, value])
 }
 
 function assertFile(path, label) {

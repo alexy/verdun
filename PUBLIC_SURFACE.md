@@ -15,8 +15,10 @@ These package subpaths are the supported external app surface:
 - `verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.
 - `verdun/db/public/workbench-migrations`: generic workbench migration manifest.
 - `verdun/scripts/public/check-deployed`: deploy/readiness checker entrypoint for external app wrappers.
+- `verdun/scripts/public/deploy-workbench-database`: generic workbench database deploy/preflight entrypoint with handoff artifact support.
 - `verdun/scripts/public/deploy-profile-contract`: deploy-check profile validator for external app profile modules.
 - `verdun/scripts/public/test-loader`: TypeScript compatibility-smoke loader contract.
+- `verdun/scripts/public/workbench-apply-sql`: generic workbench SQL validation/apply entrypoint for external app wrappers.
 - `verdun/scripts/public/workbench-api-modules`: generic workbench API module manifest for app compatibility smokes.
 
 The implementation directories behind those exports are still Verdun-owned. Apps should not import `verdun/src/core/`, `verdun/api/core/`, `verdun/db/core/`, `verdun/scripts/core/`, or raw component files directly.
