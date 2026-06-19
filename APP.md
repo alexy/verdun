@@ -8,8 +8,8 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 
 - Verdun is now being extracted as the reusable core; the live newsletter app is the Garbage instance layered on top of it.
 - Generic workbench contracts live in `src/core/workbench.ts`; Garbage config, default instance registration, newsletter, ontology, browser snapshot normalization, API routes/store, frontend app, deployment wrapper, and crawler crate live in the parent package under `apps/garbage/`.
-- Generic compatibility-smoke TypeScript loading lives behind `scripts/core/test-loader.mjs`; Garbage consumes that core loader contract while resolving Vite, Vue, and Lucide from the app package.
-- Generic workbench API module paths for compatibility smokes live behind `scripts/core/workbench-api-modules.mjs`; Garbage consumes that manifest instead of naming Verdun workbench route files directly.
+- Generic compatibility-smoke TypeScript loading lives behind `scripts/public/test-loader.mjs`; Garbage consumes that public loader contract while resolving Vite, Vue, and Lucide from the app package.
+- Generic workbench API module paths for compatibility smokes live behind `scripts/public/workbench-api-modules.mjs`; Garbage consumes that public manifest instead of naming Verdun workbench route files directly.
 - A Greathouse pilot under `src/instances/greathouse/` uses the same workbench contract for property listing and blocked-source diagnostic records.
 - Vue/Vite app with a newsroom triage interface.
 - Reusable workbench controls now live under `src/components/workbench/` and are exposed to external apps through `frontend/workbench-ui.ts` plus `frontend/workbench-style.css`; Garbage-specific editorial, inbox, draft, source-health, and news-card UI lives under parent-owned `apps/garbage/src/app/components/`.
@@ -23,7 +23,7 @@ Extract Verdun into a reusable Vercel plus database workbench core filled by ext
 - Deploy-check profile exports are neutral inside each instance module, and shared deployment tooling discovers `scripts/instances/*/deploy-checks.mjs` entries by convention instead of statically importing Garbage or Greathouse profiles.
 - Garbage deploy-check profile metadata, wrapper, and hook implementations are parent-owned at `apps/garbage/scripts/deploy-checks.mjs`, `apps/garbage/scripts/check-deployed.mjs`, `apps/garbage/scripts/deployed-check-smoke-fixture.mjs`, and `apps/garbage/scripts/deployed-draft-checks.mjs`.
 - Garbage deploy-check profile metadata also declares an external npm-workspace command runner for `@garbage/instance`, so shared Verdun orchestration runs Garbage commands through the package instead of local Verdun `garbage:*` scripts.
-- Verdun external deploy-profile discovery is environment-driven through `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`; Garbage opts in from its parent-owned `check-deployed.mjs` wrapper through the `scripts/core/check-deployed.mjs` deploy-core entrypoint.
+- Verdun external deploy-profile discovery is environment-driven through `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES`; Garbage opts in from its parent-owned `check-deployed.mjs` wrapper through the `scripts/public/check-deployed.mjs` entrypoint.
 - Vercel Authentication-protected deployments can be checked with `npx vercel curl /rbage/ --deployment <deployment-url>` and `npx vercel curl /api/garbage/newsletter/items --deployment <deployment-url>`.
 - Deployed draft API and publishing-readiness validation is instance-owned: the generic deployed checker loads Garbage's validator from parent-owned `apps/garbage/scripts/deployed-draft-checks.mjs` through deploy-profile metadata.
 - Inbox filtering by search text, vote state, project, source, and evidence stage so editors can prioritize live/manual collected items before watchlist seed placeholders.
