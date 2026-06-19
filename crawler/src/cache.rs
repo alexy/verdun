@@ -464,7 +464,7 @@ pub fn write_pretty_json<T: Serialize>(path: impl AsRef<Path>, value: &T) -> Res
         fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     }
     let text = serde_json::to_string_pretty(value)?;
-    fs::write(path, text).with_context(|| format!("writing {}", path.display()))
+    fs::write(path, format!("{text}\n")).with_context(|| format!("writing {}", path.display()))
 }
 
 pub fn write_text(path: impl AsRef<Path>, text: impl AsRef<str>) -> Result<()> {
