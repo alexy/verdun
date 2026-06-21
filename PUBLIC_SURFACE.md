@@ -26,6 +26,7 @@ These package subpaths are the supported external app surface:
 - `verdun/scripts/public/test-loader`: TypeScript compatibility-smoke loader contract.
 - `verdun/scripts/public/workbench-apply-sql`: generic workbench SQL validation/apply entrypoint for external app wrappers.
 - `verdun/scripts/public/workbench-api-modules`: generic workbench API module manifest for app compatibility smokes.
+- `verdun/package.json`: package metadata for tools that need to locate the installed Verdun package root.
 
 The implementation directories behind those exports are still Verdun-owned. Apps should not import `verdun/src/core/`, `verdun/api/core/`, `verdun/db/core/`, `verdun/scripts/core/`, or raw component files directly.
 

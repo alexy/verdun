@@ -8,6 +8,7 @@
     "url": "git+ssh://git@github.com/alexy/verdun.git"
   },
   "exports": {
+    "./package.json": "./package.json",
     "./accounts/account-types": {
       "types": "./lib/src/accounts/account-types.d.ts",
       "default": "./lib/src/accounts/account-types.js"

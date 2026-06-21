@@ -1,6 +1,7 @@
 import { access, readFile } from 'node:fs/promises'
 
 const expectedExports = {
+  './package.json': './package.json',
   './accounts/account-types': {
     types: './lib/src/accounts/account-types.d.ts',
     default: './lib/src/accounts/account-types.js',
