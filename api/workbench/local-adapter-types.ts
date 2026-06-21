@@ -4,7 +4,7 @@ import type {
   WorkbenchSnapshot,
   WorkbenchStateExport,
   WorkbenchStateImportResult,
-} from '../../src/core/workbench'
+} from '../../src/core/workbench.js'
 
 export type LocalWorkbenchStatus = {
   editorialPersistence: WorkbenchSnapshot['editorialPersistence']

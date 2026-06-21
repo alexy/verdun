@@ -1,6 +1,6 @@
 # External Verdun App Guide
 
-Use this when building an app such as Garbage or a future external Greathouse package on top of Verdun. Verdun should provide the reusable Vercel workbench, database, deployment, and crawler contracts; the app should own its product UI, domain crawler, publishing workflow, deployment profile, and compatibility surfaces.
+Use this when building a product app on top of Verdun. Verdun should provide the reusable Vercel workbench, database, deployment, and crawler contracts; the app should own its product UI, domain crawler, publishing workflow, deployment profile, and compatibility surfaces.
 
 ## App Package Shape
 

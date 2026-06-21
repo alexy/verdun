@@ -1,12 +1,30 @@
 import { access, readFile } from 'node:fs/promises'
 
 const expectedExports = {
-  './accounts/account-types': './src/accounts/account-types.ts',
-  './accounts/google': './src/accounts/google.ts',
-  './accounts/http': './src/accounts/http.ts',
-  './accounts/store': './src/accounts/store.ts',
-  './api/public/http': './api/public/http.ts',
-  './api/public/workbench-local-adapter': './api/public/workbench-local-adapter.ts',
+  './accounts/account-types': {
+    types: './lib/src/accounts/account-types.d.ts',
+    default: './lib/src/accounts/account-types.js',
+  },
+  './accounts/google': {
+    types: './lib/src/accounts/google.d.ts',
+    default: './lib/src/accounts/google.js',
+  },
+  './accounts/http': {
+    types: './lib/src/accounts/http.d.ts',
+    default: './lib/src/accounts/http.js',
+  },
+  './accounts/store': {
+    types: './lib/src/accounts/store.d.ts',
+    default: './lib/src/accounts/store.js',
+  },
+  './api/public/http': {
+    types: './lib/api/public/http.d.ts',
+    default: './lib/api/public/http.js',
+  },
+  './api/public/workbench-local-adapter': {
+    types: './lib/api/public/workbench-local-adapter.d.ts',
+    default: './lib/api/public/workbench-local-adapter.js',
+  },
   './db/public/account-migrations': './db/public/account-migrations.mjs',
   './db/public/workbench-migrations': './db/public/workbench-migrations.mjs',
   './frontend/workbench-style.css': './frontend/workbench-style.css',
@@ -33,10 +51,23 @@ if (JSON.stringify(actualKeys) !== JSON.stringify(expectedKeys)) {
 }
 
 for (const [subpath, target] of Object.entries(expectedExports)) {
-  if (actualExports[subpath] !== target) {
-    throw new Error(`Verdun export ${subpath} should point at ${target}, found ${actualExports[subpath]}`)
+  if (typeof target === 'string') {
+    if (actualExports[subpath] !== target) {
+      throw new Error(`Verdun export ${subpath} should point at ${target}, found ${actualExports[subpath]}`)
+    }
+    await access(target.replace(/^\.\//, ''))
+  } else {
+    const actualTarget = actualExports[subpath]
+    if (!actualTarget || typeof actualTarget !== 'object') {
+      throw new Error(`Verdun export ${subpath} should be a conditional export object`)
+    }
+    for (const [condition, conditionTarget] of Object.entries(target)) {
+      if (actualTarget[condition] !== conditionTarget) {
+        throw new Error(`Verdun export ${subpath}.${condition} should point at ${conditionTarget}, found ${actualTarget[condition]}`)
+      }
+      await access(conditionTarget.replace(/^\.\//, ''))
+    }
   }
-  await access(target.replace(/^\.\//, ''))
 
   const publicImport = `verdun/${subpath.replace(/^\.\//, '')}`
   if (!documentedSurface.includes(publicImport)) {

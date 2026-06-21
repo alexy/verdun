@@ -6,4 +6,4 @@ export {
   sendText,
   type ApiRequest,
   type ApiResponse,
-} from '../core/http'
+} from '../core/http.js'

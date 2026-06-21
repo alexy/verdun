@@ -1,15 +1,37 @@
 {
   "name": "verdun",
-  "private": true,
+  "private": false,
   "version": "0.1.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/alexy/verdun.git"
+  },
   "exports": {
-    "./accounts/account-types": "./src/accounts/account-types.ts",
-    "./accounts/google": "./src/accounts/google.ts",
-    "./accounts/http": "./src/accounts/http.ts",
-    "./accounts/store": "./src/accounts/store.ts",
-    "./api/public/http": "./api/public/http.ts",
-    "./api/public/workbench-local-adapter": "./api/public/workbench-local-adapter.ts",
+    "./accounts/account-types": {
+      "types": "./lib/src/accounts/account-types.d.ts",
+      "default": "./lib/src/accounts/account-types.js"
+    },
+    "./accounts/google": {
+      "types": "./lib/src/accounts/google.d.ts",
+      "default": "./lib/src/accounts/google.js"
+    },
+    "./accounts/http": {
+      "types": "./lib/src/accounts/http.d.ts",
+      "default": "./lib/src/accounts/http.js"
+    },
+    "./accounts/store": {
+      "types": "./lib/src/accounts/store.d.ts",
+      "default": "./lib/src/accounts/store.js"
+    },
+    "./api/public/http": {
+      "types": "./lib/api/public/http.d.ts",
+      "default": "./lib/api/public/http.js"
+    },
+    "./api/public/workbench-local-adapter": {
+      "types": "./lib/api/public/workbench-local-adapter.d.ts",
+      "default": "./lib/api/public/workbench-local-adapter.js"
+    },
     "./db/public/account-migrations": "./db/public/account-migrations.mjs",
     "./db/public/workbench-migrations": "./db/public/workbench-migrations.mjs",
     "./frontend/workbench-style.css": "./frontend/workbench-style.css",
@@ -23,10 +45,23 @@
     "./scripts/public/workbench-apply-sql": "./scripts/public/workbench-apply-sql.mjs",
     "./scripts/public/workbench-api-modules": "./scripts/public/workbench-api-modules.mjs"
   },
+  "files": [
+    "api",
+    "db",
+    "lib",
+    "frontend",
+    "scripts",
+    "src",
+    "PUBLIC_SURFACE.md",
+    "EXTERNAL_APP.md",
+    "README.md"
+  ],
   "scripts": {
     "dev": "vite",
     "dev:app": "vite --host 127.0.0.1 --port 5176 --strictPort",
     "build": "vue-tsc -b && vite build",
+    "build:package": "rm -rf lib && tsc -p tsconfig.package.json",
+    "prepare": "npm run build:package",
     "preview": "vite preview",
     "vercel:config": "node scripts/generate-vercel-config.mjs",
     "smoke:vercel-config": "node scripts/generate-vercel-config.mjs --check",

@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url'
 const artifactRoot = new URL('../.codex-artifacts/', import.meta.url)
 await mkdir(artifactRoot, { recursive: true })
 const outDir = await mkdtemp(new URL('account-store-smoke-', artifactRoot))
-const compile = spawnSync('../node_modules/.bin/tsc', [
+const compile = spawnSync('node_modules/.bin/tsc', [
   '--ignoreConfig',
   '--outDir',
   outDir,

@@ -1,6 +1,6 @@
 # Verdun Public Surface
 
-Verdun's reusable app contract is intentionally smaller than its repository tree. External apps such as Garbage should import only the package subpaths and Rust SDK facade listed here. Other files are implementation detail unless they are promoted into this document and `package.json` exports together.
+Verdun's reusable app contract is intentionally smaller than its repository tree. External apps should import only the package subpaths and Rust SDK facade listed here. Other files are implementation detail unless they are promoted into this document and `package.json` exports together.
 
 For the full app-package shape, see `EXTERNAL_APP.md`.
 
@@ -37,8 +37,6 @@ External crawler crates should depend on `verdun-crawler` and import through:
 
 The SDK facade re-exports the stable crawler instance registration, runtime, source adapter, source-run reporting, artifact inventory, run-manifest, cache, HTTP fetch, and generic snapshot contracts. The crate's `core`, `instances`, and `runtime` modules are internal.
 
-## Current Consumers
+## Consumer Rule
 
-Garbage consumes this surface from `apps/garbage/` as a local workspace dependency while Verdun remains nested in the same checkout. That local dependency is a development arrangement, not an ownership shortcut: Garbage owns its app, newsletter routes, crawler instance, deploy profile, publishing scripts, and compatibility SQL.
-
-Greathouse consumes this surface from `apps/greathouse/` as a second parent-owned app package. Verdun no longer bundles Greathouse frontend, crawler, or deploy profile code; Greathouse app behavior should remain package-owned.
+External apps consume this surface as a package dependency. App behavior, routes, crawler instances, deploy profiles, publishing workflows, generated data, and compatibility SQL remain app-owned.
