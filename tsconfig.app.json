@@ -8,7 +8,7 @@
       "@lucide/vue": ["./node_modules/@lucide/vue"],
       "vue": ["./node_modules/vue"]
     },
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true

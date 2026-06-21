@@ -4,8 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
+    "./accounts/account-types": "./src/accounts/account-types.ts",
+    "./accounts/google": "./src/accounts/google.ts",
+    "./accounts/http": "./src/accounts/http.ts",
+    "./accounts/store": "./src/accounts/store.ts",
     "./api/public/http": "./api/public/http.ts",
     "./api/public/workbench-local-adapter": "./api/public/workbench-local-adapter.ts",
+    "./db/public/account-migrations": "./db/public/account-migrations.mjs",
     "./db/public/workbench-migrations": "./db/public/workbench-migrations.mjs",
     "./frontend/workbench-style.css": "./frontend/workbench-style.css",
     "./frontend/workbench-ui": "./frontend/workbench-ui.ts",
@@ -41,6 +46,7 @@
     "smoke:db-deploy": "node scripts/smoke-db-deploy.mjs",
     "smoke:demo-workbench": "node scripts/smoke-demo-workbench.mjs",
     "smoke:generic-loader": "node scripts/smoke-generic-loader-sql.mjs",
+    "smoke:account-store": "node scripts/smoke-account-store.mjs",
     "smoke:workbench": "node scripts/smoke-workbench-api.mjs"
   },
   "dependencies": {

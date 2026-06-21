@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-06-21
+
+- Hardened Verdun's public-surface smoke around the reusable account exports, including the expected account type, Google auth, session cookie, SQL store symbols, and `smoke:account-store` package command.
+
 ## 2026-06-19
 
 - Added public JavaScript reload command constructors (`cargoRunCommand`, `nodeApplySqlCommand`) so generic and app-specific database deploy wrappers can share redacted command envelopes in handoff artifacts.

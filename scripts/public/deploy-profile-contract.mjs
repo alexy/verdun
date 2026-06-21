@@ -28,6 +28,11 @@ export function validateDeployCheckProfile(profile, source = 'deploy-check profi
   if (profile.readinessCheckModule !== undefined && !nonEmptyString(profile.readinessCheckModule)) {
     throw new Error(`${source} ${profile.id} readinessCheckModule must be a non-empty module path or URL`)
   }
+  for (const key of ['accountMigrationCommand', 'accountReadinessCommand', 'accountSessionCleanupCommand', 'accountLiveEnvCommand', 'accountLiveAcceptanceCommand', 'accountLiveCheckCommand']) {
+    if (profile[key] !== undefined && !nonEmptyString(profile[key])) {
+      throw new Error(`${source} ${profile.id} ${key} must be a non-empty string`)
+    }
+  }
   if (profile.migrationPaths !== undefined && !stringArray(profile.migrationPaths)) {
     throw new Error(`${source} ${profile.id} migrationPaths must be an array of strings`)
   }

@@ -11,8 +11,13 @@ These package subpaths are the supported external app surface:
 - `verdun/frontend/workbench-ui`: shared Vue workbench controls.
 - `verdun/frontend/workbench-view`: shared workbench filtering/count/coverage composable and TypeScript workbench types.
 - `verdun/frontend/workbench-style.css`: shared workbench shell and component CSS.
+- `verdun/accounts/account-types`: reusable account, tier, capability, and usage-window types for Verdun-backed apps.
+- `verdun/accounts/google`: Google Identity Services credential verification for Google-only account bootstrap.
+- `verdun/accounts/http`: Verdun account session cookie helpers and account-tier parsing.
+- `verdun/accounts/store`: SQL-backed account, session, usage, and bootstrap-admin store operations.
 - `verdun/api/public/http`: reusable Vercel-style request/response helpers.
 - `verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.
+- `verdun/db/public/account-migrations`: reusable Verdun account/user/session/usage migration manifest.
 - `verdun/db/public/workbench-migrations`: generic workbench migration manifest.
 - `verdun/scripts/public/check-deployed`: deploy/readiness checker entrypoint for external app wrappers.
 - `verdun/scripts/public/database-reload-handoff`: redacted database reload handoff writer plus shared cargo export and Node SQL apply command constructors for generic and app-specific loaders.
