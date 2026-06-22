@@ -35,7 +35,7 @@ Do not register app components inside Verdun unless the app is an intentional Ve
 
 ## API and Local Fallback
 
-Use Verdun's generic workbench API routes for reusable record/status/health/review/focus/state behavior. App-specific APIs, such as newsletter draft generation or property-specific enrichment, belong in the app package.
+Use Verdun's generic workbench API routes for reusable record/status/health/review/focus/state behavior. App-specific APIs, such as publishing workflows or domain enrichment, belong in the app package.
 
 App-local fallback adapters should export neutral registration metadata and use the public type contract:
 
@@ -56,7 +56,7 @@ The default reload path should produce generic workbench SQL for:
 - `source_runs`
 - `collection_plans`
 
-Compatibility targets, such as legacy newsletter tables, should be explicit app-owned paths rather than Verdun defaults.
+Compatibility targets, such as legacy app tables, should be explicit app-owned paths rather than Verdun defaults.
 
 ## Deployment Profile
 
