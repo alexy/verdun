@@ -40,44 +40,24 @@ export type VerdunUsageWindow = {
 
 export type VerdunTierCapabilities = {
   tier: VerdunAccountTier
-  dailyInspectionsLimit: number | null
-  canSaveFavorites: boolean
-  canCompareSaved: boolean
-  canContactOwners: boolean
   isAdmin: boolean
 }
 
 export const verdunTierCapabilities: Record<VerdunAccountTier, VerdunTierCapabilities> = {
   free: {
     tier: 'free',
-    dailyInspectionsLimit: 3,
-    canSaveFavorites: false,
-    canCompareSaved: false,
-    canContactOwners: false,
     isAdmin: false,
   },
   buyer: {
     tier: 'buyer',
-    dailyInspectionsLimit: null,
-    canSaveFavorites: true,
-    canCompareSaved: true,
-    canContactOwners: false,
     isAdmin: false,
   },
   pro: {
     tier: 'pro',
-    dailyInspectionsLimit: null,
-    canSaveFavorites: true,
-    canCompareSaved: true,
-    canContactOwners: true,
     isAdmin: false,
   },
   admin: {
     tier: 'admin',
-    dailyInspectionsLimit: null,
-    canSaveFavorites: true,
-    canCompareSaved: true,
-    canContactOwners: true,
     isAdmin: true,
   },
 }

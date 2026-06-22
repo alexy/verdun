@@ -238,7 +238,7 @@ if (suspendedLoginAttempt.name !== 'Suspended Login Attempt' || suspendedLoginAt
 
 const token = await createVerdunAccountSession(sql, free.id, 3600)
 const context = await currentVerdunAccount(sql, { headers: { cookie: `verdun_account=${encodeURIComponent(token)}` } })
-if (context.account.email !== free.email || context.capabilities.dailyInspectionsLimit !== 3) {
+if (context.account.email !== free.email || context.capabilities.isAdmin !== false) {
   throw new Error('current account lookup did not return the free account and capabilities')
 }
 if (!context.account.lastLoginAt) {
@@ -290,34 +290,39 @@ sql.setAccountStatus(suspended.id, 'suspended')
 await expectError(() => currentVerdunAccount(sql, { headers: { cookie: `verdun_account=${encodeURIComponent(suspendedToken)}` } }), 'suspended_account')
 await expectError(() => recordVerdunAccountUsage(sql, suspended), 'suspended_account')
 
-const firstPropertyUsage = await recordVerdunAccountUsage(sql, free, 'property_inspection', 'property-a')
-if (firstPropertyUsage.used !== 1 || firstPropertyUsage.remaining !== 2 || firstPropertyUsage.unlimited) {
-  throw new Error(`free usage counter mismatch after first distinct property inspection: ${JSON.stringify(firstPropertyUsage)}`)
+const meteredUsage = {
+  capability: 'demo_metered_action',
+  limit: 3,
+  limitReachedError: 'demo_meter_limit_reached',
 }
-if (firstPropertyUsage.windowStart !== '2099-12-31') {
-  throw new Error(`Verdun usage should report the Postgres current_date usage window, not the Node process date: ${JSON.stringify(firstPropertyUsage)}`)
+const firstSubjectUsage = await recordVerdunAccountUsage(sql, free, meteredUsage, 'subject-a')
+if (firstSubjectUsage.used !== 1 || firstSubjectUsage.remaining !== 2 || firstSubjectUsage.unlimited) {
+  throw new Error(`metered usage counter mismatch after first distinct subject: ${JSON.stringify(firstSubjectUsage)}`)
 }
-const repeatedPropertyUsage = await recordVerdunAccountUsage(sql, free, 'property_inspection', 'property-a')
-if (repeatedPropertyUsage.used !== 1 || repeatedPropertyUsage.remaining !== 2 || repeatedPropertyUsage.unlimited) {
-  throw new Error(`repeated inspection of the same property should not consume another free inspection: ${JSON.stringify(repeatedPropertyUsage)}`)
+if (firstSubjectUsage.windowStart !== '2099-12-31') {
+  throw new Error(`Verdun usage should report the Postgres current_date usage window, not the Node process date: ${JSON.stringify(firstSubjectUsage)}`)
 }
-sql.simulateSubjectIncrementMissOnce('property-race')
-await expectError(() => recordVerdunAccountUsage(sql, free, 'property_inspection', 'property-race'), 'daily_inspection_limit_reached')
-const retriedPropertyUsage = await recordVerdunAccountUsage(sql, free, 'property_inspection', 'property-race')
-if (retriedPropertyUsage.used !== 2 || retriedPropertyUsage.remaining !== 1 || retriedPropertyUsage.unlimited) {
-  throw new Error(`subject cleanup after a failed increment should allow a retry to consume quota: ${JSON.stringify(retriedPropertyUsage)}`)
+const repeatedSubjectUsage = await recordVerdunAccountUsage(sql, free, meteredUsage, 'subject-a')
+if (repeatedSubjectUsage.used !== 1 || repeatedSubjectUsage.remaining !== 2 || repeatedSubjectUsage.unlimited) {
+  throw new Error(`repeated use of the same subject should not consume another usage slot: ${JSON.stringify(repeatedSubjectUsage)}`)
+}
+sql.simulateSubjectIncrementMissOnce('subject-race')
+await expectError(() => recordVerdunAccountUsage(sql, free, meteredUsage, 'subject-race'), 'demo_meter_limit_reached')
+const retriedSubjectUsage = await recordVerdunAccountUsage(sql, free, meteredUsage, 'subject-race')
+if (retriedSubjectUsage.used !== 2 || retriedSubjectUsage.remaining !== 1 || retriedSubjectUsage.unlimited) {
+  throw new Error(`subject cleanup after a failed increment should allow a retry to consume quota: ${JSON.stringify(retriedSubjectUsage)}`)
 }
 
-const thirdPropertyUsage = await recordVerdunAccountUsage(sql, free, 'property_inspection', 'property-3')
-if (thirdPropertyUsage.used !== 3 || thirdPropertyUsage.remaining !== 0 || thirdPropertyUsage.unlimited) {
-  throw new Error(`free usage counter mismatch after third distinct property inspection: ${JSON.stringify(thirdPropertyUsage)}`)
+const thirdSubjectUsage = await recordVerdunAccountUsage(sql, free, meteredUsage, 'subject-3')
+if (thirdSubjectUsage.used !== 3 || thirdSubjectUsage.remaining !== 0 || thirdSubjectUsage.unlimited) {
+  throw new Error(`metered usage counter mismatch after third distinct subject: ${JSON.stringify(thirdSubjectUsage)}`)
 }
 
-await expectError(() => recordVerdunAccountUsage(sql, free, 'property_inspection', 'property-4'), 'daily_inspection_limit_reached')
+await expectError(() => recordVerdunAccountUsage(sql, free, meteredUsage, 'subject-4'), 'demo_meter_limit_reached')
 
-const genericCapabilityUsage = await recordVerdunAccountUsage(sql, free, 'saved_favorite')
+const genericCapabilityUsage = await recordVerdunAccountUsage(sql, free, 'demo_unmetered_action')
 if (!genericCapabilityUsage.unlimited || genericCapabilityUsage.limit !== null || genericCapabilityUsage.used !== 0 || genericCapabilityUsage.remaining !== null) {
-  throw new Error(`non-property capability usage should remain unmetered in the Verdun account store: ${JSON.stringify(genericCapabilityUsage)}`)
+  throw new Error(`usage without an explicit limit should remain unmetered in the Verdun account store: ${JSON.stringify(genericCapabilityUsage)}`)
 }
 
 const adminUsage = await recordVerdunAccountUsage(sql, admin)
