@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 import { createServer } from 'node:http'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 
 import { defaultDeployCheckProfileId, deployCheckProfile, supportedDeployCheckProfiles } from './instances/deploy-check-profiles.mjs'
 
@@ -11,8 +11,8 @@ if (!defaultProfile?.smokeFixtureModule || !defaultProfile.staticSnapshotPath) {
 if (defaultProfile.id !== 'demo') {
   throw new Error(`Verdun default deploy profile should be bundled demo, found ${defaultProfile.id}`)
 }
-if (supportedDeployCheckProfiles().some((profile) => profile.id === 'garbage')) {
-  throw new Error('Verdun deploy profiles should not register Garbage unless an external app opts in')
+if (supportedDeployCheckProfiles().some((profile) => profile.id !== 'demo')) {
+  throw new Error('Verdun bundled deploy profiles should only include demo unless external modules opt in')
 }
 
 const checkDeployedSource = await readFile('scripts/check-deployed.mjs', 'utf8')
@@ -21,11 +21,13 @@ const externalProfilesSource = await readFile('scripts/instances/external-deploy
 const vercelConfigSource = await readFile('scripts/generate-vercel-config.mjs', 'utf8')
 const vercelConfig = JSON.parse(await readFile('vercel.json', 'utf8'))
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
+const bundledDeployProfileDirectories = (await readdir('scripts/instances', { withFileTypes: true }))
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort()
 
-for (const marker of ['collected.ga', '/rbage/', '/greathouse/', '/api/garbage/newsletter/draft', 'Strongly Typed AI/Data Notes', 'data/newsletter-snapshot.json', 'Weekly throughline', 'upvoted items will lead the draft']) {
-  if (checkDeployedSource.includes(marker)) {
-    throw new Error(`generic deployed checker still embeds Garbage deploy marker: ${marker}`)
-  }
+if (bundledDeployProfileDirectories.join(',') !== 'demo') {
+  throw new Error(`Verdun should bundle only the demo deploy profile, found ${bundledDeployProfileDirectories.join(', ')}`)
 }
 if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs') {
   throw new Error('check:preview should use the profile-backed preview checker')
@@ -33,7 +35,7 @@ if (packageJson.scripts?.['check:preview'] !== 'node scripts/check-preview.mjs')
 if (packageJson.scripts?.['vercel:config'] !== 'node scripts/generate-vercel-config.mjs' || packageJson.scripts?.['smoke:vercel-config'] !== 'node scripts/generate-vercel-config.mjs --check') {
   throw new Error('Vercel config scripts should use the deploy-profile-backed generator')
 }
-if (vercelConfigSource.includes('/rbage/') || vercelConfigSource.includes('/greathouse/')) {
+if (vercelConfigSource.includes('hardcoded') || !vercelConfigSource.includes('supportedDeployCheckProfiles')) {
   throw new Error('Vercel config generator should derive app paths from deploy profiles')
 }
 for (const source of [`${defaultProfile.basePath}assets/(.*)`, `${defaultProfile.basePath}data/(.*)`, `${defaultProfile.basePath}(.*)`]) {
@@ -47,14 +49,14 @@ if (vercelConfig.redirects?.[0]?.destination !== defaultProfile.basePath) {
 if (
   !deployProfilesSource.includes('registeredDeployCheckProfiles') ||
   !deployProfilesSource.includes('externalDeployCheckProfileModules') ||
-  deployProfilesSource.includes('garbageDeployCheckProfile') ||
-  deployProfilesSource.includes('./garbage/') ||
+  deployProfilesSource.includes('../apps/') ||
+  deployProfilesSource.includes('apps/') ||
   !deployProfilesSource.includes('readdir(instanceDirectory')
 ) {
   throw new Error('deploy check profiles are not discovered from instance profile modules')
 }
-if (externalProfilesSource.includes('apps/garbage') || !externalProfilesSource.includes('VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES')) {
-  throw new Error('external deploy-profile registry should be environment-provided, not hardcoded to Garbage')
+if (externalProfilesSource.includes('../apps/') || externalProfilesSource.includes('apps/') || !externalProfilesSource.includes('VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES')) {
+  throw new Error('external deploy-profile registry should be environment-provided, not hardcoded to an app')
 }
 if (!defaultProfile.smokeFixtureModule.includes(`instances/${defaultProfile.id}/`) || !defaultProfile.smokeAllCommands) {
   throw new Error('bundled deploy profile is missing reusable workbench smoke metadata')

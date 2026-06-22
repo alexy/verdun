@@ -15,11 +15,11 @@ const extraArgs = process.argv.slice(4)
 const handoffPath = `/tmp/verdun-db-handoff-${Date.now()}.json`
 const deploySource = readFileSync('scripts/deploy-workbench-database.mjs', 'utf8')
 
-if (deploySource.includes('public/data/newsletter-snapshot.json')) {
-  throw new Error('generic workbench deploy script still embeds the Garbage newsletter snapshot default')
+if (!defaultGenericSmoke?.genericSnapshotPath || !defaultGenericSmoke?.genericSnapshotPath.includes('demo')) {
+  throw new Error('default database deploy smoke should derive its snapshot from the bundled demo deploy profile')
 }
-if (deploySource.includes("!== 'garbage'") || deploySource.includes('!== "garbage"')) {
-  throw new Error('generic workbench deploy script still special-cases Garbage by string literal')
+if (!deploySource.includes('deployCheckProfile') || !deploySource.includes('databaseReloadHandoff')) {
+  throw new Error('generic workbench deploy script should use profile metadata and reusable handoff receipts')
 }
 
 if (!explicitSqlPath && !explicitSnapshotPath && defaultGenericSmoke?.genericSnapshotPath) {
@@ -112,12 +112,9 @@ if (instance && handoff.instance !== instance) {
 if (
   instance
   && instance !== defaultDeployCheckProfileId()
-  && (
-    dryRun.stdout.includes('db/instances/garbage/migrations')
-    || dryRun.stdout.includes('apps/garbage/db/instances/garbage/migrations')
-  )
+  && !dryRun.stdout.includes(`--instance ${instance}`)
 ) {
-  throw new Error(`non-default workbench deployment dry run should not include Garbage migrations\n${dryRun.stdout}`)
+  throw new Error(`non-default workbench deployment dry run should preserve instance routing\n${dryRun.stdout}`)
 }
 const instanceProfile = deployCheckProfile(instance)
 const basePath = optionValue(extraArgs, '--base-path') ?? instanceProfile?.basePath

@@ -7,7 +7,7 @@ Verdun's Rust crawler crate is the reusable data-loading core for Verdun-backed 
 - `src/sdk.rs` is the public Rust API for app crates. It re-exports the stable generic data types, registration trait, and CLI runtime entrypoints.
 - `src/core.rs` defines reusable data types internally: `CrawlerSnapshot`, `NormalizedRecord`, `SourceRun`, `NormalizedCollectionPlan`, review targets, source config, and focus terms. External crates receive these through `verdun_crawler::sdk`.
 - `src/runtime.rs` owns the shared CLI internally: `verify`, `queries`, `collect`, and `export-sql`. External app binaries call it through `verdun_crawler::sdk::run_cli_with_registrations`.
-- `src/instances/` contains only bundled Verdun proof crawler instances and is not a public app extension module. The current bundled crawler proof is the neutral demo while Garbage and Greathouse run their own external crawler crates.
+- `src/instances/` contains only bundled Verdun proof crawler instances and is not a public app extension module. The current bundled crawler proof is the neutral demo; production apps run their own external crawler crates against the SDK.
 
 ## External App Pattern
 
@@ -45,6 +45,20 @@ npm run db:apply -- --sql /tmp/verdun-load.sql --snapshot /tmp/demo-snapshot.jso
 ```
 
 External app crates run the same CLI through their own binary and manifest path.
+
+## Progress
+
+Crawler runs emit machine-readable progress by default:
+
+- `.codex-artifacts/crawler-progress/progress.jsonl`
+- `.codex-artifacts/crawler-progress/latest.json`
+
+Set `VERDUN_CRAWLER_PROGRESS_JSONL` or `VERDUN_CRAWLER_PROGRESS_LATEST` to route those files elsewhere. Set `VERDUN_CRAWLER_PROGRESS_STDERR=1` for a readable terminal progress line with count bars when events include totals. Set `VERDUN_CRAWLER_PROGRESS=0` to disable file emission.
+
+Crawler runs can also persist resumable unit checkpoints through `CrawlerCheckpointStore`.
+By default, checkpoint state is written to `.codex-artifacts/crawler-progress/checkpoint.json`.
+Set `VERDUN_CRAWLER_CHECKPOINT_PATH` to route it elsewhere, or
+`VERDUN_CRAWLER_CHECKPOINT=0` to disable checkpoint writes.
 
 ## Verification
 

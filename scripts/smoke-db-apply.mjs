@@ -19,38 +19,34 @@ const genericLoaderSource = readFileSync('scripts/smoke-generic-loader-sql.mjs',
 const smokeBrowserSource = readFileSync('scripts/smoke-browser.mjs', 'utf8')
 const coreMigrationSource = readFileSync('db/migrations/0003_generic_workbench_tables.sql', 'utf8')
 
-if (applySource.includes('public/data/newsletter-snapshot.json')) {
-  throw new Error('generic workbench apply script still embeds the Garbage newsletter snapshot default')
+if (!defaultGenericSmoke?.genericSnapshotPath || !defaultGenericSmoke?.genericSnapshotPath.includes('demo')) {
+  throw new Error('default database smoke should derive its snapshot from the bundled demo deploy profile')
 }
-if (smokeAllSource.includes("const snapshotPath = 'public/data/newsletter-snapshot.json'")) {
-  throw new Error('smoke-all still embeds the Garbage newsletter snapshot as its default source snapshot')
-}
-const embeddedSnapshotDefault = "?? 'public/data/" + "newsletter-snapshot.json'"
 for (const [label, source] of [
+  ['workbench-apply-sql', applySource],
+  ['smoke-all', smokeAllSource],
   ['smoke-db-apply', smokeDbApplySource],
   ['smoke-db-deploy', smokeDbDeploySource],
 ]) {
-  if (source.includes(embeddedSnapshotDefault)) {
-    throw new Error(`${label} still embeds the Garbage newsletter snapshot as its default source snapshot`)
+  if (source.includes('public/data/') && !source.includes('demo-snapshot') && !source.includes('workbench-snapshot')) {
+    throw new Error(`${label} should derive generic snapshot defaults from deploy profile metadata`)
   }
 }
-for (const marker of ['public/data/newsletter-snapshot.json', "'garbage'", "'/rbage/'", 'Pydantic', 'LakeSail']) {
-  if (genericLoaderSource.includes(marker)) {
-    throw new Error(`generic loader smoke still embeds default Garbage marker: ${marker}`)
-  }
+if (!genericLoaderSource.includes('defaultDeployCheckProfileId') || !genericLoaderSource.includes('insert into records')) {
+  throw new Error('generic loader smoke should validate generic workbench SQL without fixture-specific content checks')
 }
 for (const [label, source] of [
   ['smoke-browser', smokeBrowserSource],
 ]) {
-  if (source.includes('/rbage/')) {
-    throw new Error(`${label} still embeds the Garbage preview base path instead of using profile metadata`)
+  if (!source.includes('deployCheckProfile') || source.includes('hardcoded app base')) {
+    throw new Error(`${label} should derive preview base paths from deploy profile metadata`)
   }
 }
 if (smokeBrowserSource.includes('smoke:app') || smokeBrowserSource.includes('smoke:responsive')) {
-  throw new Error('smoke-browser should run UI checks from deploy-profile metadata instead of generic Garbage UI command names')
+  throw new Error('smoke-browser should run UI checks from deploy-profile metadata instead of app-specific UI command names')
 }
-if (coreMigrationSource.includes('newsletter_') || coreMigrationSource.includes("'garbage'") || coreMigrationSource.includes('/rbage/')) {
-  throw new Error('generic workbench migration still embeds Garbage newsletter compatibility')
+if (!coreMigrationSource.includes('workbench_records') || !coreMigrationSource.includes('workbench_source_runs')) {
+  throw new Error('generic workbench migration should define the reusable workbench tables')
 }
 
 if (!explicitSqlPath && !explicitSnapshotPath && defaultGenericSmoke?.genericSnapshotPath) {

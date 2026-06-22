@@ -4,6 +4,7 @@ use crate::core::{
     CrawlerSnapshot, FreshnessAssessment, FreshnessPolicy, SourceRunSummary,
 };
 use crate::instances::{self, CrawlerInstanceRegistration};
+use crate::progress::CrawlerProgressSink;
 use anyhow::{Context, Result};
 use chrono::{Duration, Utc};
 use clap::{Parser, Subcommand};
@@ -171,6 +172,7 @@ fn collect(
     editorial_state: Option<PathBuf>,
 ) -> Result<()> {
     let crawler_instance = resolve_crawler_instance(instance.as_deref(), registrations)?;
+    let progress = CrawlerProgressSink::from_env(crawler_instance.id());
     let config_path = config.unwrap_or_else(|| crawler_instance.default_config_path());
     let out = out.unwrap_or_else(|| crawler_instance.default_item_payload_path());
     let source_runs_out =
@@ -186,6 +188,12 @@ fn collect(
         "--fresh-after-hours must be positive"
     );
     let since = Utc::now() - Duration::days(since_days);
+    let _ = progress.emit(
+        crawler_instance.id(),
+        "collect",
+        "started",
+        format!("collecting {}", crawler_instance.display_name()),
+    );
     let collection = crawler_instance.collect(
         &config,
         live,
@@ -194,6 +202,19 @@ fn collect(
         &editorial_focuses,
     )?;
     let record_count = collection.snapshot.records.len();
+    let _ = progress.emit_count(
+        crawler_instance.id(),
+        "collect",
+        "records_collected",
+        format!("collected {record_count} records"),
+        record_count as u64,
+        record_count as u64,
+        serde_json::json!({
+            "live": live,
+            "sourceRuns": collection.snapshot.source_runs.len(),
+            "collectionPlans": collection.snapshot.collection_plans.len(),
+        }),
+    );
     write_pretty_json(&out, &collection.item_payload)?;
     write_pretty_json(&source_runs_out, &collection.snapshot.source_runs)?;
     if let Some(generic_out) = generic_out.as_ref() {
@@ -242,6 +263,25 @@ fn collect(
         out.display(),
         source_runs_out.display(),
         public_out.display()
+    );
+    let _ = progress.emit_count(
+        crawler_instance.id(),
+        "collect",
+        "finished",
+        format!(
+            "wrote {record_count} records to {}, {}, and {}",
+            out.display(),
+            source_runs_out.display(),
+            public_out.display()
+        ),
+        record_count as u64,
+        record_count as u64,
+        serde_json::json!({
+            "itemPayload": path_string(&out),
+            "sourceRuns": path_string(&source_runs_out),
+            "publicSnapshot": path_string(&public_out),
+            "genericSnapshot": generic_out.as_ref().map(path_string),
+        }),
     );
     Ok(())
 }

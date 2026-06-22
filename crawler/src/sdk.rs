@@ -4,6 +4,9 @@ pub use crate::cache::{
     read_json, read_json_value, read_optional_json, read_optional_json_value, safe_cache_key,
     write_pretty_json, write_text,
 };
+pub use crate::checkpoint::{
+    CrawlerCheckpointState, CrawlerCheckpointStore, CrawlerCheckpointUnit,
+};
 pub use crate::core::{
     ArtifactInventory, ArtifactInventoryEntry, ArtifactInventorySummary, ArtifactSpec,
     CollectionTarget, CrawlerCollection, CrawlerConfig, CrawlerOutputPaths, CrawlerRunManifest,
@@ -24,4 +27,5 @@ pub use crate::http::{
     fetch_text_request_async, probe_http_status, probe_http_status_async,
 };
 pub use crate::instances::{CrawlerInstance, CrawlerInstanceRegistration, LegacySqlExport};
+pub use crate::progress::{CrawlerProgressEvent, CrawlerProgressSink};
 pub use crate::runtime::{run_cli, run_cli_with_registrations};

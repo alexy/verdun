@@ -1146,12 +1146,12 @@ mod tests {
         let commands = DatabaseReloadCommandSet::cargo_export_with_redacted_psql_apply(
             "crawler/Cargo.toml",
             [
-                "load-property-intel-db",
+                "load-workbench-db",
                 "--public-dir",
-                "public/data/property-intel",
+                "public/data/workbench",
                 "--activate",
             ],
-            "/tmp/property.sql",
+            "/tmp/workbench.sql",
         );
 
         assert_eq!(
@@ -1162,15 +1162,15 @@ mod tests {
                 "--manifest-path".to_owned(),
                 "crawler/Cargo.toml".to_owned(),
                 "--".to_owned(),
-                "load-property-intel-db".to_owned(),
+                "load-workbench-db".to_owned(),
                 "--public-dir".to_owned(),
-                "public/data/property-intel".to_owned(),
+                "public/data/workbench".to_owned(),
                 "--activate".to_owned(),
             ])
         );
         assert_eq!(
             commands.apply_sql,
-            DatabaseReloadCommandSet::redacted_psql_apply("/tmp/property.sql")
+            DatabaseReloadCommandSet::redacted_psql_apply("/tmp/workbench.sql")
         );
     }
 

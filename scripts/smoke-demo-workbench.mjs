@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { ref } from 'vue'
 import { runnerImport } from 'vite'
@@ -24,6 +24,8 @@ const [
   appComponentsSource,
   appRegistrySource,
   registrySource,
+  instanceEntries,
+  deployProfileEntries,
 ] = await Promise.all([
   readFile('src/instances/demo/DemoApp.vue', 'utf8'),
   readFile('src/instances/demo/app.ts', 'utf8'),
@@ -33,6 +35,8 @@ const [
   readFile('src/instances/app-components.ts', 'utf8'),
   readFile('src/instances/app-registry.ts', 'utf8'),
   readFile('src/instances/registry.ts', 'utf8'),
+  readdir('src/instances', { withFileTypes: true }),
+  readdir('scripts/instances', { withFileTypes: true }),
 ])
 
 const snapshotRef = ref(pilotModule.demoPilotSnapshot())
@@ -78,58 +82,41 @@ if (!demoAppRegistrationSource.includes('DemoApp') || !demoAppRegistrationSource
 if (!demoInstanceRegistrationSource.includes('demoInstance') || !demoInstanceRegistrationSource.includes('demoPilotSnapshot') || !demoInstanceRegistrationSource.includes('default: true')) {
   throw new Error('Demo instance metadata is not registered as the bundled default')
 }
-for (const removedGarbageFrontendPath of [
-  'src/instances/garbage/app.ts',
-  'src/instances/garbage/instance.ts',
-  'src/instances/garbage/GarbageApp.vue',
-  'src/instances/garbage/style.css',
-  'src/instances/garbage/components',
-  'src/instances/garbage/composables',
-  'src/instances/garbage/config.ts',
+const bundledInstanceDirectories = instanceEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
+if (bundledInstanceDirectories.join(',') !== 'demo') {
+  throw new Error(`Verdun frontend should bundle only the demo instance, found ${bundledInstanceDirectories.join(', ')}`)
+}
+const bundledDeployProfileDirectories = deployProfileEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
+if (bundledDeployProfileDirectories.join(',') !== 'demo') {
+  throw new Error(`Verdun deploy profiles should bundle only demo, found ${bundledDeployProfileDirectories.join(', ')}`)
+}
+for (const removedGenericPath of [
   'src/instances/external-app-components.ts',
   'src/instances/external-instances.ts',
 ]) {
-  if (existsSync(removedGarbageFrontendPath)) {
-    throw new Error(`${removedGarbageFrontendPath} should not exist; Garbage should own its app entrypoint outside Verdun`)
-  }
-}
-for (const removedGreathouseFrontendPath of [
-  'src/instances/greathouse/app.ts',
-  'src/instances/greathouse/instance.ts',
-  'src/instances/greathouse/GreathouseApp.vue',
-  'src/instances/greathouse/config.ts',
-  'scripts/instances/greathouse/deploy-checks.mjs',
-  'scripts/smoke-greathouse-workbench.mjs',
-]) {
-  if (existsSync(removedGreathouseFrontendPath)) {
-    throw new Error(`${removedGreathouseFrontendPath} should not exist; Greathouse should own its app entrypoint outside Verdun`)
+  if (existsSync(removedGenericPath)) {
+    throw new Error(`${removedGenericPath} should not exist; external apps should register through public Verdun contracts`)
   }
 }
 if (
   !instanceRegistrationsSource.includes('workbenchInstanceRegistration') ||
-  instanceRegistrationsSource.includes('garbageWorkbenchInstance') ||
-  instanceRegistrationsSource.includes('greathouseWorkbenchInstance') ||
   instanceRegistrationsSource.includes('externalWorkbenchInstances') ||
-  instanceRegistrationsSource.includes('apps/garbage') ||
-  instanceRegistrationsSource.includes('./garbage/') ||
-  instanceRegistrationsSource.includes('./greathouse/')
+  instanceRegistrationsSource.includes('../apps/') ||
+  instanceRegistrationsSource.includes('apps/')
 ) {
   throw new Error('registered instance list is not discovering neutral instance metadata registrations')
 }
 if (!appSource.includes('resolveWorkbenchAppForPath')) {
   throw new Error('root app shell is not wired through the instance app resolver')
 }
-if (appSource.includes('GreathouseApp') || appSource.includes('GarbageApp')) {
+if (appSource.includes('src/instances/demo/DemoApp.vue')) {
   throw new Error('root app shell imports concrete instance apps instead of the app registry')
 }
 if (
   !appComponentsSource.includes('workbenchAppRegistration') ||
-  appComponentsSource.includes('garbageWorkbenchApp') ||
-  appComponentsSource.includes('greathouseWorkbenchApp') ||
   appComponentsSource.includes('externalWorkbenchApps') ||
-  appComponentsSource.includes('apps/garbage') ||
-  appComponentsSource.includes('./garbage/') ||
-  appComponentsSource.includes('./greathouse/')
+  appComponentsSource.includes('../apps/') ||
+  appComponentsSource.includes('apps/')
 ) {
   throw new Error('registered app component list is not discovering neutral app registrations')
 }
@@ -139,30 +126,24 @@ if (
 ) {
   throw new Error('instance app registry is not wired to metadata-backed route selection')
 }
-if (appRegistrySource.includes('GreathouseApp') || appRegistrySource.includes('GarbageApp') || appRegistrySource.includes('apps/garbage')) {
+if (appRegistrySource.includes('../apps/') || appRegistrySource.includes('apps/') || appRegistrySource.includes('DemoApp.vue')) {
   throw new Error('instance app registry imports concrete instance apps instead of app registrations')
-}
-if (appRegistrySource.includes('?? GarbageApp')) {
-  throw new Error('instance app registry still falls back directly to the Garbage app instead of the registered default')
 }
 if (!registrySource.includes('registeredWorkbenchInstances')) {
   throw new Error('instance registry is not backed by registered instance metadata')
 }
 if (
-  registrySource.includes('garbageInstance') ||
-  registrySource.includes('greathouseInstance') ||
-  registrySource.includes('greathousePilotSnapshot') ||
-  registrySource.includes('apps/garbage') ||
-  registrySource.includes('return garbageInstance') ||
-  registrySource.includes('instance.id === greathouseInstance.id')
+  registrySource.includes('../apps/') ||
+  registrySource.includes('apps/') ||
+  registrySource.includes('return demoInstance')
 ) {
   throw new Error('instance registry still imports or hard-codes concrete instance metadata')
 }
 if (registryModule.resolveWorkbenchInstanceForPath('/demo/').id !== 'demo') {
   throw new Error('registry did not resolve /demo/ to the demo instance')
 }
-if (registryModule.resolveWorkbenchInstanceForPath('/rbage/').id !== 'demo') {
-  throw new Error('Verdun registry should not resolve /rbage/ to Garbage; Garbage owns its app entrypoint')
+if (registryModule.resolveWorkbenchInstanceForPath('/unknown-external/').id !== 'demo') {
+  throw new Error('Verdun registry should route unknown local paths to its bundled default instance')
 }
 if (registryModule.defaultWorkbenchInstance().id !== 'demo') {
   throw new Error('Verdun registry should default to its bundled demo instance')

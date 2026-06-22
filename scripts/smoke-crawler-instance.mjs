@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { createServer } from 'node:http'
 import { existsSync } from 'node:fs'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -16,6 +16,8 @@ const [
   readmeSource,
   appDocSource,
   crawlerManifestSource,
+  crawlerInstanceEntries,
+  crawlerConfigEntries,
 ] = await Promise.all([
   readFile('crawler/src/main.rs', 'utf8'),
   readFile('crawler/src/instances/demo.rs', 'utf8'),
@@ -27,6 +29,8 @@ const [
   readFile('README.md', 'utf8'),
   readFile('APP.md', 'utf8'),
   readFile('crawler/Cargo.toml', 'utf8'),
+  readdir('crawler/src/instances', { withFileTypes: true }),
+  readdir('crawler/instances', { withFileTypes: true }),
 ])
 
 if (!crawlerManifestSource.includes('description = "Reusable crawler SDK and database reload runtime for Verdun workbench apps"') || !crawlerManifestSource.includes('readme = "README.md"')) {
@@ -36,43 +40,39 @@ if (!crawlerManifestSource.includes('keywords = ["crawler", "database", "workben
   throw new Error('verdun-crawler package metadata should keep reusable crawler/workbench keywords')
 }
 for (const [docPath, source] of [['README.md', readmeSource], ['APP.md', appDocSource]]) {
-  if (source.includes('/tmp/verdun-newsletter-load.sql')) {
-    throw new Error(`${docPath} should use the app-owned Garbage newsletter SQL temp path in legacy compatibility examples`)
-  }
-  if (source.includes('current repository still carries the Garbage and Greathouse instance proofs')) {
-    throw new Error(`${docPath} should describe Garbage as an external app package, not a resident Verdun proof instance`)
+  if (!source.includes('demo') || !source.includes('external app')) {
+    throw new Error(`${docPath} should describe Verdun as a demo-backed reusable core for external app packages`)
   }
 }
 
-const trackedLegacyGarbageArtifacts = spawnSync('git', [
+const trackedDataArtifacts = spawnSync('git', [
   'ls-files',
-  'public/data/newsletter-snapshot.json',
-  'crawler/data/items.json',
-  'crawler/data/source-runs.json',
-  'crawler/data/newsletter-draft.md',
+  'public/data',
+  'crawler/data',
 ], { encoding: 'utf8' })
-if (trackedLegacyGarbageArtifacts.error) throw trackedLegacyGarbageArtifacts.error
-if (trackedLegacyGarbageArtifacts.status !== 0) {
-  throw new Error(`could not inspect tracked legacy Garbage artifacts\n${trackedLegacyGarbageArtifacts.stderr}`)
+if (trackedDataArtifacts.error) throw trackedDataArtifacts.error
+if (trackedDataArtifacts.status !== 0) {
+  throw new Error(`could not inspect tracked data artifacts\n${trackedDataArtifacts.stderr}`)
 }
-const presentTrackedLegacyArtifacts = trackedLegacyGarbageArtifacts.stdout
+const unexpectedTrackedDataArtifacts = trackedDataArtifacts.stdout
   .trim()
   .split('\n')
   .filter(Boolean)
   .filter((artifactPath) => existsSync(artifactPath))
-if (presentTrackedLegacyArtifacts.length) {
-  throw new Error(`Verdun should not keep tracked Garbage crawler/newsletter artifacts:\n${presentTrackedLegacyArtifacts.join('\n')}`)
+  .filter((artifactPath) => !artifactPath.includes('demo'))
+if (unexpectedTrackedDataArtifacts.length) {
+  throw new Error(`Verdun should keep only demo tracked data artifacts:\n${unexpectedTrackedDataArtifacts.join('\n')}`)
 }
-for (const removedPath of [
-  'crawler/src/instances/garbage.rs',
-  'crawler/src/instances/external.rs',
-  'crawler/src/instances/greathouse.rs',
-  'crawler/instances/garbage/config.toml',
-  'crawler/instances/greathouse/config.toml',
-]) {
-  if (existsSync(removedPath)) {
-    throw new Error(`${removedPath} should not exist; app crawlers register from their own packages`)
-  }
+const bundledCrawlerRustFiles = crawlerInstanceEntries
+  .filter((entry) => entry.isFile() && entry.name.endsWith('.rs'))
+  .map((entry) => entry.name)
+  .sort()
+if (bundledCrawlerRustFiles.join(',') !== 'bundled.rs,demo.rs,mod.rs') {
+  throw new Error(`Verdun crawler should bundle only demo Rust instance files, found ${bundledCrawlerRustFiles.join(', ')}`)
+}
+const bundledCrawlerConfigDirs = crawlerConfigEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
+if (bundledCrawlerConfigDirs.join(',') !== 'demo') {
+  throw new Error(`Verdun crawler should bundle only demo crawler config, found ${bundledCrawlerConfigDirs.join(', ')}`)
 }
 if (crawlerLibSource.includes('pub mod core;') || crawlerLibSource.includes('pub mod instances;') || crawlerLibSource.includes('pub use runtime::')) {
   throw new Error('verdun-crawler should expose reusable types/runtime through sdk.rs, not public core/instances/runtime modules')
@@ -86,49 +86,27 @@ if (!crawlerSdkSource.includes('run_cli_with_registrations') || !crawlerSdkSourc
 if (!crawlerMainSource.includes('verdun_crawler::sdk::run_cli()')) {
   throw new Error('crawler main should run through the public SDK facade')
 }
-if (bundledInstancesSource.includes('garbage') || bundledInstancesSource.includes('greathouse') || bundledInstancesSource.includes('external::')) {
+if (bundledInstancesSource.includes('external::') || !bundledInstancesSource.includes('demo::CRAWLER_INSTANCE')) {
   throw new Error('Verdun bundled crawler registrations should not include app-owned instances or an external parent path')
 }
-if (crawlerRuntimeSource.includes('insert into newsletter_')) {
-  throw new Error('crawler runtime still embeds legacy newsletter SQL table exports')
-}
-if (crawlerRuntimeSource.includes('fn generic_export_sql(payload: &ExportPayload')) {
-  throw new Error('generic SQL exporter still depends on Garbage export payloads')
-}
 for (const marker of [
-  'use crate::instances::garbage',
-  'garbage::load_newsletter_export_payload',
-  'garbage::newsletter_export_sql',
-  'garbage::public_snapshot_value_as_crawler_snapshot',
   'SqlExportTarget',
-  'Newsletter',
-  'use crate::instances::garbage::{',
   'fn legacy_query_plans',
   'fn load_export_payload',
   'fn load_crawler_snapshot',
 ]) {
   if (crawlerRuntimeSource.includes(marker)) {
-    throw new Error(`crawler runtime still exposes direct Garbage compatibility wiring: ${marker}`)
+    throw new Error(`crawler runtime still exposes direct compatibility wiring: ${marker}`)
   }
 }
 if (!crawlerRuntimeSource.includes('.legacy_sql_export(') || !crawlerRuntimeSource.includes('load_generic_crawler_snapshot')) {
   throw new Error('crawler runtime does not route legacy SQL export and generic snapshot loading through crawler instance hooks')
 }
 for (const marker of [
-  'garbage::PublicSnapshot',
-  'garbage::ExportPayload',
-  'garbage::NewsItem',
-  'default_value = "garbage"',
-  'default_value = "Garbage"',
-  'default_value = "/rbage/"',
-  'crawler/instances/garbage/config.toml',
-  'public/data/newsletter-snapshot.json',
-  'crawler/data/items.json',
-  'crawler/data/source-runs.json',
   'crawler/data/editorial-state.json',
 ]) {
   if (crawlerRuntimeSource.includes(marker)) {
-    throw new Error(`crawler runtime still embeds Garbage compatibility detail: ${marker}`)
+    throw new Error(`crawler runtime still embeds app compatibility detail: ${marker}`)
   }
 }
 for (const marker of [
@@ -141,36 +119,32 @@ for (const marker of [
   }
 }
 if (instanceTraitSource.includes('ProjectQueryPlan') || !instanceTraitSource.includes('Vec<NormalizedCollectionPlan>')) {
-  throw new Error('crawler instance trait still exposes Garbage query-plan types instead of core collection plans')
+  throw new Error('crawler instance trait should expose core collection plan types')
 }
 if (!instanceTraitSource.includes('REGISTERED_CRAWLER_INSTANCES') || !instanceTraitSource.includes('CrawlerInstanceRegistration')) {
   throw new Error('crawler instances are not resolved through a registration table')
 }
 if (
-  instanceTraitSource.includes('pub mod garbage') ||
-  instanceTraitSource.includes('pub mod greathouse') ||
-  instanceTraitSource.includes('garbage::CRAWLER_INSTANCE') ||
-  instanceTraitSource.includes('greathouse::CRAWLER_INSTANCE') ||
   !demoInstanceSource.includes('pub static CRAWLER_INSTANCE') ||
   !bundledInstancesSource.includes('BUNDLED_CRAWLER_INSTANCE_REGISTRATIONS') ||
   !bundledInstancesSource.includes('demo::CRAWLER_INSTANCE')
 ) {
   throw new Error('resident crawler instance modules should be isolated behind the bundled crawler registration manifest')
 }
-if (instanceTraitSource.includes('match instance') || instanceTraitSource.includes('supported instances: garbage, greathouse')) {
+if (instanceTraitSource.includes('match instance')) {
   throw new Error('crawler instance resolver still hard-codes supported instances instead of using registrations')
 }
 if (!instanceTraitSource.includes('EditorialFocus') || !instanceTraitSource.includes('CrawlerCollection')) {
-  throw new Error('crawler instance trait still imports editorial focus state from Garbage instead of core')
+  throw new Error('crawler instance trait should use generic editorial focus and crawler collection core types')
 }
-if (instanceTraitSource.includes('use garbage::NewsItem') || instanceTraitSource.includes('Vec<NewsItem>')) {
-  throw new Error('crawler instance trait still exposes Garbage NewsItem instead of core collection output')
+if (instanceTraitSource.includes('Vec<NewsItem>')) {
+  throw new Error('crawler instance trait should expose core collection output')
 }
-if (demoInstanceSource.includes('NewsItem') || demoInstanceSource.includes('instances::garbage') || demoInstanceSource.includes('Greathouse')) {
-  throw new Error('Demo crawler should not depend on app-owned Garbage or Greathouse implementation details')
+if (demoInstanceSource.includes('NewsItem')) {
+  throw new Error('Demo crawler should depend on core normalized record types')
 }
-if (!demoInstanceSource.includes('Result<Vec<NormalizedRecord>>')) {
-  throw new Error('Demo source adapters do not collect core normalized records directly')
+if (!demoInstanceSource.includes('Result<CrawlerCollection>') || !demoInstanceSource.includes('Vec<NormalizedRecord>')) {
+  throw new Error('Demo source adapters should collect core normalized records into a generic crawler collection')
 }
 
 const verifyDemo = spawnSync('cargo', [

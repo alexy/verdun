@@ -1,5 +1,4 @@
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runnerImport } from 'vite'
@@ -49,69 +48,44 @@ delete process.env.DATABASE_URL
 delete process.env.NEON_DATABASE_URL
 
 try {
-  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource] = await Promise.all([
+  const [dbSource, healthSource, instanceAdaptersSource, localAdapterTypesSource, registeredAdaptersSource, bundledAdaptersSource, apiInstanceEntries, sourceInstanceEntries] = await Promise.all([
     readFile('api/workbench/_db.ts', 'utf8'),
     readFile('api/workbench/health.ts', 'utf8'),
     readFile('api/workbench/instance-adapters.ts', 'utf8'),
     readFile('api/workbench/local-adapter-types.ts', 'utf8'),
     readFile('api/instances/workbench-adapters.ts', 'utf8'),
     readFile('api/instances/bundled-workbench-adapters.ts', 'utf8'),
+    readdir('api/instances', { withFileTypes: true }),
+    readdir('src/instances', { withFileTypes: true }),
   ])
-  if (dbSource.includes('../instances/garbage/workbench') || dbSource.includes('instances/garbage/config')) {
-    throw new Error('generic workbench DB helper still imports Garbage instance adapters directly')
+  if (dbSource.includes('../instances/') || dbSource.includes('src/instances/')) {
+    throw new Error('generic workbench DB helper should depend on adapter contracts, not concrete instances')
   }
-  if (healthSource.includes('newsletter_')) {
-    throw new Error('generic workbench health route still names newsletter compatibility tables directly')
+  if (!healthSource.includes('compatibilityTables')) {
+    throw new Error('generic workbench health route should expose compatibility table metadata generically')
   }
   if (
-    instanceAdaptersSource.includes('garbageInstance') ||
-    instanceAdaptersSource.includes('newsletter_') ||
-    instanceAdaptersSource.includes('../instances/garbage/')
+    instanceAdaptersSource.includes('compatibility_') ||
+    instanceAdaptersSource.includes('../instances/') && !instanceAdaptersSource.includes('../instances/workbench-adapters.js')
   ) {
-    throw new Error('generic workbench instance-adapter registry still embeds Garbage config or newsletter compatibility metadata')
+    throw new Error('generic workbench instance-adapter registry still embeds concrete instance metadata')
   }
   if (!localAdapterTypesSource.includes('LocalWorkbenchAdapterRegistration')) {
     throw new Error('local workbench adapter registration contract is missing from the neutral workbench type module')
   }
-  if (registeredAdaptersSource.includes('garbageLocalWorkbenchAdapter')) {
-    throw new Error('local workbench adapter registry still consumes a Garbage-named adapter export instead of a neutral registration')
-  }
-  if (registeredAdaptersSource.includes('./garbage/')) {
+  if (registeredAdaptersSource.includes('./demo/') || registeredAdaptersSource.includes('../apps/') || registeredAdaptersSource.includes('apps/')) {
     throw new Error('local workbench adapter registry still imports a resident instance directly instead of the bundled adapter manifest')
   }
-  if (bundledAdaptersSource.includes('./garbage/') || bundledAdaptersSource.includes('apps/garbage')) {
-    throw new Error('bundled API adapter manifest should not import Garbage adapters')
+  if (!bundledAdaptersSource.includes('bundledLocalWorkbenchAdapterRegistrations') || bundledAdaptersSource.includes('../apps/') || bundledAdaptersSource.includes('apps/')) {
+    throw new Error('bundled API adapter manifest should expose neutral registrations without external app imports')
   }
-  if (existsSync('scripts/instances/garbage/smoke-view-model.mjs')) {
-    throw new Error('Garbage view-model smoke should live in the external package, not a resident Verdun script shim')
+  const apiInstanceDirectories = apiInstanceEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
+  if (apiInstanceDirectories.join(',') !== '') {
+    throw new Error(`Verdun API should not bundle app-specific instance directories, found ${apiInstanceDirectories.join(', ')}`)
   }
-  if (existsSync('src/instances/garbage/workbench.ts')) {
-    throw new Error('Garbage workbench projection should live in the parent package, not resident Verdun source')
-  }
-  if (existsSync('src/instances/garbage/config.ts')) {
-    throw new Error('Garbage instance config should live in the parent package, not resident Verdun source')
-  }
-  if (existsSync('src/instances/garbage/newsletter.ts') || existsSync('src/instances/garbage/ontology.ts') || existsSync('src/instances/garbage/ontology.json')) {
-    throw new Error('Garbage newsletter and ontology modules should live in the parent package, not resident Verdun source')
-  }
-  for (const removedGreathouseFrontendPath of [
-    'src/instances/greathouse/app.ts',
-    'src/instances/greathouse/instance.ts',
-    'src/instances/greathouse/GreathouseApp.vue',
-    'src/instances/greathouse/config.ts',
-    'scripts/instances/greathouse/deploy-checks.mjs',
-  ]) {
-    if (existsSync(removedGreathouseFrontendPath)) {
-      throw new Error(`${removedGreathouseFrontendPath} should not exist; Greathouse should own its app/deploy profile outside Verdun`)
-    }
-  }
-  for (const removedGarbageApiPath of [
-    'api/garbage',
-    'api/instances/garbage',
-  ]) {
-    if (existsSync(removedGarbageApiPath)) {
-      throw new Error(`${removedGarbageApiPath} should not exist; Garbage owns app-specific API routes`)
-    }
+  const sourceInstanceDirectories = sourceInstanceEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort()
+  if (sourceInstanceDirectories.join(',') !== 'demo') {
+    throw new Error(`Verdun source should bundle only the demo app instance, found ${sourceInstanceDirectories.join(', ')}`)
   }
 
   const { module: dbModule } = await runnerImport('./api/workbench/_db.ts', {

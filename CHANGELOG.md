@@ -2,6 +2,9 @@
 
 ## 2026-06-21
 
+- Added SDK-exported crawler progress events (`CrawlerProgressSink`, `CrawlerProgressEvent`) with default JSONL/latest files plus optional pretty stderr progress bars for long-running app crawlers.
+- Added SDK-exported crawler checkpoint state (`CrawlerCheckpointStore`, `CrawlerCheckpointState`, `CrawlerCheckpointUnit`) so app crawlers can persist completed unit payloads and resume after timeouts.
+- Reworked active Verdun smokes to assert generic demo-only bundled surfaces instead of carrying app-specific migration-era names, and cleaned stale app-instance directories from the working tree.
 - Hardened Verdun's public-surface smoke around the reusable account exports, including the expected account type, Google auth, session cookie, SQL store symbols, and `smoke:account-store` package command.
 
 ## 2026-06-19
