@@ -7,6 +7,9 @@ pub use crate::cache::{
 pub use crate::checkpoint::{
     CrawlerCheckpointState, CrawlerCheckpointStore, CrawlerCheckpointUnit,
 };
+#[cfg(feature = "db")]
+pub use crate::db::{connect as db_connect, connect_from_env as db_connect_from_env, database_url_from_env, DATABASE_URL_ENV_KEYS};
+pub use crate::geocode::{geocode_oneline_address, reverse_geocode_coordinates, GeocodeResult};
 pub use crate::core::{
     ArtifactInventory, ArtifactInventoryEntry, ArtifactInventorySummary, ArtifactSpec,
     CollectionTarget, CrawlerCollection, CrawlerConfig, CrawlerOutputPaths, CrawlerRunManifest,
