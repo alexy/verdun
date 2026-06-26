@@ -13,12 +13,12 @@ use anyhow::{Context, Result};
 use tokio_postgres::Client;
 
 /// Environment variables checked, in order, for a Postgres connection string.
+/// Generic + Verdun's own namespace only — apps set one of these standard keys.
 pub const DATABASE_URL_ENV_KEYS: &[&str] = &[
     "POSTGRES_URL",
     "DATABASE_URL",
     "NEON_DATABASE_URL",
     "VERDUN_ACCOUNT_DATABASE_URL",
-    "GREATHOUSE_ACCOUNT_DATABASE_URL",
 ];
 
 /// First non-empty connection string found in [`DATABASE_URL_ENV_KEYS`].

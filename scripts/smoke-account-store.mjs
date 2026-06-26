@@ -111,8 +111,8 @@ if (verdunCookieValue('other=1; verdun_account=%E0%A4%A; theme=dark') !== '') {
 }
 const adminEnvEmails = verdunAdminEmailsFromEnv({
   VERDUN_ADMIN_EMAILS: ' Admin@Example.Test,duplicate@example.test ',
-  GREATHOUSE_ADMIN_EMAILS: 'duplicate@example.test, app-admin@example.test',
-}, ['GREATHOUSE_ADMIN_EMAILS'])
+  EXAMPLE_APP_ADMIN_EMAILS: 'duplicate@example.test, app-admin@example.test',
+}, ['EXAMPLE_APP_ADMIN_EMAILS'])
 if (adminEnvEmails.join(',') !== 'admin@example.test,duplicate@example.test,app-admin@example.test') {
   throw new Error(`admin env parsing should merge, normalize, and dedupe generic plus app-specific admin email keys: ${JSON.stringify(adminEnvEmails)}`)
 }
