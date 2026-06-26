@@ -1,8 +1,11 @@
 {
-  "name": "verdun",
+  "name": "@querygraph/verdun",
   "private": false,
   "version": "0.1.0",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/alexy/verdun.git"

@@ -4,7 +4,7 @@ Verdun is the reusable core for database-backed collection/review workbenches. T
 
 The first reusable boundary is now explicit:
 
-- Verdun's `package.json` exports its app-facing JS/CSS surface as package subpaths (`verdun/frontend/*`, `verdun/api/public/*`, `verdun/db/public/*`, and `verdun/scripts/public/*`) so external apps do not import by filesystem-relative paths.
+- Verdun's `package.json` exports its app-facing JS/CSS surface as package subpaths (`@querygraph/verdun/frontend/*`, `@querygraph/verdun/api/public/*`, `@querygraph/verdun/db/public/*`, and `@querygraph/verdun/scripts/public/*`) so external apps do not import by filesystem-relative paths.
 - `PUBLIC_SURFACE.md` is the source-of-truth list for external app imports; update it with `package.json` exports whenever Verdun promotes a new reusable JS/CSS/API/DB/script entrypoint.
 - `EXTERNAL_APP.md` is the implementation guide for app packages that extend Verdun without moving domain behavior into the core repo.
 - Generic workbench contracts live in `src/core/workbench.ts`.
@@ -54,7 +54,7 @@ Open `http://127.0.0.1:5176/demo/`.
 
 Without `POSTGRES_URL`, `DATABASE_URL`, or `NEON_DATABASE_URL`, the workbench API uses the bundled proof instance's static snapshot and reports read-only local persistence. External apps may provide their own local fallback adapters through `api/public/workbench-local-adapter.ts`.
 
-Run `npm run vercel:config` in Verdun after changing bundled deploy profiles; it regenerates Verdun `vercel.json` routes for the bundled demo app path. External apps own their own Vercel config and may opt into Verdun's public deployment checker through `verdun/scripts/public/check-deployed`.
+Run `npm run vercel:config` in Verdun after changing bundled deploy profiles; it regenerates Verdun `vercel.json` routes for the bundled demo app path. External apps own their own Vercel config and may opt into Verdun's public deployment checker through `@querygraph/verdun/scripts/public/check-deployed`.
 
 After deploying Verdun's bundled proof app, verify the route and data endpoints with:
 

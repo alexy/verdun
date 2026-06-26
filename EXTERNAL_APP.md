@@ -14,11 +14,11 @@ An external app package should own:
 
 The app should consume Verdun only through the public surface in `PUBLIC_SURFACE.md`:
 
-- Shared frontend controls and CSS through `verdun/frontend/*`.
-- Generic API helpers and local adapter types through `verdun/api/public/*`.
-- Generic workbench migrations through `verdun/db/public/workbench-migrations`.
-- Deployment tooling through `verdun/scripts/public/check-deployed` and `verdun/scripts/public/deploy-profile-contract`.
-- Test/workbench module loading through `verdun/scripts/public/test-loader` and `verdun/scripts/public/workbench-api-modules`.
+- Shared frontend controls and CSS through `@querygraph/verdun/frontend/*`.
+- Generic API helpers and local adapter types through `@querygraph/verdun/api/public/*`.
+- Generic workbench migrations through `@querygraph/verdun/db/public/workbench-migrations`.
+- Deployment tooling through `@querygraph/verdun/scripts/public/check-deployed` and `@querygraph/verdun/scripts/public/deploy-profile-contract`.
+- Test/workbench module loading through `@querygraph/verdun/scripts/public/test-loader` and `@querygraph/verdun/scripts/public/workbench-api-modules`.
 - Rust crawler runtime and contracts through `verdun_crawler::sdk`.
 
 ## Frontend
@@ -26,9 +26,9 @@ The app should consume Verdun only through the public surface in `PUBLIC_SURFACE
 The app owns its `index.html`, `vite.config.ts`, `src/main.ts`, domain app component, and domain styles. Import only the exported Verdun workbench pieces:
 
 ```ts
-import 'verdun/frontend/workbench-style.css'
-import { WorkbenchHero, WorkbenchReviewRail } from 'verdun/frontend/workbench-ui'
-import { useWorkbenchView, type WorkbenchSnapshot } from 'verdun/frontend/workbench-view'
+import '@querygraph/verdun/frontend/workbench-style.css'
+import { WorkbenchHero, WorkbenchReviewRail } from '@querygraph/verdun/frontend/workbench-ui'
+import { useWorkbenchView, type WorkbenchSnapshot } from '@querygraph/verdun/frontend/workbench-view'
 ```
 
 Do not register app components inside Verdun unless the app is an intentional Verdun-owned neutral proof instance. A normal external app mounts its own entrypoint and chooses its own base path.
@@ -40,14 +40,14 @@ Use Verdun's generic workbench API routes for reusable record/status/health/revi
 App-local fallback adapters should export neutral registration metadata and use the public type contract:
 
 ```ts
-import type { LocalWorkbenchAdapterRegistration } from 'verdun/api/public/workbench-local-adapter'
+import type { LocalWorkbenchAdapterRegistration } from '@querygraph/verdun/api/public/workbench-local-adapter'
 ```
 
-App route handlers should use app-local wrappers around `verdun/api/public/http` rather than importing Verdun `api/core/*`.
+App route handlers should use app-local wrappers around `@querygraph/verdun/api/public/http` rather than importing Verdun `api/core/*`.
 
 ## Database
 
-Use `verdun/db/public/workbench-migrations` for the reusable workbench schema. App compatibility tables or views belong under the app package and should be selected by the app's deploy profile.
+Use `@querygraph/verdun/db/public/workbench-migrations` for the reusable workbench schema. App compatibility tables or views belong under the app package and should be selected by the app's deploy profile.
 
 The default reload path should produce generic workbench SQL for:
 
@@ -60,12 +60,12 @@ Compatibility targets, such as legacy app tables, should be explicit app-owned p
 
 ## Deployment Profile
 
-An external app opts into Verdun deployment checks by exporting `deployCheckProfile` from an app-owned module and passing that module through `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES` when invoking `verdun/scripts/public/check-deployed`.
+An external app opts into Verdun deployment checks by exporting `deployCheckProfile` from an app-owned module and passing that module through `VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES` when invoking `@querygraph/verdun/scripts/public/check-deployed`.
 
 Validate the profile through the public contract:
 
 ```js
-import { validateDeployCheckProfile } from 'verdun/scripts/public/deploy-profile-contract'
+import { validateDeployCheckProfile } from '@querygraph/verdun/scripts/public/deploy-profile-contract'
 
 export const deployCheckProfile = validateDeployCheckProfile({
   id: 'example',

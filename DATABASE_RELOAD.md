@@ -64,7 +64,7 @@ cargo run --manifest-path apps/example/crawler/Cargo.toml -- export-sql \
 
 ```sh
 VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES=file:///absolute/path/to/apps/example/scripts/deploy-checks.mjs \
-node verdun/scripts/deploy-workbench-database.mjs \
+node @querygraph/verdun/scripts/deploy-workbench-database.mjs \
   --no-generate \
   --instance example \
   --snapshot /tmp/example-generic-snapshot.json \
@@ -77,7 +77,7 @@ node verdun/scripts/deploy-workbench-database.mjs \
 
 ```sh
 VERDUN_EXTERNAL_DEPLOY_CHECK_PROFILE_MODULES=file:///absolute/path/to/apps/example/scripts/deploy-checks.mjs \
-node verdun/scripts/deploy-workbench-database.mjs \
+node @querygraph/verdun/scripts/deploy-workbench-database.mjs \
   --no-generate \
   --apply \
   --instance example \
