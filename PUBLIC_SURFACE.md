@@ -17,6 +17,8 @@ These package subpaths are the supported external app surface:
 - `verdun/accounts/store`: SQL-backed account, session, usage, and bootstrap-admin store operations.
 - `verdun/api/public/http`: reusable Vercel-style request/response helpers.
 - `verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.
+- `verdun/email`: provider-agnostic transactional email transport (`EmailSender`, Resend adapter, log fallback, `getEmailSender`/`emailConfigured`/`emailFrom`). App templates/recipients stay in the app.
+- `verdun/svix`: dependency-free Svix webhook signature verification (e.g. for Resend webhooks).
 - `verdun/db/public/account-migrations`: reusable Verdun account/user/session/usage migration manifest.
 - `verdun/db/public/workbench-migrations`: generic workbench migration manifest.
 - `verdun/scripts/public/check-deployed`: deploy/readiness checker entrypoint for external app wrappers.

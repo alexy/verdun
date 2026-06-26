@@ -44,7 +44,15 @@
     "./scripts/public/deploy-profile-contract": "./scripts/public/deploy-profile-contract.mjs",
     "./scripts/public/test-loader": "./scripts/public/test-loader.mjs",
     "./scripts/public/workbench-apply-sql": "./scripts/public/workbench-apply-sql.mjs",
-    "./scripts/public/workbench-api-modules": "./scripts/public/workbench-api-modules.mjs"
+    "./scripts/public/workbench-api-modules": "./scripts/public/workbench-api-modules.mjs",
+    "./email": {
+      "types": "./lib/api/core/email.d.ts",
+      "default": "./lib/api/core/email.js"
+    },
+    "./svix": {
+      "types": "./lib/api/core/svix.d.ts",
+      "default": "./lib/api/core/svix.js"
+    }
   },
   "files": [
     "api",
