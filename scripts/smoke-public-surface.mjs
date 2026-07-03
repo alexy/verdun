@@ -38,6 +38,14 @@ const expectedExports = {
   './scripts/public/test-loader': './scripts/public/test-loader.mjs',
   './scripts/public/workbench-apply-sql': './scripts/public/workbench-apply-sql.mjs',
   './scripts/public/workbench-api-modules': './scripts/public/workbench-api-modules.mjs',
+  './email': {
+    types: './lib/api/core/email.d.ts',
+    default: './lib/api/core/email.js',
+  },
+  './svix': {
+    types: './lib/api/core/svix.d.ts',
+    default: './lib/api/core/svix.js',
+  },
 }
 
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))

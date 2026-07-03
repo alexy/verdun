@@ -20,3 +20,4 @@ public/data/newsletter-snapshot.json
 *.log
 .env
 .env.local
+.codex-artifacts/

@@ -18,7 +18,7 @@ These package subpaths are the supported external app surface:
 - `@querygraph/verdun/api/public/http`: reusable Vercel-style request/response helpers.
 - `@querygraph/verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.
 - `@querygraph/verdun/email`: provider-agnostic transactional email transport (`EmailSender`, Resend adapter, log fallback, `getEmailSender`/`emailConfigured`/`emailFrom`). App templates/recipients stay in the app.
-- `@querygraph/verdun/svix`: dependency-free Svix webhook signature verification (e.g. for Resend webhooks).
+- `@querygraph/verdun/svix`: dependency-free Svix webhook signature verification (e.g. for Resend webhooks), with replay protection via a timestamp tolerance window (default 300s; override with `verifySvixSignature(..., { toleranceSeconds })`).
 - `@querygraph/verdun/db/public/account-migrations`: reusable Verdun account/user/session/usage migration manifest.
 - `@querygraph/verdun/db/public/workbench-migrations`: generic workbench migration manifest.
 - `@querygraph/verdun/scripts/public/check-deployed`: deploy/readiness checker entrypoint for external app wrappers.

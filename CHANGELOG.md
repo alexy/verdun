@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-07-03
+
+- Hardened `@querygraph/verdun/svix`: `verifySvixSignature` now rejects webhooks whose `svix-timestamp` differs from the current time by more than a tolerance window (default 300 seconds, matching the official Svix libraries; too-old and too-far-future both fail), closing a webhook replay hole. Override via the new optional `{ toleranceSeconds }` options argument (backward compatible).
+- Fixed the public-surface smoke: `expectedExports` now includes the `./email` and `./svix` package exports, so `smoke:public-surface` passes again on main.
+
 ## 2026-06-21
 
 - Added SDK-exported crawler progress events (`CrawlerProgressSink`, `CrawlerProgressEvent`) with default JSONL/latest files plus optional pretty stderr progress bars for long-running app crawlers.
