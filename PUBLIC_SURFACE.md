@@ -14,10 +14,10 @@ These package subpaths are the supported external app surface:
 - `@querygraph/verdun/accounts/account-types`: reusable account, tier, capability, and usage-window types for Verdun-backed apps.
 - `@querygraph/verdun/accounts/google`: Google Identity Services credential verification for Google-only account bootstrap.
 - `@querygraph/verdun/accounts/http`: Verdun account session cookie helpers and account-tier parsing.
-- `@querygraph/verdun/accounts/store`: SQL-backed account, session, usage, and bootstrap-admin store operations.
-- `@querygraph/verdun/api/public/http`: reusable Vercel-style request/response helpers.
+- `@querygraph/verdun/accounts/store`: SQL-backed account, session, usage, and bootstrap-admin store operations, plus the `VerdunAccountRow` SQL row type consumed by `verdunAccountFromRow`.
+- `@querygraph/verdun/api/public/http`: reusable Vercel-style request/response helpers. `sendJson`/`sendText` take an optional `{ cache: 'public' | 'private' | false }` option — the default keeps the shared-cache header (`s-maxage=15, stale-while-revalidate=60`), `'private'` sends `private, no-store` for authenticated responses, and `false` sets no cache-control header.
 - `@querygraph/verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.
-- `@querygraph/verdun/email`: provider-agnostic transactional email transport (`EmailSender`, Resend adapter, log fallback, `getEmailSender`/`emailConfigured`/`emailFrom`). App templates/recipients stay in the app.
+- `@querygraph/verdun/email`: provider-agnostic transactional email transport (`EmailSender`, Resend adapter, log fallback, `getEmailSender`/`emailConfigured`/`emailFrom`/`maskEmailAddress`). App templates/recipients stay in the app. `getEmailSender()` throws when `EMAIL_PROVIDER=resend` is forced without `RESEND_API_KEY` (unforced auto-detection still falls back to the log sender); the log sender masks recipient addresses; Resend sends abort after 15 seconds.
 - `@querygraph/verdun/svix`: dependency-free Svix webhook signature verification (e.g. for Resend webhooks), with replay protection via a timestamp tolerance window (default 300s; override with `verifySvixSignature(..., { toleranceSeconds })`).
 - `@querygraph/verdun/db/public/account-migrations`: reusable Verdun account/user/session/usage migration manifest.
 - `@querygraph/verdun/db/public/workbench-migrations`: generic workbench migration manifest.

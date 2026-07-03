@@ -35,7 +35,7 @@ export type GoogleAccountProfile = {
   pictureUrl: string | null
 }
 
-type AccountRow = {
+export type VerdunAccountRow = {
   id: string
   email: string
   name: string | null
@@ -126,7 +126,7 @@ export async function upsertVerdunGoogleAccount(
      union all
      select * from inserted_account`,
     [normalizedEmail, profile.name, profile.pictureUrl, normalizedSubject, defaultTier],
-  ) as AccountRow[]
+  ) as VerdunAccountRow[]
   return verdunAccountFromRow(rows[0])
 }
 
@@ -139,7 +139,7 @@ export async function createVerdunAccountSession(
   const accountRows = await sql.query(
     `select status from verdun_account where id = $1 limit 1`,
     [accountId],
-  ) as Array<{ status: AccountRow['status'] }>
+  ) as Array<{ status: VerdunAccountRow['status'] }>
   if (!accountRows[0]) throw new Error('account_not_found')
   if (accountRows[0].status !== 'active') throw new Error('suspended_account')
 
@@ -195,7 +195,7 @@ export async function currentVerdunAccount(
      where s.token_hash = $1 and s.expires_at > now()
      limit 1`,
     [hashVerdunSessionToken(token)],
-  ) as AccountRow[]
+  ) as VerdunAccountRow[]
   const account = rows[0] ? verdunAccountFromRow(rows[0]) : null
   if (!account) {
     await deleteExpiredVerdunAccountSessionToken(sql, token)
@@ -378,7 +378,7 @@ export async function updateVerdunAccountStatus(
      select updated_account.*
      from updated_account`,
     [accountId, status],
-  ) as AccountRow[]
+  ) as VerdunAccountRow[]
   if (!rows[0]) throw new Error('account_not_found')
   return verdunAccountFromRow(rows[0])
 }
@@ -387,7 +387,7 @@ async function requireActiveVerdunAccount(sql: VerdunAccountSql, accountId: stri
   const accountRows = await sql.query(
     `select status from verdun_account where id = $1 limit 1`,
     [accountId],
-  ) as Array<{ status: AccountRow['status'] }>
+  ) as Array<{ status: VerdunAccountRow['status'] }>
   if (!accountRows[0]) throw new Error('account_not_found')
   if (accountRows[0].status !== 'active') throw new Error('suspended_account')
 }
@@ -396,7 +396,7 @@ export function hashVerdunSessionToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
 }
 
-export function verdunAccountFromRow(row: AccountRow): VerdunAccount {
+export function verdunAccountFromRow(row: VerdunAccountRow): VerdunAccount {
   return {
     id: row.id,
     email: row.email,

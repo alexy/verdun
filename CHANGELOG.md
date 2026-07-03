@@ -1,9 +1,21 @@
 # Changelog
 
-## 2026-07-03
+Entries are keyed by package version from `0.1.1` onward; the dated entries under the `0.1.0` heading predate version-keyed releases.
 
+## 0.1.1 (2026-07-03)
+
+- Licensed the package under MIT (`LICENSE`, `package.json`, `Cargo.toml`).
 - Hardened `@querygraph/verdun/svix`: `verifySvixSignature` now rejects webhooks whose `svix-timestamp` differs from the current time by more than a tolerance window (default 300 seconds, matching the official Svix libraries; too-old and too-far-future both fail), closing a webhook replay hole. Override via the new optional `{ toleranceSeconds }` options argument (backward compatible).
+- Hardened `@querygraph/verdun/email`: `getEmailSender()` now throws `email_provider_misconfigured` when `EMAIL_PROVIDER=resend` is forced without `RESEND_API_KEY` (auto-detection without `EMAIL_PROVIDER` still falls back to the log sender gracefully); the log sender masks recipient addresses (`a***@domain.com`, helper exported as `maskEmailAddress`); the Resend fetch aborts after 15s (`resend_send_timeout`) instead of hanging.
+- Exported `VerdunAccountRow` from `@querygraph/verdun/accounts/store` — the SQL row shape consumed by `verdunAccountFromRow`, previously private, so consuming apps no longer re-declare it.
+- `sendJson`/`sendText` in `@querygraph/verdun/api/public/http` accept an optional `{ cache: 'public' | 'private' | false }` option: default preserves the historical `s-maxage=15, stale-while-revalidate=60` header, `'private'` sends `private, no-store` for authenticated responses, `false` sets no cache-control header. Backward compatible.
+- Moved `vue` from `dependencies` to `peerDependencies` (`^3.5.0`, with a devDependency copy for the repo's demo app and builds) so consuming apps never risk a duplicate Vue copy. `@lucide/vue` stays a regular dependency (leaf icon library, no singleton hazard).
+- Slimmed the published tarball: dropped the demo app shell (`src/App.vue`, `src/main.ts`, `src/components/AppHeader.vue`) and repo-only scripts/smokes; kept everything the exports map, declaration maps, and public script entrypoints reference (including `scripts/smoke-account-store.mjs`, the public account-store contract smoke, and `scripts/smoke-generic-loader-sql.mjs`, invoked by the exported `workbench-apply-sql`). `CHANGELOG.md` now ships in the tarball.
 - Fixed the public-surface smoke: `expectedExports` now includes the `./email` and `./svix` package exports, so `smoke:public-surface` passes again on main.
+
+## 0.1.0 "Allendale" (2026-06-26)
+
+First public npm release (`@querygraph/verdun@0.1.0`): the app-neutral workbench/accounts/email/svix package surface. The dated entries below record the work that led up to it.
 
 ## 2026-06-21
 

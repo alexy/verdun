@@ -23,13 +23,31 @@ export function parseBody(req: ApiRequest): Record<string, unknown> {
   return {}
 }
 
-export function sendJson(res: ApiResponse, body: unknown): void {
+// Cache behavior for sendJson/sendText. Default ('public') keeps the historical
+// shared-cache header; 'private' opts authenticated/per-user responses out of
+// shared caches; false sets no cache-control header at all.
+export type SendCacheOption = 'public' | 'private' | false
+
+export type SendOptions = {
+  cache?: SendCacheOption
+}
+
+function applyCacheHeader(res: ApiResponse, cache: SendCacheOption | undefined): void {
+  if (cache === false) return
+  if (cache === 'private') {
+    res.setHeader('cache-control', 'private, no-store')
+    return
+  }
   res.setHeader('cache-control', 's-maxage=15, stale-while-revalidate=60')
+}
+
+export function sendJson(res: ApiResponse, body: unknown, options: SendOptions = {}): void {
+  applyCacheHeader(res, options.cache)
   res.status(200).json(body)
 }
 
-export function sendText(res: ApiResponse, body: string, contentType = 'text/plain; charset=utf-8'): void {
-  res.setHeader('cache-control', 's-maxage=15, stale-while-revalidate=60')
+export function sendText(res: ApiResponse, body: string, contentType = 'text/plain; charset=utf-8', options: SendOptions = {}): void {
+  applyCacheHeader(res, options.cache)
   res.setHeader('content-type', contentType)
   res.status(200).end(body)
 }
