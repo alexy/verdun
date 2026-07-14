@@ -2,6 +2,8 @@ export type VerdunAccountTier = 'free' | 'buyer' | 'pro' | 'admin'
 
 export type VerdunAccountStatus = 'active' | 'suspended'
 
+export type VerdunIdentityProvider = 'google' | 'email'
+
 export const verdunAccountTiers = ['free', 'buyer', 'pro', 'admin'] as const satisfies readonly VerdunAccountTier[]
 
 export const verdunAccountStatuses = ['active', 'suspended'] as const satisfies readonly VerdunAccountStatus[]
@@ -11,7 +13,7 @@ export type VerdunAccount = {
   email: string
   name: string | null
   pictureUrl: string | null
-  provider: 'google'
+  provider: VerdunIdentityProvider
   providerSubject: string
   tier: VerdunAccountTier
   status: VerdunAccountStatus

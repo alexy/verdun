@@ -156,17 +156,14 @@ await expectError(() => upsertVerdunGoogleAccount(sql, {
   pictureUrl: null,
 }, []), 'google_credential_profile_incomplete')
 
-const freeWithRotatedSubject = await upsertVerdunGoogleAccount(sql, {
+await expectError(() => upsertVerdunGoogleAccount(sql, {
   sub: 'google-free-rotated',
   email: 'Free@Example.Test',
   name: 'Free User New Subject',
   pictureUrl: null,
-}, [])
-if (freeWithRotatedSubject.id !== free.id) {
-  throw new Error(`same verified Google email should preserve the Verdun account id: ${freeWithRotatedSubject.id} !== ${free.id}`)
-}
-if (freeWithRotatedSubject.providerSubject !== 'google-free-rotated') {
-  throw new Error(`same-email Google login should update the provider subject, got ${freeWithRotatedSubject.providerSubject}`)
+}, []), 'google_account_identity_conflict')
+if (sql.accountSnapshot(free.id).provider_subject !== 'google-free') {
+  throw new Error('a new Google subject must never replace an existing linked Google identity')
 }
 
 const admin = await upsertVerdunGoogleAccount(sql, {
@@ -378,40 +375,45 @@ function fakeSql() {
     },
     async query(sqlText, params) {
       const normalized = sqlText.replace(/\s+/g, ' ').trim()
-      if (normalized.startsWith('with matched_account as')) {
-        const [email, name, pictureUrl, sub, tier] = params
+      if (normalized.startsWith('select resolved.* from verdun_resolve_account_identity(')) {
+        const [sub, email, name, pictureUrl, isAdmin] = params
         const providerKey = `google:${sub}`
         const existingByProviderId = accountByProvider.get(providerKey)
         const existingByEmail = Array.from(accounts.values()).find((account) => account.email === email)
+        if (existingByProviderId && accounts.get(existingByProviderId)?.email !== email) {
+          throw new Error('verdun_identity_conflict')
+        }
+        if (existingByProviderId && existingByEmail && existingByProviderId !== existingByEmail.id) {
+          throw new Error('verdun_identity_conflict')
+        }
+        if (!existingByProviderId && existingByEmail) {
+          const providerForEmail = Array.from(accountByProvider.entries())
+            .find(([key, accountId]) => key.startsWith('google:') && accountId === existingByEmail.id)
+          if (providerForEmail && providerForEmail[0] !== providerKey) {
+            throw new Error('verdun_identity_conflict')
+          }
+        }
         const existingId = existingByProviderId ?? existingByEmail?.id
         const now = new Date().toISOString()
         const row = existingId ? accounts.get(existingId) : {
           id: `account-${nextAccount++}`,
           provider: 'google',
-          tier,
+          provider_subject: sub,
+          tier: isAdmin ? 'admin' : 'free',
           status: 'active',
           created_at: now,
           last_login_at: null,
         }
-        if (existingId && tier === 'admin') row.tier = 'admin'
-        if (row.provider_subject) accountByProvider.delete(`google:${row.provider_subject}`)
+        if (existingId && isAdmin) row.tier = 'admin'
         Object.assign(row, {
           email,
           name,
           picture_url: pictureUrl,
-          provider_subject: sub,
           updated_at: now,
         })
         accounts.set(row.id, row)
         accountByProvider.set(providerKey, row.id)
         return [row]
-      }
-
-      if (normalized.startsWith('select id from verdun_account where provider =')) {
-        const [sub, email] = params
-        return Array.from(accounts.values())
-          .filter((account) => account.provider === 'google' && (account.provider_subject === sub || account.email === email))
-          .map((account) => ({ id: account.id }))
       }
 
       if (normalized.startsWith('with inserted_session as ( insert into verdun_account_session ')) {

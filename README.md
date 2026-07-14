@@ -12,6 +12,7 @@ The first reusable boundary is now explicit:
 - Generic reusable Vue controls live under `src/components/workbench/`; external apps should consume them through `frontend/workbench-ui.ts`, shared workbench CSS through `frontend/workbench-style.css`, and the shared workbench view model/types through `frontend/workbench-view.ts`.
 - Generic compatibility-smoke loading is exposed through `scripts/public/test-loader.mjs`; external apps can reuse Verdun's TypeScript loader contract while supplying their own Vite, Vue, and icon-library resolution.
 - Generic workbench API module discovery for compatibility smokes is exposed through `scripts/public/workbench-api-modules.mjs`, so external apps do not need to hardcode Verdun's internal workbench route filenames.
+- Reusable account authentication is exposed through `@querygraph/verdun/accounts/*`: Google verification, linked Google/email identities, password-backed email accounts, one-time email link/code challenges, account sessions, and secure session cookies. Transactional delivery remains available through `@querygraph/verdun/email`.
 - External deploy-check profile modules can validate their app-owned metadata through `scripts/public/deploy-profile-contract.mjs` before opting into Verdun's public deployed-check entrypoint.
 - The bundled default app is now a neutral `demo` instance at `/demo/`; it proves the reusable workbench frontend/API/deploy contract without making any product app core behavior.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`, exposed to external apps through `db/public/workbench-migrations.mjs`; app compatibility tables and views belong in external app packages.
@@ -64,6 +65,31 @@ npm run check:deployed -- --require-database
 ```
 
 `check:deployed` validates the deploy-profile base path, static snapshot, generic workbench records/status/health APIs, and profile-specific readiness hooks when present. Add `--require-database` after configuring external Postgres to prove the deployed API reports writable `database` persistence with enough loaded records, source runs, and query plans. For a local preview server started with `npm run prod:app`, use `npm run check:preview`; that runs the same route/static-snapshot checks without requiring Vercel API routes.
+
+## Accounts and email authentication
+
+External apps can combine `@querygraph/verdun/accounts/email-auth` with the existing account store, cookie helpers, Google credential verifier, and transactional email transport. Apply every path exported by `@querygraph/verdun/db/public/account-migrations`; the `0.2.0` manifest adds the linked-identity, authentication-challenge, and rate-limit tables used by email authentication.
+
+Email challenges support three purposes:
+
+- `verify_email` registers an email/password identity after the user proves control of the address.
+- `passwordless_login` signs an existing active account in without a password.
+- `password_reset` verifies the address, replaces the password, and revokes the account's earlier sessions.
+
+`requestVerdunEmailChallenge` creates one challenge containing both a one-time link token and a six-digit code. Deliver it with `deliverVerdunEmailChallenge` and an `EmailSender` from `@querygraph/verdun/email`, then pass either proof to `completeVerdunEmailChallenge`; successful completion consumes the challenge and returns the account plus a new session token. Links put their secret in the URL fragment, so the app frontend must read the fragment and submit the proof to its app-owned completion route. Request endpoints should return the same public response when a challenge is suppressed, so account existence is not disclosed.
+
+Identity linking happens only after provider verification. A verified Google identity and a completed email challenge with the same normalized verified email resolve to one Verdun account and retain both login methods. Verdun rejects a known provider subject that arrives with a different email and rejects attempts to bind one provider identity to two accounts. Apps must never call identity resolution using an unverified client-supplied email.
+
+Every email-auth call that accepts `authPepper` must receive a stable server-only secret from `VERDUN_AUTH_PEPPER`; it must be at least 32 characters and must never use a `VITE_` prefix. Production delivery should fail closed instead of using the development log sender:
+
+```sh
+VERDUN_AUTH_PEPPER=<stable-random-secret-at-least-32-characters>
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=<resend-api-key>
+EMAIL_FROM='Example App <login@example.com>'
+```
+
+`EMAIL_FROM` must use a sender accepted by the configured provider. Build challenge links from the app's trusted canonical HTTPS URL, not from an untrusted request host. See `EXTERNAL_APP.md` for the consumer flow and ownership boundary.
 
 ## Database
 

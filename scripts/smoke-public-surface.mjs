@@ -6,6 +6,10 @@ const expectedExports = {
     types: './lib/src/accounts/account-types.d.ts',
     default: './lib/src/accounts/account-types.js',
   },
+  './accounts/email-auth': {
+    types: './lib/src/accounts/email-auth.d.ts',
+    default: './lib/src/accounts/email-auth.js',
+  },
   './accounts/google': {
     types: './lib/src/accounts/google.d.ts',
     default: './lib/src/accounts/google.js',
@@ -87,6 +91,12 @@ for (const [subpath, target] of Object.entries(expectedExports)) {
 if (packageJson.scripts?.['smoke:account-store'] !== 'node scripts/smoke-account-store.mjs') {
   throw new Error('package.json must expose smoke:account-store for the public account store contract')
 }
+if (packageJson.scripts?.['smoke:email-auth'] !== 'node scripts/smoke-email-auth.mjs') {
+  throw new Error('package.json must expose smoke:email-auth for the public email auth contract')
+}
+if (packageJson.scripts?.['smoke:email-auth-postgres'] !== 'node scripts/smoke-email-auth-postgres.mjs') {
+  throw new Error('package.json must expose smoke:email-auth-postgres for real PostgreSQL auth coverage')
+}
 
 for (const forbidden of ['verdun/src/core/', 'verdun/api/core/', 'verdun/db/core/', 'verdun/scripts/core/']) {
   if (!documentedSurface.includes(forbidden)) {
@@ -99,7 +109,7 @@ if (!documentedSurface.includes('verdun_crawler::sdk')) {
 }
 
 const accountTypesSource = await readFile('src/accounts/account-types.ts', 'utf8')
-for (const expectedSymbol of ['VerdunAccountTier', 'VerdunAccountStatus', 'VerdunAccount', 'VerdunTierCapabilities', 'verdunTierCapabilities', 'verdunCapabilitiesForTier']) {
+for (const expectedSymbol of ['VerdunAccountTier', 'VerdunAccountStatus', 'VerdunIdentityProvider', 'VerdunAccount', 'VerdunTierCapabilities', 'verdunTierCapabilities', 'verdunCapabilitiesForTier']) {
   if (!accountTypesSource.includes(expectedSymbol)) {
     throw new Error(`src/accounts/account-types.ts does not export ${expectedSymbol}`)
   }
@@ -114,6 +124,13 @@ const googleSource = await readFile('src/accounts/google.ts', 'utf8')
 for (const expectedSymbol of ['GoogleIdentityProfile', 'verifyGoogleCredential']) {
   if (!googleSource.includes(expectedSymbol)) {
     throw new Error(`src/accounts/google.ts does not export ${expectedSymbol}`)
+  }
+}
+
+const emailAuthSource = await readFile('src/accounts/email-auth.ts', 'utf8')
+for (const expectedSymbol of ['requestVerdunEmailChallenge', 'deliverVerdunEmailChallenge', 'completeVerdunEmailChallenge', 'authenticateVerdunEmailPassword', 'listVerdunAccountIdentities', 'hashVerdunPassword', 'verifyVerdunPassword']) {
+  if (!emailAuthSource.includes(expectedSymbol)) {
+    throw new Error(`src/accounts/email-auth.ts does not export ${expectedSymbol}`)
   }
 }
 
@@ -132,13 +149,19 @@ for (const expectedSymbol of ['verdunAccountDatabaseUrl', 'verdunAccountSql', 'u
 }
 
 const accountMigrations = await import('../db/public/account-migrations.mjs')
-if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 1) {
+if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 2) {
   throw new Error('db/public/account-migrations.mjs must expose the reusable Verdun account migration manifest')
 }
 const accountMigrationSource = await readFile(accountMigrations.publicAccountMigrationPaths[0], 'utf8')
 for (const requiredAccountSchemaFragment of ['create table if not exists verdun_account', 'create table if not exists verdun_account_session', 'create table if not exists verdun_account_usage', 'create table if not exists verdun_account_usage_subject', "tier text not null default 'free'", "provider text not null default 'google'", "status text not null default 'active'", 'unique (provider, provider_subject)', 'references verdun_account(id) on delete cascade']) {
   if (!accountMigrationSource.includes(requiredAccountSchemaFragment)) {
     throw new Error(`Verdun account migration is missing ${requiredAccountSchemaFragment}`)
+  }
+}
+const identityMigrationSource = await readFile(accountMigrations.publicAccountMigrationPaths[1], 'utf8')
+for (const requiredIdentitySchemaFragment of ['create table if not exists verdun_account_identity', 'create table if not exists verdun_auth_challenge', 'create table if not exists verdun_auth_rate_bucket', 'verdun_issue_email_challenge', 'verdun_resolve_account_identity', 'verdun_complete_email_challenge', "provider in ('google', 'email')", 'unique (account_id, provider)']) {
+  if (!identityMigrationSource.includes(requiredIdentitySchemaFragment)) {
+    throw new Error(`Verdun multi-identity migration is missing ${requiredIdentitySchemaFragment}`)
   }
 }
 

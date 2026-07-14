@@ -16,7 +16,9 @@ The app should consume Verdun only through the public surface in `PUBLIC_SURFACE
 
 - Shared frontend controls and CSS through `@querygraph/verdun/frontend/*`.
 - Generic API helpers and local adapter types through `@querygraph/verdun/api/public/*`.
-- Generic workbench migrations through `@querygraph/verdun/db/public/workbench-migrations`.
+- Account types, Google verification, email authentication, sessions, and cookies through `@querygraph/verdun/accounts/*`.
+- Transactional email delivery through `@querygraph/verdun/email`.
+- Generic account and workbench migrations through `@querygraph/verdun/db/public/account-migrations` and `@querygraph/verdun/db/public/workbench-migrations`.
 - Deployment tooling through `@querygraph/verdun/scripts/public/check-deployed` and `@querygraph/verdun/scripts/public/deploy-profile-contract`.
 - Test/workbench module loading through `@querygraph/verdun/scripts/public/test-loader` and `@querygraph/verdun/scripts/public/workbench-api-modules`.
 - Rust crawler runtime and contracts through `verdun_crawler::sdk`.
@@ -45,9 +47,47 @@ import type { LocalWorkbenchAdapterRegistration } from '@querygraph/verdun/api/p
 
 App route handlers should use app-local wrappers around `@querygraph/verdun/api/public/http` rather than importing Verdun `api/core/*`.
 
+## Accounts and email authentication
+
+Verdun owns the provider-neutral account, linked-identity, challenge, rate-limit, and session primitives. The external app owns its sign-in UI, API route shapes, canonical completion URL, user-facing error copy, and any product-specific authorization after sign-in. Consume only the published exports:
+
+```ts
+import {
+  completeVerdunEmailChallenge,
+  deliverVerdunEmailChallenge,
+  requestVerdunEmailChallenge,
+} from '@querygraph/verdun/accounts/email-auth'
+import { verdunSessionCookie } from '@querygraph/verdun/accounts/http'
+import { getEmailSender } from '@querygraph/verdun/email'
+```
+
+Apply all paths from `@querygraph/verdun/db/public/account-migrations` before enabling these routes. Pass the same server-only `VERDUN_AUTH_PEPPER` value to every Verdun email-auth operation; it must be at least 32 characters. Do not expose it to browser code or give it a `VITE_` prefix.
+
+For a link-or-code sign-in flow:
+
+1. The app accepts and normalizes an email, applies any app-level abuse controls, and calls `requestVerdunEmailChallenge` with `purpose: 'passwordless_login'`, a trusted nonempty request-IP abuse key, and `authPepper: process.env.VERDUN_AUTH_PEPPER`.
+2. When a challenge is returned, the app sends it with `deliverVerdunEmailChallenge`, `getEmailSender()`, a trusted canonical `appUrl`, and the app name. The message contains both a six-digit code and one-time link. The app returns the same generic response when Verdun suppresses a challenge for an ineligible address.
+3. The frontend submits the challenge ID and either `{ kind: 'code', code }` or `{ kind: 'link', token }` to an app-owned completion route. Magic-link credentials are in the URL fragment rather than the query string, so the frontend must read and remove the fragment before submitting it.
+4. The server calls `completeVerdunEmailChallenge` with the same purpose and pepper, sets the returned session token with `verdunSessionCookie`, and discards the raw proof. A proof can succeed only once.
+
+Use `purpose: 'verify_email'` plus the proposed password for email/password registration. Use `purpose: 'password_reset'` plus the replacement password at completion for reset; successful reset revokes earlier sessions. `authenticateVerdunEmailPassword` handles subsequent password sign-in. Periodically call `deleteExpiredVerdunAuthArtifacts` from an app-owned maintenance job.
+
+Google and email identities may coexist on one account. Verdun links a newly verified identity to an existing account only when both providers assert the same normalized verified email. A provider-subject/email mismatch or an identity already attached elsewhere fails as an identity conflict. Verify Google credentials with Verdun and complete the email challenge before resolving either identity; never trust an email supplied directly by the browser as proof.
+
+Development may use Verdun's masked log sender. Production should require real delivery and a provider-approved sender:
+
+```sh
+VERDUN_AUTH_PEPPER=<stable-random-secret-at-least-32-characters>
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=<resend-api-key>
+EMAIL_FROM='Example App <login@example.com>'
+```
+
+For production, force `EMAIL_PROVIDER=resend`; without that setting, `getEmailSender()` intentionally falls back to log-only delivery when no API key exists. Keep the canonical completion URL in app configuration rather than deriving it from a tenant or inbound `Host` header.
+
 ## Database
 
-Use `@querygraph/verdun/db/public/workbench-migrations` for the reusable workbench schema. App compatibility tables or views belong under the app package and should be selected by the app's deploy profile.
+Use `@querygraph/verdun/db/public/account-migrations` for reusable accounts, identities, authentication challenges, sessions, and usage, and `@querygraph/verdun/db/public/workbench-migrations` for the reusable workbench schema. App compatibility tables or views belong under the app package and should be selected by the app's deploy profile.
 
 The default reload path should produce generic workbench SQL for:
 

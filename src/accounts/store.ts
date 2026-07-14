@@ -6,6 +6,7 @@ import {
   type VerdunAccount,
   type VerdunAccountStatus,
   type VerdunAccountTier,
+  type VerdunIdentityProvider,
   type VerdunTierCapabilities,
   type VerdunUsageWindow,
 } from './account-types.js'
@@ -40,7 +41,7 @@ export type VerdunAccountRow = {
   email: string
   name: string | null
   picture_url: string | null
-  provider: 'google'
+  provider: VerdunIdentityProvider
   provider_subject: string
   tier: VerdunAccountTier
   status: 'active' | 'suspended'
@@ -80,54 +81,33 @@ export async function upsertVerdunGoogleAccount(
   const normalizedSubject = profile.sub.trim()
   const normalizedEmail = profile.email.trim().toLowerCase()
   if (!normalizedSubject || !normalizedEmail) throw new Error('google_credential_profile_incomplete')
-  const identityRows = await sql.query(
-    `select id
-     from verdun_account
-     where provider = 'google'
-       and (provider_subject = $1 or email = $2)`,
-    [normalizedSubject, normalizedEmail],
-  ) as Array<{ id: string }>
-  if (new Set(identityRows.map((row) => row.id)).size > 1) {
-    throw new Error('google_account_identity_conflict')
+  try {
+    const rows = await sql.query(
+      `select resolved.*
+       from verdun_resolve_account_identity(
+         'google',
+         $1,
+         $2,
+         $3,
+         $4,
+         $5
+       ) as resolved`,
+      [
+        normalizedSubject,
+        normalizedEmail,
+        profile.name,
+        profile.pictureUrl,
+        admins.has(normalizedEmail),
+      ],
+    ) as VerdunAccountRow[]
+    if (!rows[0]) throw new Error('google_account_identity_conflict')
+    return verdunAccountFromRow(rows[0])
+  } catch (error) {
+    if (String(error instanceof Error ? error.message : error).includes('verdun_identity_conflict')) {
+      throw new Error('google_account_identity_conflict')
+    }
+    throw error
   }
-
-  const defaultTier: VerdunAccountTier = admins.has(normalizedEmail) ? 'admin' : 'free'
-  const rows = await sql.query(
-    `with matched_account as (
-       select id
-       from verdun_account
-       where provider = 'google'
-         and (provider_subject = $4 or email = $1)
-       order by case when provider_subject = $4 then 0 else 1 end
-       limit 1
-     ),
-     updated_account as (
-       update verdun_account
-       set
-         email = $1,
-         name = $2,
-         picture_url = $3,
-         provider_subject = $4,
-         tier = case
-           when $5 = 'admin' then 'admin'
-           else verdun_account.tier
-         end,
-         updated_at = now()
-       where id = (select id from matched_account)
-       returning *
-     ),
-     inserted_account as (
-       insert into verdun_account (email, name, picture_url, provider, provider_subject, tier)
-       select $1, $2, $3, 'google', $4, $5
-       where not exists (select 1 from updated_account)
-       returning *
-     )
-     select * from updated_account
-     union all
-     select * from inserted_account`,
-    [normalizedEmail, profile.name, profile.pictureUrl, normalizedSubject, defaultTier],
-  ) as VerdunAccountRow[]
-  return verdunAccountFromRow(rows[0])
 }
 
 export async function createVerdunAccountSession(

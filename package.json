@@ -1,7 +1,7 @@
 {
   "name": "@querygraph/verdun",
   "private": false,
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -16,6 +16,10 @@
     "./accounts/account-types": {
       "types": "./lib/src/accounts/account-types.d.ts",
       "default": "./lib/src/accounts/account-types.js"
+    },
+    "./accounts/email-auth": {
+      "types": "./lib/src/accounts/email-auth.d.ts",
+      "default": "./lib/src/accounts/email-auth.js"
     },
     "./accounts/google": {
       "types": "./lib/src/accounts/google.d.ts",
@@ -71,6 +75,8 @@
     "scripts/deploy-workbench-database.mjs",
     "scripts/workbench-apply-sql.mjs",
     "scripts/smoke-account-store.mjs",
+    "scripts/smoke-email-auth.mjs",
+    "scripts/smoke-email-auth-postgres.mjs",
     "scripts/smoke-generic-loader-sql.mjs",
     "src/accounts",
     "src/components/workbench",
@@ -109,6 +115,8 @@
     "smoke:demo-workbench": "node scripts/smoke-demo-workbench.mjs",
     "smoke:generic-loader": "node scripts/smoke-generic-loader-sql.mjs",
     "smoke:account-store": "node scripts/smoke-account-store.mjs",
+    "smoke:email-auth": "node scripts/smoke-email-auth.mjs",
+    "smoke:email-auth-postgres": "node scripts/smoke-email-auth-postgres.mjs",
     "smoke:workbench": "node scripts/smoke-workbench-api.mjs"
   },
   "dependencies": {
@@ -123,6 +131,7 @@
     "@types/node": "^24.12.3",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
+    "pg": "^8.22.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
     "vue": "3.5.38",

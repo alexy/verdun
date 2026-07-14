@@ -2,6 +2,13 @@
 
 Entries are keyed by package version from `0.1.1` onward; the dated entries under the `0.1.0` heading predate version-keyed releases.
 
+## 0.2.0 (2026-07-14)
+
+- Added `@querygraph/verdun/accounts/email-auth` for email/password registration and sign-in, passwordless sign-in, password reset, and one-time verification by either a link or six-digit code. Challenges are short-lived, attempt-limited, rate-limited, superseded after reissue, and consumed atomically with session creation.
+- Added linked Google and email identities. A newly verified provider identity joins the existing account only when its normalized verified email matches; an existing provider subject presented with a different email, or two accounts competing for one identity, is rejected as an identity conflict.
+- Added the `0005_multi_identity_auth.sql` account migration to the public account-migration manifest, including linked identities, hashed authentication challenges, and hashed rate-limit buckets.
+- Email-auth consumers must supply a stable `VERDUN_AUTH_PEPPER` of at least 32 characters. Production email delivery should set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, and a verified `EMAIL_FROM`; the automatic log sender remains a development fallback only.
+
 ## 0.1.1 (2026-07-03)
 
 - Licensed the package under MIT (`LICENSE`, `package.json`, `Cargo.toml`).
