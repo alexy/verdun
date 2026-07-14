@@ -16,7 +16,7 @@ The app should consume Verdun only through the public surface in `PUBLIC_SURFACE
 
 - Shared frontend controls and CSS through `@querygraph/verdun/frontend/*`.
 - Generic API helpers and local adapter types through `@querygraph/verdun/api/public/*`.
-- Account types, Google verification, email authentication, sessions, and cookies through `@querygraph/verdun/accounts/*`.
+- Account types, Google verification, email authentication, sessions, cookies, application/family plans, subscriptions, and plan-transition confirmations through `@querygraph/verdun/accounts/*`.
 - Transactional email delivery through `@querygraph/verdun/email`.
 - Generic account and workbench migrations through `@querygraph/verdun/db/public/account-migrations` and `@querygraph/verdun/db/public/workbench-migrations`.
 - Deployment tooling through `@querygraph/verdun/scripts/public/check-deployed` and `@querygraph/verdun/scripts/public/deploy-profile-contract`.
@@ -85,9 +85,23 @@ EMAIL_FROM='Example App <login@example.com>'
 
 For production, force `EMAIL_PROVIDER=resend`; without that setting, `getEmailSender()` intentionally falls back to log-only delivery when no API key exists. Keep the canonical completion URL in app configuration rather than deriving it from a tenant or inbound `Host` header.
 
+## Plans and subscriptions
+
+Verdun's plan contract scopes commercial state by `application_key` and `family_key`. An account may therefore hold independent plans in several products, or in several plan families within one product. Consume catalog and subscription types from `@querygraph/verdun/accounts/plan-types`, SQL operations from `@querygraph/verdun/accounts/plan-store`, and confirmation delivery from `@querygraph/verdun/accounts/plan-email`.
+
+Use a separate family whenever the same person can hold two kinds of commercial access at once. For example, Great House can register one application with a `consumer` family for ordinary property-search access and a `broker` family for listing and lead-management access. A broker subscription must not overwrite that account's consumer subscription. Great House continues to define inspection, Street View, listing, seat, and lead entitlements; Verdun stores the two catalogs and subscriptions without interpreting those app-specific keys. Curtail uses the same machinery with one `user` family and app-owned domain and short-link limits.
+
+Apply every path from `@querygraph/verdun/db/public/account-migrations` before using the plan store. Register the application, its families, plans, and provider prices from trusted app configuration. Resolve entitlement checks from the current application/family subscription and its plan record; do not accept an application, family, account, plan, or entitlement object from the browser as an ownership override.
+
+The store supports both manual assignments and provider-backed subscriptions. Provider webhook routes remain app-owned: verify the provider signature, resolve trusted customer/price/subscription identifiers, and pass the provider event ID and creation timestamp to the plan store. The shared store records provider events for idempotency and ignores stale updates that arrive after a newer event.
+
+Every effective plan change records a transition with claimable confirmation-delivery state. Deliver confirmations through `@querygraph/verdun/accounts/plan-email`; the helper reads the verified account email and registered catalog names, while the app supplies the sender and an optional trusted management URL. It claims before sending and marks the transition sent, suppressed, or failed so concurrent calls do not duplicate a completed delivery.
+
+`verdun_account.tier` remains unchanged for existing consumers. New products should use application/family subscriptions for commercial access and keep app authorization roles separate; a payment event must not implicitly grant or revoke administrative authority.
+
 ## Database
 
-Use `@querygraph/verdun/db/public/account-migrations` for reusable accounts, identities, authentication challenges, sessions, and usage, and `@querygraph/verdun/db/public/workbench-migrations` for the reusable workbench schema. App compatibility tables or views belong under the app package and should be selected by the app's deploy profile.
+Use `@querygraph/verdun/db/public/account-migrations` for reusable accounts, identities, authentication challenges, sessions, usage, application/family plans, subscriptions, provider-event ordering, and transition-delivery state, and `@querygraph/verdun/db/public/workbench-migrations` for the reusable workbench schema. App compatibility tables or views belong under the app package and should be selected by the app's deploy profile.
 
 The default reload path should produce generic workbench SQL for:
 

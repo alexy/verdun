@@ -1,7 +1,7 @@
 {
   "name": "@querygraph/verdun",
   "private": false,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -28,6 +28,18 @@
     "./accounts/http": {
       "types": "./lib/src/accounts/http.d.ts",
       "default": "./lib/src/accounts/http.js"
+    },
+    "./accounts/plan-email": {
+      "types": "./lib/src/accounts/plan-email.d.ts",
+      "default": "./lib/src/accounts/plan-email.js"
+    },
+    "./accounts/plan-store": {
+      "types": "./lib/src/accounts/plan-store.d.ts",
+      "default": "./lib/src/accounts/plan-store.js"
+    },
+    "./accounts/plan-types": {
+      "types": "./lib/src/accounts/plan-types.d.ts",
+      "default": "./lib/src/accounts/plan-types.js"
     },
     "./accounts/store": {
       "types": "./lib/src/accounts/store.d.ts",
@@ -78,6 +90,7 @@
     "scripts/smoke-email-auth.mjs",
     "scripts/smoke-email-auth-postgres.mjs",
     "scripts/smoke-generic-loader-sql.mjs",
+    "scripts/smoke-plans.mjs",
     "src/accounts",
     "src/components/workbench",
     "src/composables",
@@ -117,6 +130,7 @@
     "smoke:account-store": "node scripts/smoke-account-store.mjs",
     "smoke:email-auth": "node scripts/smoke-email-auth.mjs",
     "smoke:email-auth-postgres": "node scripts/smoke-email-auth-postgres.mjs",
+    "smoke:plans": "node scripts/smoke-plans.mjs",
     "smoke:workbench": "node scripts/smoke-workbench-api.mjs"
   },
   "dependencies": {

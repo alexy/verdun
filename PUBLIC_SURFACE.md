@@ -15,12 +15,15 @@ These package subpaths are the supported external app surface:
 - `@querygraph/verdun/accounts/email-auth`: email/password registration and sign-in, one-time link-or-code verification, passwordless sign-in, password reset, rate limiting, and verified-email identity linking.
 - `@querygraph/verdun/accounts/google`: Google Identity Services credential verification for Google account bootstrap.
 - `@querygraph/verdun/accounts/http`: Verdun account session cookie helpers and account-tier parsing.
+- `@querygraph/verdun/accounts/plan-email`: application-owned plan-transition confirmation delivery through Verdun's transactional email transport, backed by claimable transition delivery state.
+- `@querygraph/verdun/accounts/plan-store`: SQL-backed application and plan-family catalog operations, prices and billing customers, manual and provider subscriptions, ordered/idempotent provider events, effective-plan lookup, transition history, and transition-delivery claims.
+- `@querygraph/verdun/accounts/plan-types`: reusable application, plan-family, plan, price, billing-customer, subscription, provider-event, transition, entitlement, and delivery-state types.
 - `@querygraph/verdun/accounts/store`: SQL-backed account, linked-identity, session, usage, and bootstrap-admin store operations, plus the `VerdunAccountRow` SQL row type consumed by `verdunAccountFromRow`.
 - `@querygraph/verdun/api/public/http`: reusable Vercel-style request/response helpers. `sendJson`/`sendText` take an optional `{ cache: 'public' | 'private' | false }` option — the default keeps the shared-cache header (`s-maxage=15, stale-while-revalidate=60`), `'private'` sends `private, no-store` for authenticated responses, and `false` sets no cache-control header.
 - `@querygraph/verdun/api/public/workbench-local-adapter`: local fallback adapter registration types.
 - `@querygraph/verdun/email`: provider-agnostic transactional email transport (`EmailSender`, Resend adapter, log fallback, `getEmailSender`/`emailConfigured`/`emailFrom`/`maskEmailAddress`). App templates/recipients stay in the app. `getEmailSender()` throws when `EMAIL_PROVIDER=resend` is forced without `RESEND_API_KEY` (unforced auto-detection still falls back to the log sender); the log sender masks recipient addresses; Resend sends abort after 15 seconds.
 - `@querygraph/verdun/svix`: dependency-free Svix webhook signature verification (e.g. for Resend webhooks), with replay protection via a timestamp tolerance window (default 300s; override with `verifySvixSignature(..., { toleranceSeconds })`).
-- `@querygraph/verdun/db/public/account-migrations`: reusable Verdun account, linked-identity, email-auth, session, and usage migration manifest.
+- `@querygraph/verdun/db/public/account-migrations`: reusable Verdun account, linked-identity, email-auth, session, usage, application/plan-family catalog, subscription, provider-event, and plan-transition migration manifest.
 - `@querygraph/verdun/db/public/workbench-migrations`: generic workbench migration manifest.
 - `@querygraph/verdun/scripts/public/check-deployed`: deploy/readiness checker entrypoint for external app wrappers.
 - `@querygraph/verdun/scripts/public/database-reload-handoff`: redacted database reload handoff writer plus shared cargo export and Node SQL apply command constructors for generic and app-specific loaders.
@@ -32,6 +35,8 @@ These package subpaths are the supported external app surface:
 - `@querygraph/verdun/package.json`: package metadata for tools that need to locate the installed Verdun package root.
 
 The implementation directories behind those exports are still Verdun-owned. Apps should not import `@querygraph/verdun/src/core/`, `@querygraph/verdun/api/core/`, `@querygraph/verdun/db/core/`, `@querygraph/verdun/scripts/core/`, or raw component files directly.
+
+The legacy `verdun_account.tier` field remains part of the account compatibility contract for existing consumers. New commercial state should use application- and family-scoped plans and subscriptions instead, so one account can hold independent plans across products and plan families. Treat application authorization roles as app-owned state rather than inferring administrative authority from a paid plan.
 
 ## Rust Crawler SDK
 

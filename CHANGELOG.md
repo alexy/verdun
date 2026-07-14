@@ -2,6 +2,13 @@
 
 Entries are keyed by package version from `0.1.1` onward; the dated entries under the `0.1.0` heading predate version-keyed releases.
 
+## 0.3.0 (2026-07-14)
+
+- Added `@querygraph/verdun/accounts/plan-types`, `@querygraph/verdun/accounts/plan-store`, and `@querygraph/verdun/accounts/plan-email` for application/family plan catalogs, prices and billing customers, manual and provider subscriptions, effective-plan lookup, transition history, and claimable confirmation delivery.
+- Added `0006_application_plans.sql` to the public account-migration manifest. It stores application-scoped plan families and entitlements, provider-event idempotency and ordering, one subscription per account/application/family, and durable plan-transition delivery state.
+- Kept `verdun_account.tier` unchanged as an existing-consumer compatibility surface. New products can hold independent plans across applications and plan families without coupling paid-plan changes to app-owned authorization roles.
+- Added `smoke:plans` and expanded the public-surface smoke to cover the plan exports, migration manifest, schema contract, manual assignment transaction, default resolution, provider event ordering, and confirmation delivery.
+
 ## 0.2.0 (2026-07-14)
 
 - Added `@querygraph/verdun/accounts/email-auth` for email/password registration and sign-in, passwordless sign-in, password reset, and one-time verification by either a link or six-digit code. Challenges are short-lived, attempt-limited, rate-limited, superseded after reissue, and consumed atomically with session creation.

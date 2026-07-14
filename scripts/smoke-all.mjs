@@ -16,6 +16,7 @@ const steps = [
   ['npm', ['run', 'smoke:account-store']],
   ['npm', ['run', 'smoke:email-auth']],
   ['npm', ['run', 'smoke:email-auth-postgres']],
+  ['npm', ['run', 'smoke:plans']],
   ['npm', ['run', 'smoke:api-http']],
   ['npm', ['run', 'smoke:crawler-instance']],
   ['npm', ['run', 'smoke:workbench']],

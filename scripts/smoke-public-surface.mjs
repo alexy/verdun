@@ -18,6 +18,18 @@ const expectedExports = {
     types: './lib/src/accounts/http.d.ts',
     default: './lib/src/accounts/http.js',
   },
+  './accounts/plan-email': {
+    types: './lib/src/accounts/plan-email.d.ts',
+    default: './lib/src/accounts/plan-email.js',
+  },
+  './accounts/plan-store': {
+    types: './lib/src/accounts/plan-store.d.ts',
+    default: './lib/src/accounts/plan-store.js',
+  },
+  './accounts/plan-types': {
+    types: './lib/src/accounts/plan-types.d.ts',
+    default: './lib/src/accounts/plan-types.js',
+  },
   './accounts/store': {
     types: './lib/src/accounts/store.d.ts',
     default: './lib/src/accounts/store.js',
@@ -97,6 +109,9 @@ if (packageJson.scripts?.['smoke:email-auth'] !== 'node scripts/smoke-email-auth
 if (packageJson.scripts?.['smoke:email-auth-postgres'] !== 'node scripts/smoke-email-auth-postgres.mjs') {
   throw new Error('package.json must expose smoke:email-auth-postgres for real PostgreSQL auth coverage')
 }
+if (packageJson.scripts?.['smoke:plans'] !== 'node scripts/smoke-plans.mjs') {
+  throw new Error('package.json must expose smoke:plans for the public application-plan contract')
+}
 
 for (const forbidden of ['verdun/src/core/', 'verdun/api/core/', 'verdun/db/core/', 'verdun/scripts/core/']) {
   if (!documentedSurface.includes(forbidden)) {
@@ -148,8 +163,63 @@ for (const expectedSymbol of ['verdunAccountDatabaseUrl', 'verdunAccountSql', 'u
   }
 }
 
+const planTypesSource = await readFile('src/accounts/plan-types.ts', 'utf8')
+for (const expectedSymbol of [
+  'VerdunApplication',
+  'VerdunPlanFamily',
+  'VerdunPlan',
+  'VerdunPlanPrice',
+  'VerdunBillingCustomer',
+  'VerdunSubscription',
+  'VerdunSubscriptionStatus',
+  'VerdunPlanTransition',
+  'VerdunPlanTransitionDeliveryState',
+  'VerdunResolvedPlan',
+  'normalizeVerdunPlanIdentifier',
+  'normalizeVerdunPlanDisplayName',
+  'normalizeVerdunPlanDescription',
+  'normalizeVerdunPlanProviderId',
+  'normalizeVerdunPlanCurrency',
+  'normalizeVerdunPlanJsonObject',
+  'normalizeVerdunPlanDate',
+  'isVerdunSubscriptionStatus',
+  'isVerdunPlanTransitionDeliveryState',
+]) {
+  if (!planTypesSource.includes(expectedSymbol)) {
+    throw new Error(`src/accounts/plan-types.ts does not export ${expectedSymbol}`)
+  }
+}
+
+const planStoreSource = await readFile('src/accounts/plan-store.ts', 'utf8')
+for (const expectedSymbol of [
+  'upsertVerdunApplication',
+  'upsertVerdunPlanFamily',
+  'upsertVerdunPlan',
+  'upsertVerdunPlanPrice',
+  'upsertVerdunBillingCustomer',
+  'verdunBillingCustomerByProviderId',
+  'assignVerdunManualPlan',
+  'upsertVerdunProviderSubscription',
+  'resolveVerdunAccountPlan',
+  'verdunPlanTransition',
+  'listVerdunPlanTransitions',
+  'claimVerdunPlanTransitionConfirmation',
+  'markVerdunPlanTransitionConfirmation',
+]) {
+  if (!planStoreSource.includes(expectedSymbol)) {
+    throw new Error(`src/accounts/plan-store.ts does not export ${expectedSymbol}`)
+  }
+}
+
+const planEmailSource = await readFile('src/accounts/plan-email.ts', 'utf8')
+for (const expectedSymbol of ['verdunPlanTransitionEmail', 'deliverVerdunPlanTransitionConfirmation']) {
+  if (!planEmailSource.includes(expectedSymbol)) {
+    throw new Error(`src/accounts/plan-email.ts does not export ${expectedSymbol}`)
+  }
+}
+
 const accountMigrations = await import('../db/public/account-migrations.mjs')
-if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 2) {
+if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 3) {
   throw new Error('db/public/account-migrations.mjs must expose the reusable Verdun account migration manifest')
 }
 const accountMigrationSource = await readFile(accountMigrations.publicAccountMigrationPaths[0], 'utf8')
@@ -162,6 +232,33 @@ const identityMigrationSource = await readFile(accountMigrations.publicAccountMi
 for (const requiredIdentitySchemaFragment of ['create table if not exists verdun_account_identity', 'create table if not exists verdun_auth_challenge', 'create table if not exists verdun_auth_rate_bucket', 'verdun_issue_email_challenge', 'verdun_resolve_account_identity', 'verdun_complete_email_challenge', "provider in ('google', 'email')", 'unique (account_id, provider)']) {
   if (!identityMigrationSource.includes(requiredIdentitySchemaFragment)) {
     throw new Error(`Verdun multi-identity migration is missing ${requiredIdentitySchemaFragment}`)
+  }
+}
+const planMigrationPath = accountMigrations.publicAccountMigrationPaths[2]
+if (!planMigrationPath.endsWith('0006_application_plans.sql')) {
+  throw new Error(`Verdun application-plan migration should be 0006_application_plans.sql, found ${planMigrationPath}`)
+}
+const planMigrationSource = await readFile(planMigrationPath, 'utf8')
+for (const requiredPlanSchemaFragment of [
+  'legacy verdun_account.tier',
+  'create table if not exists verdun_application',
+  'create table if not exists verdun_plan_family',
+  'create table if not exists verdun_plan (',
+  'create table if not exists verdun_plan_price',
+  'create table if not exists verdun_billing_customer',
+  'create table if not exists verdun_subscription (',
+  'create table if not exists verdun_subscription_provider_event',
+  'create table if not exists verdun_plan_transition',
+  'entitlements jsonb not null',
+  "source text not null check (source in ('manual', 'provider'))",
+  'unique (application_key, account_id, family_key)',
+  "outcome in ('processing', 'applied', 'stale', 'failed')",
+  'confirmation_delivery_state',
+  'confirmation_delivery_attempts',
+  'verdun_plan_transition_delivery_idx',
+]) {
+  if (!planMigrationSource.includes(requiredPlanSchemaFragment)) {
+    throw new Error(`Verdun application-plan migration is missing ${requiredPlanSchemaFragment}`)
   }
 }
 

@@ -12,7 +12,7 @@ The first reusable boundary is now explicit:
 - Generic reusable Vue controls live under `src/components/workbench/`; external apps should consume them through `frontend/workbench-ui.ts`, shared workbench CSS through `frontend/workbench-style.css`, and the shared workbench view model/types through `frontend/workbench-view.ts`.
 - Generic compatibility-smoke loading is exposed through `scripts/public/test-loader.mjs`; external apps can reuse Verdun's TypeScript loader contract while supplying their own Vite, Vue, and icon-library resolution.
 - Generic workbench API module discovery for compatibility smokes is exposed through `scripts/public/workbench-api-modules.mjs`, so external apps do not need to hardcode Verdun's internal workbench route filenames.
-- Reusable account authentication is exposed through `@querygraph/verdun/accounts/*`: Google verification, linked Google/email identities, password-backed email accounts, one-time email link/code challenges, account sessions, and secure session cookies. Transactional delivery remains available through `@querygraph/verdun/email`.
+- Reusable account authentication is exposed through `@querygraph/verdun/accounts/*`: Google verification, linked Google/email identities, password-backed email accounts, one-time email link/code challenges, account sessions, and secure session cookies. The same public namespace now exposes application/family plan catalogs, manual and provider subscriptions, transition history, and transition confirmations. Transactional delivery remains available through `@querygraph/verdun/email`.
 - External deploy-check profile modules can validate their app-owned metadata through `scripts/public/deploy-profile-contract.mjs` before opting into Verdun's public deployed-check entrypoint.
 - The bundled default app is now a neutral `demo` instance at `/demo/`; it proves the reusable workbench frontend/API/deploy contract without making any product app core behavior.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`, exposed to external apps through `db/public/workbench-migrations.mjs`; app compatibility tables and views belong in external app packages.
@@ -68,7 +68,7 @@ npm run check:deployed -- --require-database
 
 ## Accounts and email authentication
 
-External apps can combine `@querygraph/verdun/accounts/email-auth` with the existing account store, cookie helpers, Google credential verifier, and transactional email transport. Apply every path exported by `@querygraph/verdun/db/public/account-migrations`; the `0.2.0` manifest adds the linked-identity, authentication-challenge, and rate-limit tables used by email authentication.
+External apps can combine `@querygraph/verdun/accounts/email-auth` with the existing account store, cookie helpers, Google credential verifier, and transactional email transport. Apply every path exported by `@querygraph/verdun/db/public/account-migrations`; `0.2.0` added linked-identity, authentication-challenge, and rate-limit state, while `0.3.0` adds application/family plans, subscriptions, provider events, and plan transitions.
 
 Email challenges support three purposes:
 
@@ -91,9 +91,13 @@ EMAIL_FROM='Example App <login@example.com>'
 
 `EMAIL_FROM` must use a sender accepted by the configured provider. Build challenge links from the app's trusted canonical HTTPS URL, not from an untrusted request host. See `EXTERNAL_APP.md` for the consumer flow and ownership boundary.
 
+Application-scoped plans are exported through `@querygraph/verdun/accounts/plan-types` and `@querygraph/verdun/accounts/plan-store`. Catalog records separate applications, plan families, plans, prices, and JSON entitlements; subscription records support manual assignment or trusted provider events with idempotent event IDs and stale-event ordering. Each change records a plan transition whose delivery state can be claimed and completed through `@querygraph/verdun/accounts/plan-email`.
+
+The legacy `verdun_account.tier` field remains available for compatibility. New products should derive commercial access from the relevant application/family subscription and keep application authorization roles separate from paid-plan state. Run `npm run smoke:plans` for the focused contract smoke.
+
 ## Database
 
-Apply migrations through the guarded helpers rather than applying every SQL file by directory. Verdun's reusable database contract lives in `db/migrations/0003_generic_workbench_tables.sql` and is exposed to external apps through `db/public/workbench-migrations.mjs`; product compatibility tables and view overlays belong in app-owned migrations selected by the app deploy profile.
+Apply migrations through the guarded helpers rather than applying every SQL file by directory. Reusable account and plan migrations are exposed through `db/public/account-migrations.mjs`. Verdun's reusable workbench contract lives in `db/migrations/0003_generic_workbench_tables.sql` and is exposed to external apps through `db/public/workbench-migrations.mjs`; product compatibility tables and view overlays belong in app-owned migrations selected by the app deploy profile.
 
 See `DATABASE_RELOAD.md` for the external-crawler-to-Vercel/Neon runbook, including generic workbench reloads, app-specific loaders, redacted handoff artifacts, and verification commands.
 
