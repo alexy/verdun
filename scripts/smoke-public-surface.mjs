@@ -34,6 +34,14 @@ const expectedExports = {
     types: './lib/src/accounts/store.d.ts',
     default: './lib/src/accounts/store.js',
   },
+  './accounts/workspaces': {
+    types: './lib/src/accounts/workspaces.d.ts',
+    default: './lib/src/accounts/workspaces.js',
+  },
+  './domains/vercel': {
+    types: './lib/src/domains/vercel.d.ts',
+    default: './lib/src/domains/vercel.js',
+  },
   './api/public/http': {
     types: './lib/api/public/http.d.ts',
     default: './lib/api/public/http.js',
@@ -111,6 +119,9 @@ if (packageJson.scripts?.['smoke:email-auth-postgres'] !== 'node scripts/smoke-e
 }
 if (packageJson.scripts?.['smoke:plans'] !== 'node scripts/smoke-plans.mjs') {
   throw new Error('package.json must expose smoke:plans for the public application-plan contract')
+}
+if (packageJson.scripts?.['smoke:vercel-domains'] !== 'node scripts/smoke-vercel-domains.mjs') {
+  throw new Error('package.json must expose smoke:vercel-domains for the public Vercel project-domain contract')
 }
 
 for (const forbidden of ['verdun/src/core/', 'verdun/api/core/', 'verdun/db/core/', 'verdun/scripts/core/']) {
@@ -218,8 +229,21 @@ for (const expectedSymbol of ['verdunPlanTransitionEmail', 'deliverVerdunPlanTra
   }
 }
 
+const vercelDomainsSource = await readFile('src/domains/vercel.ts', 'utf8')
+for (const expectedSymbol of [
+  'VercelProjectDomainsConfig',
+  'VercelProjectDomain',
+  'VercelDomainSnapshot',
+  'VercelProjectDomainsError',
+  'VercelProjectDomains',
+]) {
+  if (!vercelDomainsSource.includes(expectedSymbol)) {
+    throw new Error(`src/domains/vercel.ts does not export ${expectedSymbol}`)
+  }
+}
+
 const accountMigrations = await import('../db/public/account-migrations.mjs')
-if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 3) {
+if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 4) {
   throw new Error('db/public/account-migrations.mjs must expose the reusable Verdun account migration manifest')
 }
 const accountMigrationSource = await readFile(accountMigrations.publicAccountMigrationPaths[0], 'utf8')
@@ -237,6 +261,10 @@ for (const requiredIdentitySchemaFragment of ['create table if not exists verdun
 const planMigrationPath = accountMigrations.publicAccountMigrationPaths[2]
 if (!planMigrationPath.endsWith('0006_application_plans.sql')) {
   throw new Error(`Verdun application-plan migration should be 0006_application_plans.sql, found ${planMigrationPath}`)
+}
+const workspaceMigrationPath = accountMigrations.publicAccountMigrationPaths[3]
+if (!workspaceMigrationPath.endsWith('0007_workspaces.sql')) {
+  throw new Error(`Verdun workspace migration should be 0007_workspaces.sql, found ${workspaceMigrationPath}`)
 }
 const planMigrationSource = await readFile(planMigrationPath, 'utf8')
 for (const requiredPlanSchemaFragment of [

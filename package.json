@@ -1,7 +1,7 @@
 {
   "name": "@querygraph/verdun",
   "private": false,
-  "version": "0.3.0",
+  "version": "0.5.0",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -44,6 +44,14 @@
     "./accounts/store": {
       "types": "./lib/src/accounts/store.d.ts",
       "default": "./lib/src/accounts/store.js"
+    },
+    "./accounts/workspaces": {
+      "types": "./lib/src/accounts/workspaces.d.ts",
+      "default": "./lib/src/accounts/workspaces.js"
+    },
+    "./domains/vercel": {
+      "types": "./lib/src/domains/vercel.d.ts",
+      "default": "./lib/src/domains/vercel.js"
     },
     "./api/public/http": {
       "types": "./lib/api/public/http.d.ts",
@@ -91,7 +99,9 @@
     "scripts/smoke-email-auth-postgres.mjs",
     "scripts/smoke-generic-loader-sql.mjs",
     "scripts/smoke-plans.mjs",
+    "scripts/smoke-vercel-domains.mjs",
     "src/accounts",
+    "src/domains",
     "src/components/workbench",
     "src/composables",
     "src/core",
@@ -131,6 +141,7 @@
     "smoke:email-auth": "node scripts/smoke-email-auth.mjs",
     "smoke:email-auth-postgres": "node scripts/smoke-email-auth-postgres.mjs",
     "smoke:plans": "node scripts/smoke-plans.mjs",
+    "smoke:vercel-domains": "node scripts/smoke-vercel-domains.mjs",
     "smoke:workbench": "node scripts/smoke-workbench-api.mjs"
   },
   "dependencies": {

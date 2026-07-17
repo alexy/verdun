@@ -2,6 +2,17 @@
 
 Entries are keyed by package version from `0.1.1` onward; the dated entries under the `0.1.0` heading predate version-keyed releases.
 
+## 0.5.0 (2026-07-17)
+
+- Added `@querygraph/verdun/accounts/workspaces`: application-scoped workspace ownership, generic role memberships, email-bound invitations, and authenticated invitation acceptance.
+- Added `0007_workspaces.sql` to the public account migration manifest. Applications define their own roles and permissions while reusing Verdun identity, membership, and invitation state.
+
+## 0.4.0 (2026-07-15)
+
+- Added `@querygraph/verdun/domains/vercel`, a dependency-free Vercel project-domain client with explicit configuration and fetch injection, neutral snapshots/DNS records/errors, attach/refresh/detach, and automatic cursor pagination for project-domain lists.
+- Preserved fail-closed domain safety: projects are addressed and response-checked by immutable ID; `409`/`403` conflicts never prove ownership; attach retries accept an existing domain only after an exact project-domain lookup; detach `404/not_found` is idempotent only after an independent project identity check.
+- Added `smoke:vercel-domains` for live-response-shape simulation covering recommended A/TXT/CNAME records, pending verification, conflicts, detach scope validation, response mismatch rejection, and multi-page listing.
+
 ## 0.3.0 (2026-07-14)
 
 - Added `@querygraph/verdun/accounts/plan-types`, `@querygraph/verdun/accounts/plan-store`, and `@querygraph/verdun/accounts/plan-email` for application/family plan catalogs, prices and billing customers, manual and provider subscriptions, effective-plan lookup, transition history, and claimable confirmation delivery.

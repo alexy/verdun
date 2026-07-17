@@ -13,6 +13,7 @@ The first reusable boundary is now explicit:
 - Generic compatibility-smoke loading is exposed through `scripts/public/test-loader.mjs`; external apps can reuse Verdun's TypeScript loader contract while supplying their own Vite, Vue, and icon-library resolution.
 - Generic workbench API module discovery for compatibility smokes is exposed through `scripts/public/workbench-api-modules.mjs`, so external apps do not need to hardcode Verdun's internal workbench route filenames.
 - Reusable account authentication is exposed through `@querygraph/verdun/accounts/*`: Google verification, linked Google/email identities, password-backed email accounts, one-time email link/code challenges, account sessions, and secure session cookies. The same public namespace now exposes application/family plan catalogs, manual and provider subscriptions, transition history, and transition confirmations. Transactional delivery remains available through `@querygraph/verdun/email`.
+- Reusable Vercel project-domain operations are exposed through `@querygraph/verdun/domains/vercel`. Apps inject their token, immutable project ID, team slug, and fetch implementation; Verdun returns neutral DNS/status snapshots while environment lookup and user-facing error policy stay app-owned.
 - External deploy-check profile modules can validate their app-owned metadata through `scripts/public/deploy-profile-contract.mjs` before opting into Verdun's public deployed-check entrypoint.
 - The bundled default app is now a neutral `demo` instance at `/demo/`; it proves the reusable workbench frontend/API/deploy contract without making any product app core behavior.
 - Generic database tables (`instances`, `records`, `source_runs`, `collection_plans`, `review_state`, `focuses`) and reusable `workbench_*` views live in `db/migrations/0003_generic_workbench_tables.sql`, exposed to external apps through `db/public/workbench-migrations.mjs`; app compatibility tables and views belong in external app packages.
@@ -41,6 +42,24 @@ The current core proof points are intentionally generic:
 - Generic app and instance registries that discover bundled proof registrations by convention while external apps mount their own entrypoints.
 
 Product-specific operations should be documented in product app packages. Verdun docs should describe reusable contracts and the bundled proof instance only.
+
+## Vercel project domains
+
+```ts
+import { VercelProjectDomains } from '@querygraph/verdun/domains/vercel'
+
+const domains = new VercelProjectDomains({
+  token: process.env.VERCEL_API_TOKEN ?? '',
+  projectId: process.env.VERCEL_PROJECT_ID ?? '',
+  teamSlug: process.env.VERCEL_TEAM_SLUG ?? '',
+  fetch,
+})
+
+const snapshot = await domains.attach('example.com')
+const attachedDomains = await domains.list()
+```
+
+Use the returned `trafficRecords` and `verificationRecords`; do not hard-code Vercel DNS targets. `allowExisting` is intended only for an explicit administrator retry: even then, the client accepts an attach `400` only after an exact GET proves the domain belongs to the configured immutable project ID. A detach `404/not_found` is accepted only after a separate project lookup proves that the configured project and team scope still exist.
 
 The ownership split is in place: external apps own frontend apps, domain API routes, crawler crates, deployment-check wrappers, publishing scripts, and compatibility SQL. Verdun's own default is the neutral demo. External apps consume Verdun's JS/CSS/API/DB/script public surface through package subpaths.
 

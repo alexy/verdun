@@ -17,6 +17,7 @@
     "api/core/**/*.ts",
     "api/public/**/*.ts",
     "api/workbench/local-adapter-types.ts",
-    "src/accounts/**/*.ts"
+    "src/accounts/**/*.ts",
+    "src/domains/**/*.ts"
   ]
 }

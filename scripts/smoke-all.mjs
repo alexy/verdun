@@ -13,6 +13,7 @@ const steps = [
   ['cargo', ['run', '--manifest-path', 'crawler/Cargo.toml', '--', 'verify']],
   ['npm', ['run', 'smoke:check-deployed']],
   ['npm', ['run', 'smoke:public-surface']],
+  ['npm', ['run', 'smoke:vercel-domains']],
   ['npm', ['run', 'smoke:account-store']],
   ['npm', ['run', 'smoke:email-auth']],
   ['npm', ['run', 'smoke:email-auth-postgres']],
