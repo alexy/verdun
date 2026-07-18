@@ -1,0 +1,42 @@
+{
+  "$schema": "../firstpair/publishing/book.build.schema.json",
+  "schemaVersion": 1,
+  "bookRoot": "publishing/verdun",
+  "manuscript": "publishing/verdun/manuscript.md",
+  "metadata": "publishing/verdun/metadata.yaml",
+  "css": "publishing/verdun/epub.css",
+  "stem": "verdun",
+  "title": "Verdun",
+  "subtitle": "A Framework for Shared Work",
+  "author": "Alexy Khrabrov",
+  "headboardImage": "public/images/verdun-blog-headboard.png",
+  "version": {
+    "source": "file",
+    "file": "publishing/verdun/VERSION"
+  },
+  "dist": "publishing/verdun/dist-full",
+  "buildDir": "publishing/verdun/build",
+  "edition": "full",
+  "primaryFormat": "typst",
+  "mobi": false,
+  "pandoc": {
+    "reader": "markdown+smart+yaml_metadata_block",
+    "tocDepth": 2,
+    "numberSections": true,
+    "resourcePaths": ["publishing/verdun", "public/images", "${repoRoot}"]
+  },
+  "pdf": {
+    "coverImage": "public/images/verdun-book-cover-firstpair.png",
+    "coverWidth": "7in",
+    "coverHeight": "10.5in",
+    "coverFit": "cover"
+  },
+  "epub": {
+    "coverImage": "public/images/verdun-book-cover-firstpair.png",
+    "titlePage": true,
+    "includeRenderedCover": false
+  },
+  "html": {
+    "splitLevel": 1
+  }
+}

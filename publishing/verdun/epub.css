@@ -1,0 +1,5 @@
+@page { margin: 5%; }
+body { font-family: serif; line-height: 1.45; }
+h1, h2, h3 { page-break-after: avoid; }
+pre, code { font-family: monospace; white-space: pre-wrap; }
+blockquote { margin-left: 1.2em; color: #453d30; }

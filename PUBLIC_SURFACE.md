@@ -48,6 +48,12 @@ External crawler crates should depend on `verdun-crawler` and import through:
 
 The SDK facade re-exports the stable crawler instance registration, runtime, source adapter, source-run reporting, artifact inventory, run-manifest, cache, HTTP fetch, and generic snapshot contracts. The crate's `core`, `instances`, and `runtime` modules are internal.
 
+## Rust CLI
+
+External Rust CLIs can depend on the public `verdun-cli` crate and import `verdun_cli`. It provides the neutral persisted-token profile format, config read/write helpers, bearer-authenticated JSON requests, and database/crawler/account report mapping. The `verdun` binary uses `/api/workbench/health` by default, which is the public health contract already implemented by the generic workbench. Product CLIs retain product-specific routes and commands; Suffix uses these persistence and authenticated-request primitives rather than duplicating them.
+
+Consumers must declare an exact released dependency from crates.io (for example, `verdun-cli = "=0.1.0"`), not a sibling-path dependency. That fixed crate boundary means a Verdun regression cannot change an already-resolved Suffix build; upgrading Verdun is an explicit consumer change.
+
 ## Consumer Rule
 
 External apps consume this surface as a package dependency. App behavior, routes, crawler instances, deploy profiles, publishing workflows, generated data, and compatibility SQL remain app-owned.

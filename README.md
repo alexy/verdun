@@ -37,6 +37,7 @@ The current core proof points are intentionally generic:
 - Vite base path and generated `vercel.json` routing driven by deploy-profile metadata.
 - Vercel serverless API routes reading and writing an external Postgres database through generic workbench routes.
 - Reusable Rust crawler/runtime crate that collects instance-owned records and exports SQL for the generic database shape.
+- Public `verdun-cli` mothership crate and `verdun` binary. It persists token profiles under the user config directory, reports the existing workbench database/crawler health contract, and reports accounts with an optional tier so applications without plans remain first-class.
 - Bundled demo crawler adapters for local records, local diagnostics, HTTP JSON, and HTTP status diagnostics, all preserving the same `CrawlerSnapshot` contract.
 - Generic workbench item review, focus notes, source-run metadata, collection plans, and provenance stored in the reusable `workbench_*` views.
 - Generic app and instance registries that discover bundled proof registrations by convention while external apps mount their own entrypoints.

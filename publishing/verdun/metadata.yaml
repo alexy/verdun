@@ -1,0 +1,10 @@
+---
+title: Verdun
+subtitle: "A Framework for Shared Work"
+author:
+  - Alexy Khrabrov
+lang: en-US
+publisher: First Pair Press
+rights: Copyright 2026 Alexy Khrabrov
+description: "A codebase guide to Verdun: flexible multi-user workspaces, unified accounts, Rust collection engines, Neon persistence, and Vercel delivery."
+...
