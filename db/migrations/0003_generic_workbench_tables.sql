@@ -80,7 +80,14 @@ create index if not exists records_instance_dedupe_idx on records (instance, ded
 create index if not exists source_runs_instance_status_idx on source_runs (instance, status, collected_at desc);
 create index if not exists collection_plans_instance_topic_idx on collection_plans (instance, topic);
 
-create or replace view workbench_records as
+-- Instance migrations may replace these views with compatible overlays. This
+-- migration is reapplied by external apps, so do not replace an existing view
+-- here: doing so can implicitly remove instance-owned columns.
+do $workbench_records$
+begin
+  if to_regclass('workbench_records') is null then
+    execute $view$
+create view workbench_records as
 select
   r.instance,
   r.id,
@@ -101,8 +108,16 @@ select
   r.updated_at
 from records r
 left join review_state s on s.instance = r.instance and s.record_id = r.id;
+$view$;
+  end if;
+end
+$workbench_records$;
 
-create or replace view workbench_source_runs as
+do $workbench_source_runs$
+begin
+  if to_regclass('workbench_source_runs') is null then
+    execute $view$
+create view workbench_source_runs as
 select
   instance,
   source,
@@ -113,8 +128,16 @@ select
   subject_counts,
   collected_at
 from source_runs;
+$view$;
+  end if;
+end
+$workbench_source_runs$;
 
-create or replace view workbench_collection_plans as
+do $workbench_collection_plans$
+begin
+  if to_regclass('workbench_collection_plans') is null then
+    execute $view$
+create view workbench_collection_plans as
 select
   instance,
   subject,
@@ -126,16 +149,32 @@ select
   focus_terms,
   updated_at
 from collection_plans;
+$view$;
+  end if;
+end
+$workbench_collection_plans$;
 
-create or replace view workbench_review_state as
+do $workbench_review_state$
+begin
+  if to_regclass('workbench_review_state') is null then
+    execute $view$
+create view workbench_review_state as
 select
   instance,
   record_id,
   review,
   updated_at
 from review_state;
+$view$;
+  end if;
+end
+$workbench_review_state$;
 
-create or replace view workbench_focuses as
+do $workbench_focuses$
+begin
+  if to_regclass('workbench_focuses') is null then
+    execute $view$
+create view workbench_focuses as
 select
   instance,
   id,
@@ -143,3 +182,7 @@ select
   scope,
   created_at
 from focuses;
+$view$;
+  end if;
+end
+$workbench_focuses$;
