@@ -160,8 +160,11 @@ export class VercelProjectDomains {
     } catch (error) {
       // An administrator retry is idempotent only after an exact GET proves
       // that this domain is already attached to this immutable project ID.
-      // A cross-project 409/403 is never ownership proof.
-      if (!options.allowExisting || !isApiError(error, 400)) throw error
+      // A cross-project 409/403 is never ownership proof. Vercel has returned
+      // both 400/not_modified and 409/domain_already_in_use for a domain that
+      // is already attached to this project, so either status is only a signal
+      // to perform the exact immutable-project lookup below.
+      if (!options.allowExisting || (!isApiError(error, 400) && !isApiError(error, 409))) throw error
       try {
         projectDomain = await this.getProjectDomain(hostname)
       } catch {

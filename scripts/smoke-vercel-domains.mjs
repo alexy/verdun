@@ -78,8 +78,29 @@ async function existingAttachRequiresExactProjectProof() {
     purpose: 'traffic',
   }])
 
+  const conflictSnapshotFetch = queuedFetch([
+    jsonResponse({ error: { code: 'domain_already_in_use', message: 'Already in use.' } }, 409),
+    jsonResponse({
+      name: 'go.example.com',
+      apexName: 'example.com',
+      projectId: 'prj_test',
+      verified: true,
+    }),
+    jsonResponse({
+      configuredBy: 'CNAME',
+      recommendedIPv4: [],
+      recommendedCNAME: [{ rank: 1, value: 'project.vercel-dns.example' }],
+      misconfigured: false,
+    }),
+  ])
+  await assert.doesNotReject(
+    client(conflictSnapshotFetch).attach('go.example.com', { allowExisting: true }),
+  )
+  assert.equal(conflictSnapshotFetch.calls.length, 3)
+
   const conflictFetch = queuedFetch([
     jsonResponse({ error: { code: 'domain_taken', message: 'Owned elsewhere.' } }, 409),
+    jsonResponse({ error: { code: 'not_found', message: 'Not on this project.' } }, 404),
   ])
   await assert.rejects(
     client(conflictFetch).attach('go.example.com', { allowExisting: true }),
@@ -87,7 +108,7 @@ async function existingAttachRequiresExactProjectProof() {
       && error.code === 'api_error'
       && error.statusCode === 409,
   )
-  assert.equal(conflictFetch.calls.length, 1)
+  assert.equal(conflictFetch.calls.length, 2)
 }
 
 async function refreshToleratesPendingVerification() {

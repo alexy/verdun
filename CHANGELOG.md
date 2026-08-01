@@ -2,6 +2,10 @@
 
 Entries are keyed by package version from `0.1.1` onward; the dated entries under the `0.1.0` heading predate version-keyed releases.
 
+## 0.5.1 (2026-08-01)
+
+- Made administrator Vercel domain attachment retries idempotent when Vercel returns either `400` or `409`: neither response proves ownership, and Verdun still requires an exact hostname lookup whose project ID matches the configured immutable project before accepting the existing attachment.
+
 ## 0.5.0 (2026-07-17)
 
 - Added `@querygraph/verdun/accounts/workspaces`: application-scoped workspace ownership, generic role memberships, email-bound invitations, and authenticated invitation acceptance.
