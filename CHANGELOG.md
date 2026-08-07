@@ -6,6 +6,8 @@ Entries are keyed by package version from `0.1.1` onward; the dated entries unde
 
 - Added a committed FirstPair contract for non-replacing desktop and mobile
   vault candidates using Verdun's existing builders and strict validators.
+- Exposed the mobile validator at the repository publishing boundary so shared
+  publication dry runs cannot silently omit the mobile semantic gate.
 
 ## 0.5.1 (2026-08-01)
 
