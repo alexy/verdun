@@ -21,3 +21,7 @@ public/data/newsletter-snapshot.json
 .env
 .env.local
 .codex-artifacts/
+publishing/verdun/dist-full/
+publishing/verdun/dist-obsidian/
+publishing/verdun/scripts/__pycache__/
+tmp/

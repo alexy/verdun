@@ -21,3 +21,7 @@ in Obsidian before regenerating or packaging them.
 The full vault builder is `publishing/verdun/scripts/build-obsidian-vault.py`;
 the mobile reader builder is `publishing/verdun/scripts/build-obsidian-mobile-vault.py`.
 Their companion validators accept the generated vault directory as an argument.
+
+`vault.build.json` binds both builders to FirstPair's transactional candidate,
+complete-guide, privacy, comparison, and deterministic archive gates. Generated
+candidates remain beside, and never replace, the established vaults during QA.

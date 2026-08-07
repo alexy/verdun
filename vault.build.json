@@ -1,0 +1,21 @@
+{
+  "$schema": "https://firstpair.org/schemas/vault.build.schema.json",
+  "schemaVersion": 1,
+  "slug": "verdun",
+  "title": "Verdun",
+  "profile": "code",
+  "sourceCommit": "HEAD",
+  "plugin": false,
+  "nativeDriver": {
+    "build": ["python3", "publishing/verdun/scripts/firstpair-vault-driver.py", "build", "{product}", "{output}"],
+    "validate": ["python3", "publishing/verdun/scripts/firstpair-vault-driver.py", "validate", "{product}", "{output}"]
+  },
+  "guide": { "bookSpecific": "publishing/verdun/OBSIDIAN-VAULT.md" },
+  "reader": [
+    { "id": "book", "title": "Verdun", "source": "publishing/verdun/manuscript.md", "preview": true }
+  ],
+  "products": {
+    "desktop": { "output": "publishing/verdun/dist-obsidian/Verdun Candidate", "edition": "full", "maxFiles": 10000, "maxBytes": 500000000 },
+    "mobile": { "output": "publishing/verdun/dist-obsidian/Verdun Mobile Candidate", "edition": "full", "maxFiles": 5000, "maxBytes": 500000000 }
+  }
+}

@@ -2,6 +2,11 @@
 
 Entries are keyed by package version from `0.1.1` onward; the dated entries under the `0.1.0` heading predate version-keyed releases.
 
+## Unreleased
+
+- Added a committed FirstPair contract for non-replacing desktop and mobile
+  vault candidates using Verdun's existing builders and strict validators.
+
 ## 0.5.1 (2026-08-01)
 
 - Made administrator Vercel domain attachment retries idempotent when Vercel returns either `400` or `409`: neither response proves ownership, and Verdun still requires an exact hostname lookup whose project ID matches the configured immutable project before accepting the existing attachment.
