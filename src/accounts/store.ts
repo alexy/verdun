@@ -36,6 +36,17 @@ export type GoogleAccountProfile = {
   pictureUrl: string | null
 }
 
+export type LinkedInAccountProfile = {
+  sub: string
+  email: string
+  name: string | null
+  pictureUrl: string | null
+}
+
+export type VerdunVerifiedAccountProfile = GoogleAccountProfile & {
+  provider: 'google' | 'linkedin'
+}
+
 export type VerdunAccountRow = {
   id: string
   email: string
@@ -77,22 +88,39 @@ export async function upsertVerdunGoogleAccount(
   profile: GoogleAccountProfile,
   adminEmails: Iterable<string>,
 ): Promise<VerdunAccount> {
+  return upsertVerdunVerifiedAccount(sql, { provider: 'google', ...profile }, adminEmails)
+}
+
+export async function upsertVerdunLinkedInAccount(
+  sql: VerdunAccountSql,
+  profile: LinkedInAccountProfile,
+  adminEmails: Iterable<string>,
+): Promise<VerdunAccount> {
+  return upsertVerdunVerifiedAccount(sql, { provider: 'linkedin', ...profile }, adminEmails)
+}
+
+export async function upsertVerdunVerifiedAccount(
+  sql: VerdunAccountSql,
+  profile: VerdunVerifiedAccountProfile,
+  adminEmails: Iterable<string>,
+): Promise<VerdunAccount> {
   const admins = new Set(Array.from(adminEmails).map((email) => email.trim().toLowerCase()).filter(Boolean))
   const normalizedSubject = profile.sub.trim()
   const normalizedEmail = profile.email.trim().toLowerCase()
-  if (!normalizedSubject || !normalizedEmail) throw new Error('google_credential_profile_incomplete')
+  if (!normalizedSubject || !normalizedEmail) throw new Error(`${profile.provider}_credential_profile_incomplete`)
   try {
     const rows = await sql.query(
       `select resolved.*
        from verdun_resolve_account_identity(
-         'google',
          $1,
          $2,
          $3,
          $4,
-         $5
+         $5,
+         $6
        ) as resolved`,
       [
+        profile.provider,
         normalizedSubject,
         normalizedEmail,
         profile.name,
@@ -100,11 +128,11 @@ export async function upsertVerdunGoogleAccount(
         admins.has(normalizedEmail),
       ],
     ) as VerdunAccountRow[]
-    if (!rows[0]) throw new Error('google_account_identity_conflict')
+    if (!rows[0]) throw new Error(`${profile.provider}_account_identity_conflict`)
     return verdunAccountFromRow(rows[0])
   } catch (error) {
     if (String(error instanceof Error ? error.message : error).includes('verdun_identity_conflict')) {
-      throw new Error('google_account_identity_conflict')
+      throw new Error(`${profile.provider}_account_identity_conflict`)
     }
     throw error
   }

@@ -2,7 +2,7 @@ export type VerdunAccountTier = 'free' | 'buyer' | 'pro' | 'admin'
 
 export type VerdunAccountStatus = 'active' | 'suspended'
 
-export type VerdunIdentityProvider = 'google' | 'email'
+export type VerdunIdentityProvider = 'google' | 'linkedin' | 'email'
 
 export const verdunAccountTiers = ['free', 'buyer', 'pro', 'admin'] as const satisfies readonly VerdunAccountTier[]
 

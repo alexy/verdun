@@ -8,7 +8,7 @@ import {
   timingSafeEqual,
 } from 'node:crypto'
 import type { EmailSender } from '../../api/core/email.js'
-import type { VerdunAccount } from './account-types.js'
+import type { VerdunAccount, VerdunIdentityProvider } from './account-types.js'
 import {
   hashVerdunSessionToken,
   verdunAccountFromRow,
@@ -74,7 +74,7 @@ export type VerdunAuthenticationResult = {
 }
 
 export type VerdunAccountIdentity = {
-  provider: 'google' | 'email'
+  provider: VerdunIdentityProvider
   email: string
   verifiedAt: string
   lastUsedAt: string | null
@@ -556,7 +556,7 @@ export async function listVerdunAccountIdentities(
      order by created_at, provider`,
     [accountId],
   ) as Array<{
-    provider: 'google' | 'email'
+    provider: VerdunIdentityProvider
     verified_email: string
     verified_at: string
     last_used_at: string | null
