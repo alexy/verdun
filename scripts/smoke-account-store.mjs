@@ -39,6 +39,7 @@ const {
   revokeVerdunAccountSession,
   updateVerdunAccountStatus,
   upsertVerdunGoogleAccount,
+  upsertVerdunLinkedInAccount,
   verdunAdminEmailsFromEnv,
   verdunAccountUsage,
 } = await import(pathToFileURL(join(outDir, 'store.js')).href)
@@ -142,6 +143,15 @@ const normalizedProfile = await upsertVerdunGoogleAccount(sql, {
 }, [])
 if (normalizedProfile.email !== 'normalized@example.test' || normalizedProfile.providerSubject !== 'google-normalized') {
   throw new Error(`expected Verdun Google upsert to trim profile identity fields: ${JSON.stringify(normalizedProfile)}`)
+}
+const linkedInProfile = await upsertVerdunLinkedInAccount(sql, {
+  sub: 'linkedin-advocate',
+  email: 'advocate@example.test',
+  name: 'Dev Advocate',
+  pictureUrl: 'https://images.example.test/advocate.jpg',
+}, [])
+if (linkedInProfile.provider !== 'linkedin' || linkedInProfile.tier !== 'free' || linkedInProfile.email !== 'advocate@example.test') {
+  throw new Error(`expected a free linked LinkedIn identity: ${JSON.stringify(linkedInProfile)}`)
 }
 await expectError(() => upsertVerdunGoogleAccount(sql, {
   sub: '   ',
@@ -376,8 +386,8 @@ function fakeSql() {
     async query(sqlText, params) {
       const normalized = sqlText.replace(/\s+/g, ' ').trim()
       if (normalized.startsWith('select resolved.* from verdun_resolve_account_identity(')) {
-        const [sub, email, name, pictureUrl, isAdmin] = params
-        const providerKey = `google:${sub}`
+        const [provider, sub, email, name, pictureUrl, isAdmin] = params
+        const providerKey = `${provider}:${sub}`
         const existingByProviderId = accountByProvider.get(providerKey)
         const existingByEmail = Array.from(accounts.values()).find((account) => account.email === email)
         if (existingByProviderId && accounts.get(existingByProviderId)?.email !== email) {
@@ -388,7 +398,7 @@ function fakeSql() {
         }
         if (!existingByProviderId && existingByEmail) {
           const providerForEmail = Array.from(accountByProvider.entries())
-            .find(([key, accountId]) => key.startsWith('google:') && accountId === existingByEmail.id)
+            .find(([key, accountId]) => key.startsWith(`${provider}:`) && accountId === existingByEmail.id)
           if (providerForEmail && providerForEmail[0] !== providerKey) {
             throw new Error('verdun_identity_conflict')
           }
@@ -397,7 +407,7 @@ function fakeSql() {
         const now = new Date().toISOString()
         const row = existingId ? accounts.get(existingId) : {
           id: `account-${nextAccount++}`,
-          provider: 'google',
+          provider,
           provider_subject: sub,
           tier: isAdmin ? 'admin' : 'free',
           status: 'active',

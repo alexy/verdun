@@ -243,7 +243,7 @@ for (const expectedSymbol of [
 }
 
 const accountMigrations = await import('../db/public/account-migrations.mjs')
-if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 4) {
+if (!Array.isArray(accountMigrations.publicAccountMigrationPaths) || accountMigrations.publicAccountMigrationPaths.length !== 5) {
   throw new Error('db/public/account-migrations.mjs must expose the reusable Verdun account migration manifest')
 }
 const accountMigrationSource = await readFile(accountMigrations.publicAccountMigrationPaths[0], 'utf8')
@@ -257,6 +257,12 @@ for (const requiredIdentitySchemaFragment of ['create table if not exists verdun
   if (!identityMigrationSource.includes(requiredIdentitySchemaFragment)) {
     throw new Error(`Verdun multi-identity migration is missing ${requiredIdentitySchemaFragment}`)
   }
+}
+const linkedInMigrationPath = accountMigrations.publicAccountMigrationPaths[4]
+if (!linkedInMigrationPath.endsWith('0008_linkedin_identity.sql')) throw new Error(`Verdun LinkedIn migration should be 0008_linkedin_identity.sql, found ${linkedInMigrationPath}`)
+const linkedInMigrationSource = await readFile(linkedInMigrationPath, 'utf8')
+for (const requiredLinkedInFragment of ["provider in ('google', 'linkedin', 'email')", 'verdun_resolve_account_identity', "p_provider in (''google'', ''linkedin'')"]) {
+  if (!linkedInMigrationSource.includes(requiredLinkedInFragment)) throw new Error(`LinkedIn identity migration is missing ${requiredLinkedInFragment}`)
 }
 const planMigrationPath = accountMigrations.publicAccountMigrationPaths[2]
 if (!planMigrationPath.endsWith('0006_application_plans.sql')) {
