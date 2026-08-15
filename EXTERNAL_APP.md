@@ -74,16 +74,28 @@ Use `purpose: 'verify_email'` plus the proposed password for email/password regi
 
 Google and email identities may coexist on one account. Verdun links a newly verified identity to an existing account only when both providers assert the same normalized verified email. A provider-subject/email mismatch or an identity already attached elsewhere fails as an identity conflict. Verify Google credentials with Verdun and complete the email challenge before resolving either identity; never trust an email supplied directly by the browser as proof.
 
-Development may use Verdun's masked log sender. Production should require real delivery and a provider-approved sender:
+Development may use Verdun's masked log sender. Production should require real delivery and provider-approved senders. For authenticated SMTP submission:
 
 ```sh
 VERDUN_AUTH_PEPPER=<stable-random-secret-at-least-32-characters>
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=<resend-api-key>
-EMAIL_FROM='Example App <login@example.com>'
+EMAIL_PROVIDER=smtp
+SMTP_HOST=mail.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_USER=example-vercel@mail-host.example.net
+SMTP_PASSWORD=<secret>
+EMAIL_FROM_ONBOARDING='Example Onboarding <onboarding@example.com>'
+EMAIL_FROM_SUPPORT='Example Support <support@example.com>'
 ```
 
-For production, force `EMAIL_PROVIDER=resend`; without that setting, `getEmailSender()` intentionally falls back to log-only delivery when no API key exists. Keep the canonical completion URL in app configuration rather than deriving it from a tenant or inbound `Host` header.
+Select a purpose-specific sender with `getEmailSender({ from })`. For production,
+force `EMAIL_PROVIDER=smtp`; incomplete SMTP configuration then fails closed
+instead of falling back to log-only delivery. Keep the canonical completion URL
+in app configuration rather than deriving it from a tenant or inbound `Host`
+header. See `A-SENDMAIL.md` for DNS, Sendmail, DKIM, inbound reply, and deployed
+verification instructions. Resend remains supported with
+`EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, and `EMAIL_FROM`.
 
 ## Plans and subscriptions
 

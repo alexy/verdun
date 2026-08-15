@@ -1,7 +1,7 @@
 {
   "name": "@querygraph/verdun",
   "private": false,
-  "version": "0.6.0",
+  "version": "0.6.1",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -109,6 +109,7 @@
     "src/style.css",
     "PUBLIC_SURFACE.md",
     "EXTERNAL_APP.md",
+    "A-SENDMAIL.md",
     "CHANGELOG.md",
     "README.md"
   ],
@@ -146,7 +147,8 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.17.0",
-    "@neondatabase/serverless": "^1.1.0"
+    "@neondatabase/serverless": "^1.1.0",
+    "nodemailer": "^9.0.5"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
@@ -154,6 +156,7 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^24.12.3",
+    "@types/nodemailer": "^7.0.12",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",
     "pg": "^8.22.0",

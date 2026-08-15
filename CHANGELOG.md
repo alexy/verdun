@@ -4,6 +4,9 @@ Entries are keyed by package version from `0.1.1` onward; the dated entries unde
 
 ## Unreleased
 
+- Added authenticated SMTP delivery with mandatory-by-default STARTTLS,
+  purpose-specific From addresses, explicit envelope alignment, fail-closed
+  provider configuration, and a generalized Sendmail/Vercel operations runbook.
 - Added a committed FirstPair contract for non-replacing desktop and mobile
   vault candidates using Verdun's existing builders and strict validators.
 - Exposed the mobile validator at the repository publishing boundary so shared

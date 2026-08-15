@@ -104,12 +104,20 @@ Every email-auth call that accepts `authPepper` must receive a stable server-onl
 
 ```sh
 VERDUN_AUTH_PEPPER=<stable-random-secret-at-least-32-characters>
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=<resend-api-key>
-EMAIL_FROM='Example App <login@example.com>'
+EMAIL_PROVIDER=smtp
+SMTP_HOST=mail.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+SMTP_USER=example-vercel@mail-host.example.net
+SMTP_PASSWORD=<secret>
 ```
 
-`EMAIL_FROM` must use a sender accepted by the configured provider. Build challenge links from the app's trusted canonical HTTPS URL, not from an untrusted request host. See `EXTERNAL_APP.md` for the consumer flow and ownership boundary.
+Each app supplies an approved default or purpose-specific From address through
+`getEmailSender({ from })`. Build challenge links from the app's trusted
+canonical HTTPS URL, not from an untrusted request host. See `A-SENDMAIL.md` for
+the generalized Sendmail deployment and `EXTERNAL_APP.md` for the consumer flow
+and ownership boundary.
 
 Application-scoped plans are exported through `@querygraph/verdun/accounts/plan-types` and `@querygraph/verdun/accounts/plan-store`. Catalog records separate applications, plan families, plans, prices, and JSON entitlements; subscription records support manual assignment or trusted provider events with idempotent event IDs and stale-event ordering. Each change records a plan transition whose delivery state can be claimed and completed through `@querygraph/verdun/accounts/plan-email`.
 
