@@ -80,7 +80,9 @@
     "./svix": {
       "types": "./lib/api/core/svix.d.ts",
       "default": "./lib/api/core/svix.js"
-    }
+    },
+    "./frontend/ontology-ui": "./frontend/ontology-ui.ts",
+    "./frontend/ontology-view": "./frontend/ontology-view.ts"
   },
   "files": [
     "api",
@@ -146,7 +148,8 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.17.0",
-    "@neondatabase/serverless": "^1.1.0"
+    "@neondatabase/serverless": "^1.1.0",
+    "@querygraph/ontology": "github:querygraph/ontology#6b7321e9a5791bdfaffecda092f01319a39d058f"
   },
   "peerDependencies": {
     "vue": "^3.5.0"

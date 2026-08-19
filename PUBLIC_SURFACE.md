@@ -11,6 +11,8 @@ These package subpaths are the supported external app surface:
 - `@querygraph/verdun/frontend/workbench-ui`: shared Vue workbench controls.
 - `@querygraph/verdun/frontend/workbench-view`: shared workbench filtering/count/coverage composable and TypeScript workbench types.
 - `@querygraph/verdun/frontend/workbench-style.css`: shared workbench shell and component CSS.
+- `@querygraph/verdun/frontend/ontology-ui`: the reusable Vue three-tier topic chooser (`TopicTierPicker`) over `@querygraph/ontology`'s navigator.
+- `@querygraph/verdun/frontend/ontology-view`: the `useTopicNavigator` composable and re-exported navigator types. Ontology data engineering (normalization, matching, seed, extraction) lives in `@querygraph/ontology`; Verdun owns only the interactive selection layer (see that repo's ONTOLOGY.md).
 - `@querygraph/verdun/accounts/account-types`: reusable account, tier, capability, and usage-window types for Verdun-backed apps.
 - `@querygraph/verdun/accounts/email-auth`: email/password registration and sign-in, one-time link-or-code verification, passwordless sign-in, password reset, rate limiting, and verified-email identity linking.
 - `@querygraph/verdun/accounts/google`: Google Identity Services credential verification for Google account bootstrap.
