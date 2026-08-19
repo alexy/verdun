@@ -11,6 +11,8 @@ These package subpaths are the supported external app surface:
 - `@querygraph/verdun/frontend/workbench-ui`: shared Vue workbench controls.
 - `@querygraph/verdun/frontend/workbench-view`: shared workbench filtering/count/coverage composable and TypeScript workbench types.
 - `@querygraph/verdun/frontend/workbench-style.css`: shared workbench shell and component CSS.
+- `@querygraph/verdun/frontend/ontology-ui`: the reusable Vue three-tier topic chooser (`TopicTierPicker`) over `@querygraph/ontology`'s navigator.
+- `@querygraph/verdun/frontend/ontology-view`: the `useTopicNavigator` composable and re-exported navigator types. Ontology data engineering (normalization, matching, seed, extraction) lives in `@querygraph/ontology`; Verdun owns only the interactive selection layer (see that repo's ONTOLOGY.md).
 - `@querygraph/verdun/accounts/account-types`: reusable account, tier, capability, and usage-window types for Verdun-backed apps.
 - `@querygraph/verdun/accounts/email-auth`: email/password registration and sign-in, one-time link-or-code verification, passwordless sign-in, password reset, rate limiting, and verified-email identity linking.
 - `@querygraph/verdun/accounts/google`: Google Identity Services credential verification for Google account bootstrap.
@@ -53,6 +55,25 @@ The SDK facade re-exports the stable crawler instance registration, runtime, sou
 External Rust CLIs can depend on the public `verdun-cli` crate and import `verdun_cli`. It provides the neutral persisted-token profile format, config read/write helpers, bearer-authenticated JSON requests, and database/crawler/account report mapping. The `verdun` binary uses `/api/workbench/health` by default, which is the public health contract already implemented by the generic workbench. Product CLIs retain product-specific routes and commands; Suffix uses these persistence and authenticated-request primitives rather than duplicating them.
 
 Consumers must declare an exact released dependency from crates.io (for example, `verdun-cli = "=0.1.0"`), not a sibling-path dependency. That fixed crate boundary means a Verdun regression cannot change an already-resolved Suffix build; upgrading Verdun is an explicit consumer change.
+
+## Module boundaries
+
+The package surface is a set of independent modules; importing one must not
+force the runtime footprint of another:
+
+- **accounts / plans / email / domains** — server-side; no UI dependencies.
+- **workbench frontend** (`frontend/workbench-*`) — Vue; `vue` is an optional
+  peer dependency, required only by apps that mount Verdun UI.
+- **ontology frontend** (`frontend/ontology-ui`, `frontend/ontology-view`) —
+  Vue plus `@querygraph/ontology`, both optional peers. Apps that use the
+  topic chooser declare and pin `@querygraph/ontology` themselves (exact
+  commit or release); accounts-only or workbench-only consumers never
+  install it.
+- **api/db/scripts public helpers** — server-side, dependency-light.
+
+No Verdun module may import across these boundaries (for example, ontology UI
+must not touch accounts, and accounts must not import Vue components). New
+exports declare which module they belong to in this document.
 
 ## Consumer Rule
 
