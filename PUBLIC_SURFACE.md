@@ -56,6 +56,25 @@ External Rust CLIs can depend on the public `verdun-cli` crate and import `verdu
 
 Consumers must declare an exact released dependency from crates.io (for example, `verdun-cli = "=0.1.0"`), not a sibling-path dependency. That fixed crate boundary means a Verdun regression cannot change an already-resolved Suffix build; upgrading Verdun is an explicit consumer change.
 
+## Module boundaries
+
+The package surface is a set of independent modules; importing one must not
+force the runtime footprint of another:
+
+- **accounts / plans / email / domains** — server-side; no UI dependencies.
+- **workbench frontend** (`frontend/workbench-*`) — Vue; `vue` is an optional
+  peer dependency, required only by apps that mount Verdun UI.
+- **ontology frontend** (`frontend/ontology-ui`, `frontend/ontology-view`) —
+  Vue plus `@querygraph/ontology`, both optional peers. Apps that use the
+  topic chooser declare and pin `@querygraph/ontology` themselves (exact
+  commit or release); accounts-only or workbench-only consumers never
+  install it.
+- **api/db/scripts public helpers** — server-side, dependency-light.
+
+No Verdun module may import across these boundaries (for example, ontology UI
+must not touch accounts, and accounts must not import Vue components). New
+exports declare which module they belong to in this document.
+
 ## Consumer Rule
 
 External apps consume this surface as a package dependency. App behavior, routes, crawler instances, deploy profiles, publishing workflows, generated data, and compatibility SQL remain app-owned.

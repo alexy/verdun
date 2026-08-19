@@ -148,11 +148,11 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.17.0",
-    "@neondatabase/serverless": "^1.1.0",
-    "@querygraph/ontology": "github:querygraph/ontology#c7ba4b433cc6dbe9876175dc76ffa06e502f5e07"
+    "@neondatabase/serverless": "^1.1.0"
   },
   "peerDependencies": {
-    "vue": "^3.5.0"
+    "vue": "^3.5.0",
+    "@querygraph/ontology": "*"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
@@ -163,6 +163,15 @@
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
     "vue": "3.5.38",
-    "vue-tsc": "^3.2.8"
+    "vue-tsc": "^3.2.8",
+    "@querygraph/ontology": "github:querygraph/ontology#c7ba4b433cc6dbe9876175dc76ffa06e502f5e07"
+  },
+  "peerDependenciesMeta": {
+    "@querygraph/ontology": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
   }
 }

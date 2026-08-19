@@ -13,3 +13,7 @@
   semantics must not fork into apps.
 - Pin `@querygraph/ontology` to an exact commit; upgrading it is an explicit
   reviewed change because normalization keys are durable.
+- Modularity: PUBLIC_SURFACE.md's "Module boundaries" section is
+  enforced by review — ontology UI, workbench UI, and accounts must stay
+  import-independent, and `@querygraph/ontology`/`vue` remain optional peer
+  dependencies so accounts-only consumers install neither.
