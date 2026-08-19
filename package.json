@@ -149,7 +149,7 @@
   "dependencies": {
     "@lucide/vue": "^1.17.0",
     "@neondatabase/serverless": "^1.1.0",
-    "@querygraph/ontology": "github:querygraph/ontology#6b7321e9a5791bdfaffecda092f01319a39d058f"
+    "@querygraph/ontology": "github:querygraph/ontology#c7ba4b433cc6dbe9876175dc76ffa06e502f5e07"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
