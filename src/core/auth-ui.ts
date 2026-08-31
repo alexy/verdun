@@ -175,7 +175,7 @@ export function mountVerdunAuth<Account>(
         </div>
         <div id="${id}-panel" class="verdun-auth__panel" role="tabpanel"
           aria-labelledby="${state.intent === 'sign_up' ? `${id}-sign-up-tab` : `${id}-log-in-tab`}">
-          <h2 id="${id}-heading" class="verdun-auth__heading">${escapeHtml(heading)}</h2>
+          <h2 id="${id}-heading" class="verdun-auth__heading" tabindex="-1">${escapeHtml(heading)}</h2>
           ${options.note?.trim() ? `<p class="verdun-auth__note">${escapeHtml(options.note.trim())}</p>` : ''}
           ${state.stage === 'challenge' ? challengeMarkup(busy) : credentialMarkup(busy)}
         </div>
@@ -184,6 +184,23 @@ export function mountVerdunAuth<Account>(
     if (state.stage === 'credentials' && options.adapters.mountGoogle && !busy) {
       void mountGoogle(version)
     }
+    focusAfterRender(version, busy)
+  }
+
+  function focusAfterRender(version: number, busy: boolean): void {
+    queueMicrotask(() => {
+      if (destroyed || version !== renderVersion) return
+      const selector = busy
+        ? `#${id}-heading`
+        : state.stage === 'challenge'
+          ? `#${id}-code`
+          : state.intent === 'sign_up' && state.email.trim()
+            ? `#${id}-new-password`
+            : state.intent === 'log_in' && state.loginMethod === 'password' && state.email.trim()
+              ? `#${id}-current-password`
+              : `#${id}-email`
+      host.querySelector<HTMLElement>(selector)?.focus()
+    })
   }
 
   function credentialMarkup(busy: boolean): string {

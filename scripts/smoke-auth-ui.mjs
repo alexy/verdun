@@ -94,12 +94,14 @@ try {
   await assertCount(page, '.verdun-auth__note strong', 0, 'app notes must be escaped')
   await assertCount(page, '[role="tab"][data-verdun-auth-intent]', 2, 'persistent Sign up / Log in choices')
   await page.waitForFunction(() => !document.querySelector('[data-verdun-auth-google-group]'))
+  await assertFocused(page, '#auth input[name="email"]', 'initial auth focus should enter the email field')
 
   await page.getByLabel('Email').fill('friend@example.test')
   await page.getByLabel('Choose a password (10+ characters)').fill('correct horse battery staple')
   await page.getByRole('button', { name: 'Sign up', exact: true }).last().click()
   await expectText(page, '.verdun-auth__submit', 'Sending verification…')
   await assert(page, '.verdun-auth__submit:disabled', 'sign-up submit should disable immediately')
+  await assertFocused(page, '.verdun-auth__heading', 'pending sign-up should retain focus inside auth')
   await assertCount(page, '[data-verdun-auth-google-group]', 0, 'unavailable provider must stay hidden while email is pending')
   await page.locator('.verdun-auth__submit').dispatchEvent('click')
   await assertCallCount(page, 'sign_up', 1, 'sign-up must not submit twice while pending')
@@ -107,6 +109,7 @@ try {
 
   await expectText(page, '.verdun-auth__heading', 'Check your email to finish signing up')
   await expectText(page, '.verdun-auth__challenge-copy', 'If this email can be used to sign up')
+  await assertFocused(page, '#auth input[name="code"]', 'sign-up challenge should focus the code field')
   await assertCount(page, '[role="tab"][data-verdun-auth-intent]', 2, 'intent choices during challenge')
   await assertState(page, { intent: 'sign_up', stage: 'challenge', email: 'friend@example.test', challengePurpose: 'verify_email' })
 
@@ -114,6 +117,7 @@ try {
   await expectText(page, '.verdun-auth__heading', 'Log in to return')
   await expectText(page, '.verdun-auth__hint', 'For existing accounts only. A login code does not create an account.')
   await assertInputValue(page, '#auth input[name="email"]', 'friend@example.test', 'email should survive intent changes')
+  await assertFocused(page, '#auth input[name="email"]', 'login-code intent should focus the email field')
   await assertState(page, { intent: 'log_in', loginMethod: 'email_code', stage: 'credentials', challengePurpose: null })
 
   await page.getByRole('button', { name: 'Email me a login code' }).click()
@@ -127,6 +131,7 @@ try {
 
   await page.getByRole('tab', { name: 'Password', exact: true }).click()
   await assertCount(page, '.verdun-auth__error:not(:empty)', 0, 'changing methods should clear inline errors')
+  await assertFocused(page, '#auth input[name="password"]', 'password method should focus the password when email is retained')
   await page.getByLabel('Password', { exact: true }).fill('wrong password value')
   await page.getByRole('tab', { name: 'Email code' }).click()
   await page.getByRole('tab', { name: 'Password', exact: true }).click()
@@ -142,6 +147,7 @@ try {
   await page.evaluate(() => window.authPending.request_code.resolve({ challengeId: 'login-challenge' }))
   await expectText(page, '.verdun-auth__heading', 'Check your email to log in')
   await expectText(page, '.verdun-auth__challenge-copy', 'If an account uses that address')
+  await assertFocused(page, '#auth input[name="code"]', 'login challenge should focus the code field')
   await page.getByLabel('Six-digit code').fill('12a34b56')
   await assertInputValue(page, '#auth input[name="code"]', '123456', 'code input should retain only six digits')
   await page.getByRole('button', { name: 'Confirm code' }).click()
@@ -202,6 +208,15 @@ async function assertCallCount(page, action, expected, label) {
 async function assertInputValue(page, selector, expected, label) {
   const actual = await page.locator(selector).inputValue()
   if (actual !== expected) throw new Error(`${label}: expected ${JSON.stringify(expected)}, found ${JSON.stringify(actual)}`)
+}
+
+async function assertFocused(page, selector, label) {
+  try {
+    await page.waitForFunction((target) => document.activeElement?.matches(target), selector)
+  } catch {
+    const active = await page.evaluate(() => document.activeElement?.outerHTML ?? '(none)')
+    throw new Error(`${label}: active element was ${active}`)
+  }
 }
 
 async function assertState(page, expected) {

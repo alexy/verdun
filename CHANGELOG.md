@@ -4,6 +4,10 @@ Entries are keyed by package version from `0.1.1` onward; the dated entries unde
 
 ## Unreleased
 
+## 0.7.3 (2026-08-31)
+
+- Kept keyboard focus inside the framework-neutral auth flow across intent, method, pending, error, and email-challenge renders; challenge screens now focus the code field and pending screens retain an Escape-capable focus target.
+
 ## 0.7.2 (2026-08-31)
 
 - Published the framework-neutral auth entrypoint as compiled JavaScript plus declarations, so NodeNext consumers can import it without compiling TypeScript from `node_modules`; the public-surface smoke now imports the packaged subpath directly.
