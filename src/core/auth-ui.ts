@@ -187,7 +187,7 @@ export function mountVerdunAuth<Account>(
   }
 
   function credentialMarkup(busy: boolean): string {
-    const google = options.adapters.mountGoogle ? `
+    const google = options.adapters.mountGoogle && !busy ? `
       <div class="verdun-auth__google-group" data-verdun-auth-google-group>
         <div class="verdun-auth__google" data-verdun-auth-google></div>
         <p class="verdun-auth__provider-hint">${verdunAuthCopy.providerHint}</p>

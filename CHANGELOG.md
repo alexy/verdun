@@ -4,6 +4,10 @@ Entries are keyed by package version from `0.1.1` onward; the dated entries unde
 
 ## Unreleased
 
+## 0.7.1 (2026-08-31)
+
+- Kept an unavailable provider control hidden while an email authentication request is pending, avoiding an empty provider hint and divider during the immediate progress state.
+
 ## 0.7.0 (2026-08-31)
 
 - Added `@querygraph/verdun/frontend/auth-ui` and `@querygraph/verdun/frontend/auth-style.css`: a framework-neutral, scoped DOM authentication flow with canonical `Sign up` and `Log in` intents, email registration, password and existing-account login-code methods, privacy-safe challenge completion, immediate pending states, optional Google mounting, and app-injected adapters and continuation copy.

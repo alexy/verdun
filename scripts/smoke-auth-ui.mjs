@@ -100,6 +100,7 @@ try {
   await page.getByRole('button', { name: 'Sign up', exact: true }).last().click()
   await expectText(page, '.verdun-auth__submit', 'Sending verification…')
   await assert(page, '.verdun-auth__submit:disabled', 'sign-up submit should disable immediately')
+  await assertCount(page, '[data-verdun-auth-google-group]', 0, 'unavailable provider must stay hidden while email is pending')
   await page.locator('.verdun-auth__submit').dispatchEvent('click')
   await assertCallCount(page, 'sign_up', 1, 'sign-up must not submit twice while pending')
   await page.evaluate(() => window.authPending.sign_up.resolve({ challengeId: 'signup-challenge' }))
