@@ -4,6 +4,10 @@ Entries are keyed by package version from `0.1.1` onward; the dated entries unde
 
 ## Unreleased
 
+## 0.7.2 (2026-08-31)
+
+- Published the framework-neutral auth entrypoint as compiled JavaScript plus declarations, so NodeNext consumers can import it without compiling TypeScript from `node_modules`; the public-surface smoke now imports the packaged subpath directly.
+
 ## 0.7.1 (2026-08-31)
 
 - Kept an unavailable provider control hidden while an email authentication request is pending, avoiding an empty provider hint and divider during the immediate progress state.

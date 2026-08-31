@@ -1,7 +1,7 @@
 {
   "name": "@querygraph/verdun",
   "private": false,
-  "version": "0.7.1",
+  "version": "0.7.2",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -64,7 +64,10 @@
     "./db/public/account-migrations": "./db/public/account-migrations.mjs",
     "./db/public/workbench-migrations": "./db/public/workbench-migrations.mjs",
     "./frontend/auth-style.css": "./frontend/auth-style.css",
-    "./frontend/auth-ui": "./frontend/auth-ui.ts",
+    "./frontend/auth-ui": {
+      "types": "./lib/frontend/auth-ui.d.ts",
+      "default": "./lib/frontend/auth-ui.js"
+    },
     "./frontend/workbench-style.css": "./frontend/workbench-style.css",
     "./frontend/workbench-ui": "./frontend/workbench-ui.ts",
     "./frontend/workbench-view": "./frontend/workbench-view.ts",

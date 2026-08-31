@@ -53,7 +53,10 @@ const expectedExports = {
   './db/public/account-migrations': './db/public/account-migrations.mjs',
   './db/public/workbench-migrations': './db/public/workbench-migrations.mjs',
   './frontend/auth-style.css': './frontend/auth-style.css',
-  './frontend/auth-ui': './frontend/auth-ui.ts',
+  './frontend/auth-ui': {
+    types: './lib/frontend/auth-ui.d.ts',
+    default: './lib/frontend/auth-ui.js',
+  },
   './frontend/ontology-ui': './frontend/ontology-ui.ts',
   './frontend/ontology-view': './frontend/ontology-view.ts',
   './frontend/workbench-style.css': './frontend/workbench-style.css',
@@ -176,6 +179,10 @@ for (const expectedSymbol of [
   if (!authUiFacade.includes(expectedSymbol)) {
     throw new Error(`frontend/auth-ui.ts does not export ${expectedSymbol}`)
   }
+}
+const packagedAuthUi = await import('@querygraph/verdun/frontend/auth-ui')
+if (typeof packagedAuthUi.mountVerdunAuth !== 'function' || packagedAuthUi.verdunAuthCopy?.logIn !== 'Log in') {
+  throw new Error('the packaged frontend/auth-ui export is not directly importable')
 }
 const authUiSource = await readFile('src/core/auth-ui.ts', 'utf8')
 for (const expectedCopy of [

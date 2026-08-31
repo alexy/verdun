@@ -17,6 +17,7 @@
     "api/core/**/*.ts",
     "api/public/**/*.ts",
     "api/workbench/local-adapter-types.ts",
+    "frontend/auth-ui.ts",
     "src/accounts/**/*.ts",
     "src/core/auth-ui.ts",
     "src/domains/**/*.ts"

@@ -14,4 +14,4 @@ export {
   type VerdunAuthMountOptions,
   type VerdunAuthStage,
   type VerdunAuthState,
-} from '../src/core/auth-ui'
+} from '../src/core/auth-ui.js'
