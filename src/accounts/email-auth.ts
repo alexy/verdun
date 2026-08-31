@@ -664,7 +664,7 @@ function dummyVerdunPasswordHash(): Promise<string> {
 function emailChallengeAction(purpose: VerdunEmailChallengePurpose): string {
   if (purpose === 'verify_email') return 'Verify your email address'
   if (purpose === 'password_reset') return 'Reset your password'
-  return 'Sign in with your email address'
+  return 'Log in with your email address'
 }
 
 function escapeHtml(value: string): string {

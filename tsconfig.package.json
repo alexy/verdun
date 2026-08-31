@@ -18,6 +18,7 @@
     "api/public/**/*.ts",
     "api/workbench/local-adapter-types.ts",
     "src/accounts/**/*.ts",
+    "src/core/auth-ui.ts",
     "src/domains/**/*.ts"
   ]
 }

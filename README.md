@@ -10,6 +10,7 @@ The first reusable boundary is now explicit:
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering/count/coverage logic lives in `src/composables/useWorkbenchView.ts`.
 - Generic reusable Vue controls live under `src/components/workbench/`; external apps should consume them through `frontend/workbench-ui.ts`, shared workbench CSS through `frontend/workbench-style.css`, and the shared workbench view model/types through `frontend/workbench-view.ts`.
+- Framework-neutral account interaction is exposed through `@querygraph/verdun/frontend/auth-ui` and `frontend/auth-style.css`. Verdun owns canonical `Sign up` / `Log in` intent and method state; apps inject their API adapters, continuation copy, optional provider mount, error mapping, and completion behavior.
 - Generic compatibility-smoke loading is exposed through `scripts/public/test-loader.mjs`; external apps can reuse Verdun's TypeScript loader contract while supplying their own Vite, Vue, and icon-library resolution.
 - Generic workbench API module discovery for compatibility smokes is exposed through `scripts/public/workbench-api-modules.mjs`, so external apps do not need to hardcode Verdun's internal workbench route filenames.
 - Reusable account authentication is exposed through `@querygraph/verdun/accounts/*`: Google and LinkedIn verification, linked Google/LinkedIn/email identities, password-backed email accounts, one-time email link/code challenges, account sessions, and secure session cookies. The same public namespace now exposes application/family plan catalogs, manual and provider subscriptions, transition history, and transition confirmations. Transactional delivery remains available through `@querygraph/verdun/email`.
@@ -90,10 +91,12 @@ npm run check:deployed -- --require-database
 
 External apps can combine `@querygraph/verdun/accounts/email-auth` with the existing account store, cookie helpers, Google credential verifier, and transactional email transport. Apply every path exported by `@querygraph/verdun/db/public/account-migrations`; `0.2.0` added linked-identity, authentication-challenge, and rate-limit state, while `0.3.0` adds application/family plans, subscriptions, provider events, and plan transitions.
 
+Browser apps should mount the generic authentication flow from `@querygraph/verdun/frontend/auth-ui` and import its scoped `frontend/auth-style.css`. The component keeps `Sign up` and `Log in` visible, treats email-code login as existing-account-only, retains the entered email while clearing transient credentials, and delegates all network work to app-owned adapters. Apps supply only their continuation phrase (for example, “to contribute”), contextual note, provider mount, notices/error mapping, and authenticated continuation.
+
 Email challenges support three purposes:
 
 - `verify_email` registers an email/password identity after the user proves control of the address.
-- `passwordless_login` signs an existing active account in without a password.
+- `passwordless_login` logs an existing active account in without a password; it never creates an account.
 - `password_reset` verifies the address, replaces the password, and revokes the account's earlier sessions.
 
 `requestVerdunEmailChallenge` creates one challenge containing both a one-time link token and a six-digit code. Deliver it with `deliverVerdunEmailChallenge` and an `EmailSender` from `@querygraph/verdun/email`, then pass either proof to `completeVerdunEmailChallenge`; successful completion consumes the challenge and returns the account plus a new session token. Links put their secret in the URL fragment, so the app frontend must read the fragment and submit the proof to its app-owned completion route. Request endpoints should return the same public response when a challenge is suppressed, so account existence is not disclosed.

@@ -10,6 +10,7 @@ Maintain Verdun as a reusable Vercel, database, frontend, deploy-check, and craw
 - Generic workbench contracts live in `src/core/workbench.ts`.
 - Generic frontend filtering, counts, coverage, and review state live in `src/composables/useWorkbenchView.ts`.
 - Reusable Vue controls live under `src/components/workbench/` and are exposed through `frontend/workbench-ui.ts`, `frontend/workbench-style.css`, and `frontend/workbench-view.ts`.
+- Framework-neutral account interaction lives in `src/core/auth-ui.ts` and is exposed through `frontend/auth-ui.ts` plus `frontend/auth-style.css`; Verdun owns canonical `Sign up` / `Log in` state and apps inject API adapters and product continuation copy.
 - The bundled workbench proof is the neutral `demo` instance at `/demo/`.
 - Generic Vercel workbench API routes live under `api/workbench/` and resolve instance context through explicit route/query metadata.
 - Generic HTTP helpers and local workbench adapter contracts are exposed through `api/public/http.ts` and `api/public/workbench-local-adapter.ts`.
@@ -28,6 +29,7 @@ Maintain Verdun as a reusable Vercel, database, frontend, deploy-check, and craw
 Verdun owns:
 
 - Generic workbench types, routes, UI controls, and view-model helpers.
+- Generic authentication intent/method interaction, privacy-safe browser copy, and scoped auth styles.
 - Generic database migrations, SQL validation, reload handoff receipts, and deploy preflights.
 - Generic deploy-profile discovery and deployed-check mechanics.
 - Generic crawler SDK/runtime contracts.
@@ -36,6 +38,7 @@ Verdun owns:
 External apps own:
 
 - Product UI, domain route handlers, app-specific APIs, and local fallback adapters.
+- Authentication placement, product continuation text and notes, route adapters, provider mounting, error mapping, and post-authentication behavior.
 - Domain crawler crates, adapters, generated data, and compatibility payloads.
 - App-specific database migrations, loaders, activation rules, and publish/readiness workflows.
 - Vercel project linking, production environment variables, and app deployment wrappers.

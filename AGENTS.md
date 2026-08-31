@@ -17,3 +17,7 @@
   enforced by review — ontology UI, workbench UI, and accounts must stay
   import-independent, and `@querygraph/ontology`/`vue` remain optional peer
   dependencies so accounts-only consumers install neither.
+- The auth frontend is framework-neutral and dependency-free. Verdun owns its
+  generic `Sign up` / `Log in` markup, interaction state, and scoped styles;
+  consuming apps inject routes, provider mounts, continuation copy, error
+  mapping, and post-authentication behavior.

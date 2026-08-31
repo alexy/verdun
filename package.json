@@ -1,7 +1,7 @@
 {
   "name": "@querygraph/verdun",
   "private": false,
-  "version": "0.6.1",
+  "version": "0.7.0",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -63,6 +63,8 @@
     },
     "./db/public/account-migrations": "./db/public/account-migrations.mjs",
     "./db/public/workbench-migrations": "./db/public/workbench-migrations.mjs",
+    "./frontend/auth-style.css": "./frontend/auth-style.css",
+    "./frontend/auth-ui": "./frontend/auth-ui.ts",
     "./frontend/workbench-style.css": "./frontend/workbench-style.css",
     "./frontend/workbench-ui": "./frontend/workbench-ui.ts",
     "./frontend/workbench-view": "./frontend/workbench-view.ts",
@@ -97,6 +99,7 @@
     "scripts/deploy-workbench-database.mjs",
     "scripts/workbench-apply-sql.mjs",
     "scripts/smoke-account-store.mjs",
+    "scripts/smoke-auth-ui.mjs",
     "scripts/smoke-email-auth.mjs",
     "scripts/smoke-email-auth-postgres.mjs",
     "scripts/smoke-generic-loader-sql.mjs",
@@ -141,6 +144,7 @@
     "smoke:demo-workbench": "node scripts/smoke-demo-workbench.mjs",
     "smoke:generic-loader": "node scripts/smoke-generic-loader-sql.mjs",
     "smoke:account-store": "node scripts/smoke-account-store.mjs",
+    "smoke:auth-ui": "node scripts/smoke-auth-ui.mjs",
     "smoke:email-auth": "node scripts/smoke-email-auth.mjs",
     "smoke:email-auth-postgres": "node scripts/smoke-email-auth-postgres.mjs",
     "smoke:plans": "node scripts/smoke-plans.mjs",

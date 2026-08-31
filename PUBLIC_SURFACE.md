@@ -8,6 +8,8 @@ For the full app-package shape, see `EXTERNAL_APP.md`.
 
 These package subpaths are the supported external app surface:
 
+- `@querygraph/verdun/frontend/auth-ui`: framework-neutral DOM authentication UI. `mountVerdunAuth` owns the generic `Sign up` / `Log in` intent and method flow, including email registration, password login, existing-account email-code login, challenge completion, and an optional app-mounted provider control. Apps inject network adapters, product continuation copy, notices/error mapping, and post-authentication behavior.
+- `@querygraph/verdun/frontend/auth-style.css`: scoped styles for the framework-neutral authentication UI.
 - `@querygraph/verdun/frontend/workbench-ui`: shared Vue workbench controls.
 - `@querygraph/verdun/frontend/workbench-view`: shared workbench filtering/count/coverage composable and TypeScript workbench types.
 - `@querygraph/verdun/frontend/workbench-style.css`: shared workbench shell and component CSS.
@@ -62,6 +64,9 @@ The package surface is a set of independent modules; importing one must not
 force the runtime footprint of another:
 
 - **accounts / plans / email / domains** — server-side; no UI dependencies.
+- **auth frontend** (`frontend/auth-ui`, `frontend/auth-style.css`) —
+  browser-only and framework-neutral; it has no Vue, ontology, or server-account
+  dependency and calls only app-injected adapters.
 - **workbench frontend** (`frontend/workbench-*`) — Vue; `vue` is an optional
   peer dependency, required only by apps that mount Verdun UI.
 - **ontology frontend** (`frontend/ontology-ui`, `frontend/ontology-view`) —

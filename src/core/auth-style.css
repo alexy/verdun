@@ -1,0 +1,199 @@
+.verdun-auth-host {
+  --verdun-auth-accent: #2457d6;
+  --verdun-auth-accent-ink: #ffffff;
+  --verdun-auth-border: #d7dbe5;
+  --verdun-auth-error: #a61b1b;
+  --verdun-auth-muted: #5b6475;
+  --verdun-auth-surface: #ffffff;
+  color: inherit;
+  font: inherit;
+}
+
+.verdun-auth,
+.verdun-auth *,
+.verdun-auth *::before,
+.verdun-auth *::after {
+  box-sizing: border-box;
+}
+
+.verdun-auth {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+}
+
+.verdun-auth button,
+.verdun-auth input {
+  font: inherit;
+}
+
+.verdun-auth button {
+  cursor: pointer;
+}
+
+.verdun-auth button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.verdun-auth__intents,
+.verdun-auth__methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--verdun-auth-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--verdun-auth-border) 25%, transparent);
+}
+
+.verdun-auth__intent,
+.verdun-auth__method {
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+}
+
+.verdun-auth__intent.is-active,
+.verdun-auth__method.is-active {
+  background: var(--verdun-auth-surface);
+  box-shadow: 0 1px 4px rgba(20, 27, 45, 0.14);
+}
+
+.verdun-auth__intent:focus-visible,
+.verdun-auth__method:focus-visible,
+.verdun-auth__submit:focus-visible,
+.verdun-auth__escape:focus-visible,
+.verdun-auth input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--verdun-auth-accent) 32%, transparent);
+  outline-offset: 2px;
+}
+
+.verdun-auth__panel,
+.verdun-auth__form,
+.verdun-auth__field,
+.verdun-auth__google-group {
+  display: grid;
+}
+
+.verdun-auth__panel {
+  gap: 14px;
+}
+
+.verdun-auth__heading {
+  margin: 0;
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.verdun-auth__hint,
+.verdun-auth__note,
+.verdun-auth__provider-hint,
+.verdun-auth__challenge-copy,
+.verdun-auth__error {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.verdun-auth__hint,
+.verdun-auth__note,
+.verdun-auth__provider-hint,
+.verdun-auth__challenge-copy {
+  color: var(--verdun-auth-muted);
+}
+
+.verdun-auth__provider-hint {
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.verdun-auth__error {
+  min-height: 1.45em;
+  color: var(--verdun-auth-error);
+  font-weight: 650;
+}
+
+.verdun-auth__form {
+  gap: 13px;
+}
+
+.verdun-auth__field {
+  gap: 6px;
+  font-weight: 700;
+}
+
+.verdun-auth__field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--verdun-auth-border);
+  border-radius: 9px;
+  background: var(--verdun-auth-surface);
+  color: inherit;
+}
+
+.verdun-auth__submit {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--verdun-auth-accent);
+  border-radius: 9px;
+  background: var(--verdun-auth-accent);
+  color: var(--verdun-auth-accent-ink);
+  font-weight: 800;
+}
+
+.verdun-auth__escape {
+  justify-self: center;
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--verdun-auth-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.verdun-auth__challenge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 14px;
+}
+
+.verdun-auth__google-group {
+  gap: 12px;
+}
+
+.verdun-auth__google {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.verdun-auth__divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--verdun-auth-muted);
+  font-size: 0.875rem;
+}
+
+.verdun-auth__divider::before,
+.verdun-auth__divider::after {
+  height: 1px;
+  flex: 1;
+  background: var(--verdun-auth-border);
+  content: '';
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .verdun-auth__intent,
+  .verdun-auth__method,
+  .verdun-auth__submit {
+    transition: background-color 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+  }
+}

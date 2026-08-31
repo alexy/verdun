@@ -49,7 +49,38 @@ App route handlers should use app-local wrappers around `@querygraph/verdun/api/
 
 ## Accounts and email authentication
 
-Verdun owns the provider-neutral account, linked-identity, challenge, rate-limit, and session primitives. The external app owns its sign-in UI, API route shapes, canonical completion URL, user-facing error copy, and any product-specific authorization after sign-in. Consume only the published exports:
+Verdun owns the generic `Sign up` / `Log in` intent labels, method switching, DOM behavior, and shared scoped styles, together with the provider-neutral account, linked-identity, challenge, rate-limit, and session primitives. The external app owns where authentication is mounted, product continuation text and notes, API route shapes and adapters, the canonical completion URL, provider verification, error mapping, post-authentication behavior, and product-specific authorization.
+
+The browser UI is framework-neutral and depends only on injected adapters:
+
+```ts
+import '@querygraph/verdun/frontend/auth-style.css'
+import { mountVerdunAuth } from '@querygraph/verdun/frontend/auth-ui'
+
+const auth = mountVerdunAuth(document.querySelector('#auth')!, {
+  initialIntent: 'sign_up',
+  continuations: {
+    signUp: 'to contribute',
+    logIn: 'to contribute again',
+  },
+  note: 'Your app can explain why an account is needed here.',
+  adapters: {
+    signUp: ({ email, password }) => appAuth.signUp(email, password),
+    requestLoginCode: ({ email }) => appAuth.requestLoginCode(email),
+    logInWithPassword: ({ email, password }) => appAuth.logIn(email, password),
+    completeChallenge: ({ challengeId, purpose, code }) =>
+      appAuth.complete(challengeId, purpose, code),
+    mountGoogle: appAuth.mountGoogle,
+  },
+  onAuthenticated: (account) => enterApp(account),
+  onNotice: (message) => showNotice(message),
+  errorMessage: (error) => appErrorMessage(error),
+})
+```
+
+Open `sign_up` for an acquisition flow and `log_in` for an explicit returning-user flow. Login defaults to an email code, with password as an alternative. The code method is for existing accounts only, uses `passwordless_login`, and never creates an account. Preserve Verdun's enumeration-safe challenge response rather than reporting whether an email has an account. A neutral Google mount may retain provider upsert/link behavior; Verdun's visible provider hint explains that “Continue with Google” signs up new people and logs in existing accounts.
+
+The app may call `auth.setIntent(...)` for another explicit entry point and must call `auth.destroy()` before discarding the host. Server routes consume only the published account exports:
 
 ```ts
 import {
@@ -63,7 +94,7 @@ import { getEmailSender } from '@querygraph/verdun/email'
 
 Apply all paths from `@querygraph/verdun/db/public/account-migrations` before enabling these routes. Pass the same server-only `VERDUN_AUTH_PEPPER` value to every Verdun email-auth operation; it must be at least 32 characters. Do not expose it to browser code or give it a `VITE_` prefix.
 
-For a link-or-code sign-in flow:
+For a link-or-code login flow:
 
 1. The app accepts and normalizes an email, applies any app-level abuse controls, and calls `requestVerdunEmailChallenge` with `purpose: 'passwordless_login'`, a trusted nonempty request-IP abuse key, and `authPepper: process.env.VERDUN_AUTH_PEPPER`.
 2. When a challenge is returned, the app sends it with `deliverVerdunEmailChallenge`, `getEmailSender()`, a trusted canonical `appUrl`, and the app name. The message contains both a six-digit code and one-time link. The app returns the same generic response when Verdun suppresses a challenge for an ineligible address.

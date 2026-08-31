@@ -52,6 +52,10 @@ const expectedExports = {
   },
   './db/public/account-migrations': './db/public/account-migrations.mjs',
   './db/public/workbench-migrations': './db/public/workbench-migrations.mjs',
+  './frontend/auth-style.css': './frontend/auth-style.css',
+  './frontend/auth-ui': './frontend/auth-ui.ts',
+  './frontend/ontology-ui': './frontend/ontology-ui.ts',
+  './frontend/ontology-view': './frontend/ontology-view.ts',
   './frontend/workbench-style.css': './frontend/workbench-style.css',
   './frontend/workbench-ui': './frontend/workbench-ui.ts',
   './frontend/workbench-view': './frontend/workbench-view.ts',
@@ -111,6 +115,9 @@ for (const [subpath, target] of Object.entries(expectedExports)) {
 if (packageJson.scripts?.['smoke:account-store'] !== 'node scripts/smoke-account-store.mjs') {
   throw new Error('package.json must expose smoke:account-store for the public account store contract')
 }
+if (packageJson.scripts?.['smoke:auth-ui'] !== 'node scripts/smoke-auth-ui.mjs') {
+  throw new Error('package.json must expose smoke:auth-ui for the framework-neutral browser auth contract')
+}
 if (packageJson.scripts?.['smoke:email-auth'] !== 'node scripts/smoke-email-auth.mjs') {
   throw new Error('package.json must expose smoke:email-auth for the public email auth contract')
 }
@@ -151,6 +158,56 @@ for (const expectedSymbol of ['GoogleIdentityProfile', 'verifyGoogleCredential']
   if (!googleSource.includes(expectedSymbol)) {
     throw new Error(`src/accounts/google.ts does not export ${expectedSymbol}`)
   }
+}
+
+const authUiFacade = await readFile('frontend/auth-ui.ts', 'utf8')
+for (const expectedSymbol of [
+  'mountVerdunAuth',
+  'verdunAuthCopy',
+  'VerdunAuthIntent',
+  'VerdunAuthLoginMethod',
+  'VerdunAuthChallengePurpose',
+  'VerdunAuthChallengeReceipt',
+  'VerdunAuthAdapters',
+  'VerdunAuthMountOptions',
+  'VerdunAuthController',
+  'VerdunAuthState',
+]) {
+  if (!authUiFacade.includes(expectedSymbol)) {
+    throw new Error(`frontend/auth-ui.ts does not export ${expectedSymbol}`)
+  }
+}
+const authUiSource = await readFile('src/core/auth-ui.ts', 'utf8')
+for (const expectedCopy of [
+  'Sign up',
+  'Log in',
+  'Email me a login code',
+  'For existing accounts only. A login code does not create an account.',
+  'Sending code…',
+  'Continue with Google signs you up if you’re new and logs you in if you already have an account.',
+]) {
+  if (!authUiSource.includes(expectedCopy)) {
+    throw new Error(`framework-neutral auth UI is missing canonical copy: ${expectedCopy}`)
+  }
+}
+for (const forbiddenImport of ["from 'vue'", "from '@querygraph/ontology", "from '../accounts/", "from '../../api/"]) {
+  if (authUiSource.includes(forbiddenImport)) {
+    throw new Error(`framework-neutral auth UI crossed a module boundary with ${forbiddenImport}`)
+  }
+}
+if (/\bsigh\b/i.test(authUiSource)) {
+  throw new Error('framework-neutral auth UI must not contain Disappointed-specific sigh copy')
+}
+const authStyleFacade = await readFile('frontend/auth-style.css', 'utf8')
+const authStyleSource = await readFile('src/core/auth-style.css', 'utf8')
+if (!authStyleFacade.includes("@import '../src/core/auth-style.css'")) {
+  throw new Error('frontend/auth-style.css must expose the scoped core auth styles')
+}
+if (!authStyleSource.includes('.verdun-auth')) {
+  throw new Error('auth styles must be scoped under .verdun-auth')
+}
+if (/^\s*(?::root|html|body)(?:\s|,|\{)/m.test(authStyleSource)) {
+  throw new Error('auth styles must not introduce global :root, html, or body rules')
 }
 
 const emailAuthSource = await readFile('src/accounts/email-auth.ts', 'utf8')

@@ -134,6 +134,18 @@ if (!sentMessage?.text.includes(challenge.code) || !sentMessage?.text.includes(c
 }
 if (sql.deliveryState() !== 'sent') throw new Error('successful challenge delivery was not recorded')
 
+let loginMessage
+await deliverVerdunEmailChallenge(sql, async (message) => {
+  loginMessage = message
+}, { ...challenge, purpose: 'passwordless_login' }, {
+  appName: 'Example App',
+  appUrl: 'https://app.example.test',
+  completionPath: '/sign-in',
+})
+if (!loginMessage?.text.includes('Log in with your email address') || loginMessage.text.includes('Sign in with your email address')) {
+  throw new Error('passwordless email action must use canonical Log in terminology')
+}
+
 const completed = await completeVerdunEmailChallenge(sql, {
   challengeId: challenge.id,
   purpose: 'verify_email',

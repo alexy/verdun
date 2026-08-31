@@ -4,6 +4,12 @@ Entries are keyed by package version from `0.1.1` onward; the dated entries unde
 
 ## Unreleased
 
+## 0.7.0 (2026-08-31)
+
+- Added `@querygraph/verdun/frontend/auth-ui` and `@querygraph/verdun/frontend/auth-style.css`: a framework-neutral, scoped DOM authentication flow with canonical `Sign up` and `Log in` intents, email registration, password and existing-account login-code methods, privacy-safe challenge completion, immediate pending states, optional Google mounting, and app-injected adapters and continuation copy.
+- Changed passwordless authentication email action copy from “Sign in” to the canonical “Log in” terminology without changing protocol purpose identifiers or server function names.
+- Added optional Vue ontology navigator exports for shared three-tier topic selection without coupling account-only consumers to Vue or `@querygraph/ontology`.
+- Added LinkedIn as a verified identity provider with normalized-email account linkage alongside Google and email identities.
 - Added authenticated SMTP delivery with mandatory-by-default STARTTLS,
   purpose-specific From addresses, explicit envelope alignment, fail-closed
   provider configuration, and a generalized Sendmail/Vercel operations runbook.
