@@ -11,6 +11,7 @@ Maintain Verdun as a reusable Vercel, database, frontend, deploy-check, and craw
 - Generic frontend filtering, counts, coverage, and review state live in `src/composables/useWorkbenchView.ts`.
 - Reusable Vue controls live under `src/components/workbench/` and are exposed through `frontend/workbench-ui.ts`, `frontend/workbench-style.css`, and `frontend/workbench-view.ts`.
 - Framework-neutral account interaction lives in `src/core/auth-ui.ts` and is exposed through `frontend/auth-ui.ts` plus `frontend/auth-style.css`; Verdun owns canonical `Sign up` / `Log in` state and apps inject API adapters and product continuation copy.
+- Framework-neutral photo selection lives in `src/core/photo-upload.ts`, exposed through `frontend/photo-upload` and `frontend/photo-style.css`. Independent server normalization lives in `media/photo`; apps own attachment records, authorization, upload limits, storage, and deletion.
 - The bundled workbench proof is the neutral `demo` instance at `/demo/`.
 - Generic Vercel workbench API routes live under `api/workbench/` and resolve instance context through explicit route/query metadata.
 - Generic HTTP helpers and local workbench adapter contracts are exposed through `api/public/http.ts` and `api/public/workbench-local-adapter.ts`.
@@ -30,6 +31,7 @@ Verdun owns:
 
 - Generic workbench types, routes, UI controls, and view-model helpers.
 - Generic authentication intent/method interaction, privacy-safe browser copy, and scoped auth styles.
+- Generic photo file/paste/drop interaction, local draft preparation, and safe server image normalization.
 - Generic database migrations, SQL validation, reload handoff receipts, and deploy preflights.
 - Generic deploy-profile discovery and deployed-check mechanics.
 - Generic crawler SDK/runtime contracts.

@@ -1,7 +1,7 @@
 {
   "name": "@querygraph/verdun",
   "private": false,
-  "version": "0.7.3",
+  "version": "0.8.0",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -87,7 +87,16 @@
       "default": "./lib/api/core/svix.js"
     },
     "./frontend/ontology-ui": "./frontend/ontology-ui.ts",
-    "./frontend/ontology-view": "./frontend/ontology-view.ts"
+    "./frontend/ontology-view": "./frontend/ontology-view.ts",
+    "./frontend/photo-upload": {
+      "types": "./lib/frontend/photo-upload.d.ts",
+      "default": "./lib/frontend/photo-upload.js"
+    },
+    "./frontend/photo-style.css": "./frontend/photo-style.css",
+    "./media/photo": {
+      "types": "./lib/src/media/photo.d.ts",
+      "default": "./lib/src/media/photo.js"
+    }
   },
   "files": [
     "api",
@@ -119,7 +128,10 @@
     "EXTERNAL_APP.md",
     "A-SENDMAIL.md",
     "CHANGELOG.md",
-    "README.md"
+    "README.md",
+    "src/media",
+    "scripts/smoke-photo.mjs",
+    "scripts/smoke-photo-ui.mjs"
   ],
   "scripts": {
     "dev": "vite",
@@ -153,7 +165,9 @@
     "smoke:plans": "node scripts/smoke-plans.mjs",
     "smoke:vercel-domains": "node scripts/smoke-vercel-domains.mjs",
     "smoke:workbench": "node scripts/smoke-workbench-api.mjs",
-    "smoke:ontology-conformance": "node scripts/smoke-ontology-conformance.mjs"
+    "smoke:ontology-conformance": "node scripts/smoke-ontology-conformance.mjs",
+    "smoke:photo": "node scripts/smoke-photo.mjs",
+    "smoke:photo-ui": "node scripts/smoke-photo-ui.mjs"
   },
   "dependencies": {
     "@lucide/vue": "^1.17.0",
@@ -162,7 +176,8 @@
   },
   "peerDependencies": {
     "vue": "^3.5.0",
-    "@querygraph/ontology": "*"
+    "@querygraph/ontology": "*",
+    "sharp": ">=0.34.0 <0.36.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
@@ -175,13 +190,17 @@
     "vite": "^8.0.12",
     "vue": "3.5.38",
     "vue-tsc": "^3.2.8",
-    "@querygraph/ontology": "github:querygraph/ontology#e0e641b050496b64e21c2b3fd67a4606232b88f3"
+    "@querygraph/ontology": "github:querygraph/ontology#e0e641b050496b64e21c2b3fd67a4606232b88f3",
+    "sharp": "0.35.5"
   },
   "peerDependenciesMeta": {
     "@querygraph/ontology": {
       "optional": true
     },
     "vue": {
+      "optional": true
+    },
+    "sharp": {
       "optional": true
     }
   }

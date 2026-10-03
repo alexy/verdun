@@ -4,6 +4,12 @@ Entries are keyed by package version from `0.1.1` onward; the dated entries unde
 
 ## Unreleased
 
+## 0.8.0 (2026-10-02)
+
+- Added a dependency-free photo picker with shared file/paste/drop interaction, preview, replacement, removal, descriptions, stable file inputs, and guarded asynchronous selection. Browser drafts are oriented, stripped of metadata, and bounded to 1 MiB/2048 pixels for app-owned local persistence.
+- Added the independent `media/photo` server module: strict base64 and real-format validation, 2 MiB/40-million-pixel input limits, orientation correction, metadata stripping, WebP output, and content hashes. `sharp` is an optional peer, leaving accounts-only and browser-only imports independent.
+- Added real-decoder and browser interaction smokes covering image formats, malformed/spoofed input, size limits, EXIF/GPS removal, orientation, and stale selection/removal behavior.
+
 ## 0.7.3 (2026-08-31)
 
 - Kept keyboard focus inside the framework-neutral auth flow across intent, method, pending, error, and email-challenge renders; challenge screens now focus the code field and pending screens retain an Escape-capable focus target.

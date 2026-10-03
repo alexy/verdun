@@ -14,6 +14,8 @@ const steps = [
   ['npm', ['run', 'smoke:check-deployed']],
   ['npm', ['run', 'smoke:public-surface']],
   ['npm', ['run', 'smoke:auth-ui']],
+  ['npm', ['run', 'smoke:photo']],
+  ['npm', ['run', 'smoke:photo-ui']],
   ['npm', ['run', 'smoke:vercel-domains']],
   ['npm', ['run', 'smoke:account-store']],
   ['npm', ['run', 'smoke:email-auth']],

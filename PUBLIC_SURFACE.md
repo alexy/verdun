@@ -10,6 +10,9 @@ These package subpaths are the supported external app surface:
 
 - `@querygraph/verdun/frontend/auth-ui`: framework-neutral DOM authentication UI. `mountVerdunAuth` owns the generic `Sign up` / `Log in` intent and method flow, including email registration, password login, existing-account email-code login, challenge completion, and an optional app-mounted provider control. Apps inject network adapters, product continuation copy, notices/error mapping, and post-authentication behavior.
 - `@querygraph/verdun/frontend/auth-style.css`: scoped styles for the framework-neutral authentication UI.
+- `@querygraph/verdun/frontend/photo-upload`: dependency-free browser photo picker, with file/paste/drop, accessible preview/description/removal, and serializable `PhotoDraft` values. `mountPhotoPicker` accepts `photo`, `onChange`, optional `onError` (empty string clears errors), and `onBusyChange`; its controller exposes `getPhoto`, `isBusy`, and `destroy`. JPEG/PNG/WebP inputs up to 20 MiB become metadata-free JPEG drafts of at most 1 MiB and 2048 pixels on either edge. A newer selection, removal, or destruction cancels delivery of older asynchronous results.
+- `@querygraph/verdun/frontend/photo-style.css`: scoped styles for the framework-neutral photo picker.
+- `@querygraph/verdun/media/photo`: server-side `normalizePhotoDataUrl`, `normalizePhotoAlt`, and `PhotoValidationError`. Strict base64 JPEG/PNG/WebP input is limited to 2 MiB and 40 million pixels; actual format validation and decoding precede orientation correction and WebP re-encoding (2048-pixel edge, metadata removed, at most 2 MiB). The result includes `buffer`, `contentType`, `width`, `height`, `bytes`, and `sha256`. Apps install the optional `sharp` peer and own authentication, authorization, rate limits, storage, URLs, and deletion.
 - `@querygraph/verdun/frontend/workbench-ui`: shared Vue workbench controls.
 - `@querygraph/verdun/frontend/workbench-view`: shared workbench filtering/count/coverage composable and TypeScript workbench types.
 - `@querygraph/verdun/frontend/workbench-style.css`: shared workbench shell and component CSS.
@@ -67,6 +70,13 @@ force the runtime footprint of another:
 - **auth frontend** (`frontend/auth-ui`, `frontend/auth-style.css`) —
   browser-only and framework-neutral; it has no Vue, ontology, or server-account
   dependency and calls only app-injected adapters.
+- **photo frontend** (`frontend/photo-upload`, `frontend/photo-style.css`) —
+  browser-only, dependency-free, and framework-neutral. It does not import
+  server image processing, accounts, Vue, or the ontology.
+- **photo media** (`media/photo`) — server-only, with the optional `sharp`
+  peer required only by apps that normalize photo uploads. Accounts-only
+  and frontend-only consumers do not install it. It does not own storage
+  credentials, routes, authentication, or app-specific media records.
 - **workbench frontend** (`frontend/workbench-*`) — Vue; `vue` is an optional
   peer dependency, required only by apps that mount Verdun UI.
 - **ontology frontend** (`frontend/ontology-ui`, `frontend/ontology-view`) —

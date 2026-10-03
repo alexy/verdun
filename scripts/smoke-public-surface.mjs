@@ -57,6 +57,15 @@ const expectedExports = {
     types: './lib/frontend/auth-ui.d.ts',
     default: './lib/frontend/auth-ui.js',
   },
+  './frontend/photo-upload': {
+    types: './lib/frontend/photo-upload.d.ts',
+    default: './lib/frontend/photo-upload.js',
+  },
+  './frontend/photo-style.css': './frontend/photo-style.css',
+  './media/photo': {
+    types: './lib/src/media/photo.d.ts',
+    default: './lib/src/media/photo.js',
+  },
   './frontend/ontology-ui': './frontend/ontology-ui.ts',
   './frontend/ontology-view': './frontend/ontology-view.ts',
   './frontend/workbench-style.css': './frontend/workbench-style.css',
@@ -183,6 +192,25 @@ for (const expectedSymbol of [
 const packagedAuthUi = await import('@querygraph/verdun/frontend/auth-ui')
 if (typeof packagedAuthUi.mountVerdunAuth !== 'function' || packagedAuthUi.verdunAuthCopy?.logIn !== 'Log in') {
   throw new Error('the packaged frontend/auth-ui export is not directly importable')
+}
+const packagedPhotoUi = await import('@querygraph/verdun/frontend/photo-upload')
+if (typeof packagedPhotoUi.mountPhotoPicker !== 'function') {
+  throw new Error('the packaged frontend/photo-upload export is not directly importable')
+}
+const photoUiSource = await readFile('src/core/photo-upload.ts', 'utf8')
+if (/\bimport\b/.test(photoUiSource)) {
+  throw new Error('the framework-neutral photo picker must remain dependency-free')
+}
+const photoMediaSource = await readFile('src/media/photo.ts', 'utf8')
+for (const forbiddenImport of ["from 'vue'", "from '@querygraph/ontology", "from '../accounts/", "from '../core/", "from '../../api/"]) {
+  if (photoMediaSource.includes(forbiddenImport)) throw new Error(`photo media crossed a module boundary with ${forbiddenImport}`)
+}
+if (packageJson.peerDependenciesMeta?.sharp?.optional !== true || packageJson.dependencies?.sharp) {
+  throw new Error('sharp must remain an optional peer used only by media consumers')
+}
+const photoStyleSource = await readFile('src/core/photo-style.css', 'utf8')
+if (!photoStyleSource.includes('.verdun-photo') || /^\s*(?::root|html|body)(?:\s|,|\{)/m.test(photoStyleSource)) {
+  throw new Error('photo styles must be scoped under .verdun-photo')
 }
 const authUiSource = await readFile('src/core/auth-ui.ts', 'utf8')
 for (const expectedCopy of [

@@ -37,6 +37,48 @@ Do not register app components inside Verdun unless the app is an intentional Ve
 
 ## API and Local Fallback
 
+### Photo attachments
+
+Photo selection and processing have separate browser and server exports:
+
+```ts
+import '@querygraph/verdun/frontend/photo-style.css'
+import { mountPhotoPicker } from '@querygraph/verdun/frontend/photo-upload'
+
+const picker = mountPhotoPicker(document.querySelector('#photo')!, {
+  photo: savedDraft.photo,
+  onChange(photo) { savedDraft.photo = photo; saveLocalDraft(savedDraft) },
+  onBusyChange(busy) { submitButton.disabled = busy },
+})
+// Call picker.destroy() when the app removes or remounts its composer.
+```
+
+The draft has `{ imageDataUrl, imageAlt }`, uses at most 1 MiB of JPEG bytes
+(base64 adds about one third), and can be restored from app-owned draft storage.
+The picker has no network side effects. Apps must handle local-storage quota
+errors and preserve the text draft if photo persistence is unavailable. Block
+submission while `picker.isBusy()` so a pending selection cannot be skipped.
+
+On the server, declare `sharp` in the app's dependencies and use:
+
+```ts
+import { normalizePhotoDataUrl, normalizePhotoAlt, PhotoValidationError } from '@querygraph/verdun/media/photo'
+
+// Authenticate, check ownership and rate limits, then decode untrusted bytes.
+const photo = await normalizePhotoDataUrl(body.imageDataUrl)
+const imageAlt = normalizePhotoAlt(body.imageAlt)
+// Persist photo.buffer with contentType photo.contentType and app-owned identity.
+// PhotoValidationError exposes statusCode and code for a safe client response.
+```
+
+The server does not trust the browser draft: it bounds input before decoding,
+matches declared and actual JPEG/PNG/WebP formats, rejects animations and pixel
+bombs, rotates/resizes, and removes EXIF/GPS by re-encoding to WebP. Returned
+dimensions, byte count, and SHA-256 describe the stored bytes. Photo descriptions
+are plain text (up to 240 characters); escape them when rendering HTML. Apps
+own storage policy, parent-record binding, idempotency, retries, removal, and
+orphan cleanup. Never accept an arbitrary remote URL as an upload substitute.
+
 Use Verdun's generic workbench API routes for reusable record/status/health/review/focus/state behavior. App-specific APIs, such as publishing workflows or domain enrichment, belong in the app package.
 
 App-local fallback adapters should export neutral registration metadata and use the public type contract:

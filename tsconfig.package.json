@@ -20,6 +20,9 @@
     "frontend/auth-ui.ts",
     "src/accounts/**/*.ts",
     "src/core/auth-ui.ts",
-    "src/domains/**/*.ts"
+    "src/domains/**/*.ts",
+    "frontend/photo-upload.ts",
+    "src/core/photo-upload.ts",
+    "src/media/**/*.ts"
   ]
 }
